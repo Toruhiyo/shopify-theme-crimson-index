@@ -3,6 +3,35 @@
    Cold, minimal, Apple-like premium retail with red accent
    ============================================================ */
 
+:root {
+  --color-bg: #FFFFFF;
+  --color-fg: #111111;
+  --color-card: #F5F5F7;
+  --color-muted: #F5F5F7;
+  --color-muted-fg: #6E6E73;
+  --color-border: #E5E5EA;
+  --color-border-raw: #E5E5EA;
+  --color-primary: #D1001A;
+  --color-primary-fg: #FFFFFF;
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body-weight: 400;
+  --font-body-style: normal;
+  --font-body-size: 16px;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading-weight: 600;
+  --font-heading-style: normal;
+  --heading-scale: 1;
+  --type-scale: 1;
+  --page-width: 1280px;
+  --section-spacing: 64px;
+  --radius-button: 10px;
+  --radius-card: 16px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03);
+}
+
 /* --- Page Loader --- */
 .loader {
   position: fixed;
@@ -190,7 +219,7 @@ h1, h2, h3, h4, h5, h6 {
 /* --- Grid System --- */
 .grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .grid--2 { grid-template-columns: repeat(2, 1fr); }
@@ -459,7 +488,7 @@ h1, h2, h3, h4, h5, h6 {
 .product-card:hover {
   border-color: var(--color-border-raw, #E5E5EA);
   box-shadow: var(--shadow-elevated);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .product-card__media {
@@ -521,7 +550,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .product-card__info {
-  padding: 1rem;
+  padding: 1rem 1.125rem 1.25rem;
 }
 
 .product-card__vendor {
@@ -1725,12 +1754,12 @@ span.mega-menu__column-title:hover {
   position: relative;
   z-index: 2;
   padding: 3rem 0;
-  max-width: 36rem;
+  max-width: 32rem;
 }
 
 @media (min-width: 750px) {
   .hero__content {
-    padding: 4.5rem 0;
+    padding: 5rem 0;
   }
 }
 
@@ -1789,7 +1818,7 @@ span.mega-menu__column-title:hover {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 1rem 1.25rem;
+  padding: 1.125rem 1.5rem;
   text-align: center;
 }
 
@@ -2417,17 +2446,25 @@ span.mega-menu__column-title:hover {
 
 /* --- Testimonials --- */
 .testimonial-card {
-  background: var(--color-card);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
-  padding: 1.5rem;
+  padding: 2rem;
   transition: border-color 200ms ease;
   position: relative;
   overflow: hidden;
 }
 
 .testimonial-card::before {
-  display: none;
+  content: '\201C';
+  position: absolute;
+  top: 0.75rem;
+  right: 1.25rem;
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--color-border-raw, #E5E5EA);
+  font-family: Georgia, 'Times New Roman', serif;
+  pointer-events: none;
 }
 
 .testimonial-card:hover {
@@ -2435,14 +2472,14 @@ span.mega-menu__column-title:hover {
 }
 
 .testimonial-card__stars {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .testimonial-card__text {
   font-size: 0.9375rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  color: var(--color-muted-fg);
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+  color: var(--color-fg);
 }
 
 .testimonial-card__author {
@@ -2485,7 +2522,7 @@ span.mega-menu__column-title:hover {
 .footer__newsletter-banner {
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
-  padding: 2.5rem 0;
+  padding: 3rem 0;
 }
 
 .footer__newsletter-inner {
@@ -2532,7 +2569,7 @@ span.mega-menu__column-title:hover {
 }
 
 .footer__main {
-  padding: 3rem 0 0;
+  padding: 3.5rem 0 0;
 }
 
 .footer__grid {
@@ -3036,7 +3073,7 @@ span.mega-menu__column-title:hover {
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .section-header__title {
