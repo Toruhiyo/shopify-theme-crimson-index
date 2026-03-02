@@ -34,7 +34,7 @@
       {%- comment -%} Brand column {%- endcomment -%}
       <div class="footer__column footer__column--brand">
         <a href="/" class="footer__logo">
-          <img src="{{ 'logo-white.png' | asset_url }}" alt="{{ shop.name }}" width="140" height="36" loading="lazy">
+          <img src="{{ 'logo-transparent.png' | asset_url }}" alt="{{ shop.name }}" width="140" height="36" loading="lazy">
         </a>
         {%- if section.settings.brand_text != blank -%}
           <p class="footer__text">{{ section.settings.brand_text }}</p>
@@ -165,13 +165,13 @@
       "type": "text",
       "id": "newsletter_heading",
       "label": "Newsletter heading",
-      "default": "Stay in the Loop"
+      "default": "Stay up to date"
     },
     {
       "type": "text",
       "id": "newsletter_text",
       "label": "Newsletter description",
-      "default": "Get drops, deals, and new gear first."
+      "default": "New arrivals, exclusive offers, and more."
     },
     {
       "type": "text",

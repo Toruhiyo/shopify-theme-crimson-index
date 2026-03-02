@@ -4,7 +4,7 @@
     <h1 class="h1 mb-lg">{{ article.title }}</h1>
 
     {%- if article.image -%}
-      <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: var(--radius); margin-bottom: 2rem;">
+      <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: var(--radius-card); margin-bottom: 2rem;">
         <img
           src="{{ article.image | image_url: width: 1200 }}"
           alt="{{ article.title | escape }}"

@@ -25,10 +25,11 @@
     <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
   {%- endif -%}
 
-  {% comment %} Preconnect to Shopify CDN {% endcomment %}
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  {% comment %} Typography {% endcomment %}
   {% style %}
     {{ settings.font_heading | font_face: font_display: 'swap' }}
     {{ settings.font_body | font_face: font_display: 'swap' }}
@@ -37,32 +38,45 @@
   {{ 'base.css' | asset_url | stylesheet_tag }}
   {{ content_for_header }}
 
+  {%- assign type_modifier = 1.0 -%}
+  {%- if settings.typography_scale == 'small' -%}
+    {%- assign type_modifier = 0.9 -%}
+  {%- elsif settings.typography_scale == 'large' -%}
+    {%- assign type_modifier = 1.1 -%}
+  {%- endif -%}
+
   {% style %}
     :root {
-      --font-heading: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
+      --font-heading: {{ settings.font_heading.family }}, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-heading-weight: {{ settings.font_heading.weight }};
       --font-heading-style: {{ settings.font_heading.style }};
 
-      --font-body: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+      --font-body: {{ settings.font_body.family }}, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-body-weight: {{ settings.font_body.weight }};
       --font-body-style: {{ settings.font_body.style }};
       --font-body-size: {{ settings.font_body_size }}px;
 
       --heading-scale: {{ settings.font_heading_scale | divided_by: 100.0 }};
+      --type-scale: {{ type_modifier }};
       --page-width: {{ settings.page_width }}px;
       --section-spacing: {{ settings.spacing_grid }}px;
-      --radius: {{ settings.border_radius }}px;
+      --radius-button: {{ settings.button_radius }}px;
+      --radius-card: {{ settings.card_radius }}px;
 
       --color-bg: {{ settings.color_background }};
       --color-fg: {{ settings.color_foreground }};
       --color-card: {{ settings.color_card }};
       --color-muted: {{ settings.color_muted }};
       --color-muted-fg: {{ settings.color_muted_foreground }};
-      --color-border: {{ settings.color_border }};
+      --color-border: {% if settings.borders_visible %}{{ settings.color_border }}{% else %}transparent{% endif %};
+      --color-border-raw: {{ settings.color_border }};
       --color-primary: {{ settings.color_primary }};
       --color-primary-fg: {{ settings.color_primary_foreground }};
       --color-success: {{ settings.color_success }};
       --color-warning: {{ settings.color_warning }};
+
+      --shadow-card: {% if settings.minimal_shadows %}0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02){% else %}none{% endif %};
+      --shadow-elevated: {% if settings.minimal_shadows %}0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03){% else %}none{% endif %};
     }
   {% endstyle %}
 
@@ -72,7 +86,11 @@
 <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
 
   <div class="loader" id="page-loader" aria-hidden="true">
-    <img src="{{ 'logo-transparent.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="200" height="52">
+    {%- if section.settings.logo != blank -%}
+      <img src="{{ 'logo-transparent.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="200" height="52">
+    {%- else -%}
+      <div class="loader__bar"></div>
+    {%- endif -%}
   </div>
 
   <a class="skip-link" href="#main-content">{{ 'accessibility.skip_to_content' | t }}</a>

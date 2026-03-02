@@ -13,11 +13,11 @@
       "type": "hero",
       "settings": {
         "height": "large",
-        "subtitle": "Gear up. Level up.",
-        "title": "FULL POWER",
-        "description": "Pro-grade peripherals forged for the competitive edge. Precision switches, ultralight builds, zero compromises.",
-        "cta_text": "Shop Now",
-        "cta2_text": "View Collection"
+        "subtitle": "New arrival",
+        "title": "Designed to perform.",
+        "description": "Premium products crafted with precision and care. Every detail considered, every experience elevated.",
+        "cta_text": "Shop now",
+        "cta2_text": "View collection"
       }
     },
     "feature-strip": {
@@ -27,28 +27,28 @@
           "type": "feature",
           "settings": {
             "icon": "shipping",
-            "text": "Free Shipping"
+            "text": "Free shipping"
           }
         },
         "f2": {
           "type": "feature",
           "settings": {
             "icon": "shield",
-            "text": "2-Year Warranty"
+            "text": "2-year warranty"
           }
         },
         "f3": {
           "type": "feature",
           "settings": {
             "icon": "star",
-            "text": "Top Rated"
+            "text": "Top rated"
           }
         },
         "f4": {
           "type": "feature",
           "settings": {
             "icon": "headphones",
-            "text": "24/7 Support"
+            "text": "24/7 support"
           }
         }
       },
@@ -62,63 +62,18 @@
     },
     "category-grid": {
       "type": "category-grid",
-      "blocks": {
-        "c-keyboards": {
-          "type": "category",
-          "settings": {
-            "title_override": "Keyboards"
-          }
-        },
-        "c-mice": {
-          "type": "category",
-          "settings": {
-            "title_override": "Mice"
-          }
-        },
-        "c-headsets": {
-          "type": "category",
-          "settings": {
-            "title_override": "Headsets"
-          }
-        },
-        "c-controllers": {
-          "type": "category",
-          "settings": {
-            "title_override": "Controllers"
-          }
-        },
-        "c-gaming-pcs": {
-          "type": "category",
-          "settings": {
-            "title_override": "Gaming PCs"
-          }
-        },
-        "c-streaming": {
-          "type": "category",
-          "settings": {
-            "title_override": "Streaming"
-          }
-        }
-      },
-      "block_order": [
-        "c-keyboards",
-        "c-mice",
-        "c-headsets",
-        "c-controllers",
-        "c-gaming-pcs",
-        "c-streaming"
-      ],
       "settings": {
         "subtitle": "Browse",
-        "title": "Shop by Category",
-        "columns": "3"
+        "title": "Shop by category",
+        "columns": "3",
+        "use_store_collections": true
       }
     },
     "featured-collection": {
       "type": "featured-collection",
       "settings": {
         "subtitle": "Curated",
-        "title": "Best Sellers",
+        "title": "Best sellers",
         "products_count": 8,
         "columns": "4",
         "layout": "grid",
@@ -129,8 +84,8 @@
     "featured-collection-2": {
       "type": "featured-collection",
       "settings": {
-        "subtitle": "New Drops",
-        "title": "Latest Arrivals",
+        "subtitle": "Just in",
+        "title": "Latest arrivals",
         "products_count": 8,
         "columns": "4",
         "layout": "carousel",
@@ -145,27 +100,27 @@
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "text": "The build quality is insane. Lightest mouse I've ever used and the sensor tracking is flawless.",
+            "text": "Exceptional build quality. Every detail is thoughtfully designed and the materials feel premium.",
             "author": "Alex R.",
-            "product_name": "Vantor Pro X Mouse"
+            "product_name": ""
           }
         },
         "t2": {
           "type": "testimonial",
           "settings": {
             "rating": 5,
-            "text": "Best keyboard for competitive play. The switches are crisp and the RGB is clean, not overdone.",
+            "text": "Clean, minimal design that looks even better in person. Exactly what I was looking for.",
             "author": "Maya T.",
-            "product_name": "V65 Mechanical Keyboard"
+            "product_name": ""
           }
         },
         "t3": {
           "type": "testimonial",
           "settings": {
-            "rating": 4,
-            "text": "Solid headset with great spatial audio. Comfortable for long sessions and the mic is crystal clear.",
+            "rating": 5,
+            "text": "Outstanding customer service and fast delivery. The product exceeded my expectations.",
             "author": "Jordan K.",
-            "product_name": "Vantor Storm Headset"
+            "product_name": ""
           }
         }
       },
@@ -176,14 +131,14 @@
       ],
       "settings": {
         "subtitle": "Reviews",
-        "title": "What Players Say"
+        "title": "What customers say"
       }
     },
     "accessories": {
       "type": "accessories-upsell",
       "settings": {
-        "subtitle": "Complete Your Setup",
-        "title": "Accessories & Add-ons",
+        "subtitle": "Complete your order",
+        "title": "Accessories",
         "products_count": 8,
         "show_vendor": false
       }
