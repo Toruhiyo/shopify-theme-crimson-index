@@ -1,0 +1,122 @@
+{
+  "accessibility": {
+    "skip_to_content": "Zum Inhalt springen"
+  },
+  "general": {
+    "language": "Sprache",
+    "404": {
+      "subheading": "Seite nicht gefunden",
+      "title": "Im Nichts verloren",
+      "description": "Die gesuchte Seite existiert nicht oder wurde verschoben. Wir bringen Sie zurück.",
+      "button": "Zurück zur Startseite"
+    }
+  },
+  "header": {
+    "menu": "Menü",
+    "search": "Suchen",
+    "account": "Konto",
+    "cart": "Warenkorb",
+    "navigation": "Hauptnavigation",
+    "mobile_menu": "Mobilmenü",
+    "close_menu": "Menü schließen",
+    "search_placeholder": "Produkte, Kollektionen suchen...",
+    "view_all": "Alle anzeigen",
+    "more": "Mehr",
+    "support": "Support",
+    "help": "Hilfe",
+    "policies": "Richtlinien",
+    "home": "Startseite",
+    "shop_all": "Alle {{ title }} anzeigen",
+    "shipping_policy": "Versandrichtlinie",
+    "returns_refunds": "Rückgabe & Erstattung",
+    "terms_of_service": "Nutzungsbedingungen",
+    "privacy_policy": "Datenschutzrichtlinie"
+  },
+  "sections": {
+    "announcement_bar": {
+      "label": "Ankündigung"
+    },
+    "featured_collection": {
+      "view_all": "Alle anzeigen"
+    },
+    "accessories": {
+      "view_all": "Alle anzeigen"
+    }
+  },
+  "products": {
+    "add_to_cart": "In den Warenkorb",
+    "buy_now": "Jetzt kaufen",
+    "sold_out": "Ausverkauft",
+    "quick_view": "Schnellansicht",
+    "quantity": "Menge",
+    "decrease_quantity": "Menge verringern",
+    "increase_quantity": "Menge erhöhen",
+    "thumbnail": "Vorschaubild",
+    "reviews_count": "{{ count }} Bewertungen",
+    "color": "Farbe",
+    "badges": {
+      "new": "Neu",
+      "hot": "Beliebt",
+      "sale": "Sale"
+    }
+  },
+  "collections": {
+    "title": "Kollektionen",
+    "products": "Produkte",
+    "sort_by": "Sortieren nach",
+    "filters": "Filter",
+    "pagination": "Seitennummerierung",
+    "previous": "Vorherige Seite",
+    "next": "Nächste Seite",
+    "clear_all": "Alle löschen",
+    "empty": "Keine Produkte gefunden",
+    "continue_shopping": "Weiter einkaufen"
+  },
+  "cart": {
+    "title": "Ihr Warenkorb",
+    "close": "Warenkorb schließen",
+    "product": "Produkt",
+    "quantity": "Anz.",
+    "total": "Gesamt",
+    "subtotal": "Zwischensumme",
+    "checkout": "Zur Kasse",
+    "empty": "Ihr Warenkorb ist leer",
+    "continue_shopping": "Weiter einkaufen",
+    "complete_setup": "Einrichtung abschließen",
+    "decrease": "Menge verringern",
+    "increase": "Menge erhöhen",
+    "shipping_note": "Versand und Steuern werden an der Kasse berechnet."
+  },
+  "search": {
+    "title": "Suchen",
+    "placeholder": "Produkte suchen...",
+    "submit": "Suchen",
+    "results_count": "{{ count }} Ergebnisse",
+    "no_results": "Keine Ergebnisse für \"{{ terms }}\"",
+    "no_results_hint": "Versuchen Sie einen anderen Suchbegriff oder durchsuchen Sie unsere Kollektionen."
+  },
+  "newsletter": {
+    "placeholder": "E-Mail eingeben",
+    "email_label": "E-Mail-Adresse",
+    "subscribe": "Abonnieren"
+  },
+  "footer": {
+    "email_placeholder": "Ihre E-Mail",
+    "subscribe": "Abonnieren",
+    "support": "Support",
+    "legal": "Rechtliches",
+    "secure_checkout": "Sicherer Checkout",
+    "free_shipping": "Kostenloser Versand ab 99€",
+    "easy_returns": "Einfache Rückgabe",
+    "warranty_included": "Garantie inklusive",
+    "rights": "Alle Rechte vorbehalten."
+  },
+  "support": {
+    "contact_us": "Kontakt",
+    "faq": "FAQ"
+  },
+  "blog": {
+    "comments": "Kommentare",
+    "no_articles": "Noch keine Artikel."
+  }
+}

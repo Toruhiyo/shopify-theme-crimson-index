@@ -1,0 +1,267 @@
+{%- comment -%}
+  Mega Menu Config — renders columnar mega menu for a given collection.
+  Usage: {% render 'mega-menu-config', col: col %}
+{%- endcomment -%}
+
+{%- assign base = col.url -%}
+
+<div class="mega-menu__grid">
+  {%- comment -%} FEATURED column: auto-populated from collection products {%- endcomment -%}
+  <div class="mega-menu__column">
+    <span class="mega-menu__column-title">Featured</span>
+    <ul class="mega-menu__links">
+      {%- for product in col.products limit: 5 -%}
+        <li><a href="{{ product.url }}" class="mega-menu__link">{{ product.title | remove: 'PulseForge ' }}</a></li>
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  {%- case col.handle -%}
+
+    {%- when 'headsets' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Platform</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/platform_pc" class="mega-menu__link">PC</a></li>
+          <li><a href="{{ base }}/platform_ps5" class="mega-menu__link">PlayStation 5</a></li>
+          <li><a href="{{ base }}/platform_xbox" class="mega-menu__link">Xbox</a></li>
+          <li><a href="{{ base }}/platform_switch" class="mega-menu__link">Nintendo Switch</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Connectivity</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/wired" class="mega-menu__link">Wired</a></li>
+          <li><a href="{{ base }}/wireless" class="mega-menu__link">Wireless</a></li>
+          <li><a href="{{ base }}/conn_wireless_2_4ghz" class="mega-menu__link">2.4 GHz</a></li>
+          <li><a href="{{ base }}/conn_usb" class="mega-menu__link">USB</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Use Case</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/usecase_fps_competitive" class="mega-menu__link">FPS Competitive</a></li>
+          <li><a href="{{ base }}/usecase_rpg_immersive" class="mega-menu__link">RPG &amp; Immersive</a></li>
+          <li><a href="{{ base }}/usecase_streaming" class="mega-menu__link">Streaming</a></li>
+          <li><a href="{{ base }}/themed" class="mega-menu__link">Themed Editions</a></li>
+        </ul>
+      </div>
+
+    {%- when 'keyboards' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Size</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/size_60" class="mega-menu__link">60%</a></li>
+          <li><a href="{{ base }}/size_65" class="mega-menu__link">65%</a></li>
+          <li><a href="{{ base }}/size_tkl" class="mega-menu__link">TKL</a></li>
+          <li><a href="{{ base }}/size_full" class="mega-menu__link">Full Size</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Connectivity</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/conn_usb" class="mega-menu__link">USB Wired</a></li>
+          <li><a href="{{ base }}/conn_bluetooth" class="mega-menu__link">Bluetooth</a></li>
+          <li><a href="{{ base }}/wireless" class="mega-menu__link">Wireless</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Features</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/hot_swap" class="mega-menu__link">Hot-Swappable</a></li>
+          <li><a href="{{ base }}/rgb" class="mega-menu__link">RGB Lighting</a></li>
+          <li><a href="{{ base }}/silent" class="mega-menu__link">Silent</a></li>
+          <li><a href="{{ base }}/macro" class="mega-menu__link">Macro Keys</a></li>
+        </ul>
+      </div>
+
+    {%- when 'mice' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/ultralight" class="mega-menu__link">Ultralight</a></li>
+          <li><a href="{{ base }}/ergonomic" class="mega-menu__link">Ergonomic</a></li>
+          <li><a href="{{ base }}/wireless" class="mega-menu__link">Wireless</a></li>
+          <li><a href="{{ base }}/mmo" class="mega-menu__link">MMO</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Connectivity</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/conn_usb" class="mega-menu__link">USB Wired</a></li>
+          <li><a href="{{ base }}/conn_wireless_2_4ghz" class="mega-menu__link">2.4 GHz Wireless</a></li>
+          <li><a href="{{ base }}/conn_bluetooth" class="mega-menu__link">Bluetooth</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Use Case</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/usecase_fps_competitive" class="mega-menu__link">FPS Competitive</a></li>
+          <li><a href="{{ base }}/usecase_travel" class="mega-menu__link">Travel &amp; Mobile</a></li>
+          <li><a href="{{ base }}/usecase_work_from_home" class="mega-menu__link">Work from Home</a></li>
+        </ul>
+      </div>
+
+    {%- when 'controllers' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Platform</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/platform_xbox" class="mega-menu__link">Xbox</a></li>
+          <li><a href="{{ base }}/platform_ps5" class="mega-menu__link">PlayStation 5</a></li>
+          <li><a href="{{ base }}/platform_pc" class="mega-menu__link">PC</a></li>
+          <li><a href="{{ base }}/platform_mobile" class="mega-menu__link">Mobile</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Connectivity</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/conn_usb" class="mega-menu__link">USB Wired</a></li>
+          <li><a href="{{ base }}/conn_bluetooth" class="mega-menu__link">Bluetooth</a></li>
+          <li><a href="{{ base }}/conn_2_4ghz" class="mega-menu__link">2.4 GHz</a></li>
+          <li><a href="{{ base }}/wireless" class="mega-menu__link">Wireless</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/premium" class="mega-menu__link">Elite / Premium</a></li>
+          <li><a href="{{ base }}/fight_pad" class="mega-menu__link">Fight Pad</a></li>
+          <li><a href="{{ base }}/themed" class="mega-menu__link">Themed Editions</a></li>
+          <li><a href="{{ base }}/hall_effect" class="mega-menu__link">Hall Effect</a></li>
+        </ul>
+      </div>
+
+    {%- when 'gaming-pcs' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Tier</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/entry" class="mega-menu__link">Entry</a></li>
+          <li><a href="{{ base }}/mid_range" class="mega-menu__link">Mid-Range</a></li>
+          <li><a href="{{ base }}/competitive" class="mega-menu__link">Competitive</a></li>
+          <li><a href="{{ base }}/creator" class="mega-menu__link">Creator</a></li>
+          <li><a href="{{ base }}/flagship" class="mega-menu__link">Flagship</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Form Factor</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/full_tower" class="mega-menu__link">Full Tower</a></li>
+          <li><a href="{{ base }}/mid_tower" class="mega-menu__link">Mid Tower</a></li>
+          <li><a href="{{ base }}/itx" class="mega-menu__link">Mini ITX / SFF</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Line</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/forge_line" class="mega-menu__link">FORGE Series</a></li>
+          <li><a href="{{ base }}/curated" class="mega-menu__link">Curated PCs</a></li>
+        </ul>
+      </div>
+
+    {%- when 'streaming-creator-gear' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/microphone" class="mega-menu__link">Microphones</a></li>
+          <li><a href="{{ base }}/webcam" class="mega-menu__link">Webcams</a></li>
+          <li><a href="{{ base }}/capture_card" class="mega-menu__link">Capture Cards</a></li>
+          <li><a href="{{ base }}/key_light" class="mega-menu__link">Key Lights</a></li>
+          <li><a href="{{ base }}/stream_deck" class="mega-menu__link">Stream Decks</a></li>
+          <li><a href="{{ base }}/boom_arm" class="mega-menu__link">Boom Arms</a></li>
+          <li><a href="{{ base }}/acoustic" class="mega-menu__link">Acoustic Panels</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Audio</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/audio_interface" class="mega-menu__link">Audio Interfaces</a></li>
+          <li><a href="{{ base }}/mixer" class="mega-menu__link">Streaming Mixers</a></li>
+          <li><a href="{{ base }}/dac" class="mega-menu__link">DAC &amp; Amps</a></li>
+        </ul>
+      </div>
+
+    {%- when 'sim-racing' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/wheel" class="mega-menu__link">Wheels</a></li>
+          <li><a href="{{ base }}/pedals" class="mega-menu__link">Pedals</a></li>
+          <li><a href="{{ base }}/shifter" class="mega-menu__link">Shifters</a></li>
+          <li><a href="{{ base }}/handbrake" class="mega-menu__link">Handbrakes</a></li>
+          <li><a href="{{ base }}/rig" class="mega-menu__link">Cockpit Rigs</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Accessories</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/gloves" class="mega-menu__link">Racing Gloves</a></li>
+        </ul>
+      </div>
+
+    {%- when 'gaming-chairs' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/racing" class="mega-menu__link">Racing Style</a></li>
+          <li><a href="{{ base }}/ergonomic" class="mega-menu__link">Ergonomic Mesh</a></li>
+          <li><a href="{{ base }}/heavy_duty" class="mega-menu__link">Heavy Duty</a></li>
+          <li><a href="{{ base }}/budget" class="mega-menu__link">Budget</a></li>
+          <li><a href="{{ base }}/executive" class="mega-menu__link">Executive</a></li>
+        </ul>
+      </div>
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Features</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/rgb" class="mega-menu__link">RGB Lighting</a></li>
+          <li><a href="{{ base }}/floor_rocker" class="mega-menu__link">Floor Rocker</a></li>
+          <li><a href="{{ base }}/ergonomic_stool" class="mega-menu__link">Posture Stool</a></li>
+        </ul>
+      </div>
+
+    {%- when 'accessories' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/cable" class="mega-menu__link">Cables</a></li>
+          <li><a href="{{ base }}/cleaning" class="mega-menu__link">Cleaning Kits</a></li>
+          <li><a href="{{ base }}/keycaps" class="mega-menu__link">Keycap Sets</a></li>
+          <li><a href="{{ base }}/mouse_grip" class="mega-menu__link">Mouse Grip Tape</a></li>
+          <li><a href="{{ base }}/mouse_skates" class="mega-menu__link">Mouse Skates</a></li>
+          <li><a href="{{ base }}/travel_case" class="mega-menu__link">Travel Cases</a></li>
+        </ul>
+      </div>
+
+    {%- when 'replacement-spare-parts' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/dongle" class="mega-menu__link">USB Dongles</a></li>
+          <li><a href="{{ base }}/ear_pad" class="mega-menu__link">Ear Pads</a></li>
+          <li><a href="{{ base }}/mic_boom" class="mega-menu__link">Mic Booms</a></li>
+          <li><a href="{{ base }}/switch" class="mega-menu__link">Key Switches</a></li>
+          <li><a href="{{ base }}/keycaps" class="mega-menu__link">Keycap Sets</a></li>
+          <li><a href="{{ base }}/mouse_skates" class="mega-menu__link">Mouse Skates</a></li>
+        </ul>
+      </div>
+
+    {%- when 'services-protection' -%}
+      <div class="mega-menu__column">
+        <span class="mega-menu__column-title">Type</span>
+        <ul class="mega-menu__links">
+          <li><a href="{{ base }}/setup" class="mega-menu__link">Setup Sessions</a></li>
+          <li><a href="{{ base }}/warranty" class="mega-menu__link">Extended Warranty</a></li>
+          <li><a href="{{ base }}/rma" class="mega-menu__link">Priority RMA</a></li>
+          <li><a href="{{ base }}/accidental_damage" class="mega-menu__link">Accidental Damage</a></li>
+          <li><a href="{{ base }}/priority_support" class="mega-menu__link">Priority Support</a></li>
+        </ul>
+      </div>
+
+  {%- endcase -%}
+</div>
+
+<div class="mega-menu__footer">
+  <a href="{{ col.url }}" class="mega-menu__view-all">
+    Shop All {{ col.title }} ({{ col.products_count }})
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</div>

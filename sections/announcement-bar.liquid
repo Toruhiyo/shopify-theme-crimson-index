@@ -1,0 +1,37 @@
+{%- if section.settings.text != blank -%}
+  <div class="announcement-bar" role="region" aria-label="{{ 'sections.announcement_bar.label' | t }}">
+    <div class="page-width">
+      {%- if section.settings.link != blank -%}
+        <a href="{{ section.settings.link }}">{{ section.settings.text }}</a>
+      {%- else -%}
+        <p>{{ section.settings.text }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": "section",
+  "class": "announcement-bar-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "FREE SHIPPING ON ORDERS OVER $99 — SHOP NOW"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar"
+    }
+  ]
+}
+{% endschema %}

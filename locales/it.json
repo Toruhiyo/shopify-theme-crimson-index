@@ -1,0 +1,122 @@
+{
+  "accessibility": {
+    "skip_to_content": "Vai al contenuto"
+  },
+  "general": {
+    "language": "Lingua",
+    "404": {
+      "subheading": "Pagina non trovata",
+      "title": "Persi nel vuoto",
+      "description": "La pagina che cerchi non esiste o è stata spostata. Ti riportiamo sulla strada giusta.",
+      "button": "Torna alla Home"
+    }
+  },
+  "header": {
+    "menu": "Menu",
+    "search": "Cerca",
+    "account": "Account",
+    "cart": "Carrello",
+    "navigation": "Navigazione principale",
+    "mobile_menu": "Menu mobile",
+    "close_menu": "Chiudi menu",
+    "search_placeholder": "Cerca prodotti, collezioni...",
+    "view_all": "Vedi tutto",
+    "more": "Altro",
+    "support": "Supporto",
+    "help": "Aiuto",
+    "policies": "Normative",
+    "home": "Home",
+    "shop_all": "Vedi tutto {{ title }}",
+    "shipping_policy": "Spedizioni",
+    "returns_refunds": "Resi e rimborsi",
+    "terms_of_service": "Termini di servizio",
+    "privacy_policy": "Privacy Policy"
+  },
+  "sections": {
+    "announcement_bar": {
+      "label": "Annuncio"
+    },
+    "featured_collection": {
+      "view_all": "Vedi tutto"
+    },
+    "accessories": {
+      "view_all": "Vedi tutto"
+    }
+  },
+  "products": {
+    "add_to_cart": "Aggiungi al carrello",
+    "buy_now": "Acquista ora",
+    "sold_out": "Esaurito",
+    "quick_view": "Anteprima rapida",
+    "quantity": "Quantità",
+    "decrease_quantity": "Diminuisci quantità",
+    "increase_quantity": "Aumenta quantità",
+    "thumbnail": "Anteprima",
+    "reviews_count": "{{ count }} recensioni",
+    "color": "Colore",
+    "badges": {
+      "new": "Nuovo",
+      "hot": "Popolare",
+      "sale": "Saldi"
+    }
+  },
+  "collections": {
+    "title": "Collezioni",
+    "products": "prodotti",
+    "sort_by": "Ordina per",
+    "filters": "Filtri",
+    "pagination": "Impaginazione",
+    "previous": "Pagina precedente",
+    "next": "Pagina successiva",
+    "clear_all": "Cancella tutto",
+    "empty": "Nessun prodotto trovato",
+    "continue_shopping": "Continua lo shopping"
+  },
+  "cart": {
+    "title": "Il tuo carrello",
+    "close": "Chiudi carrello",
+    "product": "Prodotto",
+    "quantity": "Qtà",
+    "total": "Totale",
+    "subtotal": "Subtotale",
+    "checkout": "Checkout",
+    "empty": "Il tuo carrello è vuoto",
+    "continue_shopping": "Continua lo shopping",
+    "complete_setup": "Completa la configurazione",
+    "decrease": "Diminuisci quantità",
+    "increase": "Aumenta quantità",
+    "shipping_note": "Spedizione e tasse calcolate al checkout."
+  },
+  "search": {
+    "title": "Cerca",
+    "placeholder": "Cerca prodotti...",
+    "submit": "Cerca",
+    "results_count": "{{ count }} risultati",
+    "no_results": "Nessun risultato per \"{{ terms }}\"",
+    "no_results_hint": "Prova un altro termine di ricerca o sfoglia le nostre collezioni."
+  },
+  "newsletter": {
+    "placeholder": "Inserisci la tua email",
+    "email_label": "Indirizzo email",
+    "subscribe": "Iscriviti"
+  },
+  "footer": {
+    "email_placeholder": "La tua email",
+    "subscribe": "Iscriviti",
+    "support": "Supporto",
+    "legal": "Legale",
+    "secure_checkout": "Checkout sicuro",
+    "free_shipping": "Spedizione gratuita oltre 99€",
+    "easy_returns": "Resi facili",
+    "warranty_included": "Garanzia inclusa",
+    "rights": "Tutti i diritti riservati."
+  },
+  "support": {
+    "contact_us": "Contattaci",
+    "faq": "FAQ"
+  },
+  "blog": {
+    "comments": "Commenti",
+    "no_articles": "Nessun articolo ancora."
+  }
+}

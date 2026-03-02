@@ -1,0 +1,234 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Vantor",
+    "theme_version": "1.0.0",
+    "theme_author": "Bizmis",
+    "theme_documentation_url": "https://github.com/Toruhiyo/shopify-theme-vantor",
+    "theme_support_url": "https://github.com/Toruhiyo/shopify-theme-vantor/issues"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Dark mode (default)"
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Background",
+        "default": "#040406"
+      },
+      {
+        "type": "color",
+        "id": "color_foreground",
+        "label": "Foreground",
+        "default": "#f5f5f7"
+      },
+      {
+        "type": "color",
+        "id": "color_card",
+        "label": "Card background",
+        "default": "#09090d"
+      },
+      {
+        "type": "color",
+        "id": "color_muted",
+        "label": "Muted background",
+        "default": "#0d0d12"
+      },
+      {
+        "type": "color",
+        "id": "color_muted_foreground",
+        "label": "Muted foreground",
+        "default": "#7a7a8e"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "Border",
+        "default": "#16161f"
+      },
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Primary accent (purple)",
+        "default": "#a855f7"
+      },
+      {
+        "type": "color",
+        "id": "color_primary_foreground",
+        "label": "Primary foreground",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_success",
+        "label": "Success",
+        "default": "#22c55e"
+      },
+      {
+        "type": "color",
+        "id": "color_warning",
+        "label": "Warning",
+        "default": "#eab308"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "font_heading",
+        "label": "Heading font",
+        "default": "space_grotesk_n7"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Body font",
+        "default": "space_grotesk_n4"
+      },
+      {
+        "type": "range",
+        "id": "font_body_size",
+        "label": "Body font size (px)",
+        "min": 14,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 15
+      },
+      {
+        "type": "range",
+        "id": "font_heading_scale",
+        "label": "Heading size scale (%)",
+        "min": 80,
+        "max": 150,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page width (px)",
+        "min": 1000,
+        "max": 1600,
+        "step": 50,
+        "unit": "px",
+        "default": 1400
+      },
+      {
+        "type": "range",
+        "id": "spacing_grid",
+        "label": "Section spacing (px)",
+        "min": 16,
+        "max": 80,
+        "step": 8,
+        "unit": "px",
+        "default": 48
+      },
+      {
+        "type": "range",
+        "id": "border_radius",
+        "label": "Border radius (px)",
+        "min": 0,
+        "max": 8,
+        "step": 2,
+        "unit": "px",
+        "default": 4
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart type",
+        "options": [
+          { "value": "drawer", "label": "Drawer" },
+          { "value": "page", "label": "Page" }
+        ],
+        "default": "drawer"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_upsell_enabled",
+        "label": "Show cart upsell products",
+        "default": true
+      },
+      {
+        "type": "collection",
+        "id": "cart_upsell_collection",
+        "label": "Upsell collection"
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "text",
+        "id": "social_twitter",
+        "label": "X (Twitter)"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube",
+        "label": "YouTube"
+      },
+      {
+        "type": "text",
+        "id": "social_twitch",
+        "label": "Twitch"
+      },
+      {
+        "type": "text",
+        "id": "social_discord",
+        "label": "Discord"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok",
+        "label": "TikTok"
+      }
+    ]
+  },
+  {
+    "name": "Support menu",
+    "settings": [
+      {
+        "type": "link_list",
+        "id": "support_menu",
+        "label": "Support menu",
+        "info": "Used in header Support dropdown and footer. Add Contact Us, FAQ, etc."
+      }
+    ]
+  },
+  {
+    "name": "Favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon image",
+        "info": "32x32px .png recommended"
+      }
+    ]
+  }
+]

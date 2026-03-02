@@ -1,0 +1,122 @@
+{
+  "accessibility": {
+    "skip_to_content": "Saltar al contenido"
+  },
+  "general": {
+    "language": "Idioma",
+    "404": {
+      "subheading": "Página no encontrada",
+      "title": "Perdido en el vacío",
+      "description": "La página que buscas no existe o ha sido movida. Volvamos al camino.",
+      "button": "Volver al inicio"
+    }
+  },
+  "header": {
+    "menu": "Menú",
+    "search": "Buscar",
+    "account": "Cuenta",
+    "cart": "Carrito",
+    "navigation": "Navegación principal",
+    "mobile_menu": "Menú móvil",
+    "close_menu": "Cerrar menú",
+    "search_placeholder": "Buscar productos, colecciones...",
+    "view_all": "Ver todo",
+    "more": "Más",
+    "support": "Soporte",
+    "help": "Ayuda",
+    "policies": "Políticas",
+    "home": "Inicio",
+    "shop_all": "Ver todo {{ title }}",
+    "shipping_policy": "Política de envío",
+    "returns_refunds": "Devoluciones y reembolsos",
+    "terms_of_service": "Términos de servicio",
+    "privacy_policy": "Política de privacidad"
+  },
+  "sections": {
+    "announcement_bar": {
+      "label": "Anuncio"
+    },
+    "featured_collection": {
+      "view_all": "Ver todo"
+    },
+    "accessories": {
+      "view_all": "Ver todo"
+    }
+  },
+  "products": {
+    "add_to_cart": "Agregar al carrito",
+    "buy_now": "Comprar ahora",
+    "sold_out": "Agotado",
+    "quick_view": "Vista rápida",
+    "quantity": "Cantidad",
+    "decrease_quantity": "Disminuir cantidad",
+    "increase_quantity": "Aumentar cantidad",
+    "thumbnail": "Miniatura",
+    "reviews_count": "{{ count }} reseñas",
+    "color": "Color",
+    "badges": {
+      "new": "Nuevo",
+      "hot": "Popular",
+      "sale": "Oferta"
+    }
+  },
+  "collections": {
+    "title": "Colecciones",
+    "products": "productos",
+    "sort_by": "Ordenar por",
+    "filters": "Filtros",
+    "pagination": "Paginación",
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "clear_all": "Borrar todo",
+    "empty": "No se encontraron productos",
+    "continue_shopping": "Seguir comprando"
+  },
+  "cart": {
+    "title": "Tu carrito",
+    "close": "Cerrar carrito",
+    "product": "Producto",
+    "quantity": "Cant.",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "checkout": "Pagar",
+    "empty": "Tu carrito está vacío",
+    "continue_shopping": "Seguir comprando",
+    "complete_setup": "Completa tu configuración",
+    "decrease": "Disminuir cantidad",
+    "increase": "Aumentar cantidad",
+    "shipping_note": "Envío e impuestos calculados al finalizar la compra."
+  },
+  "search": {
+    "title": "Buscar",
+    "placeholder": "Buscar productos...",
+    "submit": "Buscar",
+    "results_count": "{{ count }} resultados",
+    "no_results": "Sin resultados para \"{{ terms }}\"",
+    "no_results_hint": "Prueba con otro término o explora nuestras colecciones."
+  },
+  "newsletter": {
+    "placeholder": "Tu correo electrónico",
+    "email_label": "Correo electrónico",
+    "subscribe": "Suscribirse"
+  },
+  "footer": {
+    "email_placeholder": "Tu correo",
+    "subscribe": "Suscribirse",
+    "support": "Soporte",
+    "legal": "Legal",
+    "secure_checkout": "Pago seguro",
+    "free_shipping": "Envío gratis +$99",
+    "easy_returns": "Devoluciones fáciles",
+    "warranty_included": "Garantía incluida",
+    "rights": "Todos los derechos reservados."
+  },
+  "support": {
+    "contact_us": "Contáctenos",
+    "faq": "Preguntas frecuentes"
+  },
+  "blog": {
+    "comments": "Comentarios",
+    "no_articles": "Aún no hay artículos."
+  }
+}

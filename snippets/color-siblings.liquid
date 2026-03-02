@@ -1,0 +1,76 @@
+{%- assign sibling_group = product.metafields.custom.sibling_group.value -%}
+
+{%- if sibling_group != blank -%}
+  {%- liquid
+    assign sibling_handles = ''
+    assign sibling_count = 0
+    assign max_siblings = 12
+
+    for c in product.collections
+      paginate c.products by 250
+        for p in c.products
+          if sibling_count >= max_siblings
+            break
+          endif
+          assign p_group = p.metafields.custom.sibling_group.value
+          if p_group == sibling_group and p.id != product.id
+            assign handle_check = '|' | append: p.handle | append: '|'
+            unless sibling_handles contains handle_check
+              assign sibling_handles = sibling_handles | append: handle_check
+              assign sibling_count = sibling_count | plus: 1
+            endunless
+          endif
+        endfor
+      endpaginate
+      if sibling_count >= max_siblings
+        break
+      endif
+    endfor
+  -%}
+
+  {%- if sibling_count > 0 -%}
+    {%- assign handles_array = sibling_handles | split: '|' -%}
+    {%- assign all_handles = '' -%}
+    {%- for h in handles_array -%}
+      {%- if h != blank -%}
+        {%- unless all_handles == '' -%}{%- assign all_handles = all_handles | append: ',' -%}{%- endunless -%}
+        {%- assign all_handles = all_handles | append: h -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless all_handles contains product.handle -%}
+      {%- unless all_handles == '' -%}{%- assign all_handles = all_handles | append: ',' -%}{%- endunless -%}
+      {%- assign all_handles = all_handles | append: product.handle -%}
+    {%- endunless -%}
+    {%- assign sorted_handles = all_handles | split: ',' | sort -%}
+
+    <div class="pdp__variants mb-md">
+      <p class="pdp__variant-label">{{ 'products.color' | t }}</p>
+      <div class="color-siblings" data-color-siblings>
+        {%- for h in sorted_handles -%}
+          {%- if h != blank -%}
+            {%- assign p = all_products[h] -%}
+            {%- if p != blank -%}
+              <a
+                href="{{ p.url }}"
+                class="color-siblings__swatch{% if p.id == product.id %} is-active{% endif %}"
+                aria-label="{{ p.title }}"
+                title="{{ p.title }}"
+                data-sibling-link
+              >
+                {%- if p.featured_image -%}
+                  <img
+                    src="{{ p.featured_image | image_url: width: 140 }}"
+                    alt="{{ p.title | escape }}"
+                    loading="lazy"
+                    width="70"
+                    height="70"
+                  >
+                {%- endif -%}
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+{%- endif -%}

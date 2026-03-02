@@ -1,0 +1,206 @@
+<section class="section-spacing">
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <div class="section-header">
+        <div>
+          {%- if section.settings.subtitle != blank -%}
+            <p class="section-header__subtitle">{{ section.settings.subtitle }}</p>
+          {%- endif -%}
+          <h2 class="section-header__title h2">{{ section.settings.title }}</h2>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="grid grid--{{ section.settings.columns }}">
+      {%- if section.settings.use_store_collections -%}
+        {%- for col in collections -%}
+          {%- if col.handle == 'all' or col.products_count == 0 -%}{%- continue -%}{%- endif -%}
+          {%- liquid
+            assign parts = col.handle | split: '-'
+            assign primary_asset = 'category-' | append: col.handle | append: '.jpg'
+            assign primary_url = primary_asset | asset_url
+            assign fallback_urls = ''
+            if parts.size >= 3
+              assign p1 = parts[1]
+              assign p2 = parts[2]
+              assign last_two = p1 | append: '-' | append: p2
+              assign fallback_asset = 'category-' | append: last_two | append: '.jpg'
+              assign fallback_urls = fallback_asset | asset_url
+            endif
+            if parts.size >= 2
+              assign first_asset = 'category-' | append: parts[0] | append: '.jpg'
+              assign first_url = first_asset | asset_url
+              if fallback_urls != blank
+                assign fallback_urls = fallback_urls | append: ',' | append: first_url
+              else
+                assign fallback_urls = first_url
+              endif
+            endif
+          -%}
+          <a href="{{ col.url }}" class="category-tile">
+            <div class="category-tile__media">
+              {%- if col.image != blank -%}
+                <img
+                  src="{{ col.image | image_url: width: 800 }}"
+                  alt="{{ col.title | escape }}"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                >
+              {%- else -%}
+                <img
+                  class="category-tile__img"
+                  src="{{ primary_url }}"
+                  alt="{{ col.title | escape }}"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                  {% if fallback_urls != blank %}data-fallbacks="{{ fallback_urls }}"{% endif %}
+                  onerror="var f=this.dataset.fallbacks;if(f){var urls=f.split(',').map(function(s){return s.trim()});var next=urls.shift();if(next){this.src=next;this.dataset.fallbacks=urls.join(',')}else{this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex'}}else{this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex'}"
+                >
+                <div class="category-tile__placeholder category-tile__placeholder--fallback" style="display:none" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20"/><path d="M17 2v20"/><path d="M2 12h20"/><path d="M2 7h5"/><path d="M2 17h5"/><path d="M17 7h5"/><path d="M17 17h5"/></svg>
+                </div>
+              {%- endif -%}
+            </div>
+            <div class="category-tile__overlay"></div>
+            <div class="category-tile__content">
+              <h3 class="category-tile__title">{{ col.title }}</h3>
+              <span class="category-tile__count">{{ col.products_count }} {{ 'collections.products' | t }}</span>
+            </div>
+          </a>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign tile_collection = block.settings.collection
+            assign tile_title = block.settings.title_override | default: tile_collection.title
+            assign tile_url = tile_collection.url | default: '#'
+            assign tile_count = tile_collection.products_count
+            assign title_handle = tile_title | handleize
+            assign collection_handle = tile_collection.handle | default: title_handle
+            assign primary_asset = 'category-' | append: collection_handle | append: '.jpg'
+            assign primary_url = primary_asset | asset_url
+          -%}
+          <a href="{{ tile_url }}" class="category-tile" {{ block.shopify_attributes }}>
+            <div class="category-tile__media">
+              {%- if block.settings.image_override != blank -%}
+                <img
+                  src="{{ block.settings.image_override | image_url: width: 800 }}"
+                  alt="{{ tile_title | escape }}"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                >
+              {%- elsif tile_collection.image != blank -%}
+                <img
+                  src="{{ tile_collection.image | image_url: width: 800 }}"
+                  alt="{{ tile_title | escape }}"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                >
+              {%- else -%}
+                <img
+                  class="category-tile__img"
+                  src="{{ primary_url }}"
+                  alt="{{ tile_title | escape }}"
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                  onerror="this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex'"
+                >
+                <div class="category-tile__placeholder category-tile__placeholder--fallback" style="display:none" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20"/><path d="M17 2v20"/><path d="M2 12h20"/><path d="M2 7h5"/><path d="M2 17h5"/><path d="M17 7h5"/><path d="M17 17h5"/></svg>
+                </div>
+              {%- endif -%}
+            </div>
+            <div class="category-tile__overlay"></div>
+            <div class="category-tile__content">
+              <h3 class="category-tile__title">{{ tile_title }}</h3>
+              {%- if tile_count != blank -%}
+                <span class="category-tile__count">{{ tile_count }} {{ 'collections.products' | t }}</span>
+              {%- endif -%}
+            </div>
+          </a>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Category grid",
+  "tag": "section",
+  "class": "category-grid-section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "use_store_collections",
+      "label": "Use store categories (same as navbar)",
+      "default": true,
+      "info": "When on, cards match the main navigation and link to each collection. When off, use the tiles below."
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Browse"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Columns",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category tile",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title_override",
+          "label": "Title override",
+          "info": "Leave blank to use the collection title"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_override",
+          "label": "Image override",
+          "info": "Leave blank to use the collection image"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Category grid",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,89 @@
+{%- comment -%}
+  Renders a product card.
+  Accepts:
+  - product: {Object} product Liquid object
+  - show_vendor: {Boolean} show vendor name
+  - aspect_ratio: {String} image aspect ratio (e.g. "1/1", "4/3")
+{%- endcomment -%}
+
+{%- liquid
+  assign show_vendor = show_vendor | default: false
+  assign aspect_ratio = aspect_ratio | default: '1 / 1'
+  assign has_hover_image = false
+  if product.images.size > 1
+    assign has_hover_image = true
+  endif
+-%}
+
+<div class="product-card">
+  <div class="product-card__media" style="--card-aspect-ratio: {{ aspect_ratio }};">
+    <a href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+      {%- if product.featured_image -%}
+        <img
+          src="{{ product.featured_image | image_url: width: 600 }}"
+          alt="{{ product.featured_image.alt | escape }}"
+          width="600"
+          height="600"
+          loading="lazy"
+        >
+        {%- if has_hover_image -%}
+          <img
+            class="product-card__hover-image"
+            src="{{ product.images[1] | image_url: width: 600 }}"
+            alt="{{ product.images[1].alt | escape }}"
+            width="600"
+            height="600"
+            loading="lazy"
+          >
+        {%- endif -%}
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
+      {%- endif -%}
+    </a>
+
+    {%- comment -%} Badges {%- endcomment -%}
+    <div class="product-card__badges">
+      {%- if product.compare_at_price > product.price -%}
+        {%- assign savings = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+        <span class="badge badge--sale">-{{ savings }}%</span>
+      {%- endif -%}
+      {%- if product.tags contains 'new' -%}
+        <span class="badge badge--new">{{ 'products.badges.new' | t }}</span>
+      {%- endif -%}
+      {%- if product.tags contains 'hot' -%}
+        <span class="badge badge--hot">{{ 'products.badges.hot' | t }}</span>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Quick Actions {%- endcomment -%}
+    <div class="product-card__actions">
+      <a href="{{ product.url }}" class="btn btn--outline btn--sm">{{ 'products.quick_view' | t }}</a>
+      {%- if product.available -%}
+        <form method="post" action="/cart/add">
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn btn--primary btn--sm btn--full">{{ 'products.add_to_cart' | t }}</button>
+        </form>
+      {%- else -%}
+        <button class="btn btn--outline btn--sm btn--full" disabled>{{ 'products.sold_out' | t }}</button>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="product-card__info">
+    {%- if show_vendor and product.vendor != blank -%}
+      <p class="product-card__vendor">{{ product.vendor }}</p>
+    {%- endif -%}
+
+    <h3 class="product-card__title">
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    </h3>
+
+    <div class="product-card__price {% if product.compare_at_price > product.price %}product-card__price--sale{% endif %}">
+      <span>{{ product.price | money }}</span>
+      {%- if product.compare_at_price > product.price -%}
+        <s>{{ product.compare_at_price | money }}</s>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

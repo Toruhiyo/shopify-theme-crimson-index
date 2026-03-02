@@ -1,0 +1,123 @@
+{%- comment -%}
+  Mobile Mega Menu — renders flat link list for a collection's sub-categories.
+  Usage: {% render 'mega-menu-mobile', col: col %}
+{%- endcomment -%}
+
+{%- assign base = col.url -%}
+
+{%- case col.handle -%}
+
+  {%- when 'headsets' -%}
+    <span class="mobile-menu__sublabel">Platform</span>
+    <a href="{{ base }}/platform_pc" class="mobile-menu__grandchild-link">PC</a>
+    <a href="{{ base }}/platform_ps5" class="mobile-menu__grandchild-link">PlayStation 5</a>
+    <a href="{{ base }}/platform_xbox" class="mobile-menu__grandchild-link">Xbox</a>
+    <a href="{{ base }}/platform_switch" class="mobile-menu__grandchild-link">Nintendo Switch</a>
+    <span class="mobile-menu__sublabel">Connectivity</span>
+    <a href="{{ base }}/wired" class="mobile-menu__grandchild-link">Wired</a>
+    <a href="{{ base }}/wireless" class="mobile-menu__grandchild-link">Wireless</a>
+    <span class="mobile-menu__sublabel">Use Case</span>
+    <a href="{{ base }}/usecase_fps_competitive" class="mobile-menu__grandchild-link">FPS Competitive</a>
+    <a href="{{ base }}/usecase_rpg_immersive" class="mobile-menu__grandchild-link">RPG &amp; Immersive</a>
+    <a href="{{ base }}/usecase_streaming" class="mobile-menu__grandchild-link">Streaming</a>
+    <a href="{{ base }}/themed" class="mobile-menu__grandchild-link">Themed Editions</a>
+
+  {%- when 'keyboards' -%}
+    <span class="mobile-menu__sublabel">Size</span>
+    <a href="{{ base }}/size_60" class="mobile-menu__grandchild-link">60%</a>
+    <a href="{{ base }}/size_65" class="mobile-menu__grandchild-link">65%</a>
+    <a href="{{ base }}/size_tkl" class="mobile-menu__grandchild-link">TKL</a>
+    <a href="{{ base }}/size_full" class="mobile-menu__grandchild-link">Full Size</a>
+    <span class="mobile-menu__sublabel">Connectivity</span>
+    <a href="{{ base }}/conn_usb" class="mobile-menu__grandchild-link">USB Wired</a>
+    <a href="{{ base }}/conn_bluetooth" class="mobile-menu__grandchild-link">Bluetooth</a>
+    <a href="{{ base }}/wireless" class="mobile-menu__grandchild-link">Wireless</a>
+    <span class="mobile-menu__sublabel">Features</span>
+    <a href="{{ base }}/hot_swap" class="mobile-menu__grandchild-link">Hot-Swappable</a>
+    <a href="{{ base }}/rgb" class="mobile-menu__grandchild-link">RGB Lighting</a>
+    <a href="{{ base }}/silent" class="mobile-menu__grandchild-link">Silent</a>
+
+  {%- when 'mice' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/ultralight" class="mobile-menu__grandchild-link">Ultralight</a>
+    <a href="{{ base }}/ergonomic" class="mobile-menu__grandchild-link">Ergonomic</a>
+    <a href="{{ base }}/wireless" class="mobile-menu__grandchild-link">Wireless</a>
+    <a href="{{ base }}/mmo" class="mobile-menu__grandchild-link">MMO</a>
+    <span class="mobile-menu__sublabel">Connectivity</span>
+    <a href="{{ base }}/conn_usb" class="mobile-menu__grandchild-link">USB Wired</a>
+    <a href="{{ base }}/conn_wireless_2_4ghz" class="mobile-menu__grandchild-link">2.4 GHz Wireless</a>
+    <a href="{{ base }}/conn_bluetooth" class="mobile-menu__grandchild-link">Bluetooth</a>
+
+  {%- when 'controllers' -%}
+    <span class="mobile-menu__sublabel">Platform</span>
+    <a href="{{ base }}/platform_xbox" class="mobile-menu__grandchild-link">Xbox</a>
+    <a href="{{ base }}/platform_ps5" class="mobile-menu__grandchild-link">PlayStation 5</a>
+    <a href="{{ base }}/platform_pc" class="mobile-menu__grandchild-link">PC</a>
+    <a href="{{ base }}/platform_mobile" class="mobile-menu__grandchild-link">Mobile</a>
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/premium" class="mobile-menu__grandchild-link">Elite / Premium</a>
+    <a href="{{ base }}/fight_pad" class="mobile-menu__grandchild-link">Fight Pad</a>
+    <a href="{{ base }}/themed" class="mobile-menu__grandchild-link">Themed Editions</a>
+
+  {%- when 'gaming-pcs' -%}
+    <span class="mobile-menu__sublabel">Tier</span>
+    <a href="{{ base }}/entry" class="mobile-menu__grandchild-link">Entry</a>
+    <a href="{{ base }}/mid_range" class="mobile-menu__grandchild-link">Mid-Range</a>
+    <a href="{{ base }}/competitive" class="mobile-menu__grandchild-link">Competitive</a>
+    <a href="{{ base }}/creator" class="mobile-menu__grandchild-link">Creator</a>
+    <a href="{{ base }}/flagship" class="mobile-menu__grandchild-link">Flagship</a>
+    <span class="mobile-menu__sublabel">Form Factor</span>
+    <a href="{{ base }}/full_tower" class="mobile-menu__grandchild-link">Full Tower</a>
+    <a href="{{ base }}/mid_tower" class="mobile-menu__grandchild-link">Mid Tower</a>
+    <a href="{{ base }}/itx" class="mobile-menu__grandchild-link">Mini ITX / SFF</a>
+
+  {%- when 'streaming-creator-gear' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/microphone" class="mobile-menu__grandchild-link">Microphones</a>
+    <a href="{{ base }}/webcam" class="mobile-menu__grandchild-link">Webcams</a>
+    <a href="{{ base }}/capture_card" class="mobile-menu__grandchild-link">Capture Cards</a>
+    <a href="{{ base }}/key_light" class="mobile-menu__grandchild-link">Key Lights</a>
+    <a href="{{ base }}/stream_deck" class="mobile-menu__grandchild-link">Stream Decks</a>
+    <a href="{{ base }}/boom_arm" class="mobile-menu__grandchild-link">Boom Arms</a>
+
+  {%- when 'sim-racing' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/wheel" class="mobile-menu__grandchild-link">Wheels</a>
+    <a href="{{ base }}/pedals" class="mobile-menu__grandchild-link">Pedals</a>
+    <a href="{{ base }}/shifter" class="mobile-menu__grandchild-link">Shifters</a>
+    <a href="{{ base }}/handbrake" class="mobile-menu__grandchild-link">Handbrakes</a>
+    <a href="{{ base }}/rig" class="mobile-menu__grandchild-link">Cockpit Rigs</a>
+    <a href="{{ base }}/gloves" class="mobile-menu__grandchild-link">Racing Gloves</a>
+
+  {%- when 'gaming-chairs' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/racing" class="mobile-menu__grandchild-link">Racing Style</a>
+    <a href="{{ base }}/ergonomic" class="mobile-menu__grandchild-link">Ergonomic Mesh</a>
+    <a href="{{ base }}/heavy_duty" class="mobile-menu__grandchild-link">Heavy Duty</a>
+    <a href="{{ base }}/budget" class="mobile-menu__grandchild-link">Budget</a>
+    <a href="{{ base }}/executive" class="mobile-menu__grandchild-link">Executive</a>
+
+  {%- when 'accessories' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/cable" class="mobile-menu__grandchild-link">Cables</a>
+    <a href="{{ base }}/cleaning" class="mobile-menu__grandchild-link">Cleaning Kits</a>
+    <a href="{{ base }}/keycaps" class="mobile-menu__grandchild-link">Keycap Sets</a>
+    <a href="{{ base }}/mouse_grip" class="mobile-menu__grandchild-link">Mouse Grip Tape</a>
+    <a href="{{ base }}/travel_case" class="mobile-menu__grandchild-link">Travel Cases</a>
+
+  {%- when 'replacement-spare-parts' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/dongle" class="mobile-menu__grandchild-link">USB Dongles</a>
+    <a href="{{ base }}/ear_pad" class="mobile-menu__grandchild-link">Ear Pads</a>
+    <a href="{{ base }}/mic_boom" class="mobile-menu__grandchild-link">Mic Booms</a>
+    <a href="{{ base }}/switch" class="mobile-menu__grandchild-link">Key Switches</a>
+    <a href="{{ base }}/keycaps" class="mobile-menu__grandchild-link">Keycap Sets</a>
+
+  {%- when 'services-protection' -%}
+    <span class="mobile-menu__sublabel">Type</span>
+    <a href="{{ base }}/setup" class="mobile-menu__grandchild-link">Setup Sessions</a>
+    <a href="{{ base }}/warranty" class="mobile-menu__grandchild-link">Extended Warranty</a>
+    <a href="{{ base }}/rma" class="mobile-menu__grandchild-link">Priority RMA</a>
+    <a href="{{ base }}/accidental_damage" class="mobile-menu__grandchild-link">Accidental Damage</a>
+
+{%- endcase -%}

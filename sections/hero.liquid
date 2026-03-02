@@ -1,0 +1,132 @@
+{%- liquid
+  assign height_class = ''
+  if section.settings.height == 'large'
+    assign height_class = 'hero--large'
+  endif
+-%}
+
+<section class="hero {{ height_class }}">
+  <div class="hero__media">
+    {%- if section.settings.video != blank -%}
+      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true }}
+    {%- elsif section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 2000 }}"
+        alt="{{ section.settings.image.alt | escape }}"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- else -%}
+      <img
+        src="{{ 'hero-1.jpeg' | asset_url }}"
+        alt="{{ section.settings.title | escape }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- endif -%}
+  </div>
+
+  <div class="hero__overlay"></div>
+
+  <div class="page-width" style="width: 100%;">
+    <div class="hero__content">
+      {%- if section.settings.subtitle != blank -%}
+        <p class="hero__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.title != blank -%}
+        <h1 class="hero__title h0">{{ section.settings.title }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.description != blank -%}
+        <p class="hero__description">{{ section.settings.description }}</p>
+      {%- endif -%}
+
+      <div class="hero__ctas">
+        {%- if section.settings.cta_text != blank -%}
+          <a href="{{ section.settings.cta_link }}" class="btn btn--primary btn--lg">{{ section.settings.cta_text }}</a>
+        {%- endif -%}
+        {%- if section.settings.cta2_text != blank -%}
+          <a href="{{ section.settings.cta2_link }}" class="btn btn--outline btn--lg">{{ section.settings.cta2_text }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero banner",
+  "tag": "section",
+  "class": "hero-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Background video"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Height",
+      "options": [
+        { "value": "medium", "label": "Medium (70vh)" },
+        { "value": "large", "label": "Large (85vh)" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "New arrival"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "DOMINATE YOUR SETUP"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Performance peripherals engineered for competitive players. Precision switches, ultra-light builds, and zero compromises."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Primary button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "cta2_text",
+      "label": "Secondary button text",
+      "default": "View Collection"
+    },
+    {
+      "type": "url",
+      "id": "cta2_link",
+      "label": "Secondary button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero banner"
+    }
+  ]
+}
+{% endschema %}

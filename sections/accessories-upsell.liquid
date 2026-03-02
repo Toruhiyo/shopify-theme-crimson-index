@@ -1,0 +1,76 @@
+{%- liquid
+  assign collection = section.settings.collection | default: collections.all
+  assign limit = section.settings.products_count
+  assign show_vendor = section.settings.show_vendor
+-%}
+
+<section class="section-spacing">
+  <div class="page-width">
+    <div class="section-header">
+      <div>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="section-header__subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+        <h2 class="section-header__title h2">{{ section.settings.title }}</h2>
+      </div>
+      <a href="{{ collection.url }}" class="btn btn--outline btn--sm">{{ 'sections.accessories.view_all' | t }}</a>
+    </div>
+
+    <div class="carousel" data-carousel>
+      <div class="carousel__track">
+        {%- for product in collection.products limit: limit -%}
+          <div class="carousel__slide">
+            {% render 'product-card', product: product, show_vendor: show_vendor, aspect_ratio: '1 / 1' %}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Accessories upsell",
+  "tag": "section",
+  "class": "accessories-upsell-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Complete Your Setup"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Accessories & Add-ons"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "label": "Products to show",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Accessories upsell"
+    }
+  ]
+}
+{% endschema %}
