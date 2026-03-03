@@ -1,16 +1,21 @@
 {%- comment -%}
   Product Links — Renders linked products as variant-like selectors.
-  Each linking metafield group shows as a row of product swatches.
+  Each linking metafield group shows as a labelled row of product swatches.
 
-  Metafields must be list.product_reference under the "custom" namespace.
+  Supported metafield keys (list.product_reference, "custom" namespace):
+    color_variants    — same config, different color/finish
+    storage_variants  — same color, different storage capacity
+    config_variants   — same color, different technical config
+    size_variants     — same color, different physical size
+    compatible_products — complementary/compatible products
+
   To add a new linking metafield, append to both KEYS and LABELS.
-
   Required param: product
 {%- endcomment -%}
 
 {%- liquid
-  assign LINK_REF_KEYS   = 'sibling_products,compatible_products'
-  assign LINK_REF_LABELS = 'Options,Compatible with'
+  assign LINK_REF_KEYS   = 'color_variants,storage_variants,config_variants,size_variants,compatible_products'
+  assign LINK_REF_LABELS = 'Color,Internal Storage,Configuration,Size,Compatible with'
   assign LINK_MAX_ITEMS  = 12
 -%}
 
