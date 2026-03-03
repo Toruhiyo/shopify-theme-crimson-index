@@ -106,8 +106,8 @@
             ]
           </script>
 
-          {%- comment -%} Color siblings (separate products linked by custom.sibling_group) {%- endcomment -%}
-          {% render 'color-siblings', product: product %}
+          {%- comment -%} Product links (separate products linked by configurable metafields) {%- endcomment -%}
+          {% render 'product-links', product: product %}
 
           {%- unless product.has_only_default_variant -%}
             {%- for option in product.options_with_values -%}

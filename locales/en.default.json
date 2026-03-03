@@ -53,7 +53,9 @@
     "increase_quantity": "Increase quantity",
     "thumbnail": "Thumbnail",
     "reviews_count": "{{ count }} reviews",
-    "color": "Color",
+    "link_options": "Options",
+    "link_model": "Model",
+    "link_compatible": "Compatible with",
     "badges": {
       "new": "New",
       "hot": "Hot",

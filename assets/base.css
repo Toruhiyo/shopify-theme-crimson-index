@@ -2883,14 +2883,14 @@ span.mega-menu__column-title:hover {
   margin-bottom: 0.5rem;
 }
 
-/* --- Color Siblings --- */
-.color-siblings {
+/* --- Product Link Swatches (cross-product linking rendered as variants) --- */
+.product-link-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.color-siblings__swatch {
+.product-link-swatch {
   flex-shrink: 0;
   width: 56px;
   height: 56px;
@@ -2902,19 +2902,24 @@ span.mega-menu__column-title:hover {
   transition: border-color 180ms ease;
 }
 
-.color-siblings__swatch img {
+.product-link-swatch img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.color-siblings__swatch:hover {
+.product-link-swatch:hover {
   border-color: var(--color-fg);
 }
 
-.color-siblings__swatch.is-active {
+.product-link-swatch.is-active {
   border-color: var(--color-primary);
+}
+
+.product-link-swatch:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .pdp__ctas {

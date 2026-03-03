@@ -1,0 +1,171 @@
+{%- comment -%}
+  Product Links — Renders linked products as variant-like selectors.
+  Each linking metafield group shows as a row of product swatches.
+
+  Required param: product
+{%- endcomment -%}
+
+{%- comment -%} ═══════════════════════════════════════════════════════════════
+  PRODUCT LINKING CONFIGURATION
+
+  Defines which metafields link separate products together in the UI.
+  All metafields must be under the "custom" namespace.
+
+  MATCH type — Products share the same string value (single_line_text).
+    Discovery: scans the product's collections for matching values.
+    Add new entries to both KEYS and LABELS (keep arrays in sync).
+
+  REF type — Metafield contains direct product references (list.product_reference).
+    Discovery: reads the referenced products directly from the metafield.
+    Add new entries to both KEYS and LABELS (keep arrays in sync).
+
+  To add a new linking metafield, append to the relevant comma-separated string.
+═══════════════════════════════════════════════════════════════ {%- endcomment -%}
+
+{%- liquid
+  assign LINK_MATCH_KEYS   = 'sibling_group,model_family'
+  assign LINK_MATCH_LABELS = 'Options,Model'
+
+  assign LINK_REF_KEYS     = 'compatible_products'
+  assign LINK_REF_LABELS   = 'Compatible with'
+
+  assign LINK_MAX_ITEMS    = 12
+-%}
+
+{%- comment -%} ═══════════════ END CONFIGURATION ═══════════════ {%- endcomment -%}
+
+{%- assign _match_keys = LINK_MATCH_KEYS | split: ',' -%}
+{%- assign _match_labels = LINK_MATCH_LABELS | split: ',' -%}
+{%- assign _ref_keys = LINK_REF_KEYS | split: ',' -%}
+{%- assign _ref_labels = LINK_REF_LABELS | split: ',' -%}
+
+{%- comment -%} ── Match-type linking ── {%- endcomment -%}
+{%- for idx in (0..9) -%}
+  {%- if idx >= _match_keys.size -%}{%- break -%}{%- endif -%}
+  {%- assign _key = _match_keys[idx] | strip -%}
+  {%- assign _label = _match_labels[idx] | strip -%}
+  {%- assign _group_value = product.metafields.custom[_key].value -%}
+
+  {%- if _group_value != blank -%}
+    {%- liquid
+      assign _found_handles = ''
+      assign _found_count = 0
+
+      for c in product.collections
+        paginate c.products by 250
+          for p in c.products
+            if _found_count >= LINK_MAX_ITEMS
+              break
+            endif
+            assign _p_val = p.metafields.custom[_key].value
+            if _p_val == _group_value and p.id != product.id
+              assign _h_check = '|' | append: p.handle | append: '|'
+              unless _found_handles contains _h_check
+                assign _found_handles = _found_handles | append: _h_check
+                assign _found_count = _found_count | plus: 1
+              endunless
+            endif
+          endfor
+        endpaginate
+        if _found_count >= LINK_MAX_ITEMS
+          break
+        endif
+      endfor
+    -%}
+
+    {%- if _found_count > 0 -%}
+      {%- assign _handles_split = _found_handles | split: '|' -%}
+      {%- assign _all = '' -%}
+      {%- for h in _handles_split -%}
+        {%- if h != blank -%}
+          {%- unless _all == '' -%}{%- assign _all = _all | append: ',' -%}{%- endunless -%}
+          {%- assign _all = _all | append: h -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless _all contains product.handle -%}
+        {%- unless _all == '' -%}{%- assign _all = _all | append: ',' -%}{%- endunless -%}
+        {%- assign _all = _all | append: product.handle -%}
+      {%- endunless -%}
+      {%- assign _sorted = _all | split: ',' | sort -%}
+
+      <div class="pdp__variants mb-md">
+        <p class="pdp__variant-label">{{ _label }}</p>
+        <div class="product-link-group" data-product-link-group>
+          {%- for h in _sorted -%}
+            {%- if h != blank -%}
+              {%- assign _p = all_products[h] -%}
+              {%- if _p != blank -%}
+                <a
+                  href="{{ _p.url }}"
+                  class="product-link-swatch{% if _p.id == product.id %} is-active{% endif %}"
+                  aria-label="{{ _p.title }}"
+                  title="{{ _p.title }}"
+                  data-product-link
+                >
+                  {%- if _p.featured_image -%}
+                    <img
+                      src="{{ _p.featured_image | image_url: width: 140 }}"
+                      alt="{{ _p.title | escape }}"
+                      loading="lazy"
+                      width="70"
+                      height="70"
+                    >
+                  {%- endif -%}
+                </a>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} ── Reference-type linking ── {%- endcomment -%}
+{%- for idx in (0..9) -%}
+  {%- if idx >= _ref_keys.size -%}{%- break -%}{%- endif -%}
+  {%- assign _key = _ref_keys[idx] | strip -%}
+  {%- assign _label = _ref_labels[idx] | strip -%}
+  {%- assign _refs = product.metafields.custom[_key].value -%}
+
+  {%- if _refs != blank -%}
+    {%- assign _valid_count = 0 -%}
+    {%- for _ref in _refs -%}
+      {%- if _ref != blank and _ref.handle != blank -%}
+        {%- assign _valid_count = _valid_count | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if _valid_count > 0 -%}
+      <div class="pdp__variants mb-md">
+        <p class="pdp__variant-label">{{ _label }}</p>
+        <div class="product-link-group" data-product-link-group>
+          {%- assign _rendered = 0 -%}
+          {%- for _ref in _refs -%}
+            {%- if _rendered >= LINK_MAX_ITEMS -%}{%- break -%}{%- endif -%}
+            {%- if _ref != blank and _ref.handle != blank -%}
+              <a
+                href="{{ _ref.url }}"
+                class="product-link-swatch{% if _ref.id == product.id %} is-active{% endif %}"
+                aria-label="{{ _ref.title }}"
+                title="{{ _ref.title }}"
+                data-product-link
+              >
+                {%- if _ref.featured_image -%}
+                  <img
+                    src="{{ _ref.featured_image | image_url: width: 140 }}"
+                    alt="{{ _ref.title | escape }}"
+                    loading="lazy"
+                    width="70"
+                    height="70"
+                  >
+                {%- endif -%}
+              </a>
+              {%- assign _rendered = _rendered | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
