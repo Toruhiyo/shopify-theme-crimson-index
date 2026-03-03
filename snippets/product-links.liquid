@@ -1,26 +1,28 @@
 {%- comment -%}
   Product Links — Renders linked products as variant-like selectors.
-  Each linking metafield group shows as a labelled row of product swatches.
+  Each linking metafield group shows as a labelled row of swatches or pills.
 
   Supported metafield keys (list.product_reference, "custom" namespace):
-    color_variants    — same config, different color/finish
-    storage_variants  — same color, different storage capacity
-    config_variants   — same color, different technical config
-    size_variants     — same color, different physical size
-    compatible_products — complementary/compatible products
+    color_variants      — image swatches (color/finish)
+    storage_variants    — text pills (storage capacity)
+    config_variants     — text pills (technical configuration)
+    size_variants       — text pills (physical size)
+    compatible_products — image swatches (complementary products)
 
-  To add a new linking metafield, append to both KEYS and LABELS.
+  To add a new linking metafield, append to KEYS, LABELS, and IMAGE_KEYS.
   Required param: product
 {%- endcomment -%}
 
 {%- liquid
   assign LINK_REF_KEYS   = 'color_variants,storage_variants,config_variants,size_variants,compatible_products'
   assign LINK_REF_LABELS = 'Color,Internal Storage,Configuration,Size,Compatible with'
+  assign LINK_IMAGE_KEYS = 'color_variants,compatible_products'
   assign LINK_MAX_ITEMS  = 12
 -%}
 
 {%- assign _ref_keys = LINK_REF_KEYS | split: ',' -%}
 {%- assign _ref_labels = LINK_REF_LABELS | split: ',' -%}
+{%- assign _separator = ' — ' -%}
 
 {%- for idx in (0..9) -%}
   {%- if idx >= _ref_keys.size -%}{%- break -%}{%- endif -%}
@@ -28,6 +30,10 @@
   {%- if _key == blank -%}{%- continue -%}{%- endif -%}
   {%- assign _label = _ref_labels[idx] | strip -%}
   {%- assign _refs = product.metafields.custom[_key].value -%}
+  {%- assign _use_image = false -%}
+  {%- if LINK_IMAGE_KEYS contains _key -%}
+    {%- assign _use_image = true -%}
+  {%- endif -%}
 
   {%- if _refs != blank -%}
     {%- assign _valid_count = 0 -%}
@@ -47,19 +53,24 @@
             {%- if _ref != blank and _ref.handle != blank -%}
               <a
                 href="{{ _ref.url }}"
-                class="product-link-swatch{% if _ref.id == product.id %} is-active{% endif %}"
+                class="{% if _use_image %}product-link-swatch{% else %}product-link-pill{% endif %}{% if _ref.id == product.id %} is-active{% endif %}"
                 aria-label="{{ _ref.title }}"
                 title="{{ _ref.title }}"
                 data-product-link
               >
-                {%- if _ref.featured_image -%}
-                  <img
-                    src="{{ _ref.featured_image | image_url: width: 140 }}"
-                    alt="{{ _ref.title | escape }}"
-                    loading="lazy"
-                    width="70"
-                    height="70"
-                  >
+                {%- if _use_image -%}
+                  {%- if _ref.featured_image -%}
+                    <img
+                      src="{{ _ref.featured_image | image_url: width: 140 }}"
+                      alt="{{ _ref.title | escape }}"
+                      loading="lazy"
+                      width="70"
+                      height="70"
+                    >
+                  {%- endif -%}
+                {%- else -%}
+                  {%- assign _title_parts = _ref.title | split: _separator -%}
+                  {{- _title_parts | last -}}
                 {%- endif -%}
               </a>
               {%- assign _rendered = _rendered | plus: 1 -%}
