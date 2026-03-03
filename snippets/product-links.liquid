@@ -4,24 +4,33 @@
 
   Supported metafield keys (list.product_reference, "custom" namespace):
     color_variants      — image swatches (color/finish)
-    storage_variants    — text pills (storage capacity)
+    memory_variants     — text pills (RAM, reads ram_gb metafield)
+    storage_variants    — text pills (storage, reads storage_gb metafield)
     config_variants     — text pills (technical configuration)
     size_variants       — text pills (physical size)
     compatible_products — image swatches (complementary products)
 
-  To add a new linking metafield, append to KEYS, LABELS, and IMAGE_KEYS.
+  LINK_VALUE_METAFIELDS maps link keys to a product metafield for pill text.
+  When set, the pill reads that metafield value directly instead of title parsing.
+
+  To add a new linking metafield, append to KEYS, LABELS, IMAGE_KEYS, and
+  optionally VALUE_METAFIELDS.
   Required param: product
 {%- endcomment -%}
 
 {%- liquid
-  assign LINK_REF_KEYS   = 'color_variants,storage_variants,config_variants,size_variants,compatible_products'
-  assign LINK_REF_LABELS = 'Color,Internal Storage,Configuration,Size,Compatible with'
-  assign LINK_IMAGE_KEYS = 'color_variants,compatible_products'
-  assign LINK_MAX_ITEMS  = 12
+  assign LINK_REF_KEYS        = 'color_variants,memory_variants,storage_variants,config_variants,size_variants,compatible_products'
+  assign LINK_REF_LABELS       = 'Color,Memory,Internal Storage,Configuration,Size,Compatible with'
+  assign LINK_IMAGE_KEYS       = 'color_variants,compatible_products'
+  assign LINK_VALUE_METAFIELDS = ',ram_gb,storage_gb,,,'
+  assign LINK_VALUE_SUFFIXES   = ', GB, GB,,,'
+  assign LINK_MAX_ITEMS        = 12
 -%}
 
 {%- assign _ref_keys = LINK_REF_KEYS | split: ',' -%}
 {%- assign _ref_labels = LINK_REF_LABELS | split: ',' -%}
+{%- assign _val_mfs = LINK_VALUE_METAFIELDS | split: ',' -%}
+{%- assign _val_suffixes = LINK_VALUE_SUFFIXES | split: ',' -%}
 {%- assign _separator = ' — ' -%}
 
 {%- for idx in (0..9) -%}
@@ -34,6 +43,8 @@
   {%- if LINK_IMAGE_KEYS contains _key -%}
     {%- assign _use_image = true -%}
   {%- endif -%}
+  {%- assign _val_mf = _val_mfs[idx] | strip -%}
+  {%- assign _val_suffix = _val_suffixes[idx] | strip -%}
 
   {%- if _refs != blank -%}
     {%- assign _valid_count = 0 -%}
@@ -67,6 +78,20 @@
                       width="70"
                       height="70"
                     >
+                  {%- endif -%}
+                {%- elsif _val_mf != blank -%}
+                  {%- assign _raw_val = _ref.metafields.custom[_val_mf].value -%}
+                  {%- if _raw_val != blank -%}
+                    {%- assign _num = _raw_val | times: 1 -%}
+                    {%- if _num >= 1024 -%}
+                      {%- assign _tb = _num | divided_by: 1024 -%}
+                      {{- _tb }} TB
+                    {%- else -%}
+                      {{- _num }} {{ _val_suffix -}}
+                    {%- endif -%}
+                  {%- else -%}
+                    {%- assign _title_parts = _ref.title | split: _separator -%}
+                    {{- _title_parts | last -}}
                   {%- endif -%}
                 {%- else -%}
                   {%- assign _title_parts = _ref.title | split: _separator -%}
