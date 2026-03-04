@@ -15,7 +15,7 @@
   endif
 -%}
 
-<div class="product-card">
+<div class="product-card" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
   <div class="product-card__media" style="--card-aspect-ratio: {{ aspect_ratio }};">
     <a href="{{ product.url }}" aria-label="{{ product.title | escape }}">
       {%- if product.featured_image -%}
@@ -42,21 +42,12 @@
     </a>
 
     {%- comment -%} Badges {%- endcomment -%}
-    {%- liquid
-      assign _card_discount_pct = product.metafields.custom.discount_pct.value | default: settings.global_discount_pct | default: 0 | plus: 0
-      assign _card_has_sale = false
-      assign _card_sale_pct = 0
-      if product.compare_at_price > product.price
-        assign _card_has_sale = true
-        assign _card_sale_pct = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price
-      elsif _card_discount_pct > 0
-        assign _card_has_sale = true
-        assign _card_sale_pct = _card_discount_pct
-      endif
-    -%}
     <div class="product-card__badges">
-      {%- if _card_has_sale -%}
-        <span class="badge badge--sale">-{{ _card_sale_pct }}%</span>
+      {%- if product.compare_at_price > product.price -%}
+        {%- assign savings = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+        <span class="badge badge--sale" data-discount-badge>-{{ savings }}%</span>
+      {%- else -%}
+        <span class="badge badge--sale" data-discount-badge style="display:none;"></span>
       {%- endif -%}
       {%- if product.tags contains 'new' -%}
         <span class="badge badge--new">{{ 'products.badges.new' | t }}</span>
@@ -90,22 +81,12 @@
       <a href="{{ product.url }}">{{ product.title }}</a>
     </h3>
 
-    {%- liquid
-      assign _card_display_price = product.price
-      assign _card_strike_price = 0
-      if product.compare_at_price > product.price
-        assign _card_display_price = product.price
-        assign _card_strike_price = product.compare_at_price
-      elsif _card_discount_pct > 0
-        assign _card_strike_price = product.price
-        assign _card_discount_amt = product.price | times: _card_discount_pct | divided_by: 100
-        assign _card_display_price = product.price | minus: _card_discount_amt
-      endif
-    -%}
-    <div class="product-card__price {% if _card_has_sale %}product-card__price--sale{% endif %}">
-      <span>{{ _card_display_price | money }}</span>
-      {%- if _card_has_sale -%}
-        <s>{{ _card_strike_price | money }}</s>
+    <div class="product-card__price {% if product.compare_at_price > product.price %}product-card__price--sale{% endif %}" data-price-wrapper>
+      <span data-display-price>{{ product.price | money }}</span>
+      {%- if product.compare_at_price > product.price -%}
+        <s data-strike-price>{{ product.compare_at_price | money }}</s>
+      {%- else -%}
+        <s data-strike-price style="display:none;"></s>
       {%- endif -%}
     </div>
   </div>
