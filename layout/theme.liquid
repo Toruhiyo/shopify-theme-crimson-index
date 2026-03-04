@@ -114,12 +114,9 @@
 <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
 
   <div class="loader" id="page-loader" aria-hidden="true">
-    {%- if section.settings.logo != blank -%}
-      <img src="{{ 'logo-transparent.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="200" height="52">
-    {%- else -%}
-      <div class="loader__bar"></div>
-    {%- endif -%}
+    <img src="{{ 'logo-mono.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="160" height="40">
   </div>
+  <script>window.addEventListener('load',function(){var l=document.getElementById('page-loader');if(l){l.classList.add('is-hidden');l.addEventListener('transitionend',function(){l.remove()})}})</script>
 
   <a class="skip-link" href="#main-content">{{ 'accessibility.skip_to_content' | t }}</a>
 
