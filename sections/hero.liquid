@@ -30,7 +30,7 @@
 
   <div class="hero__overlay"></div>
 
-  <div class="page-width" style="width: 100%;">
+  <div class="page-width hero__container">
     <div class="hero__content">
       {%- if section.settings.subtitle != blank -%}
         <p class="hero__subtitle">{{ section.settings.subtitle }}</p>
@@ -43,15 +43,6 @@
       {%- if section.settings.description != blank -%}
         <p class="hero__description">{{ section.settings.description }}</p>
       {%- endif -%}
-
-      <div class="hero__ctas">
-        {%- if section.settings.cta_text != blank -%}
-          <a href="{{ section.settings.cta_link }}" class="btn btn--primary btn--lg">{{ section.settings.cta_text }}</a>
-        {%- endif -%}
-        {%- if section.settings.cta2_text != blank -%}
-          <a href="{{ section.settings.cta2_link }}" class="btn btn--outline btn--lg">{{ section.settings.cta2_text }}</a>
-        {%- endif -%}
-      </div>
     </div>
   </div>
 </section>
@@ -86,41 +77,18 @@
       "type": "text",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "New arrival"
+      "default": "The best devices. Without the guesswork."
     },
     {
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Designed to perform."
+      "default": "Technology, curated."
     },
     {
       "type": "textarea",
       "id": "description",
-      "label": "Description",
-      "default": "Premium products crafted with precision and care. Every detail considered, every experience elevated."
-    },
-    {
-      "type": "text",
-      "id": "cta_text",
-      "label": "Primary button text",
-      "default": "Shop Now"
-    },
-    {
-      "type": "url",
-      "id": "cta_link",
-      "label": "Primary button link"
-    },
-    {
-      "type": "text",
-      "id": "cta2_text",
-      "label": "Secondary button text",
-      "default": "View Collection"
-    },
-    {
-      "type": "url",
-      "id": "cta2_link",
-      "label": "Secondary button link"
+      "label": "Description"
     }
   ],
   "presets": [

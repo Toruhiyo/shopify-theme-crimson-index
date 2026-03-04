@@ -1378,11 +1378,20 @@ h1, h2, h3, h4, h5, h6 {
   display: none;
 }
 
+.hero__container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .hero__content {
   position: relative;
   z-index: 2;
   padding: 3rem 0;
   max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 @media (min-width: 750px) {
