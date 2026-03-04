@@ -1,4 +1,17 @@
-{%- assign menu = section.settings.menu -%}
+{%- liquid
+  assign _menu_fallbacks = 'catalog,main-menu' | split: ','
+  assign menu = nil
+  for _handle in _menu_fallbacks
+    assign _candidate = linklists[_handle]
+    if _candidate.links.size > 0
+      assign menu = _candidate
+      break
+    endif
+  endfor
+  if menu == nil
+    assign menu = section.settings.menu
+  endif
+-%}
 
 <header class="header" data-header>
   <div class="header__primary">
