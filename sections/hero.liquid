@@ -3,28 +3,58 @@
   if section.settings.height == 'large'
     assign height_class = 'hero--large'
   endif
+  assign slide_count = section.blocks.size
+  if slide_count == 0
+    assign slide_count = 1
+  endif
+  assign interval = section.settings.autoplay_interval | times: 1000
 -%}
 
-<section class="hero {{ height_class }}">
-  <div class="hero__media">
-    {%- if section.settings.video != blank -%}
-      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true }}
-    {%- elsif section.settings.image != blank -%}
-      <img
-        src="{{ section.settings.image | image_url: width: 2000 }}"
-        alt="{{ section.settings.image.alt | escape }}"
-        width="{{ section.settings.image.width }}"
-        height="{{ section.settings.image.height }}"
-        loading="eager"
-        fetchpriority="high"
-      >
+<section
+  class="hero {{ height_class }}"
+  data-hero-slideshow
+  data-autoplay-interval="{{ interval }}"
+>
+  <div class="hero__slides">
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        <div
+          class="hero__slide{% if forloop.first %} is-active{% endif %}"
+          data-hero-slide="{{ forloop.index0 }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="hero__media">
+            {%- if block.settings.image != blank -%}
+              <img
+                src="{{ block.settings.image | image_url: width: 2000 }}"
+                alt="{{ block.settings.image.alt | default: section.settings.title | escape }}"
+                width="{{ block.settings.image.width }}"
+                height="{{ block.settings.image.height }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                {%- if forloop.first %} fetchpriority="high"{% endif %}
+              >
+            {%- else -%}
+              <img
+                src="{{ 'hero-1.jpeg' | asset_url }}"
+                alt="{{ section.settings.title | escape }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                {%- if forloop.first %} fetchpriority="high"{% endif %}
+              >
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
     {%- else -%}
-      <img
-        src="{{ 'hero-1.jpeg' | asset_url }}"
-        alt="{{ section.settings.title | escape }}"
-        loading="eager"
-        fetchpriority="high"
-      >
+      <div class="hero__slide is-active" data-hero-slide="0">
+        <div class="hero__media">
+          <img
+            src="{{ 'hero-1.jpeg' | asset_url }}"
+            alt="{{ section.settings.title | escape }}"
+            loading="eager"
+            fetchpriority="high"
+          >
+        </div>
+      </div>
     {%- endif -%}
   </div>
 
@@ -45,6 +75,28 @@
       {%- endif -%}
     </div>
   </div>
+
+  {%- if slide_count > 1 -%}
+    <div class="hero__nav" aria-label="Slideshow navigation">
+      <button class="hero__arrow hero__arrow--prev" data-hero-prev aria-label="Previous slide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+
+      <div class="hero__dots">
+        {%- for block in section.blocks -%}
+          <button
+            class="hero__dot{% if forloop.first %} is-active{% endif %}"
+            data-hero-dot="{{ forloop.index0 }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+
+      <button class="hero__arrow hero__arrow--next" data-hero-next aria-label="Next slide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -54,16 +106,6 @@
   "class": "hero-section",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Background image"
-    },
-    {
-      "type": "video",
-      "id": "video",
-      "label": "Background video"
-    },
-    {
       "type": "select",
       "id": "height",
       "label": "Height",
@@ -72,6 +114,15 @@
         { "value": "large", "label": "Large (85vh)" }
       ],
       "default": "large"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "Auto-rotate interval (seconds)",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 6
     },
     {
       "type": "text",
@@ -91,9 +142,28 @@
       "label": "Description"
     }
   ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background image"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
   "presets": [
     {
-      "name": "Hero banner"
+      "name": "Hero banner",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
     }
   ]
 }

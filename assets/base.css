@@ -1355,6 +1355,22 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 85vh;
 }
 
+.hero__slides {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+
+.hero__slide.is-active {
+  opacity: 1;
+}
+
 .hero__media {
   position: absolute;
   inset: 0;
@@ -1449,6 +1465,79 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-primary-fg, #fff);
   position: relative;
   display: inline;
+}
+
+/* Hero slideshow nav */
+.hero__nav {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  transition: background 180ms ease;
+  backdrop-filter: blur(4px);
+}
+
+.hero__arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hero__arrow:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.hero__dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 0;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.hero__dot.is-active {
+  background: #fff;
+  transform: scale(1.25);
+}
+
+.hero__dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.hero__dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__slide {
+    transition: none;
+  }
 }
 
 /* --- Feature Strip --- */
