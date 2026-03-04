@@ -12,10 +12,7 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "height": "large",
-        "subtitle": "New arrival",
-        "title": "Technology, curated.",
-        "description": "The best devices. Without the guesswork."
+        "height": "large"
       }
     },
     "feature-strip": {
