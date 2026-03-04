@@ -3,9 +3,21 @@
   if section.settings.height == 'large'
     assign height_class = 'hero--large'
   endif
-  assign slide_count = section.blocks.size
-  if slide_count == 0
-    assign slide_count = 1
+  assign _default_hero_images = 'hero-laptop.jpg,hero-smartphone.jpg,hero-earbuds.jpg,hero-headphones.jpg,hero-smartwatch.jpg,hero-tablet.jpg,hero-new-arrivals.jpg,hero-just-dropped.jpg,hero-free-shipping.jpg,hero-sale.jpg,hero-holiday-deals.jpg,hero-preorder.jpg'
+  assign _has_block_images = false
+  for block in section.blocks
+    if block.settings.image != blank
+      assign _has_block_images = true
+      break
+    endif
+  endfor
+  if _has_block_images
+    assign slide_count = section.blocks.size
+  elsif section.blocks.size == 0
+    assign _fallback_images = _default_hero_images | split: ','
+    assign slide_count = _fallback_images.size
+  else
+    assign slide_count = section.blocks.size
   endif
   assign interval = section.settings.autoplay_interval | times: 1000
 -%}
@@ -16,7 +28,7 @@
   data-autoplay-interval="{{ interval }}"
 >
   <div class="hero__slides">
-    {%- if section.blocks.size > 0 -%}
+    {%- if _has_block_images -%}
       {%- for block in section.blocks -%}
         <div
           class="hero__slide{% if forloop.first %} is-active{% endif %}"
@@ -34,8 +46,9 @@
                 {%- if forloop.first %} fetchpriority="high"{% endif %}
               >
             {%- else -%}
+              {%- assign _fb_idx = forloop.index0 | modulo: _fallback_images.size -%}
               <img
-                src="{{ 'hero-1.jpeg' | asset_url }}"
+                src="{{ _default_hero_images | split: ',' | slice: _fb_idx, 1 | first | asset_url }}"
                 alt="{{ section.settings.title | escape }}"
                 loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                 {%- if forloop.first %} fetchpriority="high"{% endif %}
@@ -45,16 +58,22 @@
         </div>
       {%- endfor -%}
     {%- else -%}
-      <div class="hero__slide is-active" data-hero-slide="0">
-        <div class="hero__media">
-          <img
-            src="{{ 'hero-1.jpeg' | asset_url }}"
-            alt="{{ section.settings.title | escape }}"
-            loading="eager"
-            fetchpriority="high"
-          >
+      {%- assign _fallback_images = _default_hero_images | split: ',' -%}
+      {%- for img_file in _fallback_images -%}
+        <div
+          class="hero__slide{% if forloop.first %} is-active{% endif %}"
+          data-hero-slide="{{ forloop.index0 }}"
+        >
+          <div class="hero__media">
+            <img
+              src="{{ img_file | strip | asset_url }}"
+              alt="{{ section.settings.title | escape }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              {%- if forloop.first %} fetchpriority="high"{% endif %}
+            >
+          </div>
         </div>
-      </div>
+      {%- endfor -%}
     {%- endif -%}
   </div>
 
@@ -83,10 +102,11 @@
       </button>
 
       <div class="hero__dots">
-        {%- for block in section.blocks -%}
+        {%- for i in (1..slide_count) -%}
+          {%- assign _dot_idx = forloop.index0 -%}
           <button
             class="hero__dot{% if forloop.first %} is-active{% endif %}"
-            data-hero-dot="{{ forloop.index0 }}"
+            data-hero-dot="{{ _dot_idx }}"
             aria-label="Go to slide {{ forloop.index }}"
           ></button>
         {%- endfor -%}
