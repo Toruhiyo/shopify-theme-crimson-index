@@ -1,12 +1,4 @@
 {%- assign menu = section.settings.menu -%}
-{%- assign max_visible = 7 -%}
-
-{%- comment -%} Build filtered collection array and count {%- endcomment -%}
-{%- assign nav_count = 0 -%}
-{%- for col in collections -%}
-  {%- if col.handle == 'all' or col.products_count == 0 -%}{%- continue -%}{%- endif -%}
-  {%- assign nav_count = nav_count | plus: 1 -%}
-{%- endfor -%}
 
 <header class="header" data-header>
   <div class="header__primary">
@@ -25,75 +17,59 @@
         </div>
 
         <nav class="header__nav" role="navigation" aria-label="{{ 'header.navigation' | t }}">
-          {%- assign visible_index = 0 -%}
-          {%- for col in collections -%}
-            {%- if col.handle == 'all' or col.products_count == 0 -%}{%- continue -%}{%- endif -%}
-            {%- assign visible_index = visible_index | plus: 1 -%}
-            {%- if visible_index > max_visible -%}{%- continue -%}{%- endif -%}
+          {%- for link in menu.links -%}
+            {%- if link.links.size > 0 -%}
+              <div class="header__nav-item" data-nav-mega>
+                <a
+                  href="{{ link.url }}"
+                  class="header__nav-link"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  {{ link.title }}
+                  <span class="header__nav-chevron">{% render 'icon-chevron' %}</span>
+                </a>
 
-            <div class="header__nav-item" data-nav-mega>
-              <a href="{{ col.url }}" class="header__nav-link">
-                {{ col.title }}
-                <span class="header__nav-chevron">{% render 'icon-chevron' %}</span>
-              </a>
-
-              <div class="mega-menu" data-mega-panel>
-                <div class="page-width">
-                  {% render 'mega-menu-config', col: col %}
+                <div class="mega-menu" data-mega-panel role="menu">
+                  <div class="page-width">
+                    <div class="mega-menu__grid">
+                      {%- for child in link.links -%}
+                        <div class="mega-menu__column">
+                          {%- if child.url != blank and child.url != '#' -%}
+                            <a href="{{ child.url }}" class="mega-menu__column-title">{{ child.title }}</a>
+                          {%- else -%}
+                            <span class="mega-menu__column-title">{{ child.title }}</span>
+                          {%- endif -%}
+                          {%- if child.links.size > 0 -%}
+                            <ul class="mega-menu__links" role="menu">
+                              {%- for grandchild in child.links -%}
+                                <li role="none">
+                                  <a href="{{ grandchild.url }}" class="mega-menu__link" role="menuitem">{{ grandchild.title }}</a>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                          {%- endif -%}
+                        </div>
+                      {%- endfor -%}
+                    </div>
+                    {%- if link.url != blank and link.url != '#' -%}
+                      <div class="mega-menu__footer">
+                        <a href="{{ link.url }}" class="mega-menu__view-all">
+                          {{ link.title }}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                      </div>
+                    {%- endif -%}
+                  </div>
                 </div>
               </div>
-            </div>
+            {%- else -%}
+              <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
+            {%- endif -%}
           {%- endfor -%}
-
-          {%- if nav_count > max_visible -%}
-            <div class="header__more" data-more-dropdown>
-              <button class="header__more-trigger" aria-expanded="false">
-                {{ 'header.more' | t }}
-                <span class="header__nav-chevron">{% render 'icon-chevron' %}</span>
-              </button>
-              <div class="header__more-dropdown">
-                {%- assign overflow_index = 0 -%}
-                {%- for col in collections -%}
-                  {%- if col.handle == 'all' or col.products_count == 0 -%}{%- continue -%}{%- endif -%}
-                  {%- assign overflow_index = overflow_index | plus: 1 -%}
-                  {%- if overflow_index <= max_visible -%}{%- continue -%}{%- endif -%}
-                  <a href="{{ col.url }}" class="header__more-link">{{ col.title }}</a>
-                {%- endfor -%}
-              </div>
-            </div>
-          {%- endif -%}
         </nav>
 
         <div class="header__icons">
-          <div class="header__support" data-support-dropdown>
-            <button class="header__support-trigger" aria-expanded="false">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span class="header__support-label">{{ 'header.support' | t }}</span>
-              <span class="header__nav-chevron">{% render 'icon-chevron' %}</span>
-            </button>
-            <div class="header__support-dropdown">
-              <div class="header__support-group">
-                <span class="header__support-heading">{{ 'header.help' | t }}</span>
-                {% render 'support-links', link_class: 'header__support-link' %}
-              </div>
-              <div class="header__support-group">
-                <span class="header__support-heading">{{ 'header.policies' | t }}</span>
-                {%- if shop.shipping_policy != blank -%}
-                  <a href="{{ shop.shipping_policy.url }}" class="header__support-link">{{ 'header.shipping_policy' | t }}</a>
-                {%- endif -%}
-                {%- if shop.refund_policy != blank -%}
-                  <a href="{{ shop.refund_policy.url }}" class="header__support-link">{{ 'header.returns_refunds' | t }}</a>
-                {%- endif -%}
-                {%- if shop.terms_of_service != blank -%}
-                  <a href="{{ shop.terms_of_service.url }}" class="header__support-link">{{ 'header.terms_of_service' | t }}</a>
-                {%- endif -%}
-                {%- if shop.privacy_policy != blank -%}
-                  <a href="{{ shop.privacy_policy.url }}" class="header__support-link">{{ 'header.privacy_policy' | t }}</a>
-                {%- endif -%}
-              </div>
-            </div>
-          </div>
-
           {%- if localization.available_languages.size > 1 -%}
             <div class="locale-selector" data-locale-selector>
               <button class="header__icon-btn locale-selector__trigger" type="button" aria-expanded="false" aria-label="{{ 'general.language' | t }}">
@@ -150,46 +126,44 @@
   <nav class="mobile-menu__nav">
     <a href="/" class="mobile-menu__link">{{ 'header.home' | t }}</a>
 
-    {%- for col in collections -%}
-      {%- if col.handle == 'all' or col.products_count == 0 -%}
-        {%- continue -%}
-      {%- endif -%}
+    {%- for link in menu.links -%}
+      {%- if link.links.size > 0 -%}
+        <div class="mobile-menu__group" data-mobile-accordion>
+          <button class="mobile-menu__link mobile-menu__link--parent" aria-expanded="false" data-mobile-accordion-trigger>
+            <span>{{ link.title }}</span>
+            <span class="mobile-menu__chevron">{% render 'icon-chevron' %}</span>
+          </button>
+          <div class="mobile-menu__submenu" data-mobile-accordion-content aria-hidden="true">
+            {%- if link.url != blank and link.url != '#' -%}
+              <a href="{{ link.url }}" class="mobile-menu__sublink mobile-menu__sublink--all">{{ link.title }}</a>
+            {%- endif -%}
 
-      <div class="mobile-menu__group" data-mobile-accordion>
-        <button class="mobile-menu__link mobile-menu__link--parent" aria-expanded="false" data-mobile-accordion-trigger>
-          <span>{{ col.title }}</span>
-          <span class="mobile-menu__chevron">{% render 'icon-chevron' %}</span>
-        </button>
-        <div class="mobile-menu__submenu" data-mobile-accordion-content aria-hidden="true">
-          <a href="{{ col.url }}" class="mobile-menu__sublink mobile-menu__sublink--all">{{ 'header.shop_all' | t: title: col.title }}</a>
-          {% render 'mega-menu-mobile', col: col %}
+            {%- for child in link.links -%}
+              {%- if child.links.size > 0 -%}
+                <div class="mobile-menu__subgroup" data-mobile-accordion>
+                  <button class="mobile-menu__sublink mobile-menu__sublink--parent" aria-expanded="false" data-mobile-accordion-trigger>
+                    <span>{{ child.title }}</span>
+                    <span class="mobile-menu__chevron">{% render 'icon-chevron' %}</span>
+                  </button>
+                  <div class="mobile-menu__submenu mobile-menu__submenu--nested" data-mobile-accordion-content aria-hidden="true">
+                    {%- if child.url != blank and child.url != '#' -%}
+                      <a href="{{ child.url }}" class="mobile-menu__grandchild-link mobile-menu__grandchild-link--all">{{ child.title }}</a>
+                    {%- endif -%}
+                    {%- for grandchild in child.links -%}
+                      <a href="{{ grandchild.url }}" class="mobile-menu__grandchild-link">{{ grandchild.title }}</a>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- else -%}
+                <a href="{{ child.url }}" class="mobile-menu__sublink">{{ child.title }}</a>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
         </div>
-      </div>
+      {%- else -%}
+        <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title }}</a>
+      {%- endif -%}
     {%- endfor -%}
-
-    <div class="mobile-menu__group" data-mobile-accordion>
-      <button class="mobile-menu__link mobile-menu__link--parent" aria-expanded="false" data-mobile-accordion-trigger>
-        <span>{{ 'header.support' | t }}</span>
-        <span class="mobile-menu__chevron">{% render 'icon-chevron' %}</span>
-      </button>
-      <div class="mobile-menu__submenu" data-mobile-accordion-content aria-hidden="true">
-        <a href="/pages/contact" class="mobile-menu__sublink">{{ 'support.contact_us' | t }}</a>
-        <a href="/pages/faq" class="mobile-menu__sublink">{{ 'support.faq' | t }}</a>
-        <span class="mobile-menu__sublabel">{{ 'header.policies' | t }}</span>
-        {%- if shop.shipping_policy != blank -%}
-          <a href="{{ shop.shipping_policy.url }}" class="mobile-menu__grandchild-link">{{ 'header.shipping_policy' | t }}</a>
-        {%- endif -%}
-        {%- if shop.refund_policy != blank -%}
-          <a href="{{ shop.refund_policy.url }}" class="mobile-menu__grandchild-link">{{ 'header.returns_refunds' | t }}</a>
-        {%- endif -%}
-        {%- if shop.terms_of_service != blank -%}
-          <a href="{{ shop.terms_of_service.url }}" class="mobile-menu__grandchild-link">{{ 'header.terms_of_service' | t }}</a>
-        {%- endif -%}
-        {%- if shop.privacy_policy != blank -%}
-          <a href="{{ shop.privacy_policy.url }}" class="mobile-menu__grandchild-link">{{ 'header.privacy_policy' | t }}</a>
-        {%- endif -%}
-      </div>
-    </div>
   </nav>
 </div>
 
@@ -226,7 +200,7 @@
       "id": "menu",
       "label": "Navigation menu",
       "default": "main-menu",
-      "info": "Primary navigation is auto-generated from your store's collections. This menu is kept for reference."
+      "info": "Primary navigation. Supports up to 2 levels of nesting (Category → Subcategory)."
     }
   ]
 }
