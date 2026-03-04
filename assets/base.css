@@ -1332,11 +1332,15 @@ h1, h2, h3, h4, h5, h6 {
 .hero {
   position: relative;
   overflow: hidden;
-  max-height: 80vh;
+  background: var(--color-card, #F5F5F7);
 }
 
 .hero__slides {
   display: grid;
+  max-height: 85vh;
+  max-width: 2200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero__slide {
