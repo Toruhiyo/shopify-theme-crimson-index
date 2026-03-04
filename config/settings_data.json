@@ -28,7 +28,6 @@
     "card_radius": 16,
     "borders_visible": true,
     "minimal_shadows": true,
-    "global_discount_pct": 20,
     "cart_type": "drawer",
     "cart_upsell_enabled": true,
     "content_for_index": [],

@@ -558,39 +558,53 @@
       url.searchParams.set('variant', variant.id);
       window.history.replaceState({}, '', url);
 
-      const onSale = variant.has_sale;
+      let onSale = variant.compare_at_price && variant.compare_at_price > variant.price;
+      let displayPrice = variant.price_formatted;
+      let strikePrice = variant.compare_at_price_formatted;
+      let salePct = 0;
 
-      if (this.priceEl) {
-        this.priceEl.textContent = variant.display_price_formatted;
-        this.priceEl.classList.toggle('pdp__price--sale', onSale);
+      if (onSale) {
+        salePct = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
+      } else {
+        const disc = AutoDiscountResolver.instance?.get(variant.id);
+        if (disc) {
+          onSale = true;
+          displayPrice = formatMoney(disc.fp);
+          strikePrice = formatMoney(disc.op);
+          salePct = disc.pct;
+        }
       }
 
+      if (this.priceEl) {
+        this.priceEl.textContent = displayPrice;
+        this.priceEl.classList.toggle('pdp__price--sale', onSale);
+      }
       if (this.compareEl) {
-        this.compareEl.textContent = onSale ? variant.strike_price_formatted : '';
+        this.compareEl.textContent = onSale ? strikePrice : '';
         this.compareEl.style.display = onSale ? '' : 'none';
       }
       if (this.badgeEl) {
-        this.badgeEl.textContent = onSale ? `-${variant.sale_pct}%` : '';
+        this.badgeEl.textContent = onSale ? `-${salePct}%` : '';
         this.badgeEl.style.display = onSale ? '' : 'none';
       }
 
       if (this.addBtn) {
         if (variant.available) {
           this.addBtn.disabled = false;
-          this.addBtn.innerHTML = `${this.addBtn.textContent.split('\u2014')[0].trim()} \u2014 ${variant.display_price_formatted}`;
+          this.addBtn.innerHTML = `${this.addBtn.textContent.split('\u2014')[0].trim()} \u2014 ${displayPrice}`;
         } else {
           this.addBtn.disabled = true;
           this.addBtn.textContent = 'Sold Out';
         }
       }
 
-      if (this.stickyPrice) this.stickyPrice.textContent = variant.display_price_formatted;
+      if (this.stickyPrice) this.stickyPrice.textContent = displayPrice;
       if (this.stickyCompare) {
-        this.stickyCompare.textContent = onSale ? variant.strike_price_formatted : '';
+        this.stickyCompare.textContent = onSale ? strikePrice : '';
         this.stickyCompare.style.display = onSale ? '' : 'none';
       }
       if (this.stickyBadge) {
-        this.stickyBadge.textContent = onSale ? `-${variant.sale_pct}%` : '';
+        this.stickyBadge.textContent = onSale ? `-${salePct}%` : '';
         this.stickyBadge.style.display = onSale ? '' : 'none';
       }
 
@@ -880,6 +894,125 @@
     resume() { this.paused = false; }
   }
 
+  /* --- Money Formatter --- */
+  function formatMoney(cents) {
+    const fmt = window.Shopify?.money_format || '${{amount}}';
+    const raw = (cents / 100).toFixed(2);
+    const withCommas = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const noDecimals = Math.round(cents / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return fmt
+      .replace('{{amount_with_comma_separator}}', raw.replace('.', ','))
+      .replace('{{amount_no_decimals_with_comma_separator}}', Math.round(cents / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'))
+      .replace('{{amount_no_decimals}}', noDecimals)
+      .replace('{{amount}}', withCommas);
+  }
+
+  /* --- Auto Discount Resolver (reads Shopify automatic discounts via AJAX Cart API) --- */
+  class AutoDiscountResolver {
+    static CACHE_KEY = 'crimson_auto_disc';
+    static CACHE_TTL = 5 * 60 * 1000;
+    static instance = null;
+
+    constructor() {
+      AutoDiscountResolver.instance = this;
+      this.cache = this._loadCache();
+    }
+
+    _loadCache() {
+      try {
+        const raw = sessionStorage.getItem(AutoDiscountResolver.CACHE_KEY);
+        if (!raw) return new Map();
+        const data = JSON.parse(raw);
+        if (Date.now() - data.ts > AutoDiscountResolver.CACHE_TTL) {
+          sessionStorage.removeItem(AutoDiscountResolver.CACHE_KEY);
+          return new Map();
+        }
+        return new Map(Object.entries(data.d).map(([k, v]) => [Number(k), v]));
+      } catch { return new Map(); }
+    }
+
+    _saveCache() {
+      const obj = {};
+      this.cache.forEach((v, k) => { obj[k] = v; });
+      try {
+        sessionStorage.setItem(AutoDiscountResolver.CACHE_KEY, JSON.stringify({ ts: Date.now(), d: obj }));
+      } catch { /* quota exceeded */ }
+    }
+
+    get(variantId) {
+      return this.cache.get(variantId) || null;
+    }
+
+    async resolve(variantIds) {
+      const uncached = variantIds.filter(id => !this.cache.has(id));
+      if (uncached.length === 0) return;
+
+      try {
+        const cartRes = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
+        const savedCart = await cartRes.json();
+
+        const addRes = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ items: uncached.map(id => ({ id, quantity: 1 })) })
+        });
+        const addData = await addRes.json();
+
+        const items = addData.items || [addData];
+        for (const item of items) {
+          if (!item.variant_id) continue;
+          const op = item.original_price;
+          const fp = item.final_price;
+          if (fp < op) {
+            this.cache.set(item.variant_id, {
+              op, fp, pct: Math.round((op - fp) / op * 100)
+            });
+          }
+        }
+
+        const updates = {};
+        for (const item of savedCart.items) {
+          updates[item.variant_id] = item.quantity;
+        }
+        for (const id of uncached) {
+          if (!(id in updates)) updates[id] = 0;
+        }
+        await fetch('/cart/update.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ updates })
+        });
+
+        this._saveCache();
+      } catch { /* network error — base prices remain */ }
+    }
+
+    applyToCards() {
+      document.querySelectorAll('[data-variant-id]').forEach(card => {
+        const id = parseInt(card.dataset.variantId, 10);
+        const disc = this.get(id);
+        if (!disc) return;
+
+        const priceEl = card.querySelector('[data-display-price]');
+        const strikeEl = card.querySelector('[data-strike-price]');
+        const badgeEl = card.querySelector('[data-discount-badge]');
+        const wrapper = card.querySelector('[data-price-wrapper]');
+
+        if (priceEl) priceEl.textContent = formatMoney(disc.fp);
+        if (strikeEl) { strikeEl.textContent = formatMoney(disc.op); strikeEl.style.display = ''; }
+        if (badgeEl) { badgeEl.textContent = `-${disc.pct}%`; badgeEl.style.display = ''; }
+        if (wrapper) wrapper.classList.add('product-card__price--sale');
+      });
+    }
+
+    applyToPdp(variantSelector) {
+      if (!variantSelector) return;
+      const currentId = parseInt(variantSelector.idInput?.value, 10);
+      const variant = variantSelector.variants.find(v => v.id === currentId);
+      if (variant) variantSelector.updateVariant(variant);
+    }
+  }
+
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
@@ -898,7 +1031,26 @@
     document.querySelectorAll('.qty-selector').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
-    document.querySelectorAll('[data-variant-selector]').forEach(el => new VariantSelector(el));
+    const variantSelectors = [];
+    document.querySelectorAll('[data-variant-selector]').forEach(el => {
+      variantSelectors.push(new VariantSelector(el));
+    });
+
+    const resolver = new AutoDiscountResolver();
+    const cardIds = Array.from(document.querySelectorAll('[data-variant-id]'))
+      .map(el => parseInt(el.dataset.variantId, 10))
+      .filter(Boolean);
+    const pdpIds = variantSelectors.flatMap(vs =>
+      vs.variants.filter(v => !v.compare_at_price).map(v => v.id)
+    );
+    const allIds = [...new Set([...cardIds, ...pdpIds])];
+
+    if (allIds.length > 0) {
+      resolver.resolve(allIds).then(() => {
+        resolver.applyToCards();
+        variantSelectors.forEach(vs => resolver.applyToPdp(vs));
+      });
+    }
   }
 
   function dismissLoader() {

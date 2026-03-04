@@ -184,22 +184,6 @@
     ]
   },
   {
-    "name": "Promotions",
-    "settings": [
-      {
-        "type": "range",
-        "id": "global_discount_pct",
-        "label": "Global discount (%)",
-        "info": "Match this to your active Shopify automatic discount. Displays strikethrough pricing on product pages and collection cards. Set to 0 to disable.",
-        "min": 0,
-        "max": 75,
-        "step": 1,
-        "unit": "%",
-        "default": 0
-      }
-    ]
-  },
-  {
     "name": "Cart",
     "settings": [
       {

@@ -108,7 +108,11 @@
     }
   {% endstyle %}
 
-  <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+  <script>
+    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    window.Shopify = window.Shopify || {};
+    window.Shopify.money_format = {{ shop.money_format | json }};
+  </script>
 </head>
 
 <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
