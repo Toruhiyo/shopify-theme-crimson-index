@@ -42,8 +42,8 @@
               </div>
               <span class="cart-drawer__item-price">
                 {{ item.final_line_price | money }}
-                {%- if item.variant.compare_at_price > item.variant.price -%}
-                  <s class="cart-drawer__item-compare">{{ item.variant.compare_at_price | times: item.quantity | money }}</s>
+                {%- if item.original_line_price > item.final_line_price -%}
+                  <s class="cart-drawer__item-compare">{{ item.original_line_price | money }}</s>
                 {%- endif -%}
               </span>
             </div>
@@ -87,8 +87,8 @@
     <div class="cart-drawer__footer">
       {%- assign _drawer_savings = 0 -%}
       {%- for item in cart.items -%}
-        {%- if item.variant.compare_at_price > item.variant.price -%}
-          {%- assign _ds = item.variant.compare_at_price | minus: item.variant.price | times: item.quantity -%}
+        {%- if item.original_line_price > item.final_line_price -%}
+          {%- assign _ds = item.original_line_price | minus: item.final_line_price -%}
           {%- assign _drawer_savings = _drawer_savings | plus: _ds -%}
         {%- endif -%}
       {%- endfor -%}

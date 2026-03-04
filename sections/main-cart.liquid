@@ -36,14 +36,28 @@
                       {%- unless item.product.has_only_default_variant -%}
                         <p class="text-muted" style="font-size: 0.8125rem;">{{ item.variant.title }}</p>
                       {%- endunless -%}
+                      {%- assign _has_compare = false -%}
+                      {%- assign _strike_price = 0 -%}
+                      {%- if item.variant.compare_at_price > item.variant.price -%}
+                        {%- assign _has_compare = true -%}
+                        {%- assign _strike_price = item.variant.compare_at_price -%}
+                      {%- elsif item.original_price > item.final_price -%}
+                        {%- assign _has_compare = true -%}
+                        {%- assign _strike_price = item.original_price -%}
+                      {%- endif -%}
                       <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
                         <span style="font-weight: 700; font-size: 0.875rem;">{{ item.final_price | money }}</span>
-                        {%- if item.variant.compare_at_price > item.variant.price -%}
-                          <s class="text-muted" style="font-size: 0.8125rem;">{{ item.variant.compare_at_price | money }}</s>
-                          {%- assign _cart_savings = item.variant.compare_at_price | minus: item.variant.price | times: 100 | divided_by: item.variant.compare_at_price -%}
+                        {%- if _has_compare -%}
+                          <s class="text-muted" style="font-size: 0.8125rem;">{{ _strike_price | money }}</s>
+                          {%- assign _cart_savings = _strike_price | minus: item.final_price | times: 100 | divided_by: _strike_price -%}
                           <span class="badge badge--sale">-{{ _cart_savings }}%</span>
                         {%- endif -%}
                       </div>
+                      {%- if item.discount_allocations.size > 0 -%}
+                        {%- for da in item.discount_allocations -%}
+                          <p style="font-size: 0.75rem; color: var(--color-primary); margin-top: 0.125rem;">{{ da.discount_application.title }}</p>
+                        {%- endfor -%}
+                      {%- endif -%}
                     </div>
                   </div>
                 </td>
@@ -60,8 +74,8 @@
                 </td>
                 <td style="text-align: right; padding: 1rem 0;">
                   <span style="font-weight: 700;">{{ item.final_line_price | money }}</span>
-                  {%- if item.variant.compare_at_price > item.variant.price -%}
-                    <br><s class="text-muted" style="font-size: 0.8125rem;">{{ item.variant.compare_at_price | times: item.quantity | money }}</s>
+                  {%- if item.original_line_price > item.final_line_price -%}
+                    <br><s class="text-muted" style="font-size: 0.8125rem;">{{ item.original_line_price | money }}</s>
                   {%- endif -%}
                 </td>
               </tr>
@@ -73,8 +87,8 @@
           <div style="max-width: 20rem; width: 100%;">
             {%- assign _total_savings = 0 -%}
             {%- for item in cart.items -%}
-              {%- if item.variant.compare_at_price > item.variant.price -%}
-                {%- assign _item_save = item.variant.compare_at_price | minus: item.variant.price | times: item.quantity -%}
+              {%- if item.original_line_price > item.final_line_price -%}
+                {%- assign _item_save = item.original_line_price | minus: item.final_line_price -%}
                 {%- assign _total_savings = _total_savings | plus: _item_save -%}
               {%- endif -%}
             {%- endfor -%}
