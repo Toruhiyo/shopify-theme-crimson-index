@@ -11,9 +11,7 @@
   "sections": {
     "hero": {
       "type": "hero",
-      "settings": {
-        "height": "large"
-      }
+      "settings": {}
     },
     "feature-strip": {
       "type": "feature-strip",
