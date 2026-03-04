@@ -1388,7 +1388,7 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   z-index: 2;
   padding: 3rem 0;
-  max-width: 32rem;
+  max-width: 64rem;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -1406,11 +1406,20 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 0.75rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .hero__title {
   margin-bottom: 1rem;
   color: #fff;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .hero__subtitle,
+  .hero__title {
+    white-space: normal;
+  }
 }
 
 .hero__description {
