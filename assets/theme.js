@@ -459,7 +459,9 @@
       this.badgeEl = document.querySelector('.pdp__price-row .badge--sale');
       this.addBtn = container.querySelector('[type="submit"]');
       this.mainImage = document.getElementById('pdp-main-image');
-      this.stickyPrice = document.querySelector('.pdp-sticky-bar__price');
+      this.stickyPrice = document.querySelector('[data-sticky-price]');
+      this.stickyCompare = document.querySelector('[data-sticky-compare]');
+      this.stickyBadge = document.querySelector('[data-sticky-badge]');
 
       this.initFromUrl();
       this.pills.forEach(pill => pill.addEventListener('click', () => this.onPillClick(pill)));
@@ -590,6 +592,20 @@
       }
 
       if (this.stickyPrice) this.stickyPrice.textContent = variant.price_formatted;
+      const stickyOnSale = variant.compare_at_price && variant.compare_at_price > variant.price;
+      if (this.stickyCompare) {
+        this.stickyCompare.textContent = stickyOnSale ? variant.compare_at_price_formatted : '';
+        this.stickyCompare.style.display = stickyOnSale ? '' : 'none';
+      }
+      if (this.stickyBadge) {
+        if (stickyOnSale) {
+          const stickySave = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
+          this.stickyBadge.textContent = `-${stickySave}%`;
+          this.stickyBadge.style.display = '';
+        } else {
+          this.stickyBadge.style.display = 'none';
+        }
+      }
 
       if (variant.featured_image && this.mainImage) {
         this.mainImage.src = variant.featured_image;

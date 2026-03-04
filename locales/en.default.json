@@ -96,7 +96,8 @@
     "complete_setup": "Complete your setup",
     "decrease": "Decrease quantity",
     "increase": "Increase quantity",
-    "shipping_note": "Shipping and taxes calculated at checkout."
+    "shipping_note": "Shipping and taxes calculated at checkout.",
+    "you_save": "You save"
   },
   "search": {
     "title": "Search",

@@ -243,7 +243,17 @@
 
 {%- comment -%} Sticky Mobile Bar {%- endcomment -%}
 <div class="pdp-sticky-bar">
-  <div class="pdp-sticky-bar__price">{{ current_variant.price | money }}</div>
+  <div class="pdp-sticky-bar__price">
+    <span data-sticky-price>{{ current_variant.price | money }}</span>
+    {%- if current_variant.compare_at_price > current_variant.price -%}
+      <s class="pdp-sticky-bar__compare" data-sticky-compare>{{ current_variant.compare_at_price | money }}</s>
+      {%- assign _sticky_save = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price -%}
+      <span class="badge badge--sale" data-sticky-badge>-{{ _sticky_save }}%</span>
+    {%- else -%}
+      <s class="pdp-sticky-bar__compare" data-sticky-compare style="display:none;"></s>
+      <span class="badge badge--sale" data-sticky-badge style="display:none;"></span>
+    {%- endif -%}
+  </div>
   {%- if current_variant.available -%}
     <button
       class="btn btn--primary"
