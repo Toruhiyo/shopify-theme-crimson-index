@@ -14,8 +14,8 @@
       "settings": {
         "height": "large",
         "subtitle": "New arrival",
-        "title": "Designed to perform.",
-        "description": "Premium products crafted with precision and care. Every detail considered, every experience elevated.",
+        "title": "Technology, curated..",
+        "description": "The best devices. Without the guesswork.",
         "cta_text": "Shop now",
         "cta2_text": "View collection"
       }
@@ -52,12 +52,7 @@
           }
         }
       },
-      "block_order": [
-        "f1",
-        "f2",
-        "f3",
-        "f4"
-      ],
+      "block_order": ["f1", "f2", "f3", "f4"],
       "settings": {}
     },
     "category-grid": {
@@ -124,11 +119,7 @@
           }
         }
       },
-      "block_order": [
-        "t1",
-        "t2",
-        "t3"
-      ],
+      "block_order": ["t1", "t2", "t3"],
       "settings": {
         "subtitle": "Reviews",
         "title": "What customers say"
