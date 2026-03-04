@@ -40,7 +40,12 @@
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>
               </div>
-              <span class="cart-drawer__item-price">{{ item.final_line_price | money }}</span>
+              <span class="cart-drawer__item-price">
+                {{ item.final_line_price | money }}
+                {%- if item.variant.compare_at_price > item.variant.price -%}
+                  <s class="cart-drawer__item-compare">{{ item.variant.compare_at_price | times: item.quantity | money }}</s>
+                {%- endif -%}
+              </span>
             </div>
           </div>
         </div>
@@ -66,7 +71,12 @@
                   >
                 {%- endif -%}
                 <p class="cart-drawer__upsell-item-title">{{ product.title | truncatewords: 4 }}</p>
-                <p class="cart-drawer__upsell-item-price">{{ product.price | money }}</p>
+                <p class="cart-drawer__upsell-item-price">
+                  {{ product.price | money }}
+                  {%- if product.compare_at_price > product.price -%}
+                    <s class="cart-drawer__item-compare">{{ product.compare_at_price | money }}</s>
+                  {%- endif -%}
+                </p>
               </a>
             {%- endfor -%}
           </div>
@@ -75,6 +85,19 @@
     {%- endif -%}
 
     <div class="cart-drawer__footer">
+      {%- assign _drawer_savings = 0 -%}
+      {%- for item in cart.items -%}
+        {%- if item.variant.compare_at_price > item.variant.price -%}
+          {%- assign _ds = item.variant.compare_at_price | minus: item.variant.price | times: item.quantity -%}
+          {%- assign _drawer_savings = _drawer_savings | plus: _ds -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if _drawer_savings > 0 -%}
+        <div class="cart-drawer__savings">
+          <span>{{ 'cart.you_save' | t | default: 'You save' }}</span>
+          <span>-{{ _drawer_savings | money }}</span>
+        </div>
+      {%- endif -%}
       <div class="cart-drawer__subtotal">
         <span>{{ 'cart.subtotal' | t }}</span>
         <span>{{ cart.total_price | money }}</span>
