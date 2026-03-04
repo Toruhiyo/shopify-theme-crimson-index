@@ -15,9 +15,7 @@
         "height": "large",
         "subtitle": "New arrival",
         "title": "Technology, curated.",
-        "description": "The best devices. Without the guesswork.",
-        "cta_text": "Shop now",
-        "cta2_text": "View collection"
+        "description": "The best devices. Without the guesswork."
       }
     },
     "feature-strip": {
@@ -52,16 +50,21 @@
           }
         }
       },
-      "block_order": ["f1", "f2", "f3", "f4"],
+      "block_order": [
+        "f1",
+        "f2",
+        "f3",
+        "f4"
+      ],
       "settings": {}
     },
     "category-grid": {
       "type": "category-grid",
       "settings": {
+        "use_store_collections": true,
         "subtitle": "Browse",
         "title": "Shop by category",
-        "columns": "3",
-        "use_store_collections": true
+        "columns": "3"
       }
     },
     "featured-collection": {
@@ -119,7 +122,11 @@
           }
         }
       },
-      "block_order": ["t1", "t2", "t3"],
+      "block_order": [
+        "t1",
+        "t2",
+        "t3"
+      ],
       "settings": {
         "subtitle": "Reviews",
         "title": "What customers say"
