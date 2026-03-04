@@ -818,6 +818,65 @@
     return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
   }
 
+  /* --- Hero Slideshow --- */
+  class HeroSlideshow {
+    constructor(el) {
+      this.el = el;
+      this.slides = el.querySelectorAll('[data-hero-slide]');
+      this.dots = el.querySelectorAll('[data-hero-dot]');
+      this.current = 0;
+      this.total = this.slides.length;
+      this.interval = parseInt(el.dataset.autoplayInterval, 10) || 6000;
+      this.timer = null;
+      this.paused = false;
+
+      if (this.total <= 1) return;
+
+      this.bindControls();
+      this.startAutoplay();
+    }
+
+    bindControls() {
+      this.el.querySelector('[data-hero-prev]')?.addEventListener('click', () => this.prev());
+      this.el.querySelector('[data-hero-next]')?.addEventListener('click', () => this.next());
+      this.dots.forEach(dot => {
+        dot.addEventListener('click', () => this.goTo(parseInt(dot.dataset.heroDot, 10)));
+      });
+
+      this.el.addEventListener('mouseenter', () => this.pause());
+      this.el.addEventListener('mouseleave', () => this.resume());
+      this.el.addEventListener('focusin', () => this.pause());
+      this.el.addEventListener('focusout', () => this.resume());
+    }
+
+    goTo(index) {
+      if (index === this.current) return;
+      this.slides[this.current].classList.remove('is-active');
+      this.dots[this.current]?.classList.remove('is-active');
+      this.current = (index + this.total) % this.total;
+      this.slides[this.current].classList.add('is-active');
+      this.dots[this.current]?.classList.add('is-active');
+      this.resetAutoplay();
+    }
+
+    next() { this.goTo(this.current + 1); }
+    prev() { this.goTo(this.current - 1); }
+
+    startAutoplay() {
+      this.timer = setInterval(() => {
+        if (!this.paused) this.next();
+      }, this.interval);
+    }
+
+    resetAutoplay() {
+      clearInterval(this.timer);
+      this.startAutoplay();
+    }
+
+    pause() { this.paused = true; }
+    resume() { this.paused = false; }
+  }
+
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
@@ -835,6 +894,7 @@
     document.querySelectorAll('.pdp__gallery').forEach(el => new ProductGallery(el));
     document.querySelectorAll('.qty-selector').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
+    document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
     document.querySelectorAll('[data-variant-selector]').forEach(el => new VariantSelector(el));
   }
 

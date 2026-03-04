@@ -3,28 +3,77 @@
   if section.settings.height == 'large'
     assign height_class = 'hero--large'
   endif
+  assign _default_hero_images = 'hero-laptop.jpg,hero-smartphone.jpg,hero-earbuds.jpg,hero-headphones.jpg,hero-smartwatch.jpg,hero-tablet.jpg,hero-new-arrivals.jpg,hero-just-dropped.jpg,hero-free-shipping.jpg,hero-sale.jpg,hero-holiday-deals.jpg,hero-preorder.jpg'
+  assign _has_block_images = false
+  for block in section.blocks
+    if block.settings.image != blank
+      assign _has_block_images = true
+      break
+    endif
+  endfor
+  if _has_block_images
+    assign slide_count = section.blocks.size
+  elsif section.blocks.size == 0
+    assign _fallback_images = _default_hero_images | split: ','
+    assign slide_count = _fallback_images.size
+  else
+    assign slide_count = section.blocks.size
+  endif
+  assign interval = section.settings.autoplay_interval | times: 1000
 -%}
 
-<section class="hero {{ height_class }}">
-  <div class="hero__media">
-    {%- if section.settings.video != blank -%}
-      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true }}
-    {%- elsif section.settings.image != blank -%}
-      <img
-        src="{{ section.settings.image | image_url: width: 2000 }}"
-        alt="{{ section.settings.image.alt | escape }}"
-        width="{{ section.settings.image.width }}"
-        height="{{ section.settings.image.height }}"
-        loading="eager"
-        fetchpriority="high"
-      >
+<section
+  class="hero {{ height_class }}"
+  data-hero-slideshow
+  data-autoplay-interval="{{ interval }}"
+>
+  <div class="hero__slides">
+    {%- if _has_block_images -%}
+      {%- for block in section.blocks -%}
+        <div
+          class="hero__slide{% if forloop.first %} is-active{% endif %}"
+          data-hero-slide="{{ forloop.index0 }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="hero__media">
+            {%- if block.settings.image != blank -%}
+              <img
+                src="{{ block.settings.image | image_url: width: 2000 }}"
+                alt="{{ block.settings.image.alt | default: section.settings.title | escape }}"
+                width="{{ block.settings.image.width }}"
+                height="{{ block.settings.image.height }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                {%- if forloop.first %} fetchpriority="high"{% endif %}
+              >
+            {%- else -%}
+              {%- assign _fb_idx = forloop.index0 | modulo: _fallback_images.size -%}
+              <img
+                src="{{ _default_hero_images | split: ',' | slice: _fb_idx, 1 | first | asset_url }}"
+                alt="{{ section.settings.title | escape }}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                {%- if forloop.first %} fetchpriority="high"{% endif %}
+              >
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
     {%- else -%}
-      <img
-        src="{{ 'hero-1.jpeg' | asset_url }}"
-        alt="{{ section.settings.title | escape }}"
-        loading="eager"
-        fetchpriority="high"
-      >
+      {%- assign _fallback_images = _default_hero_images | split: ',' -%}
+      {%- for img_file in _fallback_images -%}
+        <div
+          class="hero__slide{% if forloop.first %} is-active{% endif %}"
+          data-hero-slide="{{ forloop.index0 }}"
+        >
+          <div class="hero__media">
+            <img
+              src="{{ img_file | strip | asset_url }}"
+              alt="{{ section.settings.title | escape }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              {%- if forloop.first %} fetchpriority="high"{% endif %}
+            >
+          </div>
+        </div>
+      {%- endfor -%}
     {%- endif -%}
   </div>
 
@@ -45,6 +94,29 @@
       {%- endif -%}
     </div>
   </div>
+
+  {%- if slide_count > 1 -%}
+    <div class="hero__nav" aria-label="Slideshow navigation">
+      <button class="hero__arrow hero__arrow--prev" data-hero-prev aria-label="Previous slide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+
+      <div class="hero__dots">
+        {%- for i in (1..slide_count) -%}
+          {%- assign _dot_idx = forloop.index0 -%}
+          <button
+            class="hero__dot{% if forloop.first %} is-active{% endif %}"
+            data-hero-dot="{{ _dot_idx }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+
+      <button class="hero__arrow hero__arrow--next" data-hero-next aria-label="Next slide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -54,16 +126,6 @@
   "class": "hero-section",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Background image"
-    },
-    {
-      "type": "video",
-      "id": "video",
-      "label": "Background video"
-    },
-    {
       "type": "select",
       "id": "height",
       "label": "Height",
@@ -72,6 +134,15 @@
         { "value": "large", "label": "Large (85vh)" }
       ],
       "default": "large"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "Auto-rotate interval (seconds)",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 6
     },
     {
       "type": "text",
@@ -91,9 +162,28 @@
       "label": "Description"
     }
   ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background image"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
   "presets": [
     {
-      "name": "Hero banner"
+      "name": "Hero banner",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
     }
   ]
 }
