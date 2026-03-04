@@ -1,8 +1,4 @@
 {%- liquid
-  assign height_class = ''
-  if section.settings.height == 'large'
-    assign height_class = 'hero--large'
-  endif
   assign _default_hero_images = 'hero-new-arrivals.jpg,hero-sale.jpg,hero-clearance.jpg,hero-deal-of-week.jpg,hero-flash-sale.jpg,hero-limited-time.jpg'
   assign _has_block_images = false
   for block in section.blocks
@@ -23,7 +19,7 @@
 -%}
 
 <section
-  class="hero {{ height_class }}"
+  class="hero"
   data-hero-slideshow
   data-autoplay-interval="{{ interval }}"
 >
@@ -106,16 +102,6 @@
   "tag": "section",
   "class": "hero-section",
   "settings": [
-    {
-      "type": "select",
-      "id": "height",
-      "label": "Height",
-      "options": [
-        { "value": "medium", "label": "Medium (70vh)" },
-        { "value": "large", "label": "Large (85vh)" }
-      ],
-      "default": "large"
-    },
     {
       "type": "range",
       "id": "autoplay_interval",
