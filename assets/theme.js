@@ -558,53 +558,40 @@
       url.searchParams.set('variant', variant.id);
       window.history.replaceState({}, '', url);
 
+      const onSale = variant.has_sale;
+
       if (this.priceEl) {
-        this.priceEl.textContent = variant.price_formatted;
-        this.priceEl.classList.toggle(
-          'pdp__price--sale',
-          variant.compare_at_price && variant.compare_at_price > variant.price
-        );
+        this.priceEl.textContent = variant.display_price_formatted;
+        this.priceEl.classList.toggle('pdp__price--sale', onSale);
       }
 
-      if (variant.compare_at_price && variant.compare_at_price > variant.price) {
-        const savings = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
-        if (this.compareEl) {
-          this.compareEl.textContent = variant.compare_at_price_formatted;
-          this.compareEl.style.display = '';
-        }
-        if (this.badgeEl) {
-          this.badgeEl.textContent = `-${savings}%`;
-          this.badgeEl.style.display = '';
-        }
-      } else {
-        if (this.compareEl) this.compareEl.style.display = 'none';
-        if (this.badgeEl) this.badgeEl.style.display = 'none';
+      if (this.compareEl) {
+        this.compareEl.textContent = onSale ? variant.strike_price_formatted : '';
+        this.compareEl.style.display = onSale ? '' : 'none';
+      }
+      if (this.badgeEl) {
+        this.badgeEl.textContent = onSale ? `-${variant.sale_pct}%` : '';
+        this.badgeEl.style.display = onSale ? '' : 'none';
       }
 
       if (this.addBtn) {
         if (variant.available) {
           this.addBtn.disabled = false;
-          this.addBtn.innerHTML = `${this.addBtn.textContent.split('—')[0].trim()} &mdash; ${variant.price_formatted}`;
+          this.addBtn.innerHTML = `${this.addBtn.textContent.split('\u2014')[0].trim()} \u2014 ${variant.display_price_formatted}`;
         } else {
           this.addBtn.disabled = true;
           this.addBtn.textContent = 'Sold Out';
         }
       }
 
-      if (this.stickyPrice) this.stickyPrice.textContent = variant.price_formatted;
-      const stickyOnSale = variant.compare_at_price && variant.compare_at_price > variant.price;
+      if (this.stickyPrice) this.stickyPrice.textContent = variant.display_price_formatted;
       if (this.stickyCompare) {
-        this.stickyCompare.textContent = stickyOnSale ? variant.compare_at_price_formatted : '';
-        this.stickyCompare.style.display = stickyOnSale ? '' : 'none';
+        this.stickyCompare.textContent = onSale ? variant.strike_price_formatted : '';
+        this.stickyCompare.style.display = onSale ? '' : 'none';
       }
       if (this.stickyBadge) {
-        if (stickyOnSale) {
-          const stickySave = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
-          this.stickyBadge.textContent = `-${stickySave}%`;
-          this.stickyBadge.style.display = '';
-        } else {
-          this.stickyBadge.style.display = 'none';
-        }
+        this.stickyBadge.textContent = onSale ? `-${variant.sale_pct}%` : '';
+        this.stickyBadge.style.display = onSale ? '' : 'none';
       }
 
       if (variant.featured_image && this.mainImage) {
