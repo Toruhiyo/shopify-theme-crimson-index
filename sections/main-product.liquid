@@ -60,14 +60,34 @@
         </div>
 
         {%- comment -%} Price {%- endcomment -%}
+        {%- liquid
+          assign _pdp_discount_pct = product.metafields.custom.discount_pct.value | default: settings.global_discount_pct | default: 0 | plus: 0
+          assign _pdp_has_sale = false
+          assign _pdp_display_price = current_variant.price
+          assign _pdp_strike_price = 0
+          assign _pdp_sale_pct = 0
+          if current_variant.compare_at_price > current_variant.price
+            assign _pdp_has_sale = true
+            assign _pdp_strike_price = current_variant.compare_at_price
+            assign _pdp_sale_pct = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price
+          elsif _pdp_discount_pct > 0
+            assign _pdp_has_sale = true
+            assign _pdp_strike_price = current_variant.price
+            assign _pdp_discount_amt = current_variant.price | times: _pdp_discount_pct | divided_by: 100
+            assign _pdp_display_price = current_variant.price | minus: _pdp_discount_amt
+            assign _pdp_sale_pct = _pdp_discount_pct
+          endif
+        -%}
         <div class="pdp__price-row">
-          <span class="pdp__price {% if current_variant.compare_at_price > current_variant.price %}pdp__price--sale{% endif %}">
-            {{ current_variant.price | money }}
+          <span class="pdp__price {% if _pdp_has_sale %}pdp__price--sale{% endif %}">
+            {{ _pdp_display_price | money }}
           </span>
-          {%- if current_variant.compare_at_price > current_variant.price -%}
-            <s class="pdp__compare-price">{{ current_variant.compare_at_price | money }}</s>
-            {%- assign savings = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price -%}
-            <span class="badge badge--sale">-{{ savings }}%</span>
+          {%- if _pdp_has_sale -%}
+            <s class="pdp__compare-price">{{ _pdp_strike_price | money }}</s>
+            <span class="badge badge--sale">-{{ _pdp_sale_pct }}%</span>
+          {%- else -%}
+            <s class="pdp__compare-price" style="display:none;"></s>
+            <span class="badge badge--sale" style="display:none;"></span>
           {%- endif -%}
         </div>
 
@@ -92,6 +112,20 @@
           <script data-product-variants type="application/json">
             [
               {%- for variant in product.variants -%}
+                {%- liquid
+                  assign _v_display = variant.price
+                  assign _v_strike = 0
+                  assign _v_sale_pct = 0
+                  if variant.compare_at_price > variant.price
+                    assign _v_strike = variant.compare_at_price
+                    assign _v_sale_pct = variant.compare_at_price | minus: variant.price | times: 100 | divided_by: variant.compare_at_price
+                  elsif _pdp_discount_pct > 0
+                    assign _v_strike = variant.price
+                    assign _v_disc_amt = variant.price | times: _pdp_discount_pct | divided_by: 100
+                    assign _v_display = variant.price | minus: _v_disc_amt
+                    assign _v_sale_pct = _pdp_discount_pct
+                  endif
+                -%}
                 {
                   "id": {{ variant.id }},
                   "available": {{ variant.available }},
@@ -99,6 +133,10 @@
                   "compare_at_price": {{ variant.compare_at_price | default: 'null' }},
                   "price_formatted": {{ variant.price | money | json }},
                   "compare_at_price_formatted": {{ variant.compare_at_price | money | json }},
+                  "display_price_formatted": {{ _v_display | money | json }},
+                  "strike_price_formatted": {{ _v_strike | money | json }},
+                  "sale_pct": {{ _v_sale_pct }},
+                  "has_sale": {% if _v_sale_pct > 0 %}true{% else %}false{% endif %},
                   "featured_image": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 | json }}{% else %}null{% endif %},
                   "options": {{ variant.options | json }}
                 }{% unless forloop.last %},{% endunless %}
@@ -154,7 +192,7 @@
           <div class="pdp__ctas">
             {%- if current_variant.available -%}
               <button type="submit" class="btn btn--primary btn--lg btn--full">
-                {{ 'products.add_to_cart' | t }} &mdash; {{ current_variant.price | money }}
+                {{ 'products.add_to_cart' | t }} &mdash; {{ _pdp_display_price | money }}
               </button>
             {%- else -%}
               <button type="button" class="btn btn--primary btn--lg btn--full" disabled>
@@ -244,11 +282,10 @@
 {%- comment -%} Sticky Mobile Bar {%- endcomment -%}
 <div class="pdp-sticky-bar">
   <div class="pdp-sticky-bar__price">
-    <span data-sticky-price>{{ current_variant.price | money }}</span>
-    {%- if current_variant.compare_at_price > current_variant.price -%}
-      <s class="pdp-sticky-bar__compare" data-sticky-compare>{{ current_variant.compare_at_price | money }}</s>
-      {%- assign _sticky_save = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price -%}
-      <span class="badge badge--sale" data-sticky-badge>-{{ _sticky_save }}%</span>
+    <span data-sticky-price>{{ _pdp_display_price | money }}</span>
+    {%- if _pdp_has_sale -%}
+      <s class="pdp-sticky-bar__compare" data-sticky-compare>{{ _pdp_strike_price | money }}</s>
+      <span class="badge badge--sale" data-sticky-badge>-{{ _pdp_sale_pct }}%</span>
     {%- else -%}
       <s class="pdp-sticky-bar__compare" data-sticky-compare style="display:none;"></s>
       <span class="badge badge--sale" data-sticky-badge style="display:none;"></span>
