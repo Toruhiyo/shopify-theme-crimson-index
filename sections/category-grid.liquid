@@ -15,28 +15,6 @@
       {%- if section.settings.use_store_collections -%}
         {%- for col in collections -%}
           {%- if col.handle == 'all' or col.products_count == 0 -%}{%- continue -%}{%- endif -%}
-          {%- liquid
-            assign parts = col.handle | split: '-'
-            assign primary_asset = 'category-' | append: col.handle | append: '.jpg'
-            assign primary_url = primary_asset | asset_url
-            assign fallback_urls = ''
-            if parts.size >= 3
-              assign p1 = parts[1]
-              assign p2 = parts[2]
-              assign last_two = p1 | append: '-' | append: p2
-              assign fallback_asset = 'category-' | append: last_two | append: '.jpg'
-              assign fallback_urls = fallback_asset | asset_url
-            endif
-            if parts.size >= 2
-              assign first_asset = 'category-' | append: parts[0] | append: '.jpg'
-              assign first_url = first_asset | asset_url
-              if fallback_urls != blank
-                assign fallback_urls = fallback_urls | append: ',' | append: first_url
-              else
-                assign fallback_urls = first_url
-              endif
-            endif
-          -%}
           <a href="{{ col.url }}" class="category-tile">
             <div class="category-tile__media">
               {%- if col.image != blank -%}
@@ -48,19 +26,7 @@
                   loading="lazy"
                 >
               {%- else -%}
-                <img
-                  class="category-tile__img"
-                  src="{{ primary_url }}"
-                  alt="{{ col.title | escape }}"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                  {% if fallback_urls != blank %}data-fallbacks="{{ fallback_urls }}"{% endif %}
-                  onerror="var f=this.dataset.fallbacks;if(f){var urls=f.split(',').map(function(s){return s.trim()});var next=urls.shift();if(next){this.src=next;this.dataset.fallbacks=urls.join(',')}else{this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex'}}else{this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex'}"
-                >
-                <div class="category-tile__placeholder category-tile__placeholder--fallback" style="display:none" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20"/><path d="M17 2v20"/><path d="M2 12h20"/><path d="M2 7h5"/><path d="M2 17h5"/><path d="M17 7h5"/><path d="M17 17h5"/></svg>
-                </div>
+                {{ 'collection-' | append: forloop.index | placeholder_svg_tag: 'placeholder' }}
               {%- endif -%}
             </div>
             <div class="category-tile__overlay"></div>
@@ -77,10 +43,6 @@
             assign tile_title = block.settings.title_override | default: tile_collection.title
             assign tile_url = tile_collection.url | default: '#'
             assign tile_count = tile_collection.products_count
-            assign title_handle = tile_title | handleize
-            assign collection_handle = tile_collection.handle | default: title_handle
-            assign primary_asset = 'category-' | append: collection_handle | append: '.jpg'
-            assign primary_url = primary_asset | asset_url
           -%}
           <a href="{{ tile_url }}" class="category-tile" {{ block.shopify_attributes }}>
             <div class="category-tile__media">
@@ -101,18 +63,7 @@
                   loading="lazy"
                 >
               {%- else -%}
-                <img
-                  class="category-tile__img"
-                  src="{{ primary_url }}"
-                  alt="{{ tile_title | escape }}"
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                  onerror="this.style.display='none';var p=this.nextElementSibling;if(p)p.style.display='flex'"
-                >
-                <div class="category-tile__placeholder category-tile__placeholder--fallback" style="display:none" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20"/><path d="M17 2v20"/><path d="M2 12h20"/><path d="M2 7h5"/><path d="M2 17h5"/><path d="M17 7h5"/><path d="M17 17h5"/></svg>
-                </div>
+                {{ 'collection-' | append: forloop.index | placeholder_svg_tag: 'placeholder' }}
               {%- endif -%}
             </div>
             <div class="category-tile__overlay"></div>
