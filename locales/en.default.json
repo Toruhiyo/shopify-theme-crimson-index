@@ -97,7 +97,10 @@
     "decrease": "Decrease quantity",
     "increase": "Increase quantity",
     "shipping_note": "Shipping and taxes calculated at checkout.",
-    "you_save": "You save"
+    "you_save": "You save",
+    "remove": "Remove",
+    "cancel": "Cancel",
+    "confirm_remove": "Remove this item from your cart?"
   },
   "search": {
     "title": "Search",
