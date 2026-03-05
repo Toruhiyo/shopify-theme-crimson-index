@@ -57,14 +57,15 @@
         "columns": "3"
       }
     },
-    "featured-collection": {
+    "new-arrivals": {
       "type": "featured-collection",
       "settings": {
-        "subtitle": "Curated",
-        "title": "Best sellers",
+        "subtitle": "Just landed",
+        "title": "New arrivals",
+        "collection": "new-arrivals",
         "products_count": 8,
         "columns": "4",
-        "layout": "grid",
+        "layout": "carousel",
         "show_vendor": true,
         "show_view_all": true
       }
@@ -79,43 +80,6 @@
         "layout": "carousel",
         "show_vendor": true,
         "show_view_all": true
-      }
-    },
-    "testimonials": {
-      "type": "testimonials",
-      "blocks": {
-        "t1": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "text": "Exceptional build quality. Every detail is thoughtfully designed and the materials feel premium.",
-            "author": "Alex R.",
-            "product_name": ""
-          }
-        },
-        "t2": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "text": "Clean, minimal design that looks even better in person. Exactly what I was looking for.",
-            "author": "Maya T.",
-            "product_name": ""
-          }
-        },
-        "t3": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "text": "Outstanding customer service and fast delivery. The product exceeded my expectations.",
-            "author": "Jordan K.",
-            "product_name": ""
-          }
-        }
-      },
-      "block_order": ["t1", "t2", "t3"],
-      "settings": {
-        "subtitle": "Reviews",
-        "title": "What customers say"
       }
     },
     "accessories": {
@@ -133,8 +97,7 @@
     "feature-strip",
     "featured-collection-2",
     "category-grid",
-    "featured-collection",
-    "testimonials",
+    "new-arrivals",
     "accessories"
   ]
 }
