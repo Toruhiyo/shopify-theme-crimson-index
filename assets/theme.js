@@ -51,17 +51,19 @@
       });
     }
 
+    _itemId(el) {
+      return (el.dataset.itemKey || el.dataset.variantId || '').trim();
+    }
+
     bindCartItems() {
       this.drawer.querySelectorAll('[data-cart-item]').forEach(item => {
-        const key = (item.dataset.itemKey || '').trim();
-        const variantId = (item.dataset.variantId || '').trim();
         const input = item.querySelector('[data-qty-input]');
         const minus = item.querySelector('[data-qty-minus]');
         const plus = item.querySelector('[data-qty-plus]');
         const remove = item.querySelector('[data-remove-item]');
-        const id = key || variantId;
 
         minus?.addEventListener('click', () => {
+          const id = this._itemId(item);
           const val = parseInt(input.value, 10) - 1;
           if (val <= 0) { this.confirmRemove(id); return; }
           input.value = val;
@@ -69,19 +71,21 @@
         });
 
         plus?.addEventListener('click', () => {
+          const id = this._itemId(item);
           const val = Math.min(parseInt(input.value, 10) + 1, 99);
           input.value = val;
           this.scheduleUpdate(id, val);
         });
 
         input?.addEventListener('change', () => {
+          const id = this._itemId(item);
           const val = parseInt(input.value, 10);
           if (isNaN(val) || val <= 0) { this.confirmRemove(id); input.value = 1; return; }
           input.value = Math.min(val, 99);
           this.scheduleUpdate(id, Math.min(val, 99));
         });
 
-        remove?.addEventListener('click', () => this.confirmRemove(id));
+        remove?.addEventListener('click', () => this.confirmRemove(this._itemId(item)));
       });
     }
 
@@ -260,11 +264,12 @@
       this.bindInputs();
     }
 
+    _itemId(el) {
+      return (el.dataset.itemKey || el.dataset.variantId || '').trim();
+    }
+
     bindInputs() {
       this.form.querySelectorAll('[data-cart-page-item]').forEach(row => {
-        const key = (row.dataset.itemKey || '').trim();
-        const variantId = (row.dataset.variantId || '').trim();
-        const id = key || variantId;
         const selector = row.querySelector('.qty-selector');
         const input = selector?.querySelector('[data-qty-input]');
         if (!input) return;
@@ -276,20 +281,20 @@
           e.preventDefault();
           const val = Math.max(parseInt(input.value, 10) - 1, 0);
           input.value = val;
-          this.scheduleUpdate(id, val);
+          this.scheduleUpdate(this._itemId(row), val);
         });
 
         plus?.addEventListener('click', (e) => {
           e.preventDefault();
           const val = Math.min(parseInt(input.value, 10) + 1, 99);
           input.value = val;
-          this.scheduleUpdate(id, val);
+          this.scheduleUpdate(this._itemId(row), val);
         });
 
         input.addEventListener('change', () => {
           const val = Math.max(0, Math.min(parseInt(input.value, 10) || 0, 99));
           input.value = val;
-          this.scheduleUpdate(id, val);
+          this.scheduleUpdate(this._itemId(row), val);
         });
       });
     }
