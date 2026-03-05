@@ -1,5 +1,5 @@
 {%- liquid
-  assign _fallback_handles = 'featured,hot-deal,hottest-deals,deals,highlighted' | split: ','
+  assign _fallback_handles = 'featured,hot-deals,hottest-deals,deals,highlighted' | split: ','
   assign collection = section.settings.collection
   if collection == blank
     for _handle in _fallback_handles
