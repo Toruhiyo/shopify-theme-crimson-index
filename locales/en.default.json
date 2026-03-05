@@ -68,7 +68,8 @@
     "badges": {
       "new": "New",
       "hot": "Hot",
-      "sale": "Sale"
+      "sale": "Sale",
+      "refurbished": "Certified Refurbished"
     }
   },
   "collections": {
