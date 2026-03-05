@@ -1,5 +1,18 @@
 {%- liquid
-  assign collection = section.settings.collection | default: collections['featured'] | default: collections.all
+  assign _fallback_handles = 'featured,hot-deal,hottest-deals,deals,highlighted' | split: ','
+  assign collection = section.settings.collection
+  if collection == blank
+    for _handle in _fallback_handles
+      assign _candidate = collections[_handle]
+      if _candidate != blank and _candidate.products_count > 0
+        assign collection = _candidate
+        break
+      endif
+    endfor
+  endif
+  if collection == blank
+    assign collection = collections.all
+  endif
   assign limit = section.settings.products_count
   assign columns = section.settings.columns | default: 4
   assign show_vendor = section.settings.show_vendor
