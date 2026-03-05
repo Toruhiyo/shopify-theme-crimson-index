@@ -152,6 +152,14 @@
       }
     }
 
+    _findLineItem(cart, el) {
+      const key = el.dataset.itemKey;
+      const vid = el.dataset.variantId;
+      return cart.items.find(i => i.key === key)
+        || cart.items.find(i => String(i.key) === String(key))
+        || cart.items.find(i => String(i.variant_id) === String(vid));
+    }
+
     refreshDrawer(cart) {
       this.updateCartCount(cart.item_count);
 
@@ -161,9 +169,10 @@
       }
 
       this.drawer.querySelectorAll('[data-cart-item]').forEach(el => {
-        const key = el.dataset.itemKey;
-        const lineItem = cart.items.find(i => i.key === key);
+        const lineItem = this._findLineItem(cart, el);
         if (!lineItem) { el.remove(); return; }
+
+        if (lineItem.key) el.dataset.itemKey = lineItem.key;
 
         const input = el.querySelector('[data-qty-input]');
         if (input) input.value = lineItem.quantity;
@@ -215,6 +224,70 @@
     }
 
     toggle() { this.isOpen() ? this.close() : this.open(); }
+  }
+
+  /* --- Cart Page (AJAX qty updates for /cart) --- */
+  class CartPage {
+    constructor() {
+      this.form = document.querySelector('.main-cart-section form[action="/cart"]');
+      if (!this.form) return;
+
+      this.debounceTimers = new Map();
+      this.DEBOUNCE_MS = 500;
+      this.bindInputs();
+    }
+
+    bindInputs() {
+      this.form.querySelectorAll('.qty-selector').forEach(selector => {
+        const input = selector.querySelector('input[name="updates[]"]');
+        if (!input) return;
+        const line = parseInt(input.dataset.line, 10);
+
+        const minus = selector.querySelector('[data-qty-minus]');
+        const plus = selector.querySelector('[data-qty-plus]');
+
+        minus?.addEventListener('click', (e) => {
+          e.preventDefault();
+          const val = Math.max(parseInt(input.value, 10) - 1, 0);
+          input.value = val;
+          this.scheduleUpdate(line, val);
+        });
+
+        plus?.addEventListener('click', (e) => {
+          e.preventDefault();
+          const val = Math.min(parseInt(input.value, 10) + 1, 99);
+          input.value = val;
+          this.scheduleUpdate(line, val);
+        });
+
+        input.addEventListener('change', () => {
+          const val = Math.max(0, Math.min(parseInt(input.value, 10) || 0, 99));
+          input.value = val;
+          this.scheduleUpdate(line, val);
+        });
+      });
+    }
+
+    scheduleUpdate(line, quantity) {
+      clearTimeout(this.debounceTimers.get(line));
+      this.debounceTimers.set(line, setTimeout(() => this.updateLine(line, quantity), this.DEBOUNCE_MS));
+    }
+
+    async updateLine(line, quantity) {
+      await cartLock.acquire();
+      try {
+        await fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ line, quantity })
+        });
+        window.location.reload();
+      } catch {
+        window.location.reload();
+      } finally {
+        cartLock.release();
+      }
+    }
   }
 
   /* --- Desktop Navigation (mega menus driven by menu links) --- */
@@ -1121,6 +1194,7 @@
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
+    new CartPage();
     new CollectionFilters();
     new SearchInfiniteScroll();
     new DesktopNav();
@@ -1133,7 +1207,7 @@
     document.querySelectorAll('[data-tabs]').forEach(el => new Tabs(el));
     document.querySelectorAll('[data-accordion]').forEach(el => new Accordion(el));
     document.querySelectorAll('.pdp__gallery').forEach(el => new ProductGallery(el));
-    document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector)').forEach(el => new QuantitySelector(el));
+    document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
