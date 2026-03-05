@@ -19,6 +19,13 @@
     }
   };
 
+  /* --- Cart Sync Bus (keeps drawer + page in sync) --- */
+  const cartBus = {
+    _listeners: [],
+    on(fn) { this._listeners.push(fn); },
+    emit(cart) { this._listeners.forEach(fn => fn(cart)); }
+  };
+
   /* --- Cart Drawer --- */
   class CartDrawer {
     constructor() {
@@ -35,6 +42,7 @@
       this.bindEvents();
       this.bindCartItems();
       this.bindModal();
+      cartBus.on(cart => this.refreshDrawer(cart));
     }
 
     bindEvents() {
@@ -164,7 +172,7 @@
           );
           if (match) cart = await this._cartChange(match.key, quantity);
         }
-        if (cart) this.refreshDrawer(cart);
+        if (cart) cartBus.emit(cart);
       } catch { /* network failure */ }
       finally { cartLock.release(); }
     }
@@ -178,6 +186,7 @@
     }
 
     refreshDrawer(cart) {
+      if (!this.drawer) return;
       this.updateCartCount(cart.item_count);
 
       if (cart.item_count === 0) {
@@ -262,6 +271,7 @@
       this.debounceTimers = new Map();
       this.DEBOUNCE_MS = 500;
       this.bindInputs();
+      cartBus.on(cart => this.refreshPage(cart));
     }
 
     _itemId(el) {
@@ -326,7 +336,7 @@
           );
           if (match) cart = await this._cartChange(match.key, quantity);
         }
-        if (cart) this.refreshPage(cart);
+        if (cart) cartBus.emit(cart);
       } catch { /* network failure */ }
       finally { cartLock.release(); }
     }
@@ -340,6 +350,7 @@
     }
 
     refreshPage(cart) {
+      if (!this.form) return;
       if (cart.item_count === 0) {
         window.location.reload();
         return;
