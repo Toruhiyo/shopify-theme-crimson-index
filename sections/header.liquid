@@ -124,9 +124,7 @@
           </a>
           <button class="header__icon-btn" data-cart-toggle aria-label="{{ 'header.cart' | t }}">
             {% render 'icon-cart' %}
-            {%- if cart.item_count > 0 -%}
-              <span class="header__cart-count">{{ cart.item_count }}</span>
-            {%- endif -%}
+            <span class="header__cart-count" data-cart-count {% if cart.item_count == 0 %}style="display:none;"{% endif %}>{{ cart.item_count }}</span>
           </button>
           <button class="header__icon-btn header__menu-toggle" data-menu-toggle aria-label="{{ 'header.menu' | t }}">
             {% render 'icon-menu' %}
