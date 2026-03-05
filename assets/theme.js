@@ -145,11 +145,8 @@
         });
         const cart = await res.json();
         this.refreshDrawer(cart);
-      } catch {
-        window.location.reload();
-      } finally {
-        cartLock.release();
-      }
+      } catch { /* silent — optimistic UI already updated */ }
+      finally { cartLock.release(); }
     }
 
     _findLineItem(cart, el) {
@@ -164,7 +161,16 @@
       this.updateCartCount(cart.item_count);
 
       if (cart.item_count === 0) {
-        window.location.reload();
+        const items = this.drawer.querySelector('[data-cart-items]');
+        const footer = this.drawer.querySelector('.cart-drawer__footer');
+        const empty = this.drawer.querySelector('.cart-drawer__empty');
+        if (items) items.remove();
+        if (footer) footer.remove();
+        if (empty) { empty.style.display = ''; }
+        else {
+          this.drawer.insertAdjacentHTML('beforeend',
+            '<div class="cart-drawer__empty"><p>Your cart is empty</p><a href="/" class="btn btn--primary">Continue shopping</a></div>');
+        }
         return;
       }
 
@@ -229,7 +235,8 @@
   /* --- Cart Page (AJAX qty updates for /cart) --- */
   class CartPage {
     constructor() {
-      this.form = document.querySelector('.main-cart-section form[action="/cart"]');
+      this.section = document.querySelector('.main-cart-section');
+      this.form = this.section?.querySelector('[data-cart-form]');
       if (!this.form) return;
 
       this.debounceTimers = new Map();
@@ -238,10 +245,11 @@
     }
 
     bindInputs() {
-      this.form.querySelectorAll('.qty-selector').forEach(selector => {
-        const input = selector.querySelector('input[name="updates[]"]');
+      this.form.querySelectorAll('[data-cart-page-item]').forEach(row => {
+        const key = row.dataset.itemKey;
+        const selector = row.querySelector('.qty-selector');
+        const input = selector?.querySelector('[data-qty-input]');
         if (!input) return;
-        const line = parseInt(input.dataset.line, 10);
 
         const minus = selector.querySelector('[data-qty-minus]');
         const plus = selector.querySelector('[data-qty-plus]');
@@ -250,42 +258,100 @@
           e.preventDefault();
           const val = Math.max(parseInt(input.value, 10) - 1, 0);
           input.value = val;
-          this.scheduleUpdate(line, val);
+          this.scheduleUpdate(key, val);
         });
 
         plus?.addEventListener('click', (e) => {
           e.preventDefault();
           const val = Math.min(parseInt(input.value, 10) + 1, 99);
           input.value = val;
-          this.scheduleUpdate(line, val);
+          this.scheduleUpdate(key, val);
         });
 
         input.addEventListener('change', () => {
           const val = Math.max(0, Math.min(parseInt(input.value, 10) || 0, 99));
           input.value = val;
-          this.scheduleUpdate(line, val);
+          this.scheduleUpdate(key, val);
         });
       });
     }
 
-    scheduleUpdate(line, quantity) {
-      clearTimeout(this.debounceTimers.get(line));
-      this.debounceTimers.set(line, setTimeout(() => this.updateLine(line, quantity), this.DEBOUNCE_MS));
+    scheduleUpdate(key, quantity) {
+      clearTimeout(this.debounceTimers.get(key));
+      this.debounceTimers.set(key, setTimeout(() => this.updateItem(key, quantity), this.DEBOUNCE_MS));
     }
 
-    async updateLine(line, quantity) {
+    async updateItem(key, quantity) {
       await cartLock.acquire();
       try {
-        await fetch('/cart/change.js', {
+        const res = await fetch('/cart/change.js', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ line, quantity })
+          body: JSON.stringify({ id: key, quantity })
         });
+        const cart = await res.json();
+        this.refreshPage(cart);
+      } catch { /* silent — input already shows new value */ }
+      finally { cartLock.release(); }
+    }
+
+    _findItem(cart, el) {
+      const key = el.dataset.itemKey;
+      const vid = el.dataset.variantId;
+      return cart.items.find(i => i.key === key)
+        || cart.items.find(i => String(i.key) === String(key))
+        || cart.items.find(i => String(i.variant_id) === String(vid));
+    }
+
+    refreshPage(cart) {
+      if (cart.item_count === 0) {
         window.location.reload();
-      } catch {
-        window.location.reload();
-      } finally {
-        cartLock.release();
+        return;
+      }
+
+      const badge = document.querySelector('[data-cart-count]');
+      if (badge) {
+        badge.textContent = cart.item_count;
+        badge.style.display = cart.item_count > 0 ? '' : 'none';
+      }
+
+      this.form.querySelectorAll('[data-cart-page-item]').forEach(row => {
+        const lineItem = this._findItem(cart, row);
+        if (!lineItem) { row.remove(); return; }
+
+        if (lineItem.key) row.dataset.itemKey = lineItem.key;
+
+        const input = row.querySelector('[data-qty-input]');
+        if (input) input.value = lineItem.quantity;
+
+        const totalEl = row.querySelector('[data-line-total]');
+        if (totalEl) {
+          let html = `<span style="font-weight: 700;">${formatMoney(lineItem.final_line_price)}</span>`;
+          if (lineItem.original_line_price > lineItem.final_line_price) {
+            html += `<br><s class="text-muted" style="font-size: 0.8125rem;">${formatMoney(lineItem.original_line_price)}</s>`;
+          }
+          totalEl.innerHTML = html;
+        }
+      });
+
+      const subtotalEl = this.form.querySelector('[data-cart-page-subtotal]');
+      if (subtotalEl) subtotalEl.textContent = formatMoney(cart.total_price);
+
+      const savingsRow = this.form.querySelector('[data-cart-page-savings]');
+      let totalSavings = 0;
+      for (const item of cart.items) {
+        if (item.original_line_price > item.final_line_price) {
+          totalSavings += item.original_line_price - item.final_line_price;
+        }
+      }
+      if (savingsRow) {
+        if (totalSavings > 0) {
+          savingsRow.style.display = '';
+          const amt = savingsRow.querySelector('[data-savings-amount]');
+          if (amt) amt.textContent = `-${formatMoney(totalSavings)}`;
+        } else {
+          savingsRow.style.display = 'none';
+        }
       }
     }
   }
