@@ -45,12 +45,7 @@
           }
         }
       },
-      "block_order": [
-        "f1",
-        "f2",
-        "f3",
-        "f4"
-      ],
+      "block_order": ["f1", "f2", "f3", "f4"],
       "settings": {}
     },
     "category-grid": {
@@ -78,7 +73,7 @@
       "type": "featured-collection",
       "settings": {
         "subtitle": "Just in",
-        "title": "Latest arrivals",
+        "title": "Hot deals",
         "products_count": 8,
         "columns": "4",
         "layout": "carousel",
@@ -117,11 +112,7 @@
           }
         }
       },
-      "block_order": [
-        "t1",
-        "t2",
-        "t3"
-      ],
+      "block_order": ["t1", "t2", "t3"],
       "settings": {
         "subtitle": "Reviews",
         "title": "What customers say"
