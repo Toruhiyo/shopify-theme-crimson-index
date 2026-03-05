@@ -966,6 +966,14 @@
 
       if (onSale) {
         salePct = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
+      } else if (window._discountResolver) {
+        const disc = window._discountResolver.cache.get(variant.id);
+        if (disc) {
+          onSale = true;
+          displayPrice = formatMoney(disc.fp);
+          strikePrice = formatMoney(disc.op);
+          salePct = disc.pct;
+        }
       }
 
       if (this.priceEl) {
@@ -1287,6 +1295,124 @@
     resume() { this.paused = false; }
   }
 
+  /* --- Discount Resolver (safe: reads cart for discounts, probes single variant on PDP) --- */
+  class DiscountResolver {
+    static CACHE_KEY = 'crimson_disc_v2';
+    static CACHE_TTL = 5 * 60 * 1000;
+
+    constructor() {
+      this.cache = this._load();
+    }
+
+    _load() {
+      try {
+        const raw = sessionStorage.getItem(DiscountResolver.CACHE_KEY);
+        if (!raw) return new Map();
+        const data = JSON.parse(raw);
+        if (Date.now() - data.ts > DiscountResolver.CACHE_TTL) {
+          sessionStorage.removeItem(DiscountResolver.CACHE_KEY);
+          return new Map();
+        }
+        return new Map(Object.entries(data.d).map(([k, v]) => [Number(k), v]));
+      } catch { return new Map(); }
+    }
+
+    _save() {
+      const obj = {};
+      this.cache.forEach((v, k) => { obj[k] = v; });
+      try {
+        sessionStorage.setItem(DiscountResolver.CACHE_KEY, JSON.stringify({ ts: Date.now(), d: obj }));
+      } catch {}
+    }
+
+    _record(items) {
+      for (const item of items) {
+        if (!item.variant_id) continue;
+        const op = item.original_price;
+        const fp = item.final_price;
+        if (fp < op) {
+          this.cache.set(item.variant_id, { op, fp, pct: Math.round((op - fp) / op * 100) });
+        }
+      }
+    }
+
+    async learnFromCart() {
+      try {
+        const res = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
+        const cart = await res.json();
+        if (cart.items) this._record(cart.items);
+        this._save();
+      } catch {}
+    }
+
+    async probeVariant(variantId) {
+      if (this.cache.has(variantId)) return;
+      await cartLock.acquire();
+      try {
+        const cartRes = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
+        const savedCart = await cartRes.json();
+        const existing = savedCart.items?.find(i => i.variant_id === variantId);
+        const origQty = existing ? existing.quantity : 0;
+
+        const addRes = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
+        });
+        const addData = await addRes.json();
+        const items = addData.items || [addData];
+        this._record(items);
+
+        const restoreId = items[0]?.key || String(variantId);
+        await fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ id: restoreId, quantity: origQty })
+        });
+
+        this._save();
+      } catch {}
+      finally { cartLock.release(); }
+    }
+
+    applyToCards() {
+      document.querySelectorAll('[data-variant-id]').forEach(card => {
+        const id = parseInt(card.dataset.variantId, 10);
+        const disc = this.cache.get(id);
+        if (!disc) return;
+
+        const priceEl = card.querySelector('[data-display-price]');
+        const strikeEl = card.querySelector('[data-strike-price]');
+        const badgeEl = card.querySelector('[data-discount-badge]');
+        const wrapper = card.querySelector('[data-price-wrapper]');
+
+        if (priceEl) priceEl.textContent = formatMoney(disc.fp);
+        if (strikeEl) { strikeEl.textContent = formatMoney(disc.op); strikeEl.style.display = ''; }
+        if (badgeEl) { badgeEl.textContent = `-${disc.pct}%`; badgeEl.style.display = ''; }
+        if (wrapper) wrapper.classList.add('product-card__price--sale');
+      });
+    }
+
+    applyToPdp(vs) {
+      if (!vs) return;
+      const vid = parseInt(vs.idInput?.value, 10);
+      const disc = this.cache.get(vid);
+      if (!disc) return;
+      const variant = vs.variants.find(v => v.id === vid);
+      if (!variant || variant.compare_at_price) return;
+
+      if (vs.priceEl) { vs.priceEl.textContent = formatMoney(disc.fp); vs.priceEl.classList.add('pdp__price--sale'); }
+      if (vs.compareEl) { vs.compareEl.textContent = formatMoney(disc.op); vs.compareEl.style.display = ''; }
+      if (vs.badgeEl) { vs.badgeEl.textContent = `-${disc.pct}%`; vs.badgeEl.style.display = ''; }
+      if (vs.addBtn && variant.available) {
+        vs.addBtn.innerHTML = `${vs.addBtn.textContent.split('\u2014')[0].trim()} \u2014 ${formatMoney(disc.fp)}`;
+      }
+      if (vs.stickyPrice) vs.stickyPrice.textContent = formatMoney(disc.fp);
+      if (vs.stickyCompare) { vs.stickyCompare.textContent = formatMoney(disc.op); vs.stickyCompare.style.display = ''; }
+      if (vs.stickyBadge) { vs.stickyBadge.textContent = `-${disc.pct}%`; vs.stickyBadge.style.display = ''; }
+    }
+  }
+
   /* --- Money Formatter --- */
   function formatMoney(cents) {
     const fmt = window.Shopify?.money_format || '${{amount}}';
@@ -1319,8 +1445,27 @@
     document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
+    const variantSelectors = [];
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
-      new VariantSelector(el);
+      variantSelectors.push(new VariantSelector(el));
+    });
+
+    const resolver = new DiscountResolver();
+    window._discountResolver = resolver;
+
+    resolver.learnFromCart().then(async () => {
+      resolver.applyToCards();
+      variantSelectors.forEach(vs => resolver.applyToPdp(vs));
+
+      if (variantSelectors.length > 0) {
+        const vs = variantSelectors[0];
+        const vid = parseInt(vs.idInput?.value, 10);
+        const variant = vs.variants.find(v => v.id === vid);
+        if (variant && !variant.compare_at_price && !resolver.cache.has(vid)) {
+          await resolver.probeVariant(vid);
+          resolver.applyToPdp(vs);
+        }
+      }
     });
   }
 
