@@ -1,5 +1,5 @@
 {%- liquid
-  assign collection = section.settings.collection | default: collections.all
+  assign collection = section.settings.collection | default: collections['featured'] | default: collections.all
   assign limit = section.settings.products_count
   assign columns = section.settings.columns | default: 4
   assign show_vendor = section.settings.show_vendor
@@ -57,7 +57,7 @@
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Best Sellers"
+      "default": "Hottest deals"
     },
     {
       "type": "collection",
