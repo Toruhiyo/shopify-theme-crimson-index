@@ -69,7 +69,8 @@
       "new": "New",
       "hot": "Hot",
       "sale": "Sale",
-      "refurbished": "Certified Refurbished"
+      "refurbished": "Certified Refurbished",
+      "open_box": "Open Box"
     }
   },
   "collections": {
