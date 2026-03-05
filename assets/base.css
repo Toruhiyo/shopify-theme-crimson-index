@@ -1997,12 +1997,6 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.5rem;
 }
 
-.cart-drawer.is-loading .cart-drawer__items {
-  opacity: 0.5;
-  pointer-events: none;
-  transition: opacity 200ms ease;
-}
-
 .cart-drawer__modal-backdrop {
   position: absolute;
   inset: 0;
