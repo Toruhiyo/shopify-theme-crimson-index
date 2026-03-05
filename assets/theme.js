@@ -1295,16 +1295,23 @@
     resume() { this.paused = false; }
   }
 
-  /* --- Discount Resolver (safe: reads cart for discounts, probes single variant on PDP) --- */
+  /* --- Discount Resolver ---
+     Detects Shopify automatic discounts by temporarily probing the cart.
+     For each probe: saves cart -> clears it -> adds target variants ->
+     reads /cart.js (which includes automatic discounts) -> restores cart.
+     Results are cached in sessionStorage to avoid repeated probes. */
   class DiscountResolver {
-    static CACHE_KEY = 'crimson_disc_v2';
-    static CACHE_TTL = 5 * 60 * 1000;
+    static CACHE_KEY = 'crimson_disc_v3';
+    static CACHE_TTL = 10 * 60 * 1000;
+    static BATCH_SIZE = 50;
 
     constructor() {
-      this.cache = this._load();
+      this.cache = this._loadCache();
     }
 
-    _load() {
+    // Private:
+
+    _loadCache() {
       try {
         const raw = sessionStorage.getItem(DiscountResolver.CACHE_KEY);
         if (!raw) return new Map();
@@ -1317,7 +1324,7 @@
       } catch { return new Map(); }
     }
 
-    _save() {
+    _persistCache() {
       const obj = {};
       this.cache.forEach((v, k) => { obj[k] = v; });
       try {
@@ -1325,53 +1332,106 @@
       } catch {}
     }
 
-    _record(items) {
+    _recordItems(items) {
       for (const item of items) {
         if (!item.variant_id) continue;
-        const op = item.original_price;
-        const fp = item.final_price;
-        if (fp < op) {
-          this.cache.set(item.variant_id, { op, fp, pct: Math.round((op - fp) / op * 100) });
+        if (item.final_price < item.original_price) {
+          this.cache.set(item.variant_id, {
+            op: item.original_price,
+            fp: item.final_price,
+            pct: Math.round((item.original_price - item.final_price) / item.original_price * 100)
+          });
         }
       }
     }
 
+    async _fetchCart() {
+      return (await fetch('/cart.js', { headers: { Accept: 'application/json' } })).json();
+    }
+
+    async _clearCart() {
+      await fetch('/cart/clear.js', { method: 'POST', headers: { Accept: 'application/json' } });
+    }
+
+    async _addItems(ids) {
+      for (let i = 0; i < ids.length; i += DiscountResolver.BATCH_SIZE) {
+        const batch = ids.slice(i, i + DiscountResolver.BATCH_SIZE).map(id => ({ id, quantity: 1 }));
+        try {
+          await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ items: batch })
+          });
+        } catch {}
+      }
+    }
+
+    async _restoreCart(savedItems, retries = 3) {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          await this._clearCart();
+          if (savedItems.length > 0) await this._addItems(savedItems.map(i => i.id));
+          const restored = await this._fetchCart();
+          const mismatch = savedItems.some(saved => {
+            const found = restored.items?.find(ri => ri.variant_id === saved.id);
+            return !found || found.quantity !== saved.qty;
+          });
+          if (!mismatch) return;
+          for (const saved of savedItems) {
+            const found = restored.items?.find(ri => ri.variant_id === saved.id);
+            if (found && found.quantity !== saved.qty) {
+              await fetch('/cart/change.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ id: found.key, quantity: saved.qty })
+              });
+            }
+          }
+          return;
+        } catch {
+          if (attempt < retries) await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+        }
+      }
+    }
+
+    async _isolatedProbe(variantIds) {
+      const saved = await this._fetchCart();
+      const savedItems = (saved.items || []).map(i => ({ id: i.variant_id, qty: i.quantity }));
+
+      await this._clearCart();
+      await this._addItems(variantIds);
+
+      const probed = await this._fetchCart();
+      if (probed.items) this._recordItems(probed.items);
+
+      await this._restoreCart(savedItems);
+      this._persistCache();
+    }
+
+    // Public:
+
     async learnFromCart() {
       try {
-        const res = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
-        const cart = await res.json();
-        if (cart.items) this._record(cart.items);
-        this._save();
+        const cart = await this._fetchCart();
+        if (cart.items) this._recordItems(cart.items);
+        this._persistCache();
       } catch {}
     }
 
     async probeVariant(variantId) {
       if (this.cache.has(variantId)) return;
       await cartLock.acquire();
-      try {
-        const cartRes = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
-        const savedCart = await cartRes.json();
-        const existing = savedCart.items?.find(i => i.variant_id === variantId);
-        const origQty = existing ? existing.quantity : 0;
+      try { await this._isolatedProbe([variantId]); }
+      catch {}
+      finally { cartLock.release(); }
+    }
 
-        const addRes = await fetch('/cart/add.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
-        });
-        const addData = await addRes.json();
-        const items = addData.items || [addData];
-        this._record(items);
-
-        const restoreId = items[0]?.key || String(variantId);
-        await fetch('/cart/change.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ id: restoreId, quantity: origQty })
-        });
-
-        this._save();
-      } catch {}
+    async probeVariants(variantIds) {
+      const uncached = variantIds.filter(id => !this.cache.has(id));
+      if (uncached.length === 0) return;
+      await cartLock.acquire();
+      try { await this._isolatedProbe(uncached); }
+      catch {}
       finally { cartLock.release(); }
     }
 
@@ -1379,7 +1439,7 @@
       document.querySelectorAll('[data-variant-id]').forEach(card => {
         const id = parseInt(card.dataset.variantId, 10);
         const disc = this.cache.get(id);
-        if (!disc) return;
+        if (!disc || !disc.pct) return;
 
         const priceEl = card.querySelector('[data-display-price]');
         const strikeEl = card.querySelector('[data-strike-price]');
@@ -1397,7 +1457,7 @@
       if (!vs) return;
       const vid = parseInt(vs.idInput?.value, 10);
       const disc = this.cache.get(vid);
-      if (!disc) return;
+      if (!disc || !disc.pct) return;
       const variant = vs.variants.find(v => v.id === vid);
       if (!variant || variant.compare_at_price) return;
 
@@ -1457,7 +1517,9 @@
       resolver.applyToCards();
       variantSelectors.forEach(vs => resolver.applyToPdp(vs));
 
-      if (variantSelectors.length > 0) {
+      const isPdp = variantSelectors.length > 0;
+
+      if (isPdp) {
         const vs = variantSelectors[0];
         const vid = parseInt(vs.idInput?.value, 10);
         const variant = vs.variants.find(v => v.id === vid);
@@ -1465,6 +1527,16 @@
           await resolver.probeVariant(vid);
           resolver.applyToPdp(vs);
         }
+      }
+
+      const cardIds = [...document.querySelectorAll('[data-variant-id]')]
+        .map(el => parseInt(el.dataset.variantId, 10))
+        .filter(id => id && !isNaN(id));
+      const uncachedCards = cardIds.filter(id => !resolver.cache.has(id));
+
+      if (uncachedCards.length > 0) {
+        await resolver.probeVariants(uncachedCards);
+        resolver.applyToCards();
       }
     });
   }
