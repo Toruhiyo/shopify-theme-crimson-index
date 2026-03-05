@@ -565,19 +565,77 @@
   class Carousel {
     constructor(container) {
       this.track = container.querySelector('.carousel__track');
-      const prevBtn = container.querySelector('[data-carousel-prev]');
-      const nextBtn = container.querySelector('[data-carousel-next]');
+      if (!this.track) return;
 
-      prevBtn?.addEventListener('click', () => this.scroll(-1));
-      nextBtn?.addEventListener('click', () => this.scroll(1));
+      this.prevBtn = container.querySelector('[data-carousel-prev]');
+      this.nextBtn = container.querySelector('[data-carousel-next]');
+
+      this.prevBtn?.addEventListener('click', () => this.scroll(-1));
+      this.nextBtn?.addEventListener('click', () => this.scroll(1));
+
+      this.track.addEventListener('scroll', () => this.updateArrows(), { passive: true });
+      this.updateArrows();
+
+      this.initDrag();
     }
 
     scroll(direction) {
-      if (!this.track) return;
       const slide = this.track.querySelector('.carousel__slide');
       if (!slide) return;
-      const scrollAmount = slide.offsetWidth + 16;
-      this.track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+      const gap = parseFloat(getComputedStyle(this.track).gap) || 16;
+      this.track.scrollBy({ left: direction * (slide.offsetWidth + gap), behavior: 'smooth' });
+    }
+
+    updateArrows() {
+      const { scrollLeft, scrollWidth, clientWidth } = this.track;
+      const atStart = scrollLeft <= 2;
+      const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
+      if (this.prevBtn) this.prevBtn.classList.toggle('is-hidden', atStart);
+      if (this.nextBtn) this.nextBtn.classList.toggle('is-hidden', atEnd);
+    }
+
+    initDrag() {
+      let isDragging = false;
+      let startX = 0;
+      let scrollStart = 0;
+
+      const onPointerDown = (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        startX = e.clientX;
+        scrollStart = this.track.scrollLeft;
+        this.track.style.scrollSnapType = 'none';
+        this.track.style.cursor = 'grabbing';
+        this.track.setPointerCapture(e.pointerId);
+      };
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        this.track.scrollLeft = scrollStart - dx;
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        this.track.style.scrollSnapType = '';
+        this.track.style.cursor = '';
+        this.track.releasePointerCapture(e.pointerId);
+
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 30) {
+          this.scroll(dx < 0 ? 1 : -1);
+        }
+      };
+
+      this.track.addEventListener('pointerdown', onPointerDown);
+      this.track.addEventListener('pointermove', onPointerMove);
+      this.track.addEventListener('pointerup', onPointerUp);
+      this.track.addEventListener('pointercancel', onPointerUp);
+
+      this.track.addEventListener('click', (e) => {
+        if (Math.abs(e.clientX - startX) > 5) e.preventDefault();
+      }, true);
     }
   }
 
