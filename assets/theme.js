@@ -12,31 +12,160 @@
       this.backdrop = document.querySelector('.cart-drawer__backdrop');
       if (!this.drawer) return;
 
+      this.modal = this.drawer.querySelector('[data-remove-modal]');
+      this.modalBackdrop = this.drawer.querySelector('[data-modal-backdrop]');
+      this.pendingRemoveKey = null;
+      this.debounceTimers = new Map();
+      this.DEBOUNCE_MS = 600;
+
       this.bindEvents();
+      this.bindCartItems();
+      this.bindModal();
     }
 
     bindEvents() {
       document.querySelectorAll('[data-cart-toggle]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.toggle();
-        });
+        btn.addEventListener('click', (e) => { e.preventDefault(); this.toggle(); });
       });
+      if (this.backdrop) this.backdrop.addEventListener('click', () => this.close());
+      this.drawer.querySelector('[data-cart-close]')?.addEventListener('click', () => this.close());
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (this.modal?.style.display !== 'none') { this.hideModal(); return; }
+          if (this.isOpen()) this.close();
+        }
+      });
+    }
 
-      if (this.backdrop) {
-        this.backdrop.addEventListener('click', () => this.close());
+    bindCartItems() {
+      this.drawer.querySelectorAll('[data-cart-item]').forEach(item => {
+        const key = item.dataset.itemKey;
+        const input = item.querySelector('[data-qty-input]');
+        const minus = item.querySelector('[data-qty-minus]');
+        const plus = item.querySelector('[data-qty-plus]');
+        const remove = item.querySelector('[data-remove-item]');
+
+        minus?.addEventListener('click', () => {
+          const val = parseInt(input.value, 10) - 1;
+          if (val <= 0) { this.confirmRemove(key); return; }
+          input.value = val;
+          this.scheduleUpdate(key, val);
+        });
+
+        plus?.addEventListener('click', () => {
+          const val = Math.min(parseInt(input.value, 10) + 1, 99);
+          input.value = val;
+          this.scheduleUpdate(key, val);
+        });
+
+        input?.addEventListener('change', () => {
+          const val = parseInt(input.value, 10);
+          if (isNaN(val) || val <= 0) { this.confirmRemove(key); input.value = 1; return; }
+          input.value = Math.min(val, 99);
+          this.scheduleUpdate(key, Math.min(val, 99));
+        });
+
+        remove?.addEventListener('click', () => this.confirmRemove(key));
+      });
+    }
+
+    bindModal() {
+      this.drawer.querySelector('[data-modal-cancel]')?.addEventListener('click', () => this.hideModal());
+      this.drawer.querySelector('[data-modal-confirm]')?.addEventListener('click', () => {
+        if (this.pendingRemoveKey) this.updateCart(this.pendingRemoveKey, 0);
+        this.hideModal();
+      });
+      this.modalBackdrop?.addEventListener('click', () => this.hideModal());
+    }
+
+    confirmRemove(key) {
+      this.pendingRemoveKey = key;
+      if (this.modal) this.modal.style.display = '';
+      if (this.modalBackdrop) this.modalBackdrop.style.display = '';
+    }
+
+    hideModal() {
+      this.pendingRemoveKey = null;
+      if (this.modal) this.modal.style.display = 'none';
+      if (this.modalBackdrop) this.modalBackdrop.style.display = 'none';
+    }
+
+    scheduleUpdate(key, quantity) {
+      clearTimeout(this.debounceTimers.get(key));
+      this.debounceTimers.set(key, setTimeout(() => this.updateCart(key, quantity), this.DEBOUNCE_MS));
+    }
+
+    async updateCart(key, quantity) {
+      this.drawer.classList.add('is-loading');
+      try {
+        const res = await fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ id: key, quantity })
+        });
+        const cart = await res.json();
+        this.refreshDrawer(cart);
+      } catch {
+        window.location.reload();
+      }
+    }
+
+    refreshDrawer(cart) {
+      this.drawer.classList.remove('is-loading');
+      const title = this.drawer.querySelector('.cart-drawer__title');
+      if (title) title.textContent = `${title.textContent.split('(')[0].trim()} (${cart.item_count})`;
+
+      const badge = document.querySelector('[data-cart-count]');
+      if (badge) {
+        badge.textContent = cart.item_count;
+        badge.style.display = cart.item_count > 0 ? '' : 'none';
       }
 
-      this.drawer.querySelector('[data-cart-close]')?.addEventListener('click', () => this.close());
+      if (cart.item_count === 0) {
+        window.location.reload();
+        return;
+      }
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isOpen()) this.close();
+      this.drawer.querySelectorAll('[data-cart-item]').forEach(el => {
+        const key = el.dataset.itemKey;
+        const lineItem = cart.items.find(i => i.key === key);
+        if (!lineItem) { el.remove(); return; }
+
+        const input = el.querySelector('[data-qty-input]');
+        if (input) input.value = lineItem.quantity;
+
+        const priceEl = el.querySelector('[data-line-price]');
+        if (priceEl) {
+          let html = formatMoney(lineItem.final_line_price);
+          if (lineItem.original_line_price > lineItem.final_line_price) {
+            html += ` <s class="cart-drawer__item-compare">${formatMoney(lineItem.original_line_price)}</s>`;
+          }
+          priceEl.innerHTML = html;
+        }
       });
+
+      const subtotalEl = this.drawer.querySelector('.cart-drawer__subtotal span:last-child');
+      if (subtotalEl) subtotalEl.textContent = formatMoney(cart.total_price);
+
+      const savingsEl = this.drawer.querySelector('.cart-drawer__savings');
+      let totalSavings = 0;
+      for (const item of cart.items) {
+        if (item.original_line_price > item.final_line_price) {
+          totalSavings += item.original_line_price - item.final_line_price;
+        }
+      }
+      if (savingsEl) {
+        if (totalSavings > 0) {
+          savingsEl.style.display = '';
+          const savingsAmt = savingsEl.querySelector('span:last-child');
+          if (savingsAmt) savingsAmt.textContent = `-${formatMoney(totalSavings)}`;
+        } else {
+          savingsEl.style.display = 'none';
+        }
+      }
     }
 
-    isOpen() {
-      return this.drawer.classList.contains('is-open');
-    }
+    isOpen() { return this.drawer.classList.contains('is-open'); }
 
     open() {
       this.drawer.classList.add('is-open');
@@ -51,9 +180,7 @@
       document.body.style.overflow = '';
     }
 
-    toggle() {
-      this.isOpen() ? this.close() : this.open();
-    }
+    toggle() { this.isOpen() ? this.close() : this.open(); }
   }
 
   /* --- Desktop Navigation (mega menus driven by menu links) --- */
