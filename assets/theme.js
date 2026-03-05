@@ -19,11 +19,18 @@
     }
   };
 
-  /* --- Cart Sync Bus (keeps drawer + page in sync) --- */
+  /* --- Cart Sync Bus (keeps drawer + page + header badge in sync) --- */
   const cartBus = {
     _listeners: [],
     on(fn) { this._listeners.push(fn); },
-    emit(cart) { this._listeners.forEach(fn => fn(cart)); }
+    emit(cart) {
+      const badge = document.querySelector('[data-cart-count]');
+      if (badge) {
+        badge.textContent = cart.item_count;
+        badge.style.display = cart.item_count > 0 ? '' : 'none';
+      }
+      this._listeners.forEach(fn => fn(cart));
+    }
   };
 
   /* --- Cart Drawer --- */
@@ -138,11 +145,6 @@
     updateCartCount(count) {
       const title = this.drawer.querySelector('.cart-drawer__title');
       if (title) title.textContent = `${title.textContent.split('(')[0].trim()} (${count})`;
-      const badge = document.querySelector('[data-cart-count]');
-      if (badge) {
-        badge.textContent = count;
-        badge.style.display = count > 0 ? '' : 'none';
-      }
     }
 
     scheduleUpdate(key, quantity) {
@@ -354,12 +356,6 @@
       if (cart.item_count === 0) {
         window.location.reload();
         return;
-      }
-
-      const badge = document.querySelector('[data-cart-count]');
-      if (badge) {
-        badge.textContent = cart.item_count;
-        badge.style.display = cart.item_count > 0 ? '' : 'none';
       }
 
       this.form.querySelectorAll('[data-cart-page-item]').forEach(row => {
