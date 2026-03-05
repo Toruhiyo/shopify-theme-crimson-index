@@ -1,5 +1,18 @@
 {%- liquid
-  assign collection = section.settings.collection | default: collections.all
+  assign _upsell_fallbacks = 'addons,add-ons,upsell,complete-order,before-you-go,all' | split: ','
+  assign collection = section.settings.collection
+  if collection == blank
+    for _handle in _upsell_fallbacks
+      assign _candidate = collections[_handle]
+      if _candidate != blank and _candidate.products_count > 0
+        assign collection = _candidate
+        break
+      endif
+    endfor
+  endif
+  if collection == blank
+    assign collection = collections.all
+  endif
   assign limit = section.settings.products_count
   assign show_vendor = section.settings.show_vendor
 -%}
@@ -44,7 +57,7 @@
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Accessories"
+      "default": "Complete your order"
     },
     {
       "type": "collection",

@@ -85,8 +85,8 @@
     "accessories": {
       "type": "accessories-upsell",
       "settings": {
-        "subtitle": "Complete your order",
-        "title": "Accessories",
+        "subtitle": "You may also need",
+        "title": "Complete your order",
         "products_count": 8,
         "show_vendor": false
       }
