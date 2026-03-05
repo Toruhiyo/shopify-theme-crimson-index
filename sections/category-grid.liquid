@@ -1,3 +1,15 @@
+{%- liquid
+  assign _cat_menu_handles = 'catalog,main-menu' | split: ','
+  assign _cat_menu = nil
+  for _handle in _cat_menu_handles
+    assign _candidate = linklists[_handle]
+    if _candidate.links.size > 0
+      assign _cat_menu = _candidate
+      break
+    endif
+  endfor
+-%}
+
 <section class="section-spacing">
   <div class="page-width">
     {%- if section.settings.title != blank -%}
@@ -12,15 +24,21 @@
     {%- endif -%}
 
     <div class="grid grid--{{ section.settings.columns }}">
-      {%- if section.settings.use_store_collections -%}
-        {%- for col in collections -%}
-          {%- if col.handle == 'all' or col.products_count == 0 -%}{%- continue -%}{%- endif -%}
-          <a href="{{ col.url }}" class="category-tile">
+      {%- if section.settings.use_store_collections and _cat_menu -%}
+        {%- for link in _cat_menu.links -%}
+          {%- liquid
+            assign _col = link.object
+            assign _has_image = false
+            if link.type == 'collection_link' and _col.image != blank
+              assign _has_image = true
+            endif
+          -%}
+          <a href="{{ link.url }}" class="category-tile">
             <div class="category-tile__media">
-              {%- if col.image != blank -%}
+              {%- if _has_image -%}
                 <img
-                  src="{{ col.image | image_url: width: 800 }}"
-                  alt="{{ col.title | escape }}"
+                  src="{{ _col.image | image_url: width: 800 }}"
+                  alt="{{ link.title | escape }}"
                   width="800"
                   height="600"
                   loading="lazy"
@@ -31,8 +49,10 @@
             </div>
             <div class="category-tile__overlay"></div>
             <div class="category-tile__content">
-              <h3 class="category-tile__title">{{ col.title }}</h3>
-              <span class="category-tile__count">{{ col.products_count }} {{ 'collections.products' | t }}</span>
+              <h3 class="category-tile__title">{{ link.title }}</h3>
+              {%- if link.type == 'collection_link' and _col.products_count -%}
+                <span class="category-tile__count">{{ _col.products_count }} {{ 'collections.products' | t }}</span>
+              {%- endif -%}
             </div>
           </a>
         {%- endfor -%}
@@ -89,9 +109,9 @@
     {
       "type": "checkbox",
       "id": "use_store_collections",
-      "label": "Use store categories (same as navbar)",
+      "label": "Use Catalog menu categories",
       "default": true,
-      "info": "When on, cards match the main navigation and link to each collection. When off, use the tiles below."
+      "info": "When on, shows first-level items from the Catalog menu (same as navbar). When off, use the manual tiles below."
     },
     {
       "type": "text",
