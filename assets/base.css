@@ -439,8 +439,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge--refurbished {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-bg, #fff);
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -481,7 +482,9 @@ h1, h2, h3, h4, h5, h6 {
   flex-shrink: 0;
 }
 .pdp__condition-badge--refurbished {
-  background: var(--color-primary);
+  background: var(--color-bg, #fff);
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
 }
 .pdp__condition-badge--open-box {
   background: var(--color-fg, #111);
