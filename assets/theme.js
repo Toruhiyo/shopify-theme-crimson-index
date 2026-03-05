@@ -5,6 +5,20 @@
 (function () {
   'use strict';
 
+  /* --- Cart Lock (prevents concurrent cart API mutations) --- */
+  const cartLock = {
+    _locked: false,
+    _queue: [],
+    async acquire() {
+      if (!this._locked) { this._locked = true; return; }
+      return new Promise(r => this._queue.push(r));
+    },
+    release() {
+      if (this._queue.length > 0) this._queue.shift()();
+      else this._locked = false;
+    }
+  };
+
   /* --- Cart Drawer --- */
   class CartDrawer {
     constructor() {
@@ -16,7 +30,7 @@
       this.modalBackdrop = this.drawer.querySelector('[data-modal-backdrop]');
       this.pendingRemoveKey = null;
       this.debounceTimers = new Map();
-      this.DEBOUNCE_MS = 600;
+      this.DEBOUNCE_MS = 400;
 
       this.bindEvents();
       this.bindCartItems();
@@ -72,7 +86,7 @@
     bindModal() {
       this.drawer.querySelector('[data-modal-cancel]')?.addEventListener('click', () => this.hideModal());
       this.drawer.querySelector('[data-modal-confirm]')?.addEventListener('click', () => {
-        if (this.pendingRemoveKey) this.updateCart(this.pendingRemoveKey, 0);
+        if (this.pendingRemoveKey) this.removeItem(this.pendingRemoveKey);
         this.hideModal();
       });
       this.modalBackdrop?.addEventListener('click', () => this.hideModal());
@@ -90,13 +104,39 @@
       if (this.modalBackdrop) this.modalBackdrop.style.display = 'none';
     }
 
+    removeItem(key) {
+      const el = this.drawer.querySelector(`[data-item-key="${key}"]`);
+      if (el) {
+        el.style.transition = 'opacity 200ms ease, max-height 300ms ease';
+        el.style.opacity = '0';
+        el.style.maxHeight = el.offsetHeight + 'px';
+        requestAnimationFrame(() => { el.style.maxHeight = '0'; el.style.overflow = 'hidden'; });
+        setTimeout(() => el.remove(), 300);
+      }
+
+      const remaining = this.drawer.querySelectorAll('[data-cart-item]').length - 1;
+      this.updateCartCount(remaining);
+
+      this.updateCart(key, 0);
+    }
+
+    updateCartCount(count) {
+      const title = this.drawer.querySelector('.cart-drawer__title');
+      if (title) title.textContent = `${title.textContent.split('(')[0].trim()} (${count})`;
+      const badge = document.querySelector('[data-cart-count]');
+      if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? '' : 'none';
+      }
+    }
+
     scheduleUpdate(key, quantity) {
       clearTimeout(this.debounceTimers.get(key));
       this.debounceTimers.set(key, setTimeout(() => this.updateCart(key, quantity), this.DEBOUNCE_MS));
     }
 
     async updateCart(key, quantity) {
-      this.drawer.classList.add('is-loading');
+      await cartLock.acquire();
       try {
         const res = await fetch('/cart/change.js', {
           method: 'POST',
@@ -107,19 +147,13 @@
         this.refreshDrawer(cart);
       } catch {
         window.location.reload();
+      } finally {
+        cartLock.release();
       }
     }
 
     refreshDrawer(cart) {
-      this.drawer.classList.remove('is-loading');
-      const title = this.drawer.querySelector('.cart-drawer__title');
-      if (title) title.textContent = `${title.textContent.split('(')[0].trim()} (${cart.item_count})`;
-
-      const badge = document.querySelector('[data-cart-count]');
-      if (badge) {
-        badge.textContent = cart.item_count;
-        badge.style.display = cart.item_count > 0 ? '' : 'none';
-      }
+      this.updateCartCount(cart.item_count);
 
       if (cart.item_count === 0) {
         window.location.reload();
@@ -1074,6 +1108,7 @@
       const uncached = variantIds.filter(id => !this.cache.has(id));
       if (uncached.length === 0) return;
 
+      await cartLock.acquire();
       try {
         const cartRes = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
         const savedCart = await cartRes.json();
@@ -1112,6 +1147,7 @@
 
         this._saveCache();
       } catch { /* network error — base prices remain */ }
+      finally { cartLock.release(); }
     }
 
     applyToCards() {
