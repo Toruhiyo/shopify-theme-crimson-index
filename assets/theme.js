@@ -53,33 +53,35 @@
 
     bindCartItems() {
       this.drawer.querySelectorAll('[data-cart-item]').forEach(item => {
-        const key = item.dataset.itemKey;
+        const key = (item.dataset.itemKey || '').trim();
+        const variantId = (item.dataset.variantId || '').trim();
         const input = item.querySelector('[data-qty-input]');
         const minus = item.querySelector('[data-qty-minus]');
         const plus = item.querySelector('[data-qty-plus]');
         const remove = item.querySelector('[data-remove-item]');
+        const id = key || variantId;
 
         minus?.addEventListener('click', () => {
           const val = parseInt(input.value, 10) - 1;
-          if (val <= 0) { this.confirmRemove(key); return; }
+          if (val <= 0) { this.confirmRemove(id); return; }
           input.value = val;
-          this.scheduleUpdate(key, val);
+          this.scheduleUpdate(id, val);
         });
 
         plus?.addEventListener('click', () => {
           const val = Math.min(parseInt(input.value, 10) + 1, 99);
           input.value = val;
-          this.scheduleUpdate(key, val);
+          this.scheduleUpdate(id, val);
         });
 
         input?.addEventListener('change', () => {
           const val = parseInt(input.value, 10);
-          if (isNaN(val) || val <= 0) { this.confirmRemove(key); input.value = 1; return; }
+          if (isNaN(val) || val <= 0) { this.confirmRemove(id); input.value = 1; return; }
           input.value = Math.min(val, 99);
-          this.scheduleUpdate(key, Math.min(val, 99));
+          this.scheduleUpdate(id, Math.min(val, 99));
         });
 
-        remove?.addEventListener('click', () => this.confirmRemove(key));
+        remove?.addEventListener('click', () => this.confirmRemove(id));
       });
     }
 
@@ -104,8 +106,9 @@
       if (this.modalBackdrop) this.modalBackdrop.style.display = 'none';
     }
 
-    removeItem(key) {
-      const el = this.drawer.querySelector(`[data-item-key="${key}"]`);
+    removeItem(id) {
+      const el = this.drawer.querySelector(`[data-item-key="${id}"]`)
+        || this.drawer.querySelector(`[data-variant-id="${id}"]`);
       if (el) {
         el.style.transition = 'opacity 200ms ease, max-height 300ms ease';
         el.style.opacity = '0';
@@ -117,7 +120,7 @@
       const remaining = this.drawer.querySelectorAll('[data-cart-item]').length - 1;
       this.updateCartCount(remaining);
 
-      this.updateCart(key, 0);
+      this.updateCart(id, 0);
     }
 
     updateCartCount(count) {
@@ -135,17 +138,30 @@
       this.debounceTimers.set(key, setTimeout(() => this.updateCart(key, quantity), this.DEBOUNCE_MS));
     }
 
-    async updateCart(key, quantity) {
+    async _cartChange(id, quantity) {
+      const res = await fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ id, quantity })
+      });
+      const data = await res.json();
+      if (data.items) return data;
+      return null;
+    }
+
+    async updateCart(id, quantity) {
       await cartLock.acquire();
       try {
-        const res = await fetch('/cart/change.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ id: key, quantity })
-        });
-        const cart = await res.json();
-        this.refreshDrawer(cart);
-      } catch { /* silent — optimistic UI already updated */ }
+        let cart = await this._cartChange(id, quantity);
+        if (!cart) {
+          const freshCart = await (await fetch('/cart.js')).json();
+          const match = freshCart.items?.find(i =>
+            i.key === id || String(i.variant_id) === String(id)
+          );
+          if (match) cart = await this._cartChange(match.key, quantity);
+        }
+        if (cart) this.refreshDrawer(cart);
+      } catch { /* network failure */ }
       finally { cartLock.release(); }
     }
 
@@ -246,7 +262,9 @@
 
     bindInputs() {
       this.form.querySelectorAll('[data-cart-page-item]').forEach(row => {
-        const key = row.dataset.itemKey;
+        const key = (row.dataset.itemKey || '').trim();
+        const variantId = (row.dataset.variantId || '').trim();
+        const id = key || variantId;
         const selector = row.querySelector('.qty-selector');
         const input = selector?.querySelector('[data-qty-input]');
         if (!input) return;
@@ -258,46 +276,59 @@
           e.preventDefault();
           const val = Math.max(parseInt(input.value, 10) - 1, 0);
           input.value = val;
-          this.scheduleUpdate(key, val);
+          this.scheduleUpdate(id, val);
         });
 
         plus?.addEventListener('click', (e) => {
           e.preventDefault();
           const val = Math.min(parseInt(input.value, 10) + 1, 99);
           input.value = val;
-          this.scheduleUpdate(key, val);
+          this.scheduleUpdate(id, val);
         });
 
         input.addEventListener('change', () => {
           const val = Math.max(0, Math.min(parseInt(input.value, 10) || 0, 99));
           input.value = val;
-          this.scheduleUpdate(key, val);
+          this.scheduleUpdate(id, val);
         });
       });
     }
 
-    scheduleUpdate(key, quantity) {
-      clearTimeout(this.debounceTimers.get(key));
-      this.debounceTimers.set(key, setTimeout(() => this.updateItem(key, quantity), this.DEBOUNCE_MS));
+    scheduleUpdate(id, quantity) {
+      clearTimeout(this.debounceTimers.get(id));
+      this.debounceTimers.set(id, setTimeout(() => this.updateItem(id, quantity), this.DEBOUNCE_MS));
     }
 
-    async updateItem(key, quantity) {
+    async _cartChange(id, quantity) {
+      const res = await fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ id, quantity })
+      });
+      const data = await res.json();
+      if (data.items) return data;
+      return null;
+    }
+
+    async updateItem(id, quantity) {
       await cartLock.acquire();
       try {
-        const res = await fetch('/cart/change.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ id: key, quantity })
-        });
-        const cart = await res.json();
-        this.refreshPage(cart);
-      } catch { /* silent — input already shows new value */ }
+        let cart = await this._cartChange(id, quantity);
+        if (!cart) {
+          const freshCart = await (await fetch('/cart.js')).json();
+          const match = freshCart.items?.find(i =>
+            i.key === id || String(i.variant_id) === String(id)
+          );
+          if (match) cart = await this._cartChange(match.key, quantity);
+        }
+        if (cart) this.refreshPage(cart);
+      } catch { /* network failure */ }
       finally { cartLock.release(); }
     }
 
     _findItem(cart, el) {
-      const key = el.dataset.itemKey;
-      const vid = el.dataset.variantId;
+      const key = (el.dataset.itemKey || '').trim();
+      const vid = (el.dataset.variantId || '').trim();
       return cart.items.find(i => i.key === key)
         || cart.items.find(i => String(i.key) === String(key))
         || cart.items.find(i => String(i.variant_id) === String(vid));
