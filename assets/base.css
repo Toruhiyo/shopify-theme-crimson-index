@@ -451,7 +451,20 @@ h1, h2, h3, h4, h5, h6 {
   flex-shrink: 0;
 }
 
-.pdp__refurbished-badge {
+.badge--open-box {
+  background: var(--color-fg, #111);
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+}
+.badge--open-box svg {
+  flex-shrink: 0;
+}
+
+.pdp__condition-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -461,12 +474,17 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #fff;
-  background: var(--color-primary);
   border-radius: 4px;
   margin-top: 0.5rem;
 }
-.pdp__refurbished-badge svg {
+.pdp__condition-badge svg {
   flex-shrink: 0;
+}
+.pdp__condition-badge--refurbished {
+  background: var(--color-primary);
+}
+.pdp__condition-badge--open-box {
+  background: var(--color-fg, #111);
 }
 
 /* --- Forms --- */
