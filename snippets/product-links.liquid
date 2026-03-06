@@ -3,27 +3,31 @@
   Each linking metafield group shows as a labelled row of swatches or pills.
 
   Supported metafield keys (list.product_reference, "custom" namespace):
-    color_variants      — image swatches (color/finish)
-    memory_variants     — text pills (RAM, reads ram_gb metafield)
-    storage_variants    — text pills (storage, reads storage_gb metafield)
-    config_variants     — text pills (technical configuration)
-    size_variants       — text pills (physical size)
-    compatible_products — image swatches (complementary products)
-
-  LINK_VALUE_METAFIELDS maps link keys to a product metafield for pill text.
-  When set, the pill reads that metafield value directly instead of title parsing.
+    color_variants          — image swatches (color/finish)
+    memory_variants         — text pills (RAM, reads ram_gb)
+    storage_variants        — text pills (storage, reads storage_gb)
+    screen_size_variants    — text pills (display size, reads display_size_in/screen_size_in/screen_size_inches)
+    case_size_variants      — text pills (case size, reads case_size_mm)
+    processor_variants      — text pills (chip/CPU, reads chipset/cpu/processor)
+    connectivity_variants   — text pills (connectivity model)
+    capacity_variants       — text pills (battery capacity, reads capacity_mah)
+    wattage_variants        — text pills (power output, reads total_output_w/total_watts/wattage)
+    cable_length_variants   — text pills (cable length, reads cable_length_m)
+    config_variants         — text pills (generic configuration)
+    size_variants           — text pills (physical size)
+    compatible_products     — image swatches (complementary products)
 
   To add a new linking metafield, append to KEYS, LABELS, IMAGE_KEYS, and
-  optionally VALUE_METAFIELDS.
+  optionally VALUE_METAFIELDS / VALUE_SUFFIXES.
   Required param: product
 {%- endcomment -%}
 
 {%- liquid
-  assign LINK_REF_KEYS        = 'color_variants,memory_variants,storage_variants,config_variants,size_variants,compatible_products'
-  assign LINK_REF_LABELS       = 'Color,Memory,Internal Storage,Configuration,Size,Compatible with'
+  assign LINK_REF_KEYS        = 'color_variants,memory_variants,storage_variants,screen_size_variants,case_size_variants,processor_variants,connectivity_variants,capacity_variants,wattage_variants,cable_length_variants,config_variants,size_variants,compatible_products'
+  assign LINK_REF_LABELS       = 'Color,Memory,Internal Storage,Screen Size,Case Size,Processor,Connectivity,Capacity,Power Output,Cable Length,Configuration,Size,Compatible with'
   assign LINK_IMAGE_KEYS       = 'color_variants,compatible_products'
-  assign LINK_VALUE_METAFIELDS = ',ram_gb,storage_gb,,,'
-  assign LINK_VALUE_SUFFIXES   = ', GB, GB,,,'
+  assign LINK_VALUE_METAFIELDS = ',ram_gb,storage_gb,display_size_in,case_size_mm,chipset,connectivity,capacity_mah,total_output_w,cable_length_m,,,'
+  assign LINK_VALUE_SUFFIXES   = ', GB, GB,″, mm,,, mAh, W, m,,,'
   assign LINK_MAX_ITEMS        = 12
 -%}
 
@@ -33,7 +37,7 @@
 {%- assign _val_suffixes = LINK_VALUE_SUFFIXES | split: ',' -%}
 {%- assign _separator = ' — ' -%}
 
-{%- for idx in (0..9) -%}
+{%- for idx in (0..19) -%}
   {%- if idx >= _ref_keys.size -%}{%- break -%}{%- endif -%}
   {%- assign _key = _ref_keys[idx] | strip -%}
   {%- if _key == blank -%}{%- continue -%}{%- endif -%}
@@ -64,7 +68,7 @@
             {%- if _rendered >= LINK_MAX_ITEMS -%}{%- break -%}{%- endif -%}
             {%- if _ref == blank or _ref.handle == blank -%}{%- continue -%}{%- endif -%}
 
-            {%- comment -%} Compute display value for dedup {%- endcomment -%}
+            {%- comment -%} Compute display value {%- endcomment -%}
             {%- if _use_image -%}
               {%- assign _display_val = _ref.metafields.custom.variant_color.value | default: '' -%}
               {%- if _display_val == blank -%}
@@ -77,13 +81,37 @@
               {%- endif -%}
             {%- elsif _val_mf != blank -%}
               {%- assign _raw_val = _ref.metafields.custom[_val_mf].value -%}
+
+              {%- comment -%} Fallback chains for multi-source metafields {%- endcomment -%}
+              {%- if _raw_val == blank and _key == 'screen_size_variants' -%}
+                {%- assign _raw_val = _ref.metafields.custom.screen_size_in.value -%}
+                {%- if _raw_val == blank -%}{%- assign _raw_val = _ref.metafields.custom.screen_size_inches.value -%}{%- endif -%}
+              {%- endif -%}
+              {%- if _raw_val == blank and _key == 'processor_variants' -%}
+                {%- assign _raw_val = _ref.metafields.custom.cpu.value -%}
+                {%- if _raw_val == blank -%}{%- assign _raw_val = _ref.metafields.custom.processor.value -%}{%- endif -%}
+              {%- endif -%}
+              {%- if _raw_val == blank and _key == 'wattage_variants' -%}
+                {%- assign _raw_val = _ref.metafields.custom.total_watts.value -%}
+                {%- if _raw_val == blank -%}{%- assign _raw_val = _ref.metafields.custom.total_wattage.value -%}{%- endif -%}
+                {%- if _raw_val == blank -%}{%- assign _raw_val = _ref.metafields.custom.wattage.value -%}{%- endif -%}
+                {%- if _raw_val == blank -%}{%- assign _raw_val = _ref.metafields.custom.charging_watts.value -%}{%- endif -%}
+              {%- endif -%}
+              {%- if _raw_val == blank and _key == 'capacity_variants' -%}
+                {%- assign _raw_val = _ref.metafields.custom.battery_mah.value -%}
+              {%- endif -%}
+
               {%- if _raw_val != blank -%}
-                {%- assign _num = _raw_val | times: 1 -%}
-                {%- if _num >= 1024 -%}
-                  {%- assign _tb = _num | divided_by: 1024 -%}
-                  {%- assign _display_val = _tb | append: ' TB' -%}
+                {%- if _key == 'storage_variants' or _key == 'memory_variants' -%}
+                  {%- assign _num = _raw_val | times: 1 -%}
+                  {%- if _num >= 1024 -%}
+                    {%- assign _tb = _num | divided_by: 1024 -%}
+                    {%- assign _display_val = _tb | append: ' TB' -%}
+                  {%- else -%}
+                    {%- assign _display_val = _num | append: ' ' | append: _val_suffix -%}
+                  {%- endif -%}
                 {%- else -%}
-                  {%- assign _display_val = _num | append: ' ' | append: _val_suffix -%}
+                  {%- assign _display_val = _raw_val | append: _val_suffix -%}
                 {%- endif -%}
               {%- else -%}
                 {%- assign _title_parts = _ref.title | split: _separator -%}
