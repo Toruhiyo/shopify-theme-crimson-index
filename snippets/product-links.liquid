@@ -219,8 +219,7 @@
         {%- endfor -%}
       {%- endcapture -%}
 
-      {%- comment -%} Only render the group if 2+ unique options exist {%- endcomment -%}
-      {%- if _rendered > 1 -%}
+      {%- if _rendered > 0 -%}
         <div class="pdp__variants mb-md">
           <p class="pdp__variant-label">{{ _label }}</p>
           <div class="product-link-group" data-product-link-group>
