@@ -39,6 +39,30 @@
             {%- endfor -%}
           </div>
         {%- endif -%}
+
+        {%- comment -%} Trust badges — inline below image {%- endcomment -%}
+        {%- if section.blocks.size > 0 -%}
+          {%- assign benefits = section.blocks | where: 'type', 'benefit' -%}
+          {%- if benefits.size > 0 -%}
+            <div class="pdp__trust-badges">
+              {%- for block in benefits -%}
+                <span class="pdp__trust-badge" {{ block.shopify_attributes }}>
+                  {%- assign _text = block.settings.text | downcase -%}
+                  {%- if _text contains 'shipping' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  {%- elsif _text contains 'warranty' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  {%- elsif _text contains 'return' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                  {%- else -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  {%- endif -%}
+                  {{ block.settings.text }}
+                </span>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        {%- endif -%}
       </div>
 
       {%- comment -%} Product Info (Sticky) {%- endcomment -%}
@@ -87,19 +111,11 @@
           {%- endif -%}
         </div>
 
-        {%- comment -%} Key Benefits {%- endcomment -%}
-        {%- if section.blocks.size > 0 -%}
-          {%- assign benefits = section.blocks | where: 'type', 'benefit' -%}
-          {%- if benefits.size > 0 -%}
-            <div class="pdp__benefits">
-              {%- for block in benefits -%}
-                <div class="pdp__benefit" {{ block.shopify_attributes }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>{{ block.settings.text }}</span>
-                </div>
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
+        {%- comment -%} Short Description {%- endcomment -%}
+        {%- if product.description != blank -%}
+          <div class="pdp__description">
+            {{ product.description | truncatewords: 40 }}
+          </div>
         {%- endif -%}
 
         {%- comment -%} Variant Selector {%- endcomment -%}
@@ -181,12 +197,6 @@
           </div>
         </form>
 
-        {%- comment -%} Short Description {%- endcomment -%}
-        {%- if product.description != blank -%}
-          <div class="text-muted" style="font-size: 0.9375rem; line-height: 1.7;">
-            {{ product.description | truncatewords: 40 }}
-          </div>
-        {%- endif -%}
       </div>
     </div>
 
