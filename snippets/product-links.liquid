@@ -229,5 +229,79 @@
       {%- endif -%}
 
     {%- endif -%}
+  {%- else -%}
+    {%- comment -%} No linking metafield — render a single pill from the product's own spec {%- endcomment -%}
+    {%- if _key == 'config_variants' or _key == 'size_variants' or _key == 'compatible_products' -%}
+      {%- continue -%}
+    {%- endif -%}
+
+    {%- assign _solo_val = '' -%}
+    {%- if _use_image -%}
+      {%- assign _solo_val = product.metafields.custom.variant_color.value | default: '' -%}
+    {%- elsif _val_mf != blank -%}
+      {%- assign _solo_val = product.metafields.custom[_val_mf].value -%}
+      {%- if _solo_val == blank and _key == 'screen_size_variants' -%}
+        {%- assign _solo_val = product.metafields.custom.screen_size_in.value -%}
+        {%- if _solo_val == blank -%}{%- assign _solo_val = product.metafields.custom.screen_size_inches.value -%}{%- endif -%}
+      {%- endif -%}
+      {%- if _solo_val == blank and _key == 'processor_variants' -%}
+        {%- assign _solo_val = product.metafields.custom.cpu.value -%}
+        {%- if _solo_val == blank -%}{%- assign _solo_val = product.metafields.custom.processor.value -%}{%- endif -%}
+      {%- endif -%}
+      {%- if _solo_val == blank and _key == 'wattage_variants' -%}
+        {%- assign _solo_val = product.metafields.custom.total_watts.value -%}
+        {%- if _solo_val == blank -%}{%- assign _solo_val = product.metafields.custom.total_wattage.value -%}{%- endif -%}
+        {%- if _solo_val == blank -%}{%- assign _solo_val = product.metafields.custom.wattage.value -%}{%- endif -%}
+        {%- if _solo_val == blank -%}{%- assign _solo_val = product.metafields.custom.charging_watts.value -%}{%- endif -%}
+      {%- endif -%}
+      {%- if _solo_val == blank and _key == 'capacity_variants' -%}
+        {%- assign _solo_val = product.metafields.custom.battery_mah.value -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if _solo_val != blank -%}
+      {%- assign _solo_display = _solo_val -%}
+      {%- unless _use_image -%}
+        {%- if _key == 'storage_variants' or _key == 'memory_variants' -%}
+          {%- assign _snum = _solo_val | times: 1 -%}
+          {%- if _snum >= 1024 -%}
+            {%- assign _stb = _snum | divided_by: 1024 -%}
+            {%- assign _solo_display = _stb | append: ' TB' -%}
+          {%- else -%}
+            {%- assign _solo_display = _snum | append: ' ' | append: _val_suffix -%}
+          {%- endif -%}
+        {%- elsif _val_suffix != blank -%}
+          {%- assign _solo_display = _solo_val | append: _val_suffix -%}
+        {%- endif -%}
+      {%- endunless -%}
+
+      <div class="pdp__variants mb-md">
+        <p class="pdp__variant-label">{{ _label }}</p>
+        <div class="product-link-group" data-product-link-group>
+          <a
+            href="{{ product.url }}"
+            class="{% if _use_image %}product-link-swatch{% else %}product-link-pill{% endif %} is-active"
+            aria-label="{{ product.title }}"
+            title="{{ product.title }}"
+            data-product-link
+          >
+            {%- if _use_image -%}
+              {%- if product.featured_image -%}
+                <img
+                  src="{{ product.featured_image | image_url: width: 140 }}"
+                  alt="{{ product.title | escape }}"
+                  loading="lazy"
+                  width="70"
+                  height="70"
+                >
+              {%- endif -%}
+              <span class="product-link-swatch__label">{{ _solo_display }}</span>
+            {%- else -%}
+              {{- _solo_display -}}
+            {%- endif -%}
+          </a>
+        </div>
+      </div>
+    {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
