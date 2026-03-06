@@ -197,9 +197,14 @@
     {%- assign tab_in_the_box = product.metafields.custom.in_the_box.value -%}
     {%- assign tab_warranty = product.metafields.custom.warranty.value -%}
 
+    {%- capture _auto_specs -%}{%- render 'product-specs', product: product -%}{%- endcapture -%}
+    {%- assign _has_auto_specs = false -%}
+    {%- assign _auto_specs_stripped = _auto_specs | strip -%}
+    {%- if _auto_specs_stripped != blank -%}{%- assign _has_auto_specs = true -%}{%- endif -%}
+
     {%- assign mf_tabs = '' -%}
     {%- if tab_overview != blank -%}{%- assign mf_tabs = mf_tabs | append: 'overview,' -%}{%- endif -%}
-    {%- if tab_specs != blank -%}{%- assign mf_tabs = mf_tabs | append: 'specs,' -%}{%- endif -%}
+    {%- if tab_specs != blank or _has_auto_specs -%}{%- assign mf_tabs = mf_tabs | append: 'specs,' -%}{%- endif -%}
     {%- if tab_compatibility != blank -%}{%- assign mf_tabs = mf_tabs | append: 'compatibility,' -%}{%- endif -%}
     {%- if tab_in_the_box != blank -%}{%- assign mf_tabs = mf_tabs | append: 'in_the_box,' -%}{%- endif -%}
     {%- if tab_warranty != blank -%}{%- assign mf_tabs = mf_tabs | append: 'warranty,' -%}{%- endif -%}
@@ -242,7 +247,14 @@
             {%- when 'warranty' -%}{%- assign tab_content = tab_warranty -%}
           {%- endcase -%}
           <div class="tabs__panel {% if forloop.first %}is-active{% endif %}" data-panel="tab-{{ tab_key }}" role="tabpanel">
-            <div class="accordion__body pdp-tab-content">{{ tab_content | newline_to_br }}</div>
+            <div class="accordion__body pdp-tab-content">
+              {%- if tab_key == 'specs' -%}
+                {%- if tab_content != blank -%}{{ tab_content | newline_to_br }}{%- endif -%}
+                {{ _auto_specs }}
+              {%- else -%}
+                {{ tab_content | newline_to_br }}
+              {%- endif -%}
+            </div>
           </div>
         {%- endfor -%}
       {%- else -%}
@@ -250,7 +262,13 @@
           <div class="accordion__body">{{ product.description }}</div>
         </div>
         <div class="tabs__panel" data-panel="tab-specs" role="tabpanel">
-          <div class="accordion__body"><p>Specifications coming soon.</p></div>
+          <div class="accordion__body">
+            {%- if _has_auto_specs -%}
+              {{ _auto_specs }}
+            {%- else -%}
+              <p>Specifications coming soon.</p>
+            {%- endif -%}
+          </div>
         </div>
       {%- endif -%}
     </div>
