@@ -59,47 +59,72 @@
         <p class="pdp__variant-label">{{ _label }}</p>
         <div class="product-link-group" data-product-link-group>
           {%- assign _rendered = 0 -%}
+          {%- assign _seen_values = '' -%}
           {%- for _ref in _refs -%}
             {%- if _rendered >= LINK_MAX_ITEMS -%}{%- break -%}{%- endif -%}
-            {%- if _ref != blank and _ref.handle != blank -%}
-              <a
-                href="{{ _ref.url }}"
-                class="{% if _use_image %}product-link-swatch{% else %}product-link-pill{% endif %}{% if _ref.id == product.id %} is-active{% endif %}"
-                aria-label="{{ _ref.title }}"
-                title="{{ _ref.title }}"
-                data-product-link
-              >
-                {%- if _use_image -%}
-                  {%- if _ref.featured_image -%}
-                    <img
-                      src="{{ _ref.featured_image | image_url: width: 140 }}"
-                      alt="{{ _ref.title | escape }}"
-                      loading="lazy"
-                      width="70"
-                      height="70"
-                    >
-                  {%- endif -%}
-                {%- elsif _val_mf != blank -%}
-                  {%- assign _raw_val = _ref.metafields.custom[_val_mf].value -%}
-                  {%- if _raw_val != blank -%}
-                    {%- assign _num = _raw_val | times: 1 -%}
-                    {%- if _num >= 1024 -%}
-                      {%- assign _tb = _num | divided_by: 1024 -%}
-                      {{- _tb }} TB
-                    {%- else -%}
-                      {{- _num }} {{ _val_suffix -}}
-                    {%- endif -%}
-                  {%- else -%}
-                    {%- assign _title_parts = _ref.title | split: _separator -%}
-                    {{- _title_parts | last -}}
-                  {%- endif -%}
+            {%- if _ref == blank or _ref.handle == blank -%}{%- continue -%}{%- endif -%}
+
+            {%- comment -%} Compute display value for dedup {%- endcomment -%}
+            {%- if _use_image -%}
+              {%- assign _display_val = _ref.metafields.custom.variant_color.value | default: '' -%}
+              {%- if _display_val == blank -%}
+                {%- assign _title_segs = _ref.title | split: _separator -%}
+                {%- if _title_segs.size > 1 -%}
+                  {%- assign _display_val = _title_segs[1] -%}
                 {%- else -%}
-                  {%- assign _title_parts = _ref.title | split: _separator -%}
-                  {{- _title_parts | last -}}
+                  {%- assign _display_val = _ref.title -%}
                 {%- endif -%}
-              </a>
-              {%- assign _rendered = _rendered | plus: 1 -%}
+              {%- endif -%}
+            {%- elsif _val_mf != blank -%}
+              {%- assign _raw_val = _ref.metafields.custom[_val_mf].value -%}
+              {%- if _raw_val != blank -%}
+                {%- assign _num = _raw_val | times: 1 -%}
+                {%- if _num >= 1024 -%}
+                  {%- assign _tb = _num | divided_by: 1024 -%}
+                  {%- assign _display_val = _tb | append: ' TB' -%}
+                {%- else -%}
+                  {%- assign _display_val = _num | append: ' ' | append: _val_suffix -%}
+                {%- endif -%}
+              {%- else -%}
+                {%- assign _title_parts = _ref.title | split: _separator -%}
+                {%- assign _display_val = _title_parts | last -%}
+              {%- endif -%}
+            {%- else -%}
+              {%- assign _title_parts = _ref.title | split: _separator -%}
+              {%- assign _display_val = _title_parts | last -%}
             {%- endif -%}
+
+            {%- assign _dedup_key = _display_val | strip | downcase -%}
+            {%- assign _dedup_token = '||' | append: _dedup_key | append: '||' -%}
+            {%- if _seen_values contains _dedup_token -%}{%- continue -%}{%- endif -%}
+            {%- assign _seen_values = _seen_values | append: _dedup_token -%}
+
+            {%- assign _is_current = false -%}
+            {%- if _ref.id == product.id -%}{%- assign _is_current = true -%}{%- endif -%}
+
+            <a
+              href="{{ _ref.url }}"
+              class="{% if _use_image %}product-link-swatch{% else %}product-link-pill{% endif %}{% if _is_current %} is-active{% endif %}"
+              aria-label="{{ _ref.title }}"
+              title="{{ _ref.title }}"
+              data-product-link
+            >
+              {%- if _use_image -%}
+                {%- if _ref.featured_image -%}
+                  <img
+                    src="{{ _ref.featured_image | image_url: width: 140 }}"
+                    alt="{{ _ref.title | escape }}"
+                    loading="lazy"
+                    width="70"
+                    height="70"
+                  >
+                {%- endif -%}
+                <span class="product-link-swatch__label">{{ _display_val }}</span>
+              {%- else -%}
+                {{- _display_val -}}
+              {%- endif -%}
+            </a>
+            {%- assign _rendered = _rendered | plus: 1 -%}
           {%- endfor -%}
         </div>
       </div>

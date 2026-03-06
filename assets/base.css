@@ -2697,34 +2697,53 @@ h1, h2, h3, h4, h5, h6 {
 
 .product-link-swatch {
   flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-button);
-  overflow: hidden;
-  border: 2px solid var(--color-border-raw, #E5E5EA);
-  background: var(--color-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  text-decoration: none;
   cursor: pointer;
-  transition: border-color 180ms ease;
 }
 
 .product-link-swatch img {
-  width: 100%;
-  height: 100%;
+  width: 56px;
+  height: 56px;
   object-fit: cover;
   display: block;
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-border-raw, #E5E5EA);
+  background: var(--color-card);
+  transition: border-color 180ms ease;
 }
 
-.product-link-swatch:hover {
+.product-link-swatch:hover img {
   border-color: var(--color-fg);
 }
 
-.product-link-swatch.is-active {
+.product-link-swatch.is-active img {
   border-color: var(--color-primary);
 }
 
-.product-link-swatch:focus-visible {
+.product-link-swatch:focus-visible img {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+.product-link-swatch__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-muted-fg, #6E6E73);
+  text-align: center;
+  max-width: 68px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.product-link-swatch.is-active .product-link-swatch__label {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 /* --- Product Link Pills (text-based spec variants) --- */
