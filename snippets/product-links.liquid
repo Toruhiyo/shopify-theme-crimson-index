@@ -163,7 +163,7 @@
 
     {%- if _rendered > 0 -%}
       {%- assign _rendered_keys = _rendered_keys | append: _key | append: ',' -%}
-      <div class="pdp__variants">
+      <div class="pdp__variants mb-md">
         <p class="pdp__variant-label">{{ _label }}</p>
         <div class="product-link-group" data-product-link-group>{{ _pills_html }}</div>
       </div>
@@ -180,7 +180,7 @@
 {%- unless _rendered_keys contains 'color_variants' -%}
   {%- assign _sv = product.metafields.custom.variant_color.value -%}
   {%- if _sv != blank -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Color</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-swatch is-active" data-product-link>
@@ -198,7 +198,7 @@
     {%- assign _sn = _sv | times: 1 -%}
     {%- if _sn >= 1000 -%}{%- assign _sd = _sn | divided_by: 1000 | append: ' TB' -%}
     {%- else -%}{%- assign _sd = _sn | append: ' GB' -%}{%- endif -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Memory</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-pill is-active" data-product-link>{{ _sd }}</a>
@@ -213,7 +213,7 @@
     {%- assign _sn = _sv | times: 1 -%}
     {%- if _sn >= 1000 -%}{%- assign _sd = _sn | divided_by: 1000 | append: ' TB' -%}
     {%- else -%}{%- assign _sd = _sn | append: ' GB' -%}{%- endif -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Internal Storage</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-pill is-active" data-product-link>{{ _sd }}</a>
@@ -227,7 +227,7 @@
   {%- if _sv == blank -%}{%- assign _sv = product.metafields.custom.screen_size_in.value -%}{%- endif -%}
   {%- if _sv == blank -%}{%- assign _sv = product.metafields.custom.screen_size_inches.value -%}{%- endif -%}
   {%- if _sv != blank -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Screen Size</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-pill is-active" data-product-link>{{ _sv }}″</a>
@@ -239,7 +239,7 @@
 {%- unless _rendered_keys contains 'case_size_variants' -%}
   {%- assign _sv = product.metafields.custom.case_size_mm.value -%}
   {%- if _sv != blank -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Case Size</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-pill is-active" data-product-link>{{ _sv }} mm</a>
@@ -253,7 +253,7 @@
   {%- if _sv == blank -%}{%- assign _sv = product.metafields.custom.cpu.value -%}{%- endif -%}
   {%- if _sv == blank -%}{%- assign _sv = product.metafields.custom.processor.value -%}{%- endif -%}
   {%- if _sv != blank -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Processor</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-pill is-active" data-product-link>{{ _sv }}</a>
@@ -265,7 +265,7 @@
 {%- unless _rendered_keys contains 'connectivity_variants' -%}
   {%- assign _sv = product.metafields.custom.connectivity.value -%}
   {%- if _sv != blank -%}
-    <div class="pdp__variants">
+    <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Connectivity</p>
       <div class="product-link-group" data-product-link-group>
         <a href="{{ product.url }}" class="product-link-pill is-active" data-product-link>{{ _sv }}</a>
