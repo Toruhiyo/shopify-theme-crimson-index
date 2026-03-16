@@ -71,8 +71,8 @@
       {%- if _current_dval != blank -%}
         {%- if _key == 'storage_variants' or _key == 'memory_variants' -%}
           {%- assign _cnum = _current_dval | times: 1 -%}
-          {%- if _cnum >= 1024 -%}
-            {%- assign _ctb = _cnum | divided_by: 1024 -%}
+          {%- if _cnum >= 1000 -%}
+            {%- assign _ctb = _cnum | divided_by: 1000 -%}
             {%- assign _current_dval = _ctb | append: ' TB' -%}
           {%- else -%}
             {%- assign _current_dval = _cnum | append: ' ' | append: _val_suffix -%}
@@ -121,7 +121,7 @@
           {%- if _raw_val != blank -%}
             {%- if _key == 'storage_variants' or _key == 'memory_variants' -%}
               {%- assign _num = _raw_val | times: 1 -%}
-              {%- if _num >= 1024 -%}{%- assign _tb = _num | divided_by: 1024 -%}{%- assign _display_val = _tb | append: ' TB' -%}
+              {%- if _num >= 1000 -%}{%- assign _tb = _num | divided_by: 1000 -%}{%- assign _display_val = _tb | append: ' TB' -%}
               {%- else -%}{%- assign _display_val = _num | append: ' ' | append: _val_suffix -%}{%- endif -%}
             {%- else -%}
               {%- assign _display_val = _raw_val | append: _val_suffix -%}
@@ -196,7 +196,7 @@
   {%- assign _sv = product.metafields.custom.ram_gb.value -%}
   {%- if _sv != blank -%}
     {%- assign _sn = _sv | times: 1 -%}
-    {%- if _sn >= 1024 -%}{%- assign _sd = _sn | divided_by: 1024 | append: ' TB' -%}
+    {%- if _sn >= 1000 -%}{%- assign _sd = _sn | divided_by: 1000 | append: ' TB' -%}
     {%- else -%}{%- assign _sd = _sn | append: ' GB' -%}{%- endif -%}
     <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Memory</p>
@@ -211,7 +211,7 @@
   {%- assign _sv = product.metafields.custom.storage_gb.value -%}
   {%- if _sv != blank -%}
     {%- assign _sn = _sv | times: 1 -%}
-    {%- if _sn >= 1024 -%}{%- assign _sd = _sn | divided_by: 1024 | append: ' TB' -%}
+    {%- if _sn >= 1000 -%}{%- assign _sd = _sn | divided_by: 1000 | append: ' TB' -%}
     {%- else -%}{%- assign _sd = _sn | append: ' GB' -%}{%- endif -%}
     <div class="pdp__variants mb-md">
       <p class="pdp__variant-label">Internal Storage</p>
