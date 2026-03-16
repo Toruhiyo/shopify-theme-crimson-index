@@ -168,32 +168,32 @@
             {%- endfor -%}
           {%- endunless -%}
 
-          {%- comment -%} Quantity + CTAs (single row on desktop) {%- endcomment -%}
-          <div class="pdp__buy-row">
-            <div class="pdp__variants">
-              <p class="pdp__variant-label">{{ 'products.quantity' | t }}</p>
-              <div class="qty-selector">
-                <button type="button" data-qty-minus aria-label="{{ 'products.decrease_quantity' | t }}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-                <input type="number" name="quantity" value="1" min="1" max="99" aria-label="{{ 'products.quantity' | t }}">
-                <button type="button" data-qty-plus aria-label="{{ 'products.increase_quantity' | t }}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-              </div>
+          {%- comment -%} Quantity {%- endcomment -%}
+          <div class="pdp__variants mb-md">
+            <p class="pdp__variant-label">{{ 'products.quantity' | t }}</p>
+            <div class="qty-selector">
+              <button type="button" data-qty-minus aria-label="{{ 'products.decrease_quantity' | t }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <input type="number" name="quantity" value="1" min="1" max="99" aria-label="{{ 'products.quantity' | t }}">
+              <button type="button" data-qty-plus aria-label="{{ 'products.increase_quantity' | t }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
             </div>
-            <div class="pdp__ctas">
-              {%- if current_variant.available -%}
-                <button type="submit" class="btn btn--primary btn--lg btn--full" data-add-btn>
-                  {{ 'products.add_to_cart' | t }} &mdash; {{ current_variant.price | money }}
-                </button>
-              {%- else -%}
-                <button type="button" class="btn btn--primary btn--lg btn--full" disabled>
-                  {{ 'products.sold_out' | t }}
-                </button>
-              {%- endif -%}
-              <a href="/checkout" class="btn btn--outline btn--lg btn--full">{{ 'products.buy_now' | t }}</a>
-            </div>
+          </div>
+
+          {%- comment -%} CTAs {%- endcomment -%}
+          <div class="pdp__ctas">
+            {%- if current_variant.available -%}
+              <button type="submit" class="btn btn--primary btn--lg btn--full" data-add-btn>
+                {{ 'products.add_to_cart' | t }} &mdash; {{ current_variant.price | money }}
+              </button>
+            {%- else -%}
+              <button type="button" class="btn btn--primary btn--lg btn--full" disabled>
+                {{ 'products.sold_out' | t }}
+              </button>
+            {%- endif -%}
+            <a href="/checkout" class="btn btn--outline btn--lg btn--full">{{ 'products.buy_now' | t }}</a>
           </div>
         </form>
 
