@@ -485,6 +485,120 @@
     }
   }
 
+  /* --- Nav overflow: move items that don't fit into "More" dropdown --- */
+  class NavOverflow {
+    constructor() {
+      this.nav = document.querySelector('[data-header] .header__nav');
+      this.list = document.querySelector('[data-nav-list]');
+      if (!this.nav || !this.list) return;
+
+      this.moreItem = this.list.querySelector('[data-more]');
+      this.moreContent = this.list.querySelector('[data-more-content]');
+      this.moreTrigger = this.list.querySelector('[data-more-trigger]');
+      if (!this.moreItem || !this.moreContent || !this.moreTrigger) return;
+
+      this.items = () => Array.from(this.list.querySelectorAll('[data-nav-item]:not([data-more])'));
+      this.overflowClass = 'header__nav-item--overflow';
+      this.moreActiveClass = 'header__nav-item--more-active';
+
+      this.moreTrigger.addEventListener('click', (e) => {
+        if (window.innerWidth < 990) return;
+        e.preventDefault();
+        this.toggleMore();
+      });
+      this.moreItem.addEventListener('mouseenter', () => this.openMore());
+      this.moreItem.addEventListener('mouseleave', () => this.closeMore());
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') this.closeMore();
+      });
+
+      this.resizeObserver = new ResizeObserver(() => this.update());
+      this.resizeObserver.observe(this.nav);
+      this.update();
+    }
+
+    update() {
+      if (window.innerWidth < 990) {
+        this.moreItem.setAttribute('aria-hidden', 'true');
+        this.moreItem.classList.remove(this.moreActiveClass);
+        this.items().forEach(el => el.classList.remove(this.overflowClass));
+        return;
+      }
+
+      this.moreItem.removeAttribute('aria-hidden');
+      const listWidth = this.list.getBoundingClientRect().width;
+      const moreWidth = this.moreItem.getBoundingClientRect().width;
+      const available = listWidth - moreWidth - 8;
+
+      let total = 0;
+      const itemEls = this.items();
+      let overflowStart = itemEls.length;
+
+      for (let i = 0; i < itemEls.length; i++) {
+        const w = itemEls[i].getBoundingClientRect().width;
+        if (total + w > available) {
+          overflowStart = i;
+          break;
+        }
+        total += w;
+      }
+
+      if (overflowStart >= itemEls.length) {
+        this.moreItem.setAttribute('aria-hidden', 'true');
+        this.moreItem.classList.remove(this.moreActiveClass);
+        this.moreContent.innerHTML = '';
+        itemEls.forEach(el => el.classList.remove(this.overflowClass));
+        return;
+      }
+
+      itemEls.forEach((el, i) => {
+        el.classList.toggle(this.overflowClass, i >= overflowStart);
+      });
+      this.buildMoreContent(itemEls.slice(overflowStart));
+      this.moreItem.removeAttribute('aria-hidden');
+    }
+
+    buildMoreContent(overflowItems) {
+      const escape = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const parts = [];
+      overflowItems.forEach(item => {
+        const link = item.querySelector('.header__nav-link');
+        const tiles = item.querySelectorAll('.mega-menu__tile');
+        const href = escape(link?.getAttribute('href') || '#');
+        const title = escape(link?.textContent?.trim() || '');
+        if (tiles.length > 0) {
+          parts.push(`<div class="header__more-group"><a href="${href}" class="header__more-link header__more-link--parent">${title}</a>`);
+          tiles.forEach(tile => {
+            const tHref = escape(tile.getAttribute('href') || '#');
+            const tTitle = escape(tile.querySelector('.mega-menu__tile-title')?.textContent?.trim() || tile.textContent?.trim() || '');
+            parts.push(`<a href="${tHref}" class="header__more-link header__more-link--child" role="menuitem">${tTitle}</a>`);
+          });
+          parts.push('</div>');
+        } else {
+          parts.push(`<a href="${href}" class="header__more-link" role="menuitem">${title}</a>`);
+        }
+      });
+      this.moreContent.innerHTML = parts.join('');
+    }
+
+    openMore() {
+      if (this.moreContent.innerHTML) this.moreItem.classList.add(this.moreActiveClass);
+      const trigger = this.moreTrigger;
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    closeMore() {
+      this.moreItem.classList.remove(this.moreActiveClass);
+      const trigger = this.moreTrigger;
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    toggleMore() {
+      if (this.moreItem.classList.contains(this.moreActiveClass)) this.closeMore();
+      else this.openMore();
+    }
+  }
+
   /* --- Support Dropdown --- */
   class SupportDropdown {
     constructor() {
@@ -1307,6 +1421,7 @@
     new CollectionFilters();
     new SearchInfiniteScroll();
     new DesktopNav();
+    new NavOverflow();
     new SupportDropdown();
     new LocaleSelector();
     new MobileMenu();

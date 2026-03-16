@@ -30,9 +30,10 @@
         </div>
 
         <nav class="header__nav" role="navigation" aria-label="{{ 'header.navigation' | t }}">
+          <div class="header__nav-list" data-nav-list>
           {%- for link in menu.links -%}
             {%- if link.links.size > 0 -%}
-              <div class="header__nav-item" data-nav-mega>
+              <div class="header__nav-item" data-nav-mega data-nav-item>
                 <a
                   href="{{ link.url }}"
                   class="header__nav-link"
@@ -87,9 +88,20 @@
                 </div>
               </div>
             {%- else -%}
-              <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
+              <div class="header__nav-item" data-nav-item>
+                <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
+              </div>
             {%- endif -%}
           {%- endfor -%}
+
+            <div class="header__nav-item header__nav-item--more" data-more aria-hidden="true">
+              <a href="#" class="header__nav-link" aria-haspopup="true" aria-expanded="false" data-more-trigger>
+                {{ 'header.more' | t }}
+                <span class="header__nav-chevron">{% render 'icon-chevron' %}</span>
+              </a>
+              <div class="header__more-dropdown" data-more-content role="menu"></div>
+            </div>
+          </div>
         </nav>
 
         <div class="header__icons">
