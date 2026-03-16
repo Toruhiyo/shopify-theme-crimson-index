@@ -2582,8 +2582,8 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (min-width: 990px) {
   .pdp {
-    grid-template-columns: 1.15fr 1fr;
-    gap: 2.25rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
     align-items: start;
   }
 }
@@ -2608,7 +2608,7 @@ h1, h2, h3, h4, h5, h6 {
 .pdp__gallery-main img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .pdp__gallery-thumbs {
@@ -2659,14 +2659,14 @@ h1, h2, h3, h4, h5, h6 {
 .pdp__title {
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .pdp__rating {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .pdp__rating-count {
@@ -2678,7 +2678,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .pdp__price {
@@ -2699,10 +2699,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* PDP description below price */
 .pdp__description {
-  font-size: 0.875rem;
-  line-height: 1.6;
+  font-size: 0.9375rem;
+  line-height: 1.7;
   color: var(--color-muted-fg, #6E6E73);
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 /* PDP trust badges — inline row below image */
@@ -2735,23 +2735,14 @@ h1, h2, h3, h4, h5, h6 {
   flex-shrink: 0;
 }
 
-.pdp__options-block {
-  border-top: 1px solid var(--color-border);
-  padding-top: 0.75rem;
-  margin-top: 0.25rem;
-}
-
 .pdp__variants {
-  margin-bottom: 0.625rem;
+  margin-bottom: 1.5rem;
 }
 
 .pdp__variant-label {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  margin-bottom: 0.3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-muted-fg);
+  margin-bottom: 0.5rem;
 }
 
 /* --- Product Link Swatches (cross-product linking rendered as variants) --- */
@@ -2846,26 +2837,11 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
 }
 
-.pdp__actions-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.pdp__actions-row .qty-selector {
-  flex-shrink: 0;
-}
-
-.pdp__actions-row .btn {
-  flex: 1;
-}
-
 .pdp__ctas {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 /* PDP Sticky Mobile Bar */
