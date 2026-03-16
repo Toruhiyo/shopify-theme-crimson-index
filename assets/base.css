@@ -2717,10 +2717,11 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.75rem;
 }
 
-/* PDP trust badges — inline row below image */
+/* PDP trust badges — inline row below image, centered (per line when wrapped) */
 .pdp__trust-badges {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.375rem;
   margin-top: 0.5rem;
 }
