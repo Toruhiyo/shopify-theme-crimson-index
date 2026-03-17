@@ -128,6 +128,16 @@
     "warranty_included": "Warranty Included",
     "rights": "All rights reserved."
   },
+  "contact": {
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send message",
+      "success": "Thanks for contacting us. We'll get back to you as soon as we can."
+    }
+  },
   "support": {
     "contact_us": "Contact Us",
     "faq": "FAQ"
