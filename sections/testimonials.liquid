@@ -25,7 +25,7 @@
           </div>
           <p class="testimonial-card__text">"{{ block.settings.text }}"</p>
           <p class="testimonial-card__author">{{ block.settings.author }}</p>
-          {%- if block.settings.product_name != blank -%}
+          {%- if block.settings.product_name != blank and block.settings.product_name | strip != '' -%}
             <p class="testimonial-card__product">{{ block.settings.product_name }}</p>
           {%- endif -%}
         </div>
@@ -82,8 +82,8 @@
         {
           "type": "text",
           "id": "product_name",
-          "label": "Product name",
-          "default": ""
+          "label": "Product name (optional)",
+          "default": " "
         }
       ]
     }
@@ -99,7 +99,7 @@
             "rating": 5,
             "text": "Exceptional build quality. Every detail is thoughtfully designed and the materials feel premium.",
             "author": "Alex R.",
-            "product_name": ""
+            "product_name": " "
           }
         },
         {
@@ -108,7 +108,7 @@
             "rating": 5,
             "text": "Clean, minimal design that looks even better in person. Exactly what I was looking for.",
             "author": "Maya T.",
-            "product_name": ""
+            "product_name": " "
           }
         },
         {
@@ -117,7 +117,7 @@
             "rating": 5,
             "text": "Outstanding customer service and fast delivery. The product exceeded my expectations.",
             "author": "Jordan K.",
-            "product_name": ""
+            "product_name": " "
           }
         }
       ]

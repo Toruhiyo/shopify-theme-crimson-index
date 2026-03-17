@@ -127,7 +127,7 @@
   {% sections 'header-group' %}
 
   <main id="main-content" role="main" tabindex="-1">
-    {%- if request.path contains '/policies/' and policy -%}
+    {%- if request.path contains '/policies/' -%}
       {% render 'policy-page' %}
     {%- else -%}
       {{ content_for_layout }}

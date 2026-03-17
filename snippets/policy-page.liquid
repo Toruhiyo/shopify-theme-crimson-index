@@ -1,7 +1,16 @@
 {%- comment -%}
   Rendered by layout when request.path contains '/policies/'.
-  Uses global `policy` object (title, body). Sidebar lists all shop.policies.
+  Resolves current policy from shop.policies by URL (policy object may be blank in layout).
 {%- endcomment -%}
+{%- assign current_policy = nil -%}
+{%- for p in shop.policies -%}
+  {%- if p.url == request.path -%}
+    {%- assign current_policy = p -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if current_policy -%}
 <section class="section-spacing policy-page">
   <div class="page-width">
     <div class="policy-page__layout">
@@ -12,7 +21,7 @@
               {%- if p != blank and p.body != blank -%}
                 <a
                   href="{{ p.url }}"
-                  class="policy-page__nav-link {% if p.url == policy.url %}is-active{% endif %}"
+                  class="policy-page__nav-link {% if p.url == request.path %}is-active{% endif %}"
                 >
                   {{ p.title }}
                 </a>
@@ -23,11 +32,14 @@
       {%- endif -%}
 
       <div class="policy-page__content">
-        <h1 class="policy-page__title">{{ policy.title }}</h1>
+        <h1 class="policy-page__title">{{ current_policy.title }}</h1>
         <div class="policy-page__body rte">
-          {{ policy.body }}
+          {{ current_policy.body }}
         </div>
       </div>
     </div>
   </div>
 </section>
+{%- else -%}
+  {{ content_for_layout }}
+{%- endif -%}
