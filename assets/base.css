@@ -3399,6 +3399,112 @@ textarea.input {
   color: var(--color-fg);
 }
 
+/* --- Policy page layout --- */
+.policy-page {
+  padding-top: 1.5rem;
+}
+
+@media (min-width: 750px) {
+  .policy-page {
+    padding-top: 2rem;
+  }
+}
+
+.policy-page__layout {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 990px) {
+  .policy-page__layout {
+    grid-template-columns: 12rem 1fr;
+    align-items: start;
+    gap: 3rem;
+  }
+}
+
+.policy-page__nav {
+  position: sticky;
+  top: 5rem;
+}
+
+.policy-page__nav-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+@media (max-width: 989px) {
+  .policy-page__nav {
+    position: static;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .policy-page__nav-inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.policy-page__nav-link {
+  display: block;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-muted-fg);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.policy-page__nav-link:hover {
+  color: var(--color-fg);
+}
+
+.policy-page__nav-link.is-active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.policy-page__content {
+  min-width: 0;
+}
+
+.policy-page__title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 600;
+  color: var(--color-fg);
+  margin-bottom: 1.5rem;
+  line-height: 1.25;
+}
+
+.policy-page__body {
+  max-width: 65ch;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--color-fg);
+}
+
+.policy-page__body.rte p {
+  margin-bottom: 1.125em;
+}
+
+.policy-page__body.rte h2,
+.policy-page__body.rte h3,
+.policy-page__body.rte h4 {
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.policy-page__body.rte h2:first-child,
+.policy-page__body.rte h3:first-child,
+.policy-page__body.rte h4:first-child {
+  margin-top: 0;
+}
+
 /* --- Utilities --- */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
