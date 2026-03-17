@@ -530,12 +530,12 @@ textarea.input {
 }
 
 /* --- Contact Form --- */
-.contact-form__wrapper {
-  max-width: 36rem;
+.contact-form-section {
+  padding-top: 0;
 }
 
-.contact-form__heading {
-  margin-bottom: 0.5rem;
+.contact-form__wrapper {
+  max-width: 36rem;
 }
 
 .contact-form__text {

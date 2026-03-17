@@ -1,9 +1,6 @@
 <section class="section-spacing contact-form-section" {{ section.shopify_attributes }}>
   <div class="page-width">
     <div class="contact-form__wrapper">
-      {%- if section.settings.heading != blank -%}
-        <h2 class="contact-form__heading h2 mb-md">{{ section.settings.heading }}</h2>
-      {%- endif -%}
       {%- if section.settings.text != blank -%}
         <p class="contact-form__text text-muted mb-lg">{{ section.settings.text }}</p>
       {%- endif -%}
@@ -95,12 +92,6 @@
   "tag": "section",
   "class": "contact-form-section",
   "settings": [
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Get in touch"
-    },
     {
       "type": "textarea",
       "id": "text",
