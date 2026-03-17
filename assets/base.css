@@ -3399,6 +3399,15 @@ textarea.input {
   color: var(--color-fg);
 }
 
+/* --- Blank page --- */
+.blank-page {
+  min-height: 100vh;
+}
+
+.blank-page__inner {
+  min-height: 100vh;
+}
+
 /* --- Policy page layout --- */
 .policy-page {
   padding-top: 2.5rem;
