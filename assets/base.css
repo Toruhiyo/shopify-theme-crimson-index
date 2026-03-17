@@ -3401,12 +3401,12 @@ textarea.input {
 
 /* --- Policy page layout --- */
 .policy-page {
-  padding-top: 1.5rem;
+  padding-top: 2.5rem;
 }
 
 @media (min-width: 750px) {
   .policy-page {
-    padding-top: 2rem;
+    padding-top: 3.5rem;
   }
 }
 
@@ -3475,12 +3475,14 @@ textarea.input {
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 600;
   color: var(--color-fg);
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 3rem;
   line-height: 1.25;
 }
 
 .policy-page__body {
   max-width: 65ch;
+  margin-top: 0.5rem;
   font-size: 1.0625rem;
   line-height: 1.8;
   color: var(--color-fg);
