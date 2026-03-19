@@ -12,10 +12,11 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "layout_style": "flagship",
-        "flagship_heading": "Meridian",
-        "flagship_caption": "Premium electronics for your home and workspace.",
-        "flagship_subheading": " "
+        "show_logo": true,
+        "heading": " ",
+        "subheading": "Curated electronics. Voice-first help when you need it.",
+        "button_label": " ",
+        "button_link": ""
       }
     },
     "feature-strip": {
