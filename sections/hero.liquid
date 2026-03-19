@@ -23,15 +23,6 @@
   endif
   assign interval = section.settings.autoplay_interval | times: 1000
 
-  if is_flagship
-    assign _flagship_image = section.settings.flagship_image
-    if _flagship_image == blank and section.blocks.size > 0 and section.blocks[0].settings.image != blank
-      assign _flagship_image = section.blocks[0].settings.image
-    endif
-    if _flagship_image == blank
-      assign _flagship_image = nil
-    endif
-  endif
 -%}
 
 <section
@@ -45,35 +36,18 @@
     {%- if is_flagship -%}
       <div class="hero__slide is-active">
         <div class="hero__flagship-inner">
-          {%- assign _h = section.settings.flagship_heading | strip -%}
-          {%- assign _c = section.settings.flagship_caption | strip -%}
-          {%- if _h != '' or _c != '' -%}
-            <div class="hero__flagship-text">
-              {%- if _h != '' -%}
-                <h2 class="hero__title">{{ section.settings.flagship_heading }}</h2>
-              {%- endif -%}
-              {%- if _c != '' -%}
-                <p class="hero__caption">{{ section.settings.flagship_caption }}</p>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-          <div class="hero__media hero__media--flagship">
-            {%- if _flagship_image != blank -%}
-              <img
-                src="{{ _flagship_image | image_url: width: 1200 }}"
-                alt="{{ _flagship_image.alt | default: section.settings.flagship_heading | default: 'Featured product' | escape }}"
-                width="{{ _flagship_image.width }}"
-                height="{{ _flagship_image.height }}"
-                loading="eager"
-                fetchpriority="high"
-              >
+          <div class="hero__flagship-text">
+            {%- assign _welcome = section.settings.flagship_heading | strip -%}
+            {%- assign _offers = section.settings.flagship_caption | strip -%}
+            {%- if _welcome != '' -%}
+              <h2 class="hero__title">{{ section.settings.flagship_heading }}</h2>
             {%- else -%}
-              <img
-                src="{{ 'hero-new-arrivals.jpg' | asset_url }}"
-                alt="{{ section.settings.flagship_heading | default: 'Featured product' | escape }}"
-                loading="eager"
-                fetchpriority="high"
-              >
+              <h2 class="hero__title">Welcome</h2>
+            {%- endif -%}
+            {%- if _offers != '' -%}
+              <p class="hero__caption">{{ section.settings.flagship_caption }}</p>
+            {%- else -%}
+              <p class="hero__caption">Offers</p>
             {%- endif -%}
           </div>
         </div>
@@ -180,24 +154,19 @@
     },
     {
       "type": "header",
-      "content": "Flagship layout"
-    },
-    {
-      "type": "image_picker",
-      "id": "flagship_image",
-      "label": "Flagship product image"
+      "content": "Flagship layout (text only)"
     },
     {
       "type": "text",
       "id": "flagship_heading",
-      "label": "Heading (optional)",
-      "default": " "
+      "label": "Welcome heading",
+      "default": "Welcome"
     },
     {
       "type": "text",
       "id": "flagship_caption",
-      "label": "Caption (optional)",
-      "default": " "
+      "label": "Offers heading",
+      "default": "Offers"
     }
   ],
   "blocks": [
@@ -230,8 +199,8 @@
       "name": "Hero (flagship)",
       "settings": {
         "layout_style": "flagship",
-        "flagship_heading": "",
-        "flagship_caption": ""
+        "flagship_heading": "Welcome",
+        "flagship_caption": "Offers"
       },
       "blocks": []
     }

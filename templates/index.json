@@ -13,8 +13,8 @@
       "type": "hero",
       "settings": {
         "layout_style": "flagship",
-        "flagship_heading": " ",
-        "flagship_caption": " "
+        "flagship_heading": "Welcome",
+        "flagship_caption": "Offers"
       }
     },
     "feature-strip": {
