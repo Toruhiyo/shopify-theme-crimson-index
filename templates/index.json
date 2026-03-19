@@ -11,13 +11,7 @@
   "sections": {
     "hero": {
       "type": "hero",
-      "settings": {
-        "show_logo": true,
-        "heading": " ",
-        "subheading": "Curated electronics. Voice-first help when you need it.",
-        "button_label": " ",
-        "button_link": ""
-      }
+      "settings": {}
     },
     "feature-strip": {
       "type": "feature-strip",
