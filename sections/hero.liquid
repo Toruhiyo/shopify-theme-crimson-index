@@ -36,18 +36,18 @@
     {%- if is_flagship -%}
       <div class="hero__slide is-active">
         <div class="hero__flagship-inner">
+          {%- assign _h = section.settings.flagship_heading | strip -%}
+          {%- assign _c = section.settings.flagship_caption | strip -%}
+          {%- assign _s = section.settings.flagship_subheading | strip -%}
           <div class="hero__flagship-text">
-            {%- assign _welcome = section.settings.flagship_heading | strip -%}
-            {%- assign _offers = section.settings.flagship_caption | strip -%}
-            {%- if _welcome != '' -%}
-              <h2 class="hero__title">{{ section.settings.flagship_heading }}</h2>
-            {%- else -%}
-              <h2 class="hero__title">Welcome</h2>
+            {%- if _h != '' -%}
+              <h1 class="hero__title">{{ section.settings.flagship_heading }}</h1>
             {%- endif -%}
-            {%- if _offers != '' -%}
-              <p class="hero__caption">{{ section.settings.flagship_caption }}</p>
-            {%- else -%}
-              <p class="hero__caption">Offers</p>
+            {%- if _c != '' -%}
+              <p class="hero__subtitle">{{ section.settings.flagship_caption }}</p>
+            {%- endif -%}
+            {%- if _s != '' -%}
+              <p class="hero__subheading">{{ section.settings.flagship_subheading }}</p>
             {%- endif -%}
           </div>
         </div>
@@ -138,10 +138,10 @@
       "label": "Layout",
       "options": [
         { "value": "slideshow", "label": "Slideshow" },
-        { "value": "flagship", "label": "Flagship (single product)" }
+        { "value": "flagship", "label": "Text hero (headings)" }
       ],
       "default": "flagship",
-      "info": "Flagship: one product, calm layout, for greeting/overview visuals."
+      "info": "Text hero: headings only, compact layout. Slideshow uses image slides."
     },
     {
       "type": "range",
@@ -154,19 +154,25 @@
     },
     {
       "type": "header",
-      "content": "Flagship layout (text only)"
+      "content": "Text hero (headings)"
     },
     {
       "type": "text",
       "id": "flagship_heading",
-      "label": "Welcome heading",
-      "default": "Welcome"
+      "label": "Heading",
+      "default": "Meridian"
     },
     {
       "type": "text",
       "id": "flagship_caption",
-      "label": "Offers heading",
-      "default": "Offers"
+      "label": "Subheading",
+      "default": "Premium electronics for your home and workspace."
+    },
+    {
+      "type": "text",
+      "id": "flagship_subheading",
+      "label": "Supporting line (optional)",
+      "default": " "
     }
   ],
   "blocks": [
@@ -196,11 +202,12 @@
       ]
     },
     {
-      "name": "Hero (flagship)",
+      "name": "Hero (text)",
       "settings": {
         "layout_style": "flagship",
-        "flagship_heading": "Welcome",
-        "flagship_caption": "Offers"
+        "flagship_heading": "Meridian",
+        "flagship_caption": "Premium electronics for your home and workspace.",
+        "flagship_subheading": " "
       },
       "blocks": []
     }

@@ -13,8 +13,9 @@
       "type": "hero",
       "settings": {
         "layout_style": "flagship",
-        "flagship_heading": "Welcome",
-        "flagship_caption": "Offers"
+        "flagship_heading": "Meridian",
+        "flagship_caption": "Premium electronics for your home and workspace.",
+        "flagship_subheading": " "
       }
     },
     "feature-strip": {
