@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "accessibility": {
     "skip_to_content": "Saltar al contenido"
@@ -57,8 +66,13 @@
     "badges": {
       "new": "Nuevo",
       "hot": "Popular",
-      "sale": "Oferta"
-    }
+      "sale": "Oferta",
+      "refurbished": "Certificado Remanufacturado",
+      "open_box": "Caja Abierta"
+    },
+    "link_options": "Opciones",
+    "link_model": "Modelo",
+    "link_compatible": "Compatible con"
   },
   "collections": {
     "title": "Colecciones",
@@ -85,7 +99,11 @@
     "complete_setup": "Completa tu configuración",
     "decrease": "Disminuir cantidad",
     "increase": "Aumentar cantidad",
-    "shipping_note": "Envío e impuestos calculados al finalizar la compra."
+    "shipping_note": "Envío e impuestos calculados al finalizar la compra.",
+    "you_save": "Usted guarda",
+    "remove": "Eliminar",
+    "cancel": "Cancelar",
+    "confirm_remove": "¿Quitar este artículo de tu carrito?"
   },
   "search": {
     "title": "Buscar",
@@ -118,5 +136,15 @@
   "blog": {
     "comments": "Comentarios",
     "no_articles": "Aún no hay artículos."
+  },
+  "contact": {
+    "form": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "subject": "Asunto",
+      "message": "Mensaje",
+      "send": "Enviar mensaje",
+      "success": "Gracias por contactarnos. Le responderemos tan pronto como nos sea posible."
+    }
   }
 }
