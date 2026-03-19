@@ -11,7 +11,11 @@
   "sections": {
     "hero": {
       "type": "hero",
-      "settings": {}
+      "settings": {
+        "layout_style": "flagship",
+        "flagship_heading": " ",
+        "flagship_caption": " "
+      }
     },
     "feature-strip": {
       "type": "feature-strip",
