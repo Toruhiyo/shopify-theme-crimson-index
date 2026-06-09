@@ -29,7 +29,13 @@
             {%- assign tag = tags[forloop.index0] | strip -%}
             <figure class="bizmis-coach__slide" data-bizmis-coach-slide>
               {%- if tag != blank -%}
-                <figcaption class="bizmis-coach__tag">{{ tag }}</figcaption>
+                {%- assign tag_parts = tag | split: '·' -%}
+                <figcaption class="bizmis-coach__tag">
+                  <span class="bizmis-coach__tag-benefit">{{ tag_parts[0] | strip }}</span>
+                  {%- if tag_parts.size > 1 -%}
+                    <span class="bizmis-coach__tag-sub">{{ tag_parts[1] | strip }}</span>
+                  {%- endif -%}
+                </figcaption>
               {%- endif -%}
               <blockquote class="bizmis-coach__prompt">{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="bizmis-coach__word">{{ word }}</span>{% endfor %}</blockquote>
             </figure>

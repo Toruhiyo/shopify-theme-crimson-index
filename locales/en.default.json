@@ -149,7 +149,7 @@
   "bizmis": {
     "panel": {
       "title": "Meet your voice store clerk",
-      "examples": "A book for my 12-year-old nephew\nAtomic Habits or Deep Work, which first if I procrastinate a lot?\nDo I need to read the original trilogy before the prequels?\nWhere's my order? I haven't received it yet.\nThe cover arrived damaged, can I exchange it?\nDo you ship to Spain, and how long does it take?",
+      "examples": "I need noise-cancelling earbuds for the gym, what do you recommend?\nWhich is better for gaming, the 144Hz or the 240Hz monitor?\nWill this soundbar pair with my TV over HDMI ARC?\nWhere's my order? The tracking hasn't moved in three days.\nThe charger arrived with the wrong plug, can I exchange it?\nDo you ship to Spain, and is the 2-year warranty valid there?",
       "example_tags": "Boost sales · Product discovery\nBoost sales · Product comparison\nBoost sales · Domain expertise\nCut support · Order status\nCut support · Returns & exchanges\nCut support · Pre-purchase FAQ",
       "install": "Install Bizmis",
       "install_with_code": "Install with your early-access code"

@@ -3648,16 +3648,16 @@ textarea.input {
   overflow: hidden;
   pointer-events: auto;
   padding: 0.85rem 1rem 0.9rem;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--color-fg, #111);
+  border: 1px solid var(--color-border-raw, #e5e5ea);
   border-radius: 1rem;
-  background: rgba(17, 17, 17, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 20px 48px -22px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 48px -24px rgba(0, 0, 0, 0.28);
 }
 
-/* Faint white brand mark behind the content so it never takes up layout space. */
+/* Faint brand mark behind the content so it never takes up layout space. */
 .bizmis-coach__watermark {
   position: absolute;
   top: -0.55rem;
@@ -3665,9 +3665,9 @@ textarea.input {
   width: 3.75rem;
   height: 3.75rem;
   z-index: 0;
-  opacity: 0.07;
+  opacity: 0.06;
   pointer-events: none;
-  background-color: #fff;
+  background-color: var(--color-fg, #111);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
@@ -3699,19 +3699,46 @@ textarea.input {
 }
 
 .bizmis-coach__tag {
-  display: block;
-  margin-bottom: 0.45rem;
-  font-size: 0.5625rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4em;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
-  color: var(--color-primary);
   opacity: 0;
   transition: opacity 0.4s ease;
 }
 
 .bizmis-coach__slide.is-active .bizmis-coach__tag {
   opacity: 1;
+}
+
+/* Benefit leads the eyebrow: red, heavier, slightly larger. */
+.bizmis-coach__tag-benefit {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-primary);
+}
+
+/* Sub-benefit is the quieter qualifier: muted, lighter, with a dot lead-in. */
+.bizmis-coach__tag-sub {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-muted-fg, #6e6e73);
+}
+
+.bizmis-coach__tag-sub::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: var(--color-border-raw, #c7c7cc);
+  transform: translateY(-0.15em);
 }
 
 /* Framed as something the shopper could say: fancy quotes + a flex row so word
@@ -3728,7 +3755,7 @@ textarea.input {
   font-size: 0.875rem;
   line-height: 1.4;
   letter-spacing: 0.01em;
-  color: #fff;
+  color: var(--color-fg, #111);
 }
 
 .bizmis-coach__prompt::before {
@@ -3743,7 +3770,7 @@ textarea.input {
   font-weight: 600;
 }
 
-/* Karaoke caption: a white chip highlight sweeps word by word (like the landing
+/* Karaoke caption: a red chip highlight sweeps word by word (like the landing
    page). The chip is painted via box-shadow + scale so it never reflows. */
 .bizmis-coach__word {
   display: inline-block;
@@ -3752,9 +3779,9 @@ textarea.input {
 }
 
 .bizmis-coach__word.is-current {
-  background-color: #fff;
-  color: var(--color-primary);
-  box-shadow: 0 0 0 0.18em #fff;
+  background-color: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  box-shadow: 0 0 0 0.18em var(--color-primary);
   transform: scale(1.05);
 }
 
@@ -3766,18 +3793,15 @@ textarea.input {
   justify-content: center;
   gap: 0.45rem;
   width: 100%;
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  color: var(--color-primary-fg, #fff);
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  transition: filter 0.2s ease;
 }
 
 .bizmis-coach__cta.btn:hover {
-  background-color: rgba(255, 255, 255, 0.16);
-  border-color: #fff;
-  color: #fff;
+  filter: brightness(0.92);
+  color: var(--color-primary-fg, #fff);
 }
 
 .bizmis-coach__cta-icon {
