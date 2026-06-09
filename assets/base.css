@@ -4,6 +4,7 @@
    ============================================================ */
 
 :root {
+  --header-height: 3.5rem;
   --color-bg: #FFFFFF;
   --color-fg: #111111;
   --color-card: #F5F5F7;
@@ -30,6 +31,12 @@
   --radius-card: 16px;
   --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
   --shadow-elevated: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.03);
+}
+
+@media (min-width: 990px) {
+  :root {
+    --header-height: 4rem;
+  }
 }
 
 /* --- Page Loader --- */
@@ -1584,6 +1591,10 @@ textarea.input {
 }
 
 /* --- Announcement Bar --- */
+.announcement-bar-section {
+  display: none;
+}
+
 .announcement-bar {
   background: var(--color-primary);
   color: var(--color-primary-fg);
@@ -1618,6 +1629,20 @@ textarea.input {
   .hero-text {
     padding: 9rem 0 7rem;
   }
+}
+
+.template-index .hero-section {
+  min-height: calc(100dvh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+}
+
+.template-index .hero-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 0;
 }
 
 .hero-text__inner {
