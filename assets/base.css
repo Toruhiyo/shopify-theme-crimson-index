@@ -3619,3 +3619,186 @@ textarea.input {
     scroll-behavior: auto !important;
   }
 }
+
+/* --- Bizmis coachmark (BIZ-134) — speech bubble that pops above the widget --- */
+.bizmis-coach {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998;
+  width: min(18rem, calc(100vw - 1.5rem));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+  transform-origin: bottom center;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.bizmis-coach[hidden] {
+  display: none;
+}
+
+.bizmis-coach.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+.bizmis-coach__bubble {
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto;
+  padding: 0.85rem 1rem 0.9rem;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1rem;
+  background: rgba(17, 17, 17, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 48px -22px rgba(0, 0, 0, 0.8);
+}
+
+/* Faint white brand mark behind the content so it never takes up layout space. */
+.bizmis-coach__watermark {
+  position: absolute;
+  top: -0.55rem;
+  right: -0.5rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  z-index: 0;
+  opacity: 0.07;
+  pointer-events: none;
+  background-color: #fff;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.bizmis-coach__slides {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  margin-bottom: 0.75rem;
+}
+
+/* The card stays put; the suggestion appears instantly and fades out as a unit. */
+.bizmis-coach__slide {
+  grid-area: 1 / 1;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.bizmis-coach__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transition: none;
+}
+
+.bizmis-coach__tag {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.bizmis-coach__slide.is-active .bizmis-coach__tag {
+  opacity: 1;
+}
+
+/* Framed as something the shopper could say: fancy quotes + a flex row so word
+   spacing stays consistent regardless of whitespace. */
+.bizmis-coach__prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.12em 0.3em;
+  margin: 0;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.bizmis-coach__prompt::before {
+  content: '\201C';
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.bizmis-coach__prompt::after {
+  content: '\201D';
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Karaoke caption: a white chip highlight sweeps word by word (like the landing
+   page). The chip is painted via box-shadow + scale so it never reflows. */
+.bizmis-coach__word {
+  display: inline-block;
+  border-radius: 0.3em;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.bizmis-coach__word.is-current {
+  background-color: #fff;
+  color: var(--color-primary);
+  box-shadow: 0 0 0 0.18em #fff;
+  transform: scale(1.05);
+}
+
+.bizmis-coach__cta.btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.bizmis-coach__cta.btn:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-color: #fff;
+  color: #fff;
+}
+
+.bizmis-coach__cta-icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bizmis-coach {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+
+  .bizmis-coach__slide,
+  .bizmis-coach__tag,
+  .bizmis-coach__word {
+    transition: none;
+  }
+
+  .bizmis-coach__word {
+    transform: none;
+  }
+}
