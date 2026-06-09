@@ -148,8 +148,8 @@
   "bizmis": {
     "panel": {
       "title": "Découvrez votre vendeur vocal",
-      "examples": "Je cherche un ordinateur portable avec une bonne autonomie.\nCes écouteurs semblent identiques. Lesquels sont meilleurs pour courir ?\nEst-ce que ça recharge vite un iPhone 15 ?\nOù est ma commande ? Le suivi n'a pas bougé depuis des jours.\nLe chargeur a la mauvaise prise. Puis-je l'échanger ?\nLivrez-vous en Espagne, et la garantie y est-elle valable ?",
-      "example_tags": "Augmenter les ventes · Convertir les indécis\nAugmenter les ventes · Lever les hésitations\nAugmenter les ventes · Acheter en confiance\nRéduire les demandes · Fini les e-mails de suivi\nRéduire les demandes · Retours en autonomie\nRéduire les demandes · Réponses en amont",
+      "examples": "Je cherche un ordinateur portable qui tienne toute la journée.\nCes écouteurs se ressemblent. Lesquels sont les mieux pour courir ?\nEst-ce compatible charge rapide pour iPhone 15 ?\nOù est ma commande ? Le suivi n'a pas été mis à jour depuis plusieurs jours.\nLe chargeur est arrivé avec la mauvaise prise. Puis-je l'échanger ?\nLivrez-vous en Espagne ? La garantie y est-elle valable ?",
+      "example_tags": "Augmenter les ventes · Convaincre les indécis\nAugmenter les ventes · Lever les doutes\nAugmenter les ventes · Rassurer avant l'achat\nRéduire les demandes · Éviter les e-mails de suivi\nRéduire les demandes · Échanges sans ticket\nRéduire les demandes · Répondre aux questions fréquentes",
       "install": "Installer Bizmis",
       "install_with_code": "Installer avec votre code d'accès anticipé"
     }

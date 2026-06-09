@@ -122,8 +122,8 @@
   "bizmis": {
     "panel": {
       "title": "Maak kennis met je spraakgestuurde verkoper",
-      "examples": "Ik zoek een laptop met goede accuduur.\nDeze oordopjes lijken hetzelfde. Welke zijn beter om te hardlopen?\nLaadt dit een iPhone 15 snel op?\nWaar is mijn bestelling? De tracking is al dagen niet bijgewerkt.\nDe oplader heeft de verkeerde stekker. Kan ik hem ruilen?\nLeveren jullie aan Spanje, en is de garantie daar geldig?",
-      "example_tags": "Verhoog omzet · Twijfelaars overtuigen\nVerhoog omzet · Twijfel wegnemen\nVerhoog omzet · Met vertrouwen kopen\nVerminder vragen · Geen status-mails meer\nVerminder vragen · Retouren in zelfbediening\nVerminder vragen · Antwoorden vooraf",
+      "examples": "Ik zoek een laptop die de hele dag meegaat.\nDeze oordopjes lijken hetzelfde. Welke zijn beter voor hardlopen?\nOndersteunt dit snelladen voor iPhone 15?\nWaar is mijn bestelling? De tracking is al dagen niet bijgewerkt.\nDe oplader is met de verkeerde stekker geleverd. Kan ik hem ruilen?\nLeveren jullie in Spanje? Geldt de garantie daar ook?",
+      "example_tags": "Verhoog omzet · Overtuig twijfelaars\nVerhoog omzet · Neem twijfel weg\nVerhoog omzet · Geef vertrouwen om te kopen\nVerminder vragen · Voorkom statusmails\nVerminder vragen · Ruilen zonder tickets\nVerminder vragen · Beantwoord veelgestelde vragen",
       "install": "Bizmis installeren",
       "install_with_code": "Installeren met je early-accesscode"
     }
