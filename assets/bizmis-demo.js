@@ -184,12 +184,16 @@
     var slides = coach.querySelectorAll('[data-bizmis-coach-slide]');
     if (!slides.length) return;
 
+    var benefitEl = coach.querySelector('[data-bizmis-coach-benefit]');
+    var subEl = coach.querySelector('[data-bizmis-coach-sub]');
+
     coach.hidden = false;
     trackToWidget(coach);
 
     var index = 0;
     var timer = null;
     var wordTimers = [];
+    var shownBenefit = null;
 
     function clearWordTimers() {
       for (var i = 0; i < wordTimers.length; i++) window.clearTimeout(wordTimers[i]);
@@ -212,10 +216,33 @@
       step(0);
     }
 
+    /* Reveal the eyebrow for a slide. The benefit only re-animates when it
+       actually changes, so it holds steady across same-benefit slides; the
+       sub-benefit fades in with every prompt. */
+    function showEyebrow(slide) {
+      var benefit = slide.getAttribute('data-benefit') || '';
+      var sub = slide.getAttribute('data-sub') || '';
+
+      if (benefitEl) {
+        if (benefit !== shownBenefit) {
+          benefitEl.textContent = benefit;
+          shownBenefit = benefit;
+        }
+        benefitEl.classList.add('is-shown');
+      }
+
+      if (subEl) {
+        subEl.textContent = sub;
+        subEl.hidden = !sub;
+        subEl.classList.add('is-shown');
+      }
+    }
+
     /* The card stays put; only the suggestion text fades in, lingers, fades
        out, pauses, then the next one fades in. */
     function showText() {
       var slide = slides[index];
+      showEyebrow(slide);
       slide.classList.add('is-active');
       runKaraoke(slide);
       if (slides.length < 2) return;
@@ -224,9 +251,15 @@
 
     function hideText() {
       clearWordTimers();
+      var nextIndex = (index + 1) % slides.length;
+      var sameBenefit = slides[nextIndex].getAttribute('data-benefit') === slides[index].getAttribute('data-benefit');
+
       slides[index].classList.remove('is-active');
+      if (subEl) subEl.classList.remove('is-shown');
+      if (!sameBenefit && benefitEl) benefitEl.classList.remove('is-shown');
+
       timer = window.setTimeout(function () {
-        index = (index + 1) % slides.length;
+        index = nextIndex;
         showText();
       }, COACH_FADE_MS + COACH_GAP_MS);
     }
@@ -234,6 +267,7 @@
     if (bubble && slides.length > 1) {
       bubble.addEventListener('mouseenter', function () {
         if (timer) { window.clearTimeout(timer); timer = null; }
+        showEyebrow(slides[index]);
         slides[index].classList.add('is-active');
       });
       bubble.addEventListener('mouseleave', function () {

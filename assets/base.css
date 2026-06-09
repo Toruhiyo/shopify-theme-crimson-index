@@ -3665,7 +3665,7 @@ textarea.input {
   width: 3.75rem;
   height: 3.75rem;
   z-index: 0;
-  opacity: 0.06;
+  opacity: 0.04;
   pointer-events: none;
   background-color: var(--color-fg, #111);
   -webkit-mask-repeat: no-repeat;
@@ -3698,19 +3698,18 @@ textarea.input {
   transition: none;
 }
 
-.bizmis-coach__tag {
+/* Persistent eyebrow. The benefit holds steady across same-benefit slides and
+   only fades when it changes; the sub-benefit fades with every prompt. */
+.bizmis-coach__eyebrow {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.4em;
   margin-bottom: 0.5rem;
+  min-height: 0.75rem;
   text-transform: uppercase;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.bizmis-coach__slide.is-active .bizmis-coach__tag {
-  opacity: 1;
 }
 
 /* Benefit leads the eyebrow: red, heavier, slightly larger. */
@@ -3719,6 +3718,12 @@ textarea.input {
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.bizmis-coach__tag-benefit.is-shown {
+  opacity: 1;
 }
 
 /* Sub-benefit is the quieter qualifier: muted, lighter, with a dot lead-in. */
@@ -3730,6 +3735,16 @@ textarea.input {
   font-weight: 500;
   letter-spacing: 0.08em;
   color: var(--color-muted-fg, #6e6e73);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.bizmis-coach__tag-sub.is-shown {
+  opacity: 1;
+}
+
+.bizmis-coach__tag-sub[hidden] {
+  display: none;
 }
 
 .bizmis-coach__tag-sub::before {
@@ -3785,6 +3800,8 @@ textarea.input {
   transform: scale(1.05);
 }
 
+/* Secondary to the widget's voice-chat button: outline + red text/icon only,
+   with a soft brand-red tint on hover so it never competes as a filled CTA. */
 .bizmis-coach__cta.btn {
   position: relative;
   z-index: 1;
@@ -3793,15 +3810,17 @@ textarea.input {
   justify-content: center;
   gap: 0.45rem;
   width: 100%;
-  color: var(--color-primary-fg, #fff);
-  background-color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  transition: filter 0.2s ease;
+  color: var(--color-primary);
+  background-color: transparent;
+  border: 1px solid var(--color-border-raw, #e5e5ea);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .bizmis-coach__cta.btn:hover {
-  filter: brightness(0.92);
-  color: var(--color-primary-fg, #fff);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background-color: rgba(209, 0, 26, 0.07);
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
 .bizmis-coach__cta-icon {
@@ -3817,7 +3836,8 @@ textarea.input {
   }
 
   .bizmis-coach__slide,
-  .bizmis-coach__tag,
+  .bizmis-coach__tag-benefit,
+  .bizmis-coach__tag-sub,
   .bizmis-coach__word {
     transition: none;
   }

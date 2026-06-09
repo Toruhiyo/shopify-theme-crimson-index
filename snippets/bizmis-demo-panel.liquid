@@ -22,21 +22,28 @@
         aria-hidden="true"
       ></span>
 
+      <div class="bizmis-coach__eyebrow" aria-hidden="true">
+        <span class="bizmis-coach__tag-benefit" data-bizmis-coach-benefit></span>
+        <span class="bizmis-coach__tag-sub" data-bizmis-coach-sub hidden></span>
+      </div>
+
       <div class="bizmis-coach__slides" data-bizmis-coach-slides>
         {%- for prompt in prompts -%}
           {%- assign trimmed = prompt | strip -%}
           {%- if trimmed != blank -%}
             {%- assign tag = tags[forloop.index0] | strip -%}
-            <figure class="bizmis-coach__slide" data-bizmis-coach-slide>
-              {%- if tag != blank -%}
-                {%- assign tag_parts = tag | split: '·' -%}
-                <figcaption class="bizmis-coach__tag">
-                  <span class="bizmis-coach__tag-benefit">{{ tag_parts[0] | strip }}</span>
-                  {%- if tag_parts.size > 1 -%}
-                    <span class="bizmis-coach__tag-sub">{{ tag_parts[1] | strip }}</span>
-                  {%- endif -%}
-                </figcaption>
-              {%- endif -%}
+            {%- assign tag_parts = tag | split: '·' -%}
+            {%- assign benefit = tag_parts[0] | strip -%}
+            {%- assign sub = '' -%}
+            {%- if tag_parts.size > 1 -%}
+              {%- assign sub = tag_parts[1] | strip -%}
+            {%- endif -%}
+            <figure
+              class="bizmis-coach__slide"
+              data-bizmis-coach-slide
+              data-benefit="{{ benefit | escape }}"
+              data-sub="{{ sub | escape }}"
+            >
               <blockquote class="bizmis-coach__prompt">{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="bizmis-coach__word">{{ word }}</span>{% endfor %}</blockquote>
             </figure>
           {%- endif -%}
