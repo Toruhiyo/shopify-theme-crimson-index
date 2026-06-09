@@ -118,5 +118,14 @@
   "blog": {
     "comments": "Kommentare",
     "no_articles": "Noch keine Artikel."
+  },
+  "bizmis": {
+    "panel": {
+      "title": "Lernen Sie Ihren sprachgesteuerten Verkäufer kennen",
+      "examples": "Ich suche einen Laptop mit langer Akkulaufzeit.\nDiese Kopfhörer wirken gleich. Welche sind besser zum Laufen?\nLädt das ein iPhone 15 schnell?\nWo ist meine Bestellung? Die Sendungsverfolgung bewegt sich seit Tagen nicht.\nDas Ladegerät hat den falschen Stecker. Kann ich es umtauschen?\nLiefern Sie nach Spanien, und gilt die Garantie dort?",
+      "example_tags": "Mehr Umsatz · Produktsuche\nMehr Umsatz · Produktvergleich\nMehr Umsatz · Technische Beratung\nWeniger Support · Bestellstatus\nWeniger Support · Rückgaben & Umtausch\nWeniger Support · Fragen vor dem Kauf",
+      "install": "Bizmis installieren",
+      "install_with_code": "Mit Ihrem Early-Access-Code installieren"
+    }
   }
 }

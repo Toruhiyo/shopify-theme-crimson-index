@@ -146,5 +146,14 @@
       "send": "Enviar mensaje",
       "success": "Gracias por contactarnos. Le responderemos tan pronto como nos sea posible."
     }
+  },
+  "bizmis": {
+    "panel": {
+      "title": "Conoce a tu dependiente por voz",
+      "examples": "Busco un portátil con buena batería.\nEstos auriculares parecen iguales. ¿Cuál es mejor para correr?\n¿Carga rápido un iPhone 15?\n¿Dónde está mi pedido? El seguimiento no se actualiza desde hace días.\nEl cargador vino con el enchufe equivocado. ¿Puedo cambiarlo?\n¿Enviáis a España y la garantía es válida allí?",
+      "example_tags": "Más ventas · Descubrimiento de productos\nMás ventas · Comparación de productos\nMás ventas · Asesoramiento técnico\nMenos soporte · Estado del pedido\nMenos soporte · Devoluciones y cambios\nMenos soporte · Preguntas previas a la compra",
+      "install": "Instalar Bizmis",
+      "install_with_code": "Instala con tu código de acceso anticipado"
+    }
   }
 }

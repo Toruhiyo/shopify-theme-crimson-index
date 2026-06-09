@@ -149,8 +149,8 @@
   "bizmis": {
     "panel": {
       "title": "Meet your voice store clerk",
-      "examples": "I need noise-cancelling earbuds for the gym, what do you recommend?\nWhich is better for gaming, the 144Hz or the 240Hz monitor?\nWill this soundbar pair with my TV over HDMI ARC?\nWhere's my order? The tracking hasn't moved in three days.\nThe charger arrived with the wrong plug, can I exchange it?\nDo you ship to Spain, and is the 2-year warranty valid there?",
-      "example_tags": "Boost sales · Product discovery\nBoost sales · Product comparison\nBoost sales · Domain expertise\nCut support · Order status\nCut support · Returns & exchanges\nCut support · Pre-purchase FAQ",
+      "examples": "Looking for a laptop with great battery life.\nThese earbuds seem the same. Which is better for running?\nDoes this fast-charge an iPhone 15?\nWhere's my order? Tracking hasn't updated in days.\nThe charger came with the wrong plug type. Can I swap it?\nDo you ship to Spain, and is the warranty valid there?",
+      "example_tags": "Boost sales · Product discovery\nBoost sales · Product comparison\nBoost sales · Technical guidance\nCut support · Order status\nCut support · Returns & exchanges\nCut support · Pre-purchase FAQ",
       "install": "Install Bizmis",
       "install_with_code": "Install with your early-access code"
     }

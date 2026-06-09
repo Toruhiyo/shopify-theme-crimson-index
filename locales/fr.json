@@ -144,5 +144,14 @@
       "send": "Envoyer le message",
       "success": "Merci de nous avoir contactés. Nous vous recontacterons dès que possible."
     }
+  },
+  "bizmis": {
+    "panel": {
+      "title": "Découvrez votre vendeur vocal",
+      "examples": "Je cherche un ordinateur portable avec une bonne autonomie.\nCes écouteurs semblent identiques. Lesquels sont meilleurs pour courir ?\nEst-ce que ça recharge vite un iPhone 15 ?\nOù est ma commande ? Le suivi n'a pas bougé depuis des jours.\nLe chargeur a la mauvaise prise. Puis-je l'échanger ?\nLivrez-vous en Espagne, et la garantie y est-elle valable ?",
+      "example_tags": "Plus de ventes · Découverte produit\nPlus de ventes · Comparaison produit\nPlus de ventes · Conseil technique\nMoins de support · Suivi de commande\nMoins de support · Retours et échanges\nMoins de support · Questions avant achat",
+      "install": "Installer Bizmis",
+      "install_with_code": "Installer avec votre code d'accès anticipé"
+    }
   }
 }
