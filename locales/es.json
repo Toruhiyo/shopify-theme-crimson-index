@@ -15,8 +15,8 @@
     "language": "Idioma",
     "404": {
       "subheading": "Página no encontrada",
-      "title": "Perdido en el vacío",
-      "description": "La página que buscas no existe o ha sido movida. Volvamos al camino.",
+      "title": "Te has perdido",
+      "description": "La página que buscas no existe o se ha movido. Vamos a llevarte de vuelta.",
       "button": "Volver al inicio"
     }
   },
@@ -28,17 +28,17 @@
     "navigation": "Navegación principal",
     "mobile_menu": "Menú móvil",
     "close_menu": "Cerrar menú",
-    "search_placeholder": "Buscar productos, colecciones...",
+    "search_placeholder": "Busca productos, colecciones...",
     "view_all": "Ver todo",
     "more": "Más",
     "support": "Soporte",
     "help": "Ayuda",
-    "policies": "Políticas",
+    "policies": "Legal",
     "home": "Inicio",
-    "shop_all": "Ver todo {{ title }}",
-    "shipping_policy": "Política de envío",
+    "shop_all": "Comprar {{ title }}",
+    "shipping_policy": "Envíos",
     "returns_refunds": "Devoluciones y reembolsos",
-    "terms_of_service": "Términos de servicio",
+    "terms_of_service": "Términos y condiciones",
     "privacy_policy": "Política de privacidad"
   },
   "sections": {
@@ -53,12 +53,12 @@
     }
   },
   "products": {
-    "add_to_cart": "Agregar al carrito",
-    "buy_now": "Comprar ahora",
+    "add_to_cart": "Añadir al carrito",
+    "buy_now": "Comprar ya",
     "sold_out": "Agotado",
     "quick_view": "Vista rápida",
     "quantity": "Cantidad",
-    "decrease_quantity": "Disminuir cantidad",
+    "decrease_quantity": "Reducir cantidad",
     "increase_quantity": "Aumentar cantidad",
     "thumbnail": "Miniatura",
     "reviews_count": "{{ count }} reseñas",
@@ -67,8 +67,8 @@
       "new": "Nuevo",
       "hot": "Popular",
       "sale": "Oferta",
-      "refurbished": "Certificado Remanufacturado",
-      "open_box": "Caja Abierta"
+      "refurbished": "Reacondicionado certificado",
+      "open_box": "Caja abierta"
     },
     "link_options": "Opciones",
     "link_model": "Modelo",
@@ -77,60 +77,60 @@
   "collections": {
     "title": "Colecciones",
     "products": "productos",
-    "sort_by": "Ordenar por",
+    "sort_by": "Ordenar",
     "filters": "Filtros",
     "pagination": "Paginación",
     "previous": "Página anterior",
     "next": "Página siguiente",
     "clear_all": "Borrar todo",
-    "empty": "No se encontraron productos",
+    "empty": "No hemos encontrado ningún producto",
     "continue_shopping": "Seguir comprando"
   },
   "cart": {
     "title": "Tu carrito",
-    "close": "Cerrar carrito",
+    "close": "Cerrar el carrito",
     "product": "Producto",
     "quantity": "Cant.",
     "total": "Total",
     "subtotal": "Subtotal",
-    "checkout": "Pagar",
+    "checkout": "Finalizar compra",
     "empty": "Tu carrito está vacío",
     "continue_shopping": "Seguir comprando",
     "complete_setup": "Completa tu configuración",
-    "decrease": "Disminuir cantidad",
+    "decrease": "Reducir cantidad",
     "increase": "Aumentar cantidad",
-    "shipping_note": "Envío e impuestos calculados al finalizar la compra.",
-    "you_save": "Usted guarda",
+    "shipping_note": "Los gastos de envío y los impuestos se calculan al finalizar la compra.",
+    "you_save": "Ahorras",
     "remove": "Eliminar",
     "cancel": "Cancelar",
-    "confirm_remove": "¿Quitar este artículo de tu carrito?"
+    "confirm_remove": "¿Quieres quitar este artículo del carrito?"
   },
   "search": {
     "title": "Buscar",
-    "placeholder": "Buscar productos...",
+    "placeholder": "Busca productos...",
     "submit": "Buscar",
     "results_count": "{{ count }} resultados",
-    "no_results": "Sin resultados para \"{{ terms }}\"",
-    "no_results_hint": "Prueba con otro término o explora nuestras colecciones."
+    "no_results": "No hay resultados para \"{{ terms }}\"",
+    "no_results_hint": "Prueba con otra búsqueda o explora nuestras colecciones."
   },
   "newsletter": {
-    "placeholder": "Tu correo electrónico",
-    "email_label": "Correo electrónico",
-    "subscribe": "Suscribirse"
+    "placeholder": "Introduce tu email",
+    "email_label": "Email",
+    "subscribe": "Suscríbete"
   },
   "footer": {
-    "email_placeholder": "Tu correo",
-    "subscribe": "Suscribirse",
-    "support": "Soporte",
+    "email_placeholder": "Tu email",
+    "subscribe": "Suscríbete",
+    "support": "Ayuda",
     "legal": "Legal",
-    "secure_checkout": "Pago seguro",
-    "free_shipping": "Envío gratis +$99",
-    "easy_returns": "Devoluciones fáciles",
+    "secure_checkout": "Compra segura",
+    "free_shipping": "Envío gratis desde $99",
+    "easy_returns": "Devoluciones sencillas",
     "warranty_included": "Garantía incluida",
     "rights": "Todos los derechos reservados."
   },
   "support": {
-    "contact_us": "Contáctenos",
+    "contact_us": "Contacta con nosotros",
     "faq": "Preguntas frecuentes"
   },
   "blog": {
@@ -140,16 +140,16 @@
   "contact": {
     "form": {
       "name": "Nombre",
-      "email": "Correo electrónico",
+      "email": "Email",
       "subject": "Asunto",
       "message": "Mensaje",
       "send": "Enviar mensaje",
-      "success": "Gracias por contactarnos. Le responderemos tan pronto como nos sea posible."
+      "success": "Gracias por escribirnos. Te responderemos lo antes posible."
     }
   },
   "bizmis": {
     "panel": {
-      "title": "Conoce a tu dependiente por voz",
+      "title": "Conoce a tu dependiente virtual por voz",
       "examples": "Busco un portátil que aguante todo el día.\nEstos auriculares parecen iguales. ¿Cuál es mejor para correr?\n¿Tiene carga rápida para iPhone 15?\n¿Dónde está mi pedido? El seguimiento lleva días sin actualizarse.\nEl cargador ha llegado con el enchufe equivocado. ¿Puedo cambiarlo?\n¿Enviáis a España? ¿La garantía vale allí?",
       "example_tags": "Aumenta ventas · Convence a los indecisos\nAumenta ventas · Despeja dudas\nAumenta ventas · Da confianza para comprar\nReduce consultas · Evita correos de seguimiento\nReduce consultas · Cambios sin tickets\nReduce consultas · Resuelve dudas frecuentes",
       "install": "Instalar Bizmis",
