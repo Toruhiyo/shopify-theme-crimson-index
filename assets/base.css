@@ -1982,31 +1982,40 @@ textarea.input {
   min-height: 1.7rem;
 }
 
+/* Both benefits stay visible; the current one is filled, the other dimmed. */
+.hero-voice__benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
 .hero-voice__benefit {
   display: inline-flex;
   align-items: center;
   padding: 0.34em 0.8em;
   border-radius: 999px;
-  background: var(--color-primary);
-  color: var(--color-primary-fg, #fff);
+  border: 1.5px solid var(--color-border-raw, #e5e5ea);
+  background: transparent;
+  color: var(--color-muted-fg, #6e6e73);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.11em;
   text-transform: uppercase;
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.hero-voice__benefit.is-active[data-benefit-pill='sales'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
   box-shadow: 0 8px 18px -10px var(--color-primary);
-  opacity: 0;
-  transform: translateY(0.2rem);
-  transition: opacity 0.45s ease, transform 0.45s ease, background-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-.hero-voice__benefit.is-support {
+.hero-voice__benefit.is-active[data-benefit-pill='support'] {
   background: var(--color-fg, #111);
+  border-color: var(--color-fg, #111);
+  color: #fff;
   box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.6);
-}
-
-.hero-voice__benefit.is-shown {
-  opacity: 1;
-  transform: none;
 }
 
 .hero-voice__subbenefit {

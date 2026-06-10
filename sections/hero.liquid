@@ -10,18 +10,23 @@
   assign tags = 'bizmis.panel.example_tags' | t | newline_to_br | split: '<br />'
 
   comment
-    Interleave the two benefit branches (sales first half, support second half)
-    so the rotation alternates sales / support and reads as balanced.
+    Walk the examples in natural order: all of benefit 1's sub-benefits straight
+    through (first half), then all of benefit 2's (second half). The benefit
+    pills derive their labels from the first tag of each half.
   endcomment
   assign total = prompts.size
   assign half = total | divided_by: 2
+  assign last_index = total | minus: 1
   assign order = ''
-  for offset in (1..half)
-    assign si = offset | minus: 1
-    assign ti = si | plus: half
-    assign order = order | append: si | append: ',' | append: ti | append: ','
+  for i in (0..last_index)
+    assign order = order | append: i | append: ','
   endfor
   assign order_list = order | split: ','
+
+  assign sales_tag_parts = tags[0] | split: '·'
+  assign benefit_sales = sales_tag_parts[0] | strip
+  assign support_tag_parts = tags[half] | split: '·'
+  assign benefit_support = support_tag_parts[0] | strip
 
   comment
     Use case -> collection map, keyed by the canonical (en.default) example
@@ -85,8 +90,15 @@
     {%- endcomment -%}
     <div class="hero-voice__live" data-hero-voice>
       <div class="hero-voice__ask">
+        <div class="hero-voice__benefits" aria-hidden="true">
+          {%- if benefit_sales != blank -%}
+            <span class="hero-voice__benefit" data-benefit-pill="sales">{{ benefit_sales }}</span>
+          {%- endif -%}
+          {%- if benefit_support != blank -%}
+            <span class="hero-voice__benefit" data-benefit-pill="support">{{ benefit_support }}</span>
+          {%- endif -%}
+        </div>
         <div class="hero-voice__outcome" aria-hidden="true">
-          <span class="hero-voice__benefit" data-hero-voice-benefit></span>
           <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
         </div>
 

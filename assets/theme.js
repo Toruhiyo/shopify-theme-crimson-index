@@ -983,11 +983,10 @@
       const sceneScope = root.closest('.hero-voice') || document;
       this.scenes = Array.from(sceneScope.querySelectorAll('[data-hero-voice-scene]'));
 
-      this.benefitEl = root.querySelector('[data-hero-voice-benefit]');
+      this.benefitPills = Array.from(root.querySelectorAll('[data-benefit-pill]'));
       this.subEl = root.querySelector('[data-hero-voice-sub]');
       this.dotsWrap = root.querySelector('[data-hero-voice-dots]');
       this.index = 0;
-      this.shownBenefit = null;
       this.timer = null;
       this.showMs = 3600;
       this.fadeMs = 600;
@@ -1057,18 +1056,12 @@
     }
 
     showEyebrow(slide) {
-      const benefit = slide.getAttribute('data-benefit') || '';
       const sub = slide.getAttribute('data-sub') || '';
-      const isSupport = slide.getAttribute('data-benefit-type') === 'support';
+      const benefitType = slide.getAttribute('data-benefit-type');
 
-      if (this.benefitEl) {
-        if (benefit !== this.shownBenefit) {
-          this.benefitEl.textContent = benefit;
-          this.shownBenefit = benefit;
-        }
-        this.benefitEl.classList.toggle('is-support', isSupport);
-        this.benefitEl.classList.add('is-shown');
-      }
+      this.benefitPills.forEach(pill => {
+        pill.classList.toggle('is-active', pill.getAttribute('data-benefit-pill') === benefitType);
+      });
 
       if (this.subEl) {
         this.subEl.textContent = sub;
@@ -1115,12 +1108,9 @@
       current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
 
       const nextIndex = (this.index + 1) % this.slides.length;
-      const sameBenefit = this.slides[nextIndex].getAttribute('data-benefit')
-        === current.getAttribute('data-benefit');
 
       current.classList.remove('is-active');
       if (this.subEl) this.subEl.classList.remove('is-shown');
-      if (!sameBenefit && this.benefitEl) this.benefitEl.classList.remove('is-shown');
 
       this.timer = window.setTimeout(() => {
         this.index = nextIndex;
