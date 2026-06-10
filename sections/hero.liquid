@@ -4,7 +4,6 @@
   assign subheading = section.settings.subheading
   assign say_label = section.settings.say_label
   assign secondary_text = section.settings.secondary_cta_text
-  assign scene_title = section.settings.scene_title
 
   assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
 
@@ -55,58 +54,6 @@
         <p class="hero-voice__sub">{{ subheading }}</p>
       {%- endif -%}
 
-      {%- comment -%}
-        The voice demo: a live cue (mic), the shopper phrase with the karaoke
-        sweep, the benefit/sub-benefit it drives, and a progress rail. Copy is
-        the shared, localized Bizmis use-case set; JS (HeroVoiceDemo) drives it.
-      {%- endcomment -%}
-      <div class="hero-voice__demo" data-hero-voice>
-        <div class="hero-voice__cue" aria-hidden="true">
-          <span class="hero-voice__mic">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
-            <span class="hero-voice__mic-ring"></span>
-          </span>
-          {%- if say_label != blank -%}
-            <span class="hero-voice__cue-label">{{ say_label }}</span>
-          {%- endif -%}
-        </div>
-
-        <div class="hero-voice__slides" data-hero-voice-slides>
-          {%- for idx_str in order_list -%}
-            {%- assign idx = idx_str | times: 1 -%}
-            {%- assign trimmed = prompts[idx] | strip -%}
-            {%- if trimmed != blank -%}
-              {%- assign tag = tags[idx] | strip -%}
-              {%- assign tag_parts = tag | split: '·' -%}
-              {%- assign benefit = tag_parts[0] | strip -%}
-              {%- assign sub = '' -%}
-              {%- if tag_parts.size > 1 -%}
-                {%- assign sub = tag_parts[1] | strip -%}
-              {%- endif -%}
-              {%- assign btype = 'support' -%}
-              {%- if idx < half -%}
-                {%- assign btype = 'sales' -%}
-              {%- endif -%}
-              <blockquote
-                class="hero-voice__quote"
-                data-hero-voice-slide
-                data-benefit="{{ benefit | escape }}"
-                data-sub="{{ sub | escape }}"
-                data-benefit-type="{{ btype }}"
-              >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
-            {%- endif -%}
-          {%- endfor -%}
-        </div>
-
-        <div class="hero-voice__outcome" aria-hidden="true">
-          <span class="hero-voice__arrow">&rarr;</span>
-          <span class="hero-voice__benefit" data-hero-voice-benefit></span>
-          <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
-        </div>
-
-        <div class="hero-voice__dots" data-hero-voice-dots></div>
-      </div>
-
       <div class="hero-voice__actions">
         <a
           href="{{ listing_url | escape }}"
@@ -131,15 +78,56 @@
     </div>
 
     {%- comment -%}
-      Live scene: mirrors the current use case with the matching catalog moment.
-      Each rendered slide has a parallel scene (same index, JS keeps them in
-      sync). The collection comes from scene_collection_map above (or a scene
-      block override at this position).
+      Single live component (no outer card): a live cue, the shopper phrase with
+      the karaoke sweep, the benefit/sub-benefit it drives, the matching catalog
+      scene (collection image + products), and a progress rail. The quotes and
+      scenes rotate in sync; JS (HeroVoiceDemo) drives the whole thing. Scenes
+      use scene_collection_map (or a scene block override at this position).
     {%- endcomment -%}
-    <div class="hero-voice__aside">
-      {%- if scene_title != blank -%}
-        <p class="hero-voice__scene-eyebrow">{{ scene_title }}</p>
-      {%- endif -%}
+    <div class="hero-voice__live" data-hero-voice>
+      <div class="hero-voice__cue" aria-hidden="true">
+        <span class="hero-voice__mic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+          <span class="hero-voice__mic-ring"></span>
+        </span>
+        {%- if say_label != blank -%}
+          <span class="hero-voice__cue-label">{{ say_label }}</span>
+        {%- endif -%}
+      </div>
+
+      <div class="hero-voice__slides" data-hero-voice-slides>
+        {%- for idx_str in order_list -%}
+          {%- assign idx = idx_str | times: 1 -%}
+          {%- assign trimmed = prompts[idx] | strip -%}
+          {%- if trimmed != blank -%}
+            {%- assign tag = tags[idx] | strip -%}
+            {%- assign tag_parts = tag | split: '·' -%}
+            {%- assign benefit = tag_parts[0] | strip -%}
+            {%- assign sub = '' -%}
+            {%- if tag_parts.size > 1 -%}
+              {%- assign sub = tag_parts[1] | strip -%}
+            {%- endif -%}
+            {%- assign btype = 'support' -%}
+            {%- if idx < half -%}
+              {%- assign btype = 'sales' -%}
+            {%- endif -%}
+            <blockquote
+              class="hero-voice__quote"
+              data-hero-voice-slide
+              data-benefit="{{ benefit | escape }}"
+              data-sub="{{ sub | escape }}"
+              data-benefit-type="{{ btype }}"
+            >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <div class="hero-voice__outcome" aria-hidden="true">
+        <span class="hero-voice__arrow">&rarr;</span>
+        <span class="hero-voice__benefit" data-hero-voice-benefit></span>
+        <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
+      </div>
+
       <div class="hero-voice__stage" data-hero-voice-stage>
         {%- for idx_str in order_list -%}
           {%- assign idx = idx_str | times: 1 -%}
@@ -183,25 +171,23 @@
               data-benefit-type="{{ btype }}"
             >
               <a
-                class="hero-voice__scene-card"
+                class="hero-voice__scene-media"
                 {% if scene_url != blank %}href="{{ scene_url }}"{% else %}href="#" aria-hidden="true" tabindex="-1"{% endif %}
               >
-                <span class="hero-voice__scene-media">
-                  {%- if scene_img != blank -%}
-                    <img
-                      src="{{ scene_img | image_url: width: 720 }}"
-                      alt="{{ scene_label | escape }}"
-                      width="720"
-                      height="450"
-                      loading="lazy"
-                    >
-                  {%- else -%}
-                    {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
-                  {%- endif -%}
-                  {%- if scene_label != blank -%}
-                    <span class="hero-voice__scene-tag">{{ scene_label }}</span>
-                  {%- endif -%}
-                </span>
+                {%- if scene_img != blank -%}
+                  <img
+                    src="{{ scene_img | image_url: width: 760 }}"
+                    alt="{{ scene_label | escape }}"
+                    width="760"
+                    height="475"
+                    loading="lazy"
+                  >
+                {%- else -%}
+                  {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+                {%- endif -%}
+                {%- if scene_label != blank -%}
+                  <span class="hero-voice__scene-tag">{{ scene_label }}</span>
+                {%- endif -%}
               </a>
 
               {%- if scene_collection.products.size > 0 -%}
@@ -231,6 +217,8 @@
           {%- endif -%}
         {%- endfor -%}
       </div>
+
+      <div class="hero-voice__dots" data-hero-voice-dots></div>
     </div>
   </div>
 </section>
@@ -270,12 +258,6 @@
       "id": "secondary_cta_text",
       "label": "Secondary button (opens voice clerk)",
       "default": "Talk to the clerk"
-    },
-    {
-      "type": "text",
-      "id": "scene_title",
-      "label": "Scene eyebrow",
-      "default": "What Bizmis pulls up"
     }
   ],
   "blocks": [
