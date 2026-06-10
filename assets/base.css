@@ -1380,7 +1380,7 @@ textarea.input {
   visibility: hidden;
   transform: translateY(-6px);
   transition: all 180ms ease;
-  z-index: 100;
+  z-index: 150;
   box-shadow: var(--shadow-elevated);
 }
 
@@ -1421,6 +1421,27 @@ textarea.input {
 .locale-selector__option.is-active {
   color: var(--color-primary);
   font-weight: 500;
+}
+
+.header__icons .locale-selector__trigger {
+  width: auto;
+  height: auto;
+  gap: 0.3rem;
+  padding: 0.34rem 0.62rem;
+  border: 1px solid var(--color-border-raw, #E5E5EA);
+  border-radius: 999px;
+  color: var(--color-fg);
+}
+
+.header__icons .locale-selector__trigger:hover,
+.header__icons .locale-selector.is-open .locale-selector__trigger {
+  border-color: var(--color-fg);
+  background: var(--color-card);
+}
+
+.locale-selector__trigger .locale-selector__globe {
+  width: 14px;
+  height: 14px;
 }
 
 .locale-selector__trigger--footer {
