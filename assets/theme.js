@@ -983,9 +983,11 @@
       this.index = 0;
       this.shownBenefit = null;
       this.timer = null;
-      this.showMs = 4200;
+      this.showMs = 3600;
       this.fadeMs = 600;
       this.gapMs = 250;
+      this.wordMs = 340;
+      this.wordTimers = [];
 
       this.show = this.show.bind(this);
       this.hide = this.hide.bind(this);
@@ -1021,19 +1023,46 @@
       }
     }
 
+    clearWordTimers() {
+      this.wordTimers.forEach(t => window.clearTimeout(t));
+      this.wordTimers = [];
+    }
+
+    /* Sweep the red highlight chip across the phrase one word at a time. */
+    runKaraoke(words) {
+      this.clearWordTimers();
+      if (!words.length) return;
+
+      const step = (i) => {
+        words.forEach(w => w.classList.remove('is-current'));
+        if (i >= words.length) return;
+        words[i].classList.add('is-current');
+        this.wordTimers.push(window.setTimeout(() => step(i + 1), this.wordMs));
+      };
+      step(0);
+    }
+
     show() {
       const slide = this.slides[this.index];
       this.showEyebrow(slide);
       slide.classList.add('is-active');
-      this.timer = window.setTimeout(this.hide, this.showMs);
+
+      const words = slide.querySelectorAll('.hero-voice__word');
+      this.runKaraoke(words);
+      const dwell = Math.max(this.showMs, words.length * this.wordMs + 1400);
+      this.timer = window.setTimeout(this.hide, dwell);
     }
 
     hide() {
+      this.clearWordTimers();
+      const current = this.slides[this.index];
+      current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
+
       const nextIndex = (this.index + 1) % this.slides.length;
       const sameBenefit = this.slides[nextIndex].getAttribute('data-benefit')
-        === this.slides[this.index].getAttribute('data-benefit');
+        === current.getAttribute('data-benefit');
 
-      this.slides[this.index].classList.remove('is-active');
+      current.classList.remove('is-active');
       if (this.subEl) this.subEl.classList.remove('is-shown');
       if (!sameBenefit && this.benefitEl) this.benefitEl.classList.remove('is-shown');
 
@@ -1044,6 +1073,7 @@
     }
 
     pause() {
+      this.clearWordTimers();
       if (this.timer) {
         window.clearTimeout(this.timer);
         this.timer = null;

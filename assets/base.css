@@ -1739,9 +1739,17 @@ textarea.input {
   color: var(--color-primary);
 }
 
-.hero-voice__eyebrow-icon {
-  width: 0.95rem;
-  height: 0.95rem;
+.hero-voice__eyebrow-mark {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  background-color: var(--color-primary);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .hero-voice__heading {
@@ -1763,27 +1771,37 @@ textarea.input {
   max-width: 46ch;
 }
 
-/* Rotating "say this" demo — same copy as the coachmark, larger and inline. */
+/* Rotating "say this" demo — the centerpiece. A clean card lifts the shopper
+   phrases off the page; the karaoke highlight sweeps word by word. */
 .hero-voice__demo {
   margin-top: 2rem;
   width: 100%;
-  max-width: 36rem;
+  max-width: 38rem;
+  padding: 1.5rem 1.6rem 1.35rem;
+  background: #fff;
+  border: 1px solid var(--color-border-raw, #e5e5ea);
+  border-radius: var(--radius-card, 18px);
+  box-shadow: 0 22px 48px -30px rgba(0, 0, 0, 0.45);
 }
 
-.hero-voice__demo-eyebrow {
+.hero-voice__demo-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.45em;
-  min-height: 0.85rem;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 1.5rem;
 }
 
 .hero-voice__benefit {
-  font-size: 0.7rem;
+  display: inline-block;
+  padding: 0.28em 0.7em;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  font-size: 0.64rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-primary);
   opacity: 0;
   transition: opacity 0.5s ease;
 }
@@ -1793,12 +1811,9 @@ textarea.input {
 }
 
 .hero-voice__subbenefit {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.45em;
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-muted-fg, #6e6e73);
   opacity: 0;
@@ -1813,28 +1828,23 @@ textarea.input {
   display: none;
 }
 
-.hero-voice__subbenefit::before {
-  content: '';
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background-color: var(--color-border-raw, #c7c7cc);
-  transform: translateY(-0.15em);
-}
-
 .hero-voice__slides {
   display: grid;
-  margin-top: 0.6rem;
-  min-height: 4.2rem;
+  margin-top: 1rem;
+  min-height: 5rem;
 }
 
 .hero-voice__quote {
   grid-area: 1 / 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.14em 0.34em;
   margin: 0;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: clamp(1.25rem, 2.1vw, 1.7rem);
-  line-height: 1.3;
+  font-size: clamp(1.4rem, 2.5vw, 2.05rem);
+  line-height: 1.32;
   letter-spacing: -0.01em;
   color: var(--color-fg, #111);
   opacity: 0;
@@ -1859,8 +1869,23 @@ textarea.input {
   color: var(--color-primary);
 }
 
+/* Karaoke caption: a red chip highlight sweeps word by word. Painted with
+   box-shadow + scale so it never reflows the line. */
+.hero-voice__word {
+  display: inline-block;
+  border-radius: 0.28em;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.hero-voice__word.is-current {
+  background-color: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  box-shadow: 0 0 0 0.14em var(--color-primary);
+  transform: scale(1.04);
+}
+
 .hero-voice__say {
-  margin-top: 1rem;
+  margin-top: 1.1rem;
   font-size: 0.85rem;
   color: var(--color-muted-fg, #6e6e73);
 }
@@ -1976,8 +2001,12 @@ textarea.input {
 @media (prefers-reduced-motion: reduce) {
   .hero-voice__benefit,
   .hero-voice__subbenefit,
-  .hero-voice__quote {
+  .hero-voice__quote,
+  .hero-voice__word {
     transition: none;
+  }
+  .hero-voice__word.is-current {
+    transform: none;
   }
 }
 
