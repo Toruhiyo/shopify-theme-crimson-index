@@ -1,4 +1,34 @@
-{%- if section.settings.text != blank -%}
+{%- if settings.bizmis_demo_enabled -%}
+  {%- liquid
+    assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
+    assign logo_url = 'bizmis-logo-white-transparent.png' | asset_url
+  -%}
+  <div class="promo-bar" role="region" aria-label="{{ 'bizmis.promo.label' | t | escape }}">
+    <div class="page-width promo-bar__inner">
+      <span class="promo-bar__brand">
+        <span
+          class="promo-bar__mark"
+          style="-webkit-mask-image: url('{{ logo_url }}'); mask-image: url('{{ logo_url }}');"
+          aria-hidden="true"
+        ></span>
+        {{ 'bizmis.promo.label' | t }}
+      </span>
+
+      <a
+        href="{{ listing_url | escape }}"
+        class="promo-bar__cta"
+        data-bizmis-install
+        data-label-with-code="{{ 'bizmis.panel.install_with_code' | t | escape }}"
+        data-label-no-code="{{ 'bizmis.panel.install' | t | escape }}"
+        target="_blank"
+        rel="noopener"
+      >
+        <span data-bizmis-install-label>{{ 'bizmis.panel.install' | t }}</span>
+        <svg class="promo-bar__cta-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </div>
+  </div>
+{%- elsif section.settings.text != blank -%}
   <div class="announcement-bar" role="region" aria-label="{{ 'sections.announcement_bar.label' | t }}">
     <div class="page-width">
       {%- if section.settings.link != blank -%}
@@ -20,7 +50,8 @@
       "type": "text",
       "id": "text",
       "label": "Text",
-      "default": "Free shipping on orders over $99"
+      "default": "Free shipping on orders over $99",
+      "info": "Hidden while Bizmis demo mode is on (the demo promo bar takes its place)."
     },
     {
       "type": "url",

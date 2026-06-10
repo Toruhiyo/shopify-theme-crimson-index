@@ -115,7 +115,7 @@
   </script>
 </head>
 
-<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
+<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %}">
 
   <div class="loader" id="page-loader" aria-hidden="true">
     <img src="{{ 'logo-mono.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="160" height="40">

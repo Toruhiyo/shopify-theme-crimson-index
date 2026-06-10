@@ -980,6 +980,7 @@
 
       this.benefitEl = root.querySelector('[data-hero-voice-benefit]');
       this.subEl = root.querySelector('[data-hero-voice-sub]');
+      this.dotsWrap = root.querySelector('[data-hero-voice-dots]');
       this.index = 0;
       this.shownBenefit = null;
       this.timer = null;
@@ -991,10 +992,12 @@
 
       this.show = this.show.bind(this);
       this.hide = this.hide.bind(this);
+      this.dots = this.buildDots();
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduceMotion || this.slides.length < 2) {
         this.showEyebrow(this.slides[0]);
+        this.updateDots(this.slides[0]);
         this.slides[0].classList.add('is-active');
         return;
       }
@@ -1004,15 +1007,55 @@
       root.addEventListener('mouseleave', () => this.resume());
     }
 
+    buildDots() {
+      if (!this.dotsWrap) return [];
+      return this.slides.map((slide, i) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'hero-voice__dot';
+        dot.setAttribute('aria-label', `Show example ${i + 1} of ${this.slides.length}`);
+        dot.addEventListener('click', () => this.jumpTo(i));
+        this.dotsWrap.appendChild(dot);
+        return dot;
+      });
+    }
+
+    updateDots(slide) {
+      if (!this.dots.length) return;
+      const isSupport = slide.getAttribute('data-benefit-type') === 'support';
+      this.dots.forEach((dot, i) => {
+        const active = i === this.index;
+        dot.classList.toggle('is-active', active);
+        dot.classList.toggle('is-support', active && isSupport);
+      });
+    }
+
+    jumpTo(i) {
+      if (i === this.index && this.timer) return;
+      this.clearWordTimers();
+      if (this.timer) {
+        window.clearTimeout(this.timer);
+        this.timer = null;
+      }
+      const current = this.slides[this.index];
+      current.classList.remove('is-active');
+      current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
+      if (this.subEl) this.subEl.classList.remove('is-shown');
+      this.index = i;
+      this.show();
+    }
+
     showEyebrow(slide) {
       const benefit = slide.getAttribute('data-benefit') || '';
       const sub = slide.getAttribute('data-sub') || '';
+      const isSupport = slide.getAttribute('data-benefit-type') === 'support';
 
       if (this.benefitEl) {
         if (benefit !== this.shownBenefit) {
           this.benefitEl.textContent = benefit;
           this.shownBenefit = benefit;
         }
+        this.benefitEl.classList.toggle('is-support', isSupport);
         this.benefitEl.classList.add('is-shown');
       }
 
@@ -1045,6 +1088,7 @@
     show() {
       const slide = this.slides[this.index];
       this.showEyebrow(slide);
+      this.updateDots(slide);
       slide.classList.add('is-active');
 
       const words = slide.querySelectorAll('.hero-voice__word');
@@ -1699,6 +1743,17 @@
     });
   }
 
+  /* Measure the demo promo bar so the index header floats just below it (and the
+     hero fills exactly the remaining viewport). Handles wrapping on small screens. */
+  function initPromoBar() {
+    const bar = document.querySelector('.promo-bar');
+    if (!bar) return;
+    const apply = () => document.body.style.setProperty('--promo-height', `${bar.offsetHeight}px`);
+    apply();
+    window.addEventListener('resize', apply, { passive: true });
+    window.addEventListener('load', apply);
+  }
+
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
@@ -1721,6 +1776,7 @@
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
     document.querySelectorAll('[data-hero-voice]').forEach(el => new HeroVoiceDemo(el));
     initVoiceClerkTriggers();
+    initPromoBar();
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);
     });

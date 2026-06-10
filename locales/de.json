@@ -127,6 +127,9 @@
       "example_tags": "Umsatz steigern · Unentschlossene überzeugen\nUmsatz steigern · Kaufzweifel ausräumen\nUmsatz steigern · Kaufvertrauen schaffen\nAnfragen reduzieren · Statusmails vermeiden\nAnfragen reduzieren · Umtausch ohne Tickets\nAnfragen reduzieren · Häufige Fragen klären",
       "install": "Bizmis installieren",
       "install_with_code": "Mit Ihrem Early-Access-Code installieren"
+    },
+    "promo": {
+      "label": "Bizmis Demo-Store"
     }
   }
 }

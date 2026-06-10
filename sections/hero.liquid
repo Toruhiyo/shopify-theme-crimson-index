@@ -7,10 +7,23 @@
   assign cards_title = section.settings.cards_title
 
   assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
-  assign logo_url = 'bizmis-logo-white-transparent.png' | asset_url
 
   assign prompts = 'bizmis.panel.examples' | t | newline_to_br | split: '<br />'
   assign tags = 'bizmis.panel.example_tags' | t | newline_to_br | split: '<br />'
+
+  comment
+    Interleave the two benefit branches (sales first half, support second half)
+    so the rotation alternates sales / support and reads as balanced.
+  endcomment
+  assign total = prompts.size
+  assign half = total | divided_by: 2
+  assign order = ''
+  for offset in (1..half)
+    assign si = offset | minus: 1
+    assign ti = si | plus: half
+    assign order = order | append: si | append: ',' | append: ti | append: ','
+  endfor
+  assign order_list = order | split: ','
 
   assign cat_menu_handles = 'catalog,main-menu' | split: ','
   assign cat_menu = nil
@@ -27,14 +40,7 @@
   <div class="page-width hero-voice__inner">
     <div class="hero-voice__main">
       {%- if eyebrow != blank -%}
-        <span class="hero-voice__eyebrow">
-          <span
-            class="hero-voice__eyebrow-mark"
-            style="-webkit-mask-image: url('{{ logo_url }}'); mask-image: url('{{ logo_url }}');"
-            aria-hidden="true"
-          ></span>
-          {{ eyebrow }}
-        </span>
+        <span class="hero-voice__eyebrow">{{ eyebrow }}</span>
       {%- endif -%}
 
       {%- if heading != blank -%}
@@ -46,40 +52,55 @@
       {%- endif -%}
 
       {%- comment -%}
-        Rotating "say this" demo. Benefit / sub-benefit eyebrow and the shopper
-        phrases reuse the shared, localized Bizmis coachmark copy. JS
-        (HeroVoiceDemo) cycles the slides and sweeps the karaoke word highlight.
+        The voice demo: a live cue (mic), the shopper phrase with the karaoke
+        sweep, the benefit/sub-benefit it drives, and a progress rail. Copy is
+        the shared, localized Bizmis use-case set; JS (HeroVoiceDemo) drives it.
       {%- endcomment -%}
       <div class="hero-voice__demo" data-hero-voice>
-        <div class="hero-voice__demo-head" aria-hidden="true">
-          <span class="hero-voice__benefit" data-hero-voice-benefit></span>
-          <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
+        <div class="hero-voice__cue" aria-hidden="true">
+          <span class="hero-voice__mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+            <span class="hero-voice__mic-ring"></span>
+          </span>
+          {%- if say_label != blank -%}
+            <span class="hero-voice__cue-label">{{ say_label }}</span>
+          {%- endif -%}
         </div>
 
         <div class="hero-voice__slides" data-hero-voice-slides>
-          {%- for prompt in prompts -%}
-            {%- assign trimmed = prompt | strip -%}
+          {%- for idx_str in order_list -%}
+            {%- assign idx = idx_str | times: 1 -%}
+            {%- assign trimmed = prompts[idx] | strip -%}
             {%- if trimmed != blank -%}
-              {%- assign tag = tags[forloop.index0] | strip -%}
+              {%- assign tag = tags[idx] | strip -%}
               {%- assign tag_parts = tag | split: '·' -%}
               {%- assign benefit = tag_parts[0] | strip -%}
               {%- assign sub = '' -%}
               {%- if tag_parts.size > 1 -%}
                 {%- assign sub = tag_parts[1] | strip -%}
               {%- endif -%}
+              {%- assign btype = 'support' -%}
+              {%- if idx < half -%}
+                {%- assign btype = 'sales' -%}
+              {%- endif -%}
               <blockquote
                 class="hero-voice__quote"
                 data-hero-voice-slide
                 data-benefit="{{ benefit | escape }}"
                 data-sub="{{ sub | escape }}"
+                data-benefit-type="{{ btype }}"
               >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
             {%- endif -%}
           {%- endfor -%}
         </div>
 
-        {%- if say_label != blank -%}
-          <p class="hero-voice__say">{{ say_label }}</p>
-        {%- endif -%}
+        <div class="hero-voice__outcome" aria-hidden="true">
+          <span class="hero-voice__arrow">&rarr;</span>
+          <span class="hero-voice__benefit" data-hero-voice-benefit></span>
+          <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
+        </div>
+
+        <div class="hero-voice__dots" data-hero-voice-dots></div>
       </div>
 
       <div class="hero-voice__actions">
@@ -146,7 +167,7 @@
       "type": "text",
       "id": "eyebrow",
       "label": "Eyebrow",
-      "default": "Bizmis demo store"
+      "default": "Premium consumer electronics"
     },
     {
       "type": "text",
@@ -158,13 +179,13 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "default": "This isn't a chatbot. Say what you're after out loud and the Bizmis Store Clerk finds it, compares it, even tracks your order — like the best in-store associate, online."
+      "default": "Go ahead, try it. Ask out loud for a recommendation, a head-to-head comparison, or where your order is, and get the kind of help you'd expect from the best associate on the floor."
     },
     {
       "type": "text",
       "id": "say_label",
-      "label": "Say-this prompt",
-      "default": "Just say it out loud, the way you would to a clerk on the floor."
+      "label": "Voice cue label",
+      "default": "Say it out loud, just like this"
     },
     {
       "type": "text",

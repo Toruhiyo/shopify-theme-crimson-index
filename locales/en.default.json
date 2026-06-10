@@ -154,6 +154,9 @@
       "example_tags": "Boost sales · Win undecided shoppers\nBoost sales · End buyer hesitation\nBoost sales · Confidence to buy\nCut support · Fewer status emails\nCut support · Self-serve returns\nCut support · Answers before they ask",
       "install": "Install Bizmis",
       "install_with_code": "Install with your early-access code"
+    },
+    "promo": {
+      "label": "Bizmis demo store"
     }
   }
 }

@@ -155,6 +155,9 @@
       "example_tags": "Aumenta ventas · Convence a los indecisos\nAumenta ventas · Despeja dudas\nAumenta ventas · Da confianza para comprar\nReduce consultas · Evita correos de seguimiento\nReduce consultas · Cambios sin tickets\nReduce consultas · Resuelve dudas frecuentes",
       "install": "Instalar Bizmis",
       "install_with_code": "Instala con tu código de acceso anticipado"
+    },
+    "promo": {
+      "label": "Tienda demo de Bizmis"
     }
   }
 }

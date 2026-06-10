@@ -974,14 +974,16 @@ textarea.input {
    so the hero sits behind it). */
 .template-index .header-section {
   position: absolute;
-  top: 0;
+  top: var(--promo-height, 0px);
   left: 0;
   right: 0;
 }
 
-/* Once the hero is behind us, re-pin the header at the top as solid chrome. */
+/* Once the hero is behind us, re-pin the header at the very top as solid chrome
+   (the promo bar has scrolled away by then). */
 .template-index .header-section.is-pinned {
   position: fixed;
+  top: 0;
 }
 
 .header {
@@ -1650,8 +1652,88 @@ textarea.input {
 }
 
 /* --- Announcement Bar --- */
-.announcement-bar-section {
-  display: none;
+/* Bizmis demo promo bar (top strip, above the navbar). The body carries
+   .bizmis-demo only when the promo is rendered, so the header offset never
+   leaves a gap on non-demo stores. theme.js refines --promo-height to the
+   measured pixel height (handles wrapping on small screens). */
+.bizmis-demo {
+  --promo-height: 2.5rem;
+}
+
+.promo-bar {
+  background: var(--color-fg, #111);
+  color: #fff;
+  min-height: var(--promo-height);
+}
+
+.promo-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--promo-height);
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.promo-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.promo-bar__mark {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+  background-color: var(--color-primary);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.promo-bar__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.78rem;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.promo-bar__cta:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.promo-bar__cta-arrow {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 749px) {
+  .promo-bar__brand {
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+  }
+  .promo-bar__cta {
+    font-size: 0.7rem;
+    padding: 0.28rem 0.62rem;
+  }
 }
 
 .announcement-bar {
@@ -1691,7 +1773,7 @@ textarea.input {
 }
 
 .template-index .hero-section {
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--promo-height, 0px));
   display: flex;
   flex-direction: column;
 }
@@ -1739,18 +1821,6 @@ textarea.input {
   color: var(--color-primary);
 }
 
-.hero-voice__eyebrow-mark {
-  width: 1.15rem;
-  height: 1.15rem;
-  flex: 0 0 auto;
-  background-color: var(--color-primary);
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
 
 .hero-voice__heading {
   font-family: var(--font-heading);
@@ -1771,66 +1841,62 @@ textarea.input {
   max-width: 46ch;
 }
 
-/* Rotating "say this" demo — the centerpiece. A clean card lifts the shopper
-   phrases off the page; the karaoke highlight sweeps word by word. */
+/* Voice demo — the centerpiece. A clean card with a live mic cue, the shopper
+   phrase (karaoke sweep), the benefit it drives, and a progress rail. */
 .hero-voice__demo {
   margin-top: 2rem;
   width: 100%;
-  max-width: 38rem;
-  padding: 1.5rem 1.6rem 1.35rem;
+  max-width: 39rem;
+  padding: 1.4rem 1.6rem 1.3rem;
   background: #fff;
   border: 1px solid var(--color-border-raw, #e5e5ea);
   border-radius: var(--radius-card, 18px);
-  box-shadow: 0 22px 48px -30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 52px -30px rgba(0, 0, 0, 0.5);
 }
 
-.hero-voice__demo-head {
+.hero-voice__cue {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 1.5rem;
+  gap: 0.6rem;
+  color: var(--color-muted-fg, #6e6e73);
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
-.hero-voice__benefit {
-  display: inline-block;
-  padding: 0.28em 0.7em;
-  border-radius: 999px;
+.hero-voice__mic {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
   background: var(--color-primary);
   color: var(--color-primary-fg, #fff);
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0;
-  transition: opacity 0.5s ease;
 }
 
-.hero-voice__benefit.is-shown {
-  opacity: 1;
+.hero-voice__mic svg {
+  width: 0.85rem;
+  height: 0.85rem;
 }
 
-.hero-voice__subbenefit {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-muted-fg, #6e6e73);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+.hero-voice__mic-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  animation: hero-voice-pulse 1.9s ease-out infinite;
 }
 
-.hero-voice__subbenefit.is-shown {
-  opacity: 1;
-}
-
-.hero-voice__subbenefit[hidden] {
-  display: none;
+@keyframes hero-voice-pulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.95); opacity: 0; }
 }
 
 .hero-voice__slides {
   display: grid;
-  margin-top: 1rem;
+  margin-top: 0.95rem;
   min-height: 5rem;
 }
 
@@ -1843,8 +1909,8 @@ textarea.input {
   margin: 0;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: clamp(1.4rem, 2.5vw, 2.05rem);
-  line-height: 1.32;
+  font-size: clamp(1.45rem, 2.6vw, 2.15rem);
+  line-height: 1.3;
   letter-spacing: -0.01em;
   color: var(--color-fg, #111);
   opacity: 0;
@@ -1884,10 +1950,90 @@ textarea.input {
   transform: scale(1.04);
 }
 
-.hero-voice__say {
-  margin-top: 1.1rem;
-  font-size: 0.85rem;
-  color: var(--color-muted-fg, #6e6e73);
+.hero-voice__outcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  min-height: 1.6rem;
+}
+
+.hero-voice__arrow {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.hero-voice__benefit {
+  display: inline-block;
+  padding: 0.3em 0.72em;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.45s ease, background-color 0.4s ease;
+}
+
+.hero-voice__benefit.is-support {
+  background: var(--color-fg, #111);
+}
+
+.hero-voice__benefit.is-shown {
+  opacity: 1;
+}
+
+.hero-voice__subbenefit {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-fg, #111);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hero-voice__subbenefit.is-shown {
+  opacity: 1;
+}
+
+.hero-voice__subbenefit[hidden] {
+  display: none;
+}
+
+.hero-voice__dots {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 1.15rem;
+}
+
+.hero-voice__dot {
+  width: 1.4rem;
+  height: 0.28rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-border-raw, #e5e5ea);
+  cursor: pointer;
+  transition: background-color 0.3s ease, width 0.3s ease;
+}
+
+.hero-voice__dot.is-active {
+  width: 2.2rem;
+  background: var(--color-primary);
+}
+
+.hero-voice__dot.is-active.is-support {
+  background: var(--color-fg, #111);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-voice__mic-ring {
+    animation: none;
+  }
 }
 
 .hero-voice__actions {

@@ -9,6 +9,14 @@
 {%- endcomment -%}
 
 {%- if settings.bizmis_demo_enabled -%}
+  {%- comment -%}
+    The coachmark is superseded by the hero voice demo. When it's off we still
+    render a hidden config node so bizmis-demo.js keeps the early-access code and
+    hydrates every Install Bizmis CTA (promo bar + hero).
+  {%- endcomment -%}
+  {%- unless settings.bizmis_coachmark_enabled -%}
+    <span data-bizmis-coach data-fallback-code="{{ settings.bizmis_demo_fallback_code | escape }}" hidden></span>
+  {%- else -%}
   {%- liquid
     assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
     assign prompts = 'bizmis.panel.examples' | t | newline_to_br | split: '<br />'
@@ -64,4 +72,5 @@
       </a>
     </div>
   </aside>
+  {%- endunless -%}
 {%- endif -%}

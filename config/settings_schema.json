@@ -277,8 +277,15 @@
         "type": "checkbox",
         "id": "bizmis_demo_enabled",
         "default": true,
-        "label": "Show demo coachmark",
-        "info": "Floating speech bubble that pops above the Bizmis voice widget, rotating one use case at a time."
+        "label": "Enable Bizmis demo mode",
+        "info": "Master switch: shows the top demo promo bar, hydrates the Install Bizmis CTAs with the early-access code, and powers the hero voice demo."
+      },
+      {
+        "type": "checkbox",
+        "id": "bizmis_coachmark_enabled",
+        "default": false,
+        "label": "Show floating coachmark",
+        "info": "Legacy floating speech bubble above the voice widget. Superseded by the hero voice demo; off by default."
       },
       {
         "type": "url",

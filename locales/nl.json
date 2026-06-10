@@ -127,6 +127,9 @@
       "example_tags": "Verhoog omzet · Overtuig twijfelaars\nVerhoog omzet · Neem twijfel weg\nVerhoog omzet · Geef vertrouwen om te kopen\nVerminder vragen · Voorkom statusmails\nVerminder vragen · Ruilen zonder tickets\nVerminder vragen · Beantwoord veelgestelde vragen",
       "install": "Bizmis installeren",
       "install_with_code": "Installeren met je early-accesscode"
+    },
+    "promo": {
+      "label": "Bizmis demowinkel"
     }
   }
 }
