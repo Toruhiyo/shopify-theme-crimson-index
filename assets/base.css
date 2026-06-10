@@ -2039,7 +2039,8 @@ a.promo-bar__brand:hover {
 
 .hero-voice__slides {
   display: grid;
-  min-height: 4.2rem;
+  align-items: end;
+  min-height: 3.2rem;
 }
 
 .hero-voice__quote {
@@ -2169,38 +2170,22 @@ a.promo-bar__brand:hover {
   box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.6);
 }
 
-/* The sub-benefit is the value headline — accent bar takes the active
-   benefit's colour (red for sales, dark for support). */
+/* The sub-benefit is the value headline — its colour follows the active
+   benefit (brand red for sales, ink for support) to tie it to the pills. */
 .hero-voice__subbenefit {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  padding-left: 0.85rem;
   font-family: var(--font-heading);
-  font-size: clamp(1.15rem, 1.9vw, 1.5rem);
-  font-weight: 760;
+  font-size: clamp(1.1rem, 1.7vw, 1.4rem);
+  font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.12;
-  color: var(--color-fg, #111);
+  line-height: 1.1;
+  color: var(--color-primary);
   opacity: 0;
   transform: translateY(0.2rem);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease, color 0.35s ease;
 }
 
-.hero-voice__subbenefit::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.12em;
-  bottom: 0.12em;
-  width: 4px;
-  border-radius: 2px;
-  background: var(--color-primary);
-  transition: background-color 0.35s ease;
-}
-
-.hero-voice__subbenefit.is-support::before {
-  background: var(--color-fg, #111);
+.hero-voice__subbenefit.is-support {
+  color: var(--color-fg, #111);
 }
 
 .hero-voice__subbenefit.is-shown {
@@ -2280,7 +2265,7 @@ a.promo-bar__brand:hover {
 .hero-voice__stage {
   position: relative;
   z-index: 1;
-  margin-top: -3rem;
+  margin-top: -3.4rem;
   display: grid;
 }
 
