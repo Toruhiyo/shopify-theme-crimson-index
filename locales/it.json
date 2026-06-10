@@ -123,6 +123,12 @@
   "bizmis": {
     "panel": {
       "title": "Scopri il tuo commesso vocale",
+      "hero_store": "Meridian · Elettronica di consumo",
+      "hero_heading": "Parla con Meridian come faresti di persona.",
+      "hero_subheading": "Niente menu, niente scroll. Chiedi ad alta voce al nostro commesso, come a una persona in negozio.",
+      "hero_kicker": "Di' semplicemente, ad alta voce:",
+      "hero_categories": "Portatili, Audio, Telefoni, Casa smart, Ricarica",
+      "talk": "Inizia a parlare",
       "examples": "Cerco un portatile che duri tutto il giorno.\nQuesti auricolari sembrano uguali. Quali sono migliori per correre?\nHa la ricarica rapida per iPhone 15?\nDov'è il mio ordine? Il tracking non si aggiorna da giorni.\nIl caricatore è arrivato con la spina sbagliata. Posso cambiarlo?\nSpedite in Spagna? La garanzia vale lì?",
       "example_tags": "Aumenta le vendite · Convinci gli indecisi\nAumenta le vendite · Sciogli i dubbi\nAumenta le vendite · Dai fiducia all'acquisto\nRiduci le richieste · Evita email di tracking\nRiduci le richieste · Cambi senza ticket\nRiduci le richieste · Rispondi alle domande frequenti",
       "install": "Installa Bizmis",

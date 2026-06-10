@@ -150,6 +150,12 @@
   "bizmis": {
     "panel": {
       "title": "Meet your voice store clerk",
+      "hero_store": "Meridian · Consumer electronics",
+      "hero_heading": "Talk to Meridian like you would in person.",
+      "hero_subheading": "No menus, no scrolling. Just ask our voice clerk out loud, the way you'd ask a real person in store.",
+      "hero_kicker": "Just say, out loud:",
+      "hero_categories": "Laptops, Audio, Phones, Smart home, Charging",
+      "talk": "Start talking",
       "examples": "Looking for a laptop with great battery life.\nThese earbuds seem the same. Which is better for running?\nDoes this fast-charge an iPhone 15?\nWhere's my order? Tracking hasn't updated in days.\nThe charger came with the wrong plug type. Can I swap it?\nDo you ship to Spain, and is the warranty valid there?",
       "example_tags": "Boost sales · Win undecided shoppers\nBoost sales · End buyer hesitation\nBoost sales · Confidence to buy\nCut support · Fewer status emails\nCut support · Self-serve returns\nCut support · Answers before they ask",
       "install": "Install Bizmis",
