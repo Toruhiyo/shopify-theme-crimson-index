@@ -1900,13 +1900,13 @@ textarea.input {
   max-width: 100%;
   gap: 0.14em 0.34em;
   margin: 0;
-  padding: 0.18em 0.12em;
+  padding: 0.16em 0.1em;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(1.35rem, 2vw, 1.75rem);
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  color: #fff;
+  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  color: var(--color-fg, #111);
   opacity: 0;
   pointer-events: none;
   transform: translateY(0.4rem);
@@ -1919,8 +1919,9 @@ textarea.input {
   transform: none;
 }
 
-/* Diffuse primary "stain" behind the caption (soft halo + denser core), like
-   the Bizmis landing shopper captions — white words sit on the red wash. */
+/* Diffuse whitish "stain" behind the caption (soft halo + denser core), like
+   the Bizmis landing captions — dark words sit on an on-theme light wash that
+   frosts over the scene image. */
 .hero-voice__quote::before,
 .hero-voice__quote::after {
   content: '';
@@ -1934,11 +1935,11 @@ textarea.input {
   inset: -0.55em -1.05em;
   background: radial-gradient(
     ellipse 132% 80% at 50% 50%,
-    color-mix(in srgb, var(--color-primary) 92%, transparent) 0%,
-    color-mix(in srgb, var(--color-primary) 66%, transparent) 32%,
-    color-mix(in srgb, var(--color-primary) 42%, transparent) 54%,
-    color-mix(in srgb, var(--color-primary) 22%, transparent) 72%,
-    color-mix(in srgb, var(--color-primary) 8%, transparent) 88%,
+    color-mix(in srgb, var(--color-bg, #fff) 95%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg, #fff) 78%, transparent) 32%,
+    color-mix(in srgb, var(--color-bg, #fff) 55%, transparent) 54%,
+    color-mix(in srgb, var(--color-bg, #fff) 32%, transparent) 72%,
+    color-mix(in srgb, var(--color-bg, #fff) 12%, transparent) 88%,
     transparent 100%
   );
   filter: blur(34px);
@@ -1948,18 +1949,18 @@ textarea.input {
   inset: -0.32em -0.78em;
   background: radial-gradient(
     ellipse 126% 72% at 50% 50%,
-    var(--color-primary) 0%,
-    var(--color-primary) 44%,
-    color-mix(in srgb, var(--color-primary) 80%, transparent) 62%,
-    color-mix(in srgb, var(--color-primary) 46%, transparent) 78%,
-    color-mix(in srgb, var(--color-primary) 18%, transparent) 90%,
+    var(--color-bg, #fff) 0%,
+    var(--color-bg, #fff) 46%,
+    color-mix(in srgb, var(--color-bg, #fff) 82%, transparent) 64%,
+    color-mix(in srgb, var(--color-bg, #fff) 48%, transparent) 80%,
+    color-mix(in srgb, var(--color-bg, #fff) 18%, transparent) 90%,
     transparent 100%
   );
   filter: blur(12px);
 }
 
-/* Karaoke caption: an inverted (white) chip highlight sweeps word by word.
-   Painted with box-shadow + scale so it never reflows the line. */
+/* Karaoke caption: a primary chip highlight sweeps word by word. Painted with
+   box-shadow + scale so it never reflows the line. */
 .hero-voice__word {
   display: inline-block;
   border-radius: 0.28em;
@@ -1967,9 +1968,9 @@ textarea.input {
 }
 
 .hero-voice__word.is-current {
-  background-color: #fff;
-  color: var(--color-primary);
-  box-shadow: 0 0 0 0.14em #fff;
+  background-color: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  box-shadow: 0 0 0 0.14em var(--color-primary);
   transform: scale(1.04);
 }
 
@@ -2095,7 +2096,7 @@ textarea.input {
 .hero-voice__stage {
   position: relative;
   z-index: 1;
-  margin-top: -0.9rem;
+  margin-top: -1.9rem;
   display: grid;
 }
 
