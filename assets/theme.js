@@ -968,6 +968,101 @@
     }
   }
 
+  /* --- Hero clerk scene --- */
+  const HERO_WIDGET_SELECTORS = ['#bizmis-avatar-embed', '.bizmis-avatar-widget-root', '#avatar-root', '[data-avatar-widget]'];
+
+  class HeroClerk {
+    constructor(root) {
+      this.root = root;
+      this.slides = Array.from(root.querySelectorAll('[data-hero-slide]'));
+      this.benefitEl = root.querySelector('[data-hero-benefit]');
+      this.subEl = root.querySelector('[data-hero-sub]');
+      this.talkBtn = root.querySelector('[data-hero-talk]');
+
+      this.index = 0;
+      this.timer = null;
+      this.shownBenefit = null;
+      this.showMs = 4800;
+      this.fadeMs = 600;
+      this.gapMs = 250;
+
+      this.showText = this.showText.bind(this);
+      this.hideText = this.hideText.bind(this);
+
+      if (this.talkBtn) this.talkBtn.addEventListener('click', () => this.startTalk());
+      if (this.slides.length) this.showText();
+    }
+
+    showEyebrow(slide) {
+      const benefit = slide.getAttribute('data-benefit') || '';
+      const sub = slide.getAttribute('data-sub') || '';
+
+      if (this.benefitEl) {
+        if (benefit !== this.shownBenefit) {
+          this.benefitEl.textContent = benefit;
+          this.shownBenefit = benefit;
+        }
+        this.benefitEl.classList.add('is-shown');
+      }
+
+      if (this.subEl) {
+        this.subEl.textContent = sub;
+        this.subEl.hidden = !sub;
+        this.subEl.classList.add('is-shown');
+      }
+    }
+
+    showText() {
+      const slide = this.slides[this.index];
+      this.showEyebrow(slide);
+      slide.classList.add('is-active');
+      if (this.slides.length < 2) return;
+      this.timer = window.setTimeout(this.hideText, this.showMs);
+    }
+
+    hideText() {
+      const nextIndex = (this.index + 1) % this.slides.length;
+      const sameBenefit = this.slides[nextIndex].getAttribute('data-benefit') === this.slides[this.index].getAttribute('data-benefit');
+
+      this.slides[this.index].classList.remove('is-active');
+      if (this.subEl) this.subEl.classList.remove('is-shown');
+      if (!sameBenefit && this.benefitEl) this.benefitEl.classList.remove('is-shown');
+
+      this.timer = window.setTimeout(() => {
+        this.index = nextIndex;
+        this.showText();
+      }, this.fadeMs + this.gapMs);
+    }
+
+    findWidgetRoot() {
+      for (let i = 0; i < HERO_WIDGET_SELECTORS.length; i++) {
+        const el = document.querySelector(HERO_WIDGET_SELECTORS[i]);
+        if (el) return el;
+      }
+      return null;
+    }
+
+    /* "Start talking": point at the live voice widget and, when reachable, fire its
+       own voice launcher. The widget is app-injected with no public API, so the
+       point-and-pulse cue is the guaranteed fallback. */
+    startTalk() {
+      const widget = this.findWidgetRoot();
+      if (!widget) return;
+
+      widget.classList.add('bizmis-widget-attn');
+      window.setTimeout(() => widget.classList.remove('bizmis-widget-attn'), 2400);
+
+      const triggers = widget.querySelectorAll('button, [role="button"], a');
+      for (let i = 0; i < triggers.length; i++) {
+        const text = (triggers[i].textContent || '').toLowerCase();
+        if (/voz|voice|chat|talk|habl|parl|spr|spreek/.test(text)) {
+          triggers[i].click();
+          break;
+        }
+      }
+    }
+  }
+
   /* --- Variant Selector --- */
   class VariantSelector {
     constructor(container) {
@@ -1565,6 +1660,7 @@
     document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
+    document.querySelectorAll('[data-hero-clerk]').forEach(el => new HeroClerk(el));
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);
     });

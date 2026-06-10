@@ -149,6 +149,12 @@
   "bizmis": {
     "panel": {
       "title": "Découvrez votre vendeur vocal",
+      "hero_store": "Meridian · Électronique grand public",
+      "hero_heading": "Parlez à Meridian comme en magasin.",
+      "hero_subheading": "Sans menus ni défilement. Demandez à voix haute à notre vendeur, comme à une vraie personne en boutique.",
+      "hero_kicker": "Dites simplement, à voix haute :",
+      "hero_categories": "Ordinateurs portables, Audio, Téléphones, Maison connectée, Charge",
+      "talk": "Commencer à parler",
       "examples": "Je cherche un ordinateur portable qui tienne toute la journée.\nCes écouteurs se ressemblent. Lesquels sont les mieux pour courir ?\nEst-ce compatible charge rapide pour iPhone 15 ?\nOù est ma commande ? Le suivi n'a pas été mis à jour depuis plusieurs jours.\nLe chargeur est arrivé avec la mauvaise prise. Puis-je l'échanger ?\nLivrez-vous en Espagne ? La garantie y est-elle valable ?",
       "example_tags": "Augmenter les ventes · Convaincre les indécis\nAugmenter les ventes · Lever les doutes\nAugmenter les ventes · Rassurer avant l'achat\nRéduire les demandes · Éviter les e-mails de suivi\nRéduire les demandes · Échanges sans ticket\nRéduire les demandes · Répondre aux questions fréquentes",
       "install": "Installer Bizmis",
