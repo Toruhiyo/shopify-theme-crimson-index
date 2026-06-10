@@ -944,6 +944,7 @@
       if (!this.header) return;
 
       this.section = this.header.closest('.header-section');
+      this.promo = document.querySelector('.announcement-bar-section');
       this.hero = document.querySelector('.hero-section');
       this.heroExitOffset = 100;
       this.scrollThreshold = 50;
@@ -960,6 +961,7 @@
       if (this.hero) {
         const inHero = scrollY < this.hero.offsetHeight - this.heroExitOffset;
         if (this.section) this.section.classList.toggle('is-pinned', !inHero);
+        if (this.promo) this.promo.classList.toggle('is-pinned', !inHero);
         this.header.classList.toggle('is-transparent', inHero);
         this.header.classList.toggle('scrolled', !inHero);
       } else {

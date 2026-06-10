@@ -964,14 +964,29 @@ textarea.input {
 /* --- Header --- */
 /* The section wrapper carries the positioning: a normal sticky header on inner
    pages, but fixed over the hero on the home page so it overlays the artwork. */
-.header-section {
+/* Promo bar + header are a single stacked unit: promo on top, header just
+   below it. Off the home page they're sticky and always visible. */
+.announcement-bar-section {
   position: sticky;
   top: 0;
+  z-index: 101;
+}
+
+.header-section {
+  position: sticky;
+  top: var(--promo-height, 0px);
   z-index: 100;
 }
 
-/* Home: the header floats over the hero and scrolls away with it (out of flow
-   so the hero sits behind it). */
+/* Home: the promo bar + header float over the hero and scroll away with it,
+   then pin back together as solid chrome once the hero is behind us. */
+.template-index .announcement-bar-section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
 .template-index .header-section {
   position: absolute;
   top: var(--promo-height, 0px);
@@ -979,11 +994,14 @@ textarea.input {
   right: 0;
 }
 
-/* Once the hero is behind us, re-pin the header at the very top as solid chrome
-   (the promo bar has scrolled away by then). */
-.template-index .header-section.is-pinned {
+.template-index .announcement-bar-section.is-pinned {
   position: fixed;
   top: 0;
+}
+
+.template-index .header-section.is-pinned {
+  position: fixed;
+  top: var(--promo-height, 0px);
 }
 
 .header {
@@ -1703,21 +1721,22 @@ textarea.input {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.32rem 0.85rem;
+  padding: 0.3rem 0.85rem;
   border-radius: 999px;
-  background: #fff;
-  color: var(--color-primary);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: transparent;
+  color: #fff;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .promo-bar__cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  background: #fff;
+  border-color: #fff;
+  color: var(--color-primary);
 }
 
 .promo-bar__cta-icon {
@@ -1777,7 +1796,7 @@ textarea.input {
 }
 
 .template-index .hero-section {
-  min-height: calc(100dvh - var(--promo-height, 0px));
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
