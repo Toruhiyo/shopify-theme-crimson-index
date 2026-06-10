@@ -936,27 +936,33 @@
   }
 
   /* --- Sticky Header --- */
+  /* Transparent over the hero, solid chrome once it scrolls past. On pages
+     without a hero the header is just a solid sticky bar. */
   class StickyHeader {
     constructor() {
       this.header = document.querySelector('.header');
       if (!this.header) return;
 
-      this.lastScroll = 0;
-      this.threshold = 100;
+      this.hero = document.querySelector('.hero-section');
+      this.heroExitOffset = 100;
+      this.scrollThreshold = 50;
 
-      window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+      this.update = this.update.bind(this);
+      this.update();
+      window.addEventListener('scroll', this.update, { passive: true });
+      window.addEventListener('resize', this.update, { passive: true });
     }
 
-    onScroll() {
-      const currentScroll = window.scrollY;
+    update() {
+      const scrollY = window.pageYOffset;
 
-      if (currentScroll > this.threshold && currentScroll > this.lastScroll) {
-        this.header.style.transform = 'translateY(-100%)';
+      if (this.hero) {
+        const inHero = scrollY < this.hero.offsetHeight - this.heroExitOffset;
+        this.header.classList.toggle('is-transparent', inHero);
+        this.header.classList.toggle('scrolled', !inHero);
       } else {
-        this.header.style.transform = 'translateY(0)';
+        this.header.classList.toggle('scrolled', scrollY > this.scrollThreshold);
       }
-
-      this.lastScroll = currentScroll;
     }
   }
 

@@ -962,14 +962,38 @@ textarea.input {
 }
 
 /* --- Header --- */
-.header {
+/* The section wrapper carries the positioning: a normal sticky header on inner
+   pages, but fixed over the hero on the home page so it overlays the artwork. */
+.header-section {
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+.template-index .header-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.header {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transition: transform 300ms ease;
+  transition: background-color 300ms ease, backdrop-filter 300ms ease, border-color 300ms ease;
+}
+
+/* Transparent while it sits over the hero; turns into solid chrome once the
+   hero has scrolled past. Text stays dark since the hero is light. */
+.header.is-transparent {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.header.is-transparent .header__primary {
+  border-bottom-color: transparent;
 }
 
 .header__primary {
@@ -1653,7 +1677,7 @@ textarea.input {
 }
 
 .template-index .hero-section {
-  min-height: calc(100dvh - var(--header-height));
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
