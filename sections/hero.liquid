@@ -25,24 +25,19 @@
   endfor
   assign order_list = order | split: ','
 
-  assign cat_menu_handles = 'catalog,main-menu' | split: ','
-  assign cat_menu = nil
-  for menu_handle in cat_menu_handles
-    assign candidate = linklists[menu_handle]
-    if candidate.links.size > 0
-      assign cat_menu = candidate
-      break
-    endif
-  endfor
-
   comment
-    Category keyword per use case, keyed by the canonical (en.default) example
-    order, so the auto-matched scene stays right across locales. Each scene
-    picks the first menu collection whose handle/title contains its keyword;
-    a block-level collection override always wins, positional cycling is the
-    last resort.
+    Use case -> collection map, keyed by the canonical (en.default) example
+    order so it stays correct across every locale:
+      0  "laptop with great battery life"     -> computers-peripherals
+      1  "earbuds ... better for running?"    -> audio
+      2  "fast-charge an iPhone 15"           -> charging-power
+      3  "where's my order?"                  -> outlet
+      4  "wrong plug type ... swap it?"       -> charging-power
+      5  "ship to Spain / warranty"           -> phones-wearables
+    A scene block at the same position overrides its entry. Edit the handles
+    below to match your store's collections.
   endcomment
-  assign scene_keywords = 'comput,audio,charg,outlet,charg,phone' | split: ','
+  assign scene_collection_map = 'computers-peripherals,audio,charging-power,outlet,charging-power,phones-wearables' | split: ','
 -%}
 
 <section class="hero-text hero-voice" {{ section.shopify_attributes }}>
@@ -138,9 +133,8 @@
     {%- comment -%}
       Live scene: mirrors the current use case with the matching catalog moment.
       Each rendered slide has a parallel scene (same index, JS keeps them in
-      sync). A scene block at this position assigns the collection; otherwise the
-      scene auto-matches its use-case keyword against the category menu, falling
-      back to positional cycling so it always shows something real.
+      sync). The collection comes from scene_collection_map above (or a scene
+      block override at this position).
     {%- endcomment -%}
     <div class="hero-voice__aside">
       {%- if scene_title != blank -%}
@@ -156,25 +150,10 @@
               assign scene_block = section.blocks[pos]
               assign scene_collection = scene_block.settings.collection
 
-              if scene_collection == blank and cat_menu != blank and cat_menu.links.size > 0
-                assign want = scene_keywords[idx]
-                if want != blank
-                  for menu_link in cat_menu.links
-                    if menu_link.type == 'collection_link'
-                      assign link_key = menu_link.object.handle | append: ' ' | append: menu_link.title | downcase
-                      if link_key contains want
-                        assign scene_collection = menu_link.object
-                        break
-                      endif
-                    endif
-                  endfor
-                endif
-                if scene_collection == blank
-                  assign link_pos = pos | modulo: cat_menu.links.size
-                  assign menu_link = cat_menu.links[link_pos]
-                  if menu_link.type == 'collection_link'
-                    assign scene_collection = menu_link.object
-                  endif
+              if scene_collection == blank
+                assign mapped_handle = scene_collection_map[idx]
+                if mapped_handle != blank
+                  assign scene_collection = collections[mapped_handle]
                 endif
               endif
 
