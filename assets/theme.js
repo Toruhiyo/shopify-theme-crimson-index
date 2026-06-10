@@ -968,6 +968,93 @@
     }
   }
 
+  /* --- Hero voice demo ---
+     Cycles the shopper "say this" prompts in the hero. The benefit eyebrow holds
+     steady across same-benefit slides and the sub-benefit fades in with each one,
+     mirroring the coachmark. Pauses on hover so a prompt can be read. */
+  class HeroVoiceDemo {
+    constructor(root) {
+      this.root = root;
+      this.slides = Array.from(root.querySelectorAll('[data-hero-voice-slide]'));
+      if (!this.slides.length) return;
+
+      this.benefitEl = root.querySelector('[data-hero-voice-benefit]');
+      this.subEl = root.querySelector('[data-hero-voice-sub]');
+      this.index = 0;
+      this.shownBenefit = null;
+      this.timer = null;
+      this.showMs = 4200;
+      this.fadeMs = 600;
+      this.gapMs = 250;
+
+      this.show = this.show.bind(this);
+      this.hide = this.hide.bind(this);
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion || this.slides.length < 2) {
+        this.showEyebrow(this.slides[0]);
+        this.slides[0].classList.add('is-active');
+        return;
+      }
+
+      this.show();
+      root.addEventListener('mouseenter', () => this.pause());
+      root.addEventListener('mouseleave', () => this.resume());
+    }
+
+    showEyebrow(slide) {
+      const benefit = slide.getAttribute('data-benefit') || '';
+      const sub = slide.getAttribute('data-sub') || '';
+
+      if (this.benefitEl) {
+        if (benefit !== this.shownBenefit) {
+          this.benefitEl.textContent = benefit;
+          this.shownBenefit = benefit;
+        }
+        this.benefitEl.classList.add('is-shown');
+      }
+
+      if (this.subEl) {
+        this.subEl.textContent = sub;
+        this.subEl.hidden = !sub;
+        this.subEl.classList.add('is-shown');
+      }
+    }
+
+    show() {
+      const slide = this.slides[this.index];
+      this.showEyebrow(slide);
+      slide.classList.add('is-active');
+      this.timer = window.setTimeout(this.hide, this.showMs);
+    }
+
+    hide() {
+      const nextIndex = (this.index + 1) % this.slides.length;
+      const sameBenefit = this.slides[nextIndex].getAttribute('data-benefit')
+        === this.slides[this.index].getAttribute('data-benefit');
+
+      this.slides[this.index].classList.remove('is-active');
+      if (this.subEl) this.subEl.classList.remove('is-shown');
+      if (!sameBenefit && this.benefitEl) this.benefitEl.classList.remove('is-shown');
+
+      this.timer = window.setTimeout(() => {
+        this.index = nextIndex;
+        this.show();
+      }, this.fadeMs + this.gapMs);
+    }
+
+    pause() {
+      if (this.timer) {
+        window.clearTimeout(this.timer);
+        this.timer = null;
+      }
+    }
+
+    resume() {
+      if (!this.timer) this.timer = window.setTimeout(this.hide, this.showMs);
+    }
+  }
+
   /* --- Variant Selector --- */
   class VariantSelector {
     constructor(container) {
@@ -1545,6 +1632,43 @@
     requestAnimationFrame(() => window.scrollTo({ top: targetY, behavior: 'smooth' }));
   }
 
+  /* --- Bizmis voice clerk trigger ---
+     "Talk to the clerk" should open the floating voice widget. The widget is a
+     third-party embed (window.AvatarVoicechat); if it exposes an imperative open
+     method we use it, otherwise we surface the widget and pulse it so the visitor
+     finds the call button. */
+  const VOICE_WIDGET_SELECTORS = ['#bizmis-avatar-embed', '.bizmis-avatar-widget-root', '#avatar-root', '[data-avatar-widget]'];
+
+  function findVoiceWidget() {
+    for (let i = 0; i < VOICE_WIDGET_SELECTORS.length; i++) {
+      const el = document.querySelector(VOICE_WIDGET_SELECTORS[i]);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  function openVoiceClerk() {
+    const api = window.AvatarVoicechat;
+    if (api) {
+      if (typeof api.open === 'function') return api.open();
+      if (typeof api.start === 'function') return api.start();
+      if (typeof api.toggle === 'function') return api.toggle();
+    }
+
+    const widget = findVoiceWidget();
+    if (!widget) return;
+
+    widget.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    widget.classList.add('bizmis-widget-pulse');
+    window.setTimeout(() => widget.classList.remove('bizmis-widget-pulse'), 1800);
+  }
+
+  function initVoiceClerkTriggers() {
+    document.querySelectorAll('[data-open-voice-clerk]').forEach(btn => {
+      btn.addEventListener('click', openVoiceClerk);
+    });
+  }
+
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
@@ -1565,6 +1689,8 @@
     document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
+    document.querySelectorAll('[data-hero-voice]').forEach(el => new HeroVoiceDemo(el));
+    initVoiceClerkTriggers();
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);
     });
