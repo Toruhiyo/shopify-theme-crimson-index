@@ -1430,7 +1430,7 @@
     resize();
     window.addEventListener('resize', resize);
 
-    const colors = ['#E11D2A', '#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FFFFFF'];
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#D1001A';
     const gravity = 0.32;
     const drag = 0.006;
     const duration = 2600;
@@ -1446,7 +1446,7 @@
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed - 4,
         size: 6 + Math.random() * 6,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: primary,
         rotation: Math.random() * Math.PI,
         spin: (Math.random() - 0.5) * 0.3,
       };
