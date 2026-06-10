@@ -1,115 +1,61 @@
 {%- liquid
-  assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
-  assign prompts = 'bizmis.panel.examples' | t | newline_to_br | split: '<br />'
-  assign tags = 'bizmis.panel.example_tags' | t | newline_to_br | split: '<br />'
-  assign categories = 'bizmis.panel.hero_categories' | t | split: ','
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign cta_text = section.settings.cta_text
+  assign cta_url = section.settings.cta_url
+  assign secondary_text = section.settings.secondary_text
+  assign secondary_url = section.settings.secondary_url
+  assign show_logo = section.settings.show_logo
 -%}
 
-<section class="hero-clerk" data-hero-clerk {{ section.shopify_attributes }}>
-  <div class="hero-clerk__bg" aria-hidden="true"></div>
-
-  <div class="page-width hero-clerk__inner">
-    <div class="hero-clerk__copy">
-      <span class="hero-clerk__store">{{ 'bizmis.panel.hero_store' | t }}</span>
-      <h1 class="hero-clerk__heading">{{ 'bizmis.panel.hero_heading' | t }}</h1>
-      <p class="hero-clerk__subheading">{{ 'bizmis.panel.hero_subheading' | t }}</p>
-
-      {%- if categories.size > 0 -%}
-        <ul class="hero-clerk__chips" aria-label="{{ 'bizmis.panel.hero_store' | t | escape }}">
-          {%- for category in categories -%}
-            {%- assign label = category | strip -%}
-            {%- if label != blank -%}
-              <li class="hero-clerk__chip">{{ label }}</li>
-            {%- endif -%}
-          {%- endfor -%}
-        </ul>
-      {%- endif -%}
-
-      <div class="hero-clerk__actions">
-        <button type="button" class="btn btn--primary hero-clerk__talk" data-hero-talk>
-          <svg class="hero-clerk__mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <rect x="9" y="2" width="6" height="12" rx="3"/>
-            <path d="M5 11a7 7 0 0 0 14 0"/>
-            <path d="M12 18v3"/>
-          </svg>
-          <span>{{ 'bizmis.panel.talk' | t }}</span>
-        </button>
-
-        <a
-          href="{{ listing_url | escape }}"
-          class="btn btn--outline hero-clerk__install"
-          data-bizmis-install
-          data-label-with-code="{{ 'bizmis.panel.install_with_code' | t | escape }}"
-          data-label-no-code="{{ 'bizmis.panel.install' | t | escape }}"
-          target="_blank"
-          rel="noopener"
+<section class="hero-text" {{ section.shopify_attributes }}>
+  <div class="page-width hero-text__inner">
+    {%- if show_logo -%}
+      <div class="hero-text__logo">
+        <img
+          src="{{ 'logo-transparent.png' | asset_url }}"
+          alt="{{ shop.name }}"
+          width="48"
+          height="48"
+          loading="eager"
         >
-          <span data-bizmis-install-label>{{ 'bizmis.panel.install' | t }}</span>
+      </div>
+    {%- endif -%}
+
+    {%- if heading != blank -%}
+      <h1 class="hero-text__heading">{{ heading }}</h1>
+    {%- endif -%}
+
+    {%- if subheading != blank -%}
+      <p class="hero-text__subheading">{{ subheading }}</p>
+    {%- endif -%}
+
+    <div class="hero-text__actions">
+      {%- if cta_text != blank -%}
+        <a href="{{ cta_url }}" class="btn btn--primary hero-text__btn">
+          {{ cta_text }}
         </a>
-      </div>
+      {%- endif -%}
+      {%- if secondary_text != blank -%}
+        <a href="{{ secondary_url }}" class="btn btn--outline hero-text__btn">
+          {{ secondary_text }}
+        </a>
+      {%- endif -%}
     </div>
 
-    <div class="hero-clerk__stage">
-      <div class="hero-clerk__avatar">
-        {%- if section.settings.clerk_image != blank -%}
-          <img
-            src="{{ section.settings.clerk_image | image_url: width: 720 }}"
-            alt="{{ 'bizmis.panel.title' | t | escape }}"
-            width="360"
-            height="360"
-            loading="eager"
-          >
-        {%- else -%}
-          <img
-            src="{{ 'bizmis-clerk.png' | asset_url }}"
-            alt="{{ 'bizmis.panel.title' | t | escape }}"
-            width="360"
-            height="360"
-            loading="eager"
-          >
-        {%- endif -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="hero-text__stats">
+        {%- for block in section.blocks -%}
+          <div class="hero-text__stat" {{ block.shopify_attributes }}>
+            <span class="hero-text__stat-value">{{ block.settings.value }}</span>
+            <span class="hero-text__stat-label">{{ block.settings.label }}</span>
+          </div>
+        {%- endfor -%}
       </div>
-
-      <div class="hero-clerk__prompts" data-hero-prompts>
-        <p class="hero-clerk__say">
-          <svg class="hero-clerk__say-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <rect x="9" y="2" width="6" height="12" rx="3"/>
-            <path d="M5 11a7 7 0 0 0 14 0"/>
-            <path d="M12 18v3"/>
-          </svg>
-          {{ 'bizmis.panel.hero_kicker' | t }}
-        </p>
-
-        <div class="hero-clerk__eyebrow" aria-hidden="true">
-          <span class="hero-clerk__tag-benefit" data-hero-benefit></span>
-          <span class="hero-clerk__tag-sub" data-hero-sub hidden></span>
-        </div>
-
-        <div class="hero-clerk__slides" data-hero-slides>
-          {%- for prompt in prompts -%}
-            {%- assign trimmed = prompt | strip -%}
-            {%- if trimmed != blank -%}
-              {%- assign tag = tags[forloop.index0] | strip -%}
-              {%- assign tag_parts = tag | split: '·' -%}
-              {%- assign benefit = tag_parts[0] | strip -%}
-              {%- assign sub = '' -%}
-              {%- if tag_parts.size > 1 -%}
-                {%- assign sub = tag_parts[1] | strip -%}
-              {%- endif -%}
-              <figure
-                class="hero-clerk__slide"
-                data-hero-slide
-                data-benefit="{{ benefit | escape }}"
-                data-sub="{{ sub | escape }}"
-              >
-                <blockquote class="hero-clerk__quote">{{ trimmed }}</blockquote>
-              </figure>
-            {%- endif -%}
-          {%- endfor -%}
-        </div>
-      </div>
-    </div>
+    {%- endif -%}
   </div>
+
+  <div class="hero-text__accent" aria-hidden="true"></div>
 </section>
 
 {% schema %}
@@ -119,19 +65,93 @@
   "class": "hero-section",
   "settings": [
     {
-      "type": "paragraph",
-      "content": "Headline, prompts and labels are translated in the locale files under bizmis.panel."
+      "type": "checkbox",
+      "id": "show_logo",
+      "label": "Show logo",
+      "default": false
     },
     {
-      "type": "image_picker",
-      "id": "clerk_image",
-      "label": "Clerk avatar",
-      "info": "Transparent PNG of the Bizmis voice clerk. Defaults to the bundled render."
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Technology that moves you forward."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Discover our curated selection of premium electronics — designed for performance, built to last."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Primary button text",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_text",
+      "label": "Secondary button text",
+      "default": "View deals"
+    },
+    {
+      "type": "url",
+      "id": "secondary_url",
+      "label": "Secondary button link"
     }
   ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "10K+"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Happy customers"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
   "presets": [
     {
-      "name": "Hero"
+      "name": "Hero",
+      "blocks": [
+        {
+          "type": "stat",
+          "settings": {
+            "value": "10K+",
+            "label": "Happy customers"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "value": "500+",
+            "label": "Products"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "value": "30-day",
+            "label": "Free returns"
+          }
+        }
+      ]
     }
   ]
 }
