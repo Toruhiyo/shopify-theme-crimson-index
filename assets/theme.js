@@ -980,6 +980,9 @@
       this.slides = Array.from(root.querySelectorAll('[data-hero-voice-slide]'));
       if (!this.slides.length) return;
 
+      const sceneScope = root.closest('.hero-voice') || document;
+      this.scenes = Array.from(sceneScope.querySelectorAll('[data-hero-voice-scene]'));
+
       this.benefitEl = root.querySelector('[data-hero-voice-benefit]');
       this.subEl = root.querySelector('[data-hero-voice-sub]');
       this.dotsWrap = root.querySelector('[data-hero-voice-dots]');
@@ -1000,6 +1003,7 @@
       if (reduceMotion || this.slides.length < 2) {
         this.showEyebrow(this.slides[0]);
         this.updateDots(this.slides[0]);
+        this.setScene(0);
         this.slides[0].classList.add('is-active');
         return;
       }
@@ -1020,6 +1024,11 @@
         this.dotsWrap.appendChild(dot);
         return dot;
       });
+    }
+
+    setScene(i) {
+      if (!this.scenes.length) return;
+      this.scenes.forEach((scene, k) => scene.classList.toggle('is-active', k === i));
     }
 
     updateDots(slide) {
@@ -1091,6 +1100,7 @@
       const slide = this.slides[this.index];
       this.showEyebrow(slide);
       this.updateDots(slide);
+      this.setScene(this.index);
       slide.classList.add('is-active');
 
       const words = slide.querySelectorAll('.hero-voice__word');

@@ -4,7 +4,7 @@
   assign subheading = section.settings.subheading
   assign say_label = section.settings.say_label
   assign secondary_text = section.settings.secondary_cta_text
-  assign cards_title = section.settings.cards_title
+  assign scene_title = section.settings.scene_title
 
   assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
 
@@ -126,34 +126,109 @@
       </div>
     </div>
 
-    {%- if cat_menu -%}
-      <div class="hero-voice__aside">
-        {%- if cards_title != blank -%}
-          <p class="hero-voice__cards-title">{{ cards_title }}</p>
-        {%- endif -%}
-        <div class="hero-voice__cards">
-          {%- for link in cat_menu.links limit: 4 -%}
-            {%- assign col = link.object -%}
-            <a href="{{ link.url }}" class="hero-voice__card">
-              <span class="hero-voice__card-media">
-                {%- if link.type == 'collection_link' and col.image != blank -%}
-                  <img
-                    src="{{ col.image | image_url: width: 480 }}"
-                    alt="{{ link.title | escape }}"
-                    width="480"
-                    height="360"
-                    loading="eager"
-                  >
-                {%- else -%}
-                  {{ 'collection-' | append: forloop.index | placeholder_svg_tag: 'placeholder' }}
-                {%- endif -%}
-              </span>
-              <span class="hero-voice__card-title">{{ link.title }}</span>
-            </a>
-          {%- endfor -%}
-        </div>
+    {%- comment -%}
+      Live scene: mirrors the current use case with the matching catalog moment.
+      Each rendered slide has a parallel scene (same index, JS keeps them in
+      sync). A scene block at this position assigns the collection; otherwise we
+      fall back to cycling the category menu so it always shows something real.
+    {%- endcomment -%}
+    <div class="hero-voice__aside">
+      {%- if scene_title != blank -%}
+        <p class="hero-voice__scene-eyebrow">{{ scene_title }}</p>
+      {%- endif -%}
+      <div class="hero-voice__stage" data-hero-voice-stage>
+        {%- for idx_str in order_list -%}
+          {%- assign idx = idx_str | times: 1 -%}
+          {%- assign trimmed = prompts[idx] | strip -%}
+          {%- if trimmed != blank -%}
+            {%- liquid
+              assign pos = forloop.index0
+              assign scene_block = section.blocks[pos]
+              assign scene_collection = scene_block.settings.collection
+
+              if scene_collection == blank and cat_menu != blank and cat_menu.links.size > 0
+                assign link_pos = pos | modulo: cat_menu.links.size
+                assign menu_link = cat_menu.links[link_pos]
+                if menu_link.type == 'collection_link'
+                  assign scene_collection = menu_link.object
+                endif
+              endif
+
+              assign scene_img = scene_block.settings.image
+              if scene_img == blank
+                assign scene_img = scene_collection.image
+              endif
+              if scene_img == blank and scene_collection.products.first.featured_image != blank
+                assign scene_img = scene_collection.products.first.featured_image
+              endif
+
+              assign scene_label = scene_block.settings.label
+              if scene_label == blank
+                assign scene_label = scene_collection.title
+              endif
+
+              assign scene_url = scene_collection.url
+
+              assign btype = 'support'
+              if idx < half
+                assign btype = 'sales'
+              endif
+            -%}
+            <div
+              class="hero-voice__scene{% if forloop.first %} is-active{% endif %}"
+              data-hero-voice-scene
+              data-benefit-type="{{ btype }}"
+            >
+              <a
+                class="hero-voice__scene-card"
+                {% if scene_url != blank %}href="{{ scene_url }}"{% else %}href="#" aria-hidden="true" tabindex="-1"{% endif %}
+              >
+                <span class="hero-voice__scene-media">
+                  {%- if scene_img != blank -%}
+                    <img
+                      src="{{ scene_img | image_url: width: 720 }}"
+                      alt="{{ scene_label | escape }}"
+                      width="720"
+                      height="450"
+                      loading="lazy"
+                    >
+                  {%- else -%}
+                    {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+                  {%- endif -%}
+                  {%- if scene_label != blank -%}
+                    <span class="hero-voice__scene-tag">{{ scene_label }}</span>
+                  {%- endif -%}
+                </span>
+              </a>
+
+              {%- if scene_collection.products.size > 0 -%}
+                <div class="hero-voice__scene-products">
+                  {%- for product in scene_collection.products limit: 2 -%}
+                    <a class="hero-voice__chip" href="{{ product.url }}">
+                      <span class="hero-voice__chip-thumb">
+                        {%- if product.featured_image != blank -%}
+                          <img
+                            src="{{ product.featured_image | image_url: width: 120 }}"
+                            alt="{{ product.title | escape }}"
+                            width="60"
+                            height="60"
+                            loading="lazy"
+                          >
+                        {%- endif -%}
+                      </span>
+                      <span class="hero-voice__chip-meta">
+                        <span class="hero-voice__chip-name">{{ product.title }}</span>
+                        <span class="hero-voice__chip-price">{{ product.price | money }}</span>
+                      </span>
+                    </a>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
       </div>
-    {%- endif -%}
+    </div>
   </div>
 </section>
 
@@ -195,11 +270,41 @@
     },
     {
       "type": "text",
-      "id": "cards_title",
-      "label": "Category cards title",
-      "default": "What we stock"
+      "id": "scene_title",
+      "label": "Scene eyebrow",
+      "default": "What Bizmis pulls up"
     }
   ],
+  "blocks": [
+    {
+      "type": "scene",
+      "name": "Use-case scene",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Maps to the use case at the same position in the rotation (first block = first example shown). Leave the collection empty to auto-use the category menu."
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Featured collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image override",
+          "info": "Optional. Use for service moments with no single product (e.g. a multi-product render)."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Caption override",
+          "info": "Optional. Defaults to the collection title."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
   "presets": [
     {
       "name": "Hero"
