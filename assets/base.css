@@ -970,11 +970,18 @@ textarea.input {
   z-index: 100;
 }
 
+/* Home: the header floats over the hero and scrolls away with it (out of flow
+   so the hero sits behind it). */
 .template-index .header-section {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
+}
+
+/* Once the hero is behind us, re-pin the header at the top as solid chrome. */
+.template-index .header-section.is-pinned {
+  position: fixed;
 }
 
 .header {
@@ -999,6 +1006,12 @@ textarea.input {
 .header__primary {
   position: relative;
   border-bottom: 1px solid var(--color-border);
+}
+
+/* The bar spans the full viewport so the nav can use the entire width; the
+   rest of the site keeps the page-width cap. */
+.header__primary > .page-width {
+  max-width: none;
 }
 
 .header__inner {
@@ -1047,6 +1060,7 @@ textarea.input {
 .header__nav-list {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0;
   flex: 1;
   min-width: 0;

@@ -943,6 +943,7 @@
       this.header = document.querySelector('.header');
       if (!this.header) return;
 
+      this.section = this.header.closest('.header-section');
       this.hero = document.querySelector('.hero-section');
       this.heroExitOffset = 100;
       this.scrollThreshold = 50;
@@ -958,6 +959,7 @@
 
       if (this.hero) {
         const inHero = scrollY < this.hero.offsetHeight - this.heroExitOffset;
+        if (this.section) this.section.classList.toggle('is-pinned', !inHero);
         this.header.classList.toggle('is-transparent', inHero);
         this.header.classList.toggle('scrolled', !inHero);
       } else {
