@@ -1066,6 +1066,7 @@
       if (this.subEl) {
         this.subEl.textContent = sub;
         this.subEl.hidden = !sub;
+        this.subEl.classList.toggle('is-support', benefitType === 'support');
         this.subEl.classList.add('is-shown');
       }
     }
