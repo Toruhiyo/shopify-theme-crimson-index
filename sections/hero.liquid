@@ -34,6 +34,15 @@
       break
     endif
   endfor
+
+  comment
+    Category keyword per use case, keyed by the canonical (en.default) example
+    order, so the auto-matched scene stays right across locales. Each scene
+    picks the first menu collection whose handle/title contains its keyword;
+    a block-level collection override always wins, positional cycling is the
+    last resort.
+  endcomment
+  assign scene_keywords = 'comput,audio,charg,outlet,charg,phone' | split: ','
 -%}
 
 <section class="hero-text hero-voice" {{ section.shopify_attributes }}>
@@ -129,8 +138,9 @@
     {%- comment -%}
       Live scene: mirrors the current use case with the matching catalog moment.
       Each rendered slide has a parallel scene (same index, JS keeps them in
-      sync). A scene block at this position assigns the collection; otherwise we
-      fall back to cycling the category menu so it always shows something real.
+      sync). A scene block at this position assigns the collection; otherwise the
+      scene auto-matches its use-case keyword against the category menu, falling
+      back to positional cycling so it always shows something real.
     {%- endcomment -%}
     <div class="hero-voice__aside">
       {%- if scene_title != blank -%}
@@ -147,10 +157,24 @@
               assign scene_collection = scene_block.settings.collection
 
               if scene_collection == blank and cat_menu != blank and cat_menu.links.size > 0
-                assign link_pos = pos | modulo: cat_menu.links.size
-                assign menu_link = cat_menu.links[link_pos]
-                if menu_link.type == 'collection_link'
-                  assign scene_collection = menu_link.object
+                assign want = scene_keywords[idx]
+                if want != blank
+                  for menu_link in cat_menu.links
+                    if menu_link.type == 'collection_link'
+                      assign link_key = menu_link.object.handle | append: ' ' | append: menu_link.title | downcase
+                      if link_key contains want
+                        assign scene_collection = menu_link.object
+                        break
+                      endif
+                    endif
+                  endfor
+                endif
+                if scene_collection == blank
+                  assign link_pos = pos | modulo: cat_menu.links.size
+                  assign menu_link = cat_menu.links[link_pos]
+                  if menu_link.type == 'collection_link'
+                    assign scene_collection = menu_link.object
+                  endif
                 endif
               endif
 
