@@ -1486,6 +1486,57 @@
     requestAnimationFrame(frame);
   }
 
+  /* --- Subscription celebration ---
+     After a successful subscribe, Shopify reloads with ?customer_posted=true
+     and the form id as the fragment (e.g. #footer-newsletter). Auto-scroll to
+     that section, then fire confetti once the scroll has settled. */
+  function whenScrollSettles(callback) {
+    let done = false;
+    let idle;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(idle);
+      clearTimeout(safety);
+      callback();
+    };
+    const onScroll = () => {
+      clearTimeout(idle);
+      idle = setTimeout(finish, 140);
+    };
+    const safety = setTimeout(finish, 2000);
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  function initSubscriptionCelebration() {
+    const successEl = document.querySelector('[data-newsletter-success]');
+    if (!successEl) return;
+
+    const hashId = window.location.hash.length > 1
+      ? decodeURIComponent(window.location.hash.slice(1))
+      : null;
+    const target = (hashId && document.getElementById(hashId))
+      || successEl.closest('section, .footer__newsletter-banner')
+      || successEl;
+
+    const absoluteTop = target.getBoundingClientRect().top + window.scrollY;
+    const centerMargin = Math.max(0, (window.innerHeight - target.offsetHeight) / 2);
+    const targetY = Math.max(0, absoluteTop - centerMargin);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion || Math.abs(window.scrollY - targetY) < 4) {
+      window.scrollTo(0, targetY);
+      fireConfetti();
+      return;
+    }
+
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+    whenScrollSettles(fireConfetti);
+    requestAnimationFrame(() => window.scrollTo({ top: targetY, behavior: 'smooth' }));
+  }
+
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
@@ -1509,10 +1560,6 @@
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);
     });
-
-    if (document.querySelector('[data-newsletter-success]')) {
-      fireConfetti();
-    }
   }
 
   function dismissLoader() {
@@ -1528,5 +1575,9 @@
     init();
   }
 
-  window.addEventListener('load', dismissLoader);
+  window.addEventListener('load', () => {
+    dismissLoader();
+    // Wait out the loader fade so the scroll and confetti are not hidden behind it.
+    setTimeout(initSubscriptionCelebration, 600);
+  });
 })();
