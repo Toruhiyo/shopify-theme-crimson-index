@@ -2,7 +2,6 @@
   assign eyebrow = section.settings.eyebrow
   assign heading = section.settings.heading
   assign subheading = section.settings.subheading
-  assign say_label = section.settings.say_label
   assign secondary_text = section.settings.secondary_cta_text
 
   assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
@@ -85,47 +84,38 @@
       use scene_collection_map (or a scene block override at this position).
     {%- endcomment -%}
     <div class="hero-voice__live" data-hero-voice>
-      <div class="hero-voice__cue" aria-hidden="true">
-        <span class="hero-voice__mic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
-          <span class="hero-voice__mic-ring"></span>
-        </span>
-        {%- if say_label != blank -%}
-          <span class="hero-voice__cue-label">{{ say_label }}</span>
-        {%- endif -%}
-      </div>
+      <div class="hero-voice__ask">
+        <div class="hero-voice__outcome" aria-hidden="true">
+          <span class="hero-voice__benefit" data-hero-voice-benefit></span>
+          <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
+        </div>
 
-      <div class="hero-voice__slides" data-hero-voice-slides>
-        {%- for idx_str in order_list -%}
-          {%- assign idx = idx_str | times: 1 -%}
-          {%- assign trimmed = prompts[idx] | strip -%}
-          {%- if trimmed != blank -%}
-            {%- assign tag = tags[idx] | strip -%}
-            {%- assign tag_parts = tag | split: '·' -%}
-            {%- assign benefit = tag_parts[0] | strip -%}
-            {%- assign sub = '' -%}
-            {%- if tag_parts.size > 1 -%}
-              {%- assign sub = tag_parts[1] | strip -%}
+        <div class="hero-voice__slides" data-hero-voice-slides>
+          {%- for idx_str in order_list -%}
+            {%- assign idx = idx_str | times: 1 -%}
+            {%- assign trimmed = prompts[idx] | strip -%}
+            {%- if trimmed != blank -%}
+              {%- assign tag = tags[idx] | strip -%}
+              {%- assign tag_parts = tag | split: '·' -%}
+              {%- assign benefit = tag_parts[0] | strip -%}
+              {%- assign sub = '' -%}
+              {%- if tag_parts.size > 1 -%}
+                {%- assign sub = tag_parts[1] | strip -%}
+              {%- endif -%}
+              {%- assign btype = 'support' -%}
+              {%- if idx < half -%}
+                {%- assign btype = 'sales' -%}
+              {%- endif -%}
+              <blockquote
+                class="hero-voice__quote"
+                data-hero-voice-slide
+                data-benefit="{{ benefit | escape }}"
+                data-sub="{{ sub | escape }}"
+                data-benefit-type="{{ btype }}"
+              >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
             {%- endif -%}
-            {%- assign btype = 'support' -%}
-            {%- if idx < half -%}
-              {%- assign btype = 'sales' -%}
-            {%- endif -%}
-            <blockquote
-              class="hero-voice__quote"
-              data-hero-voice-slide
-              data-benefit="{{ benefit | escape }}"
-              data-sub="{{ sub | escape }}"
-              data-benefit-type="{{ btype }}"
-            >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-
-      <div class="hero-voice__outcome" aria-hidden="true">
-        <span class="hero-voice__arrow">&rarr;</span>
-        <span class="hero-voice__benefit" data-hero-voice-benefit></span>
-        <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
+          {%- endfor -%}
+        </div>
       </div>
 
       <div class="hero-voice__stage" data-hero-voice-stage>
@@ -184,9 +174,6 @@
                   >
                 {%- else -%}
                   {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
-                {%- endif -%}
-                {%- if scene_label != blank -%}
-                  <span class="hero-voice__scene-tag">{{ scene_label }}</span>
                 {%- endif -%}
               </a>
 
