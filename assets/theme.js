@@ -1414,6 +1414,78 @@
       .replace('{{amount}}', withCommas);
   }
 
+  /* --- Newsletter Confetti --- */
+  function fireConfetti() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const colors = ['#E11D2A', '#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FFFFFF'];
+    const gravity = 0.32;
+    const drag = 0.006;
+    const duration = 2600;
+    const originX = canvas.width / 2;
+    const originY = canvas.height * 0.35;
+
+    const particles = Array.from({ length: 150 }, () => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 4 + Math.random() * 11;
+      return {
+        x: originX,
+        y: originY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 4,
+        size: 6 + Math.random() * 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * 0.3,
+      };
+    });
+
+    const start = performance.now();
+
+    const frame = (now) => {
+      const elapsed = now - start;
+      const life = Math.max(0, 1 - elapsed / duration);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.vy += gravity;
+        p.vx *= (1 - drag);
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.spin;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.globalAlpha = life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      });
+
+      if (elapsed < duration) {
+        requestAnimationFrame(frame);
+      } else {
+        window.removeEventListener('resize', resize);
+        canvas.remove();
+      }
+    };
+
+    requestAnimationFrame(frame);
+  }
+
   /* --- Initialize --- */
   function init() {
     new CartDrawer();
@@ -1437,6 +1509,10 @@
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);
     });
+
+    if (document.querySelector('[data-newsletter-success]')) {
+      fireConfetti();
+    }
   }
 
   function dismissLoader() {

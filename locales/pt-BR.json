@@ -98,7 +98,8 @@
   "newsletter": {
     "placeholder": "Digite seu email",
     "email_label": "Endereço de email",
-    "subscribe": "Inscrever-se"
+    "subscribe": "Inscrever-se",
+    "success": "Tudo certo! Confira seu email para confirmar."
   },
   "footer": {
     "email_placeholder": "Seu email",

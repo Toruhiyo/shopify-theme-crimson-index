@@ -14,19 +14,23 @@
       {%- endif -%}
 
       {% form 'customer', id: 'newsletter-section' %}
-        <div class="newsletter__form">
-          <input
-            type="email"
-            name="contact[email]"
-            class="input"
-            placeholder="{{ 'newsletter.placeholder' | t }}"
-            required
-            autocomplete="email"
-            aria-label="{{ 'newsletter.email_label' | t }}"
-          >
-          <input type="hidden" name="contact[tags]" value="newsletter">
-          <button type="submit" class="btn btn--primary">{{ 'newsletter.subscribe' | t }}</button>
-        </div>
+        {%- if form.posted_successfully? -%}
+          <p class="newsletter__success" data-newsletter-success role="status" style="margin: 0; color: var(--color-primary); font-weight: 500;">{{ 'newsletter.success' | t }}</p>
+        {%- else -%}
+          <div class="newsletter__form">
+            <input
+              type="email"
+              name="contact[email]"
+              class="input"
+              placeholder="{{ 'newsletter.placeholder' | t }}"
+              required
+              autocomplete="email"
+              aria-label="{{ 'newsletter.email_label' | t }}"
+            >
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <button type="submit" class="btn btn--primary">{{ 'newsletter.subscribe' | t }}</button>
+          </div>
+        {%- endif -%}
       {% endform %}
     </div>
   </div>

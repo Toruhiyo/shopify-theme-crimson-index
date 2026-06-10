@@ -98,7 +98,8 @@
   "newsletter": {
     "placeholder": "E-Mail eingeben",
     "email_label": "E-Mail-Adresse",
-    "subscribe": "Abonnieren"
+    "subscribe": "Abonnieren",
+    "success": "Du bist dabei! Bestätige es in deinem Postfach."
   },
   "footer": {
     "email_placeholder": "Ihre E-Mail",

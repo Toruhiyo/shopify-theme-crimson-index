@@ -98,7 +98,8 @@
   "newsletter": {
     "placeholder": "输入您的邮箱",
     "email_label": "邮箱地址",
-    "subscribe": "订阅"
+    "subscribe": "订阅",
+    "success": "订阅成功！请查收邮件确认。"
   },
   "footer": {
     "email_placeholder": "您的邮箱",

@@ -98,7 +98,8 @@
   "newsletter": {
     "placeholder": "Voer je e-mail in",
     "email_label": "E-mailadres",
-    "subscribe": "Abonneren"
+    "subscribe": "Abonneren",
+    "success": "Je bent erbij! Check je inbox om te bevestigen."
   },
   "footer": {
     "email_placeholder": "Je e-mail",

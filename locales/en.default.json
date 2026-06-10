@@ -115,7 +115,8 @@
   "newsletter": {
     "placeholder": "Enter your email",
     "email_label": "Email address",
-    "subscribe": "Subscribe"
+    "subscribe": "Subscribe",
+    "success": "You're in. Check your inbox to confirm."
   },
   "footer": {
     "email_placeholder": "Your email",

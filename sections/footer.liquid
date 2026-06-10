@@ -10,19 +10,23 @@
         {%- endif -%}
       </div>
       {% form 'customer', id: 'footer-newsletter' %}
-        <div class="footer__newsletter-form">
-          <input
-            type="email"
-            name="contact[email]"
-            class="input footer__newsletter-input"
-            placeholder="{{ section.settings.newsletter_placeholder | default: 'Enter your email' }}"
-            required
-            autocomplete="email"
-            aria-label="{{ section.settings.newsletter_placeholder | default: 'Enter your email' }}"
-          >
-          <input type="hidden" name="contact[tags]" value="newsletter">
-          <button type="submit" class="btn btn--primary">{{ section.settings.newsletter_button | default: 'Subscribe' }}</button>
-        </div>
+        {%- if form.posted_successfully? -%}
+          <p class="footer__newsletter-success" data-newsletter-success role="status" style="margin: 0; color: var(--color-primary); font-weight: 500;">{{ 'newsletter.success' | t }}</p>
+        {%- else -%}
+          <div class="footer__newsletter-form">
+            <input
+              type="email"
+              name="contact[email]"
+              class="input footer__newsletter-input"
+              placeholder="{{ section.settings.newsletter_placeholder | default: 'Enter your email' }}"
+              required
+              autocomplete="email"
+              aria-label="{{ section.settings.newsletter_placeholder | default: 'Enter your email' }}"
+            >
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <button type="submit" class="btn btn--primary">{{ section.settings.newsletter_button | default: 'Subscribe' }}</button>
+          </div>
+        {%- endif -%}
       {% endform %}
     </div>
   </div>

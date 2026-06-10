@@ -98,7 +98,8 @@
   "newsletter": {
     "placeholder": "メールアドレスを入力",
     "email_label": "メールアドレス",
-    "subscribe": "登録する"
+    "subscribe": "登録する",
+    "success": "登録完了！確認メールをご確認ください。"
   },
   "footer": {
     "email_placeholder": "メールアドレス",
