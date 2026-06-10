@@ -308,6 +308,30 @@
       },
       {
         "type": "header",
+        "content": "Promo bar links"
+      },
+      {
+        "type": "url",
+        "id": "bizmis_landing_url",
+        "label": "Bizmis landing URL",
+        "info": "Promo bar link to the Bizmis marketing site. Defaults to https://www.bizmis.ai/ when blank."
+      },
+      {
+        "type": "textarea",
+        "id": "bizmis_demos",
+        "label": "Other demo stores",
+        "info": "One per line as 'Label | URL'. Shown in the promo bar 'Other demos' menu.",
+        "default": "Paper & Pine Books | https://paper-and-pine-books.myshopify.com/"
+      },
+      {
+        "type": "text",
+        "id": "bizmis_demos_password",
+        "label": "Demo store password",
+        "default": "bizmis",
+        "info": "Shown in the 'Other demos' menu so visitors can unlock the password-protected demos."
+      },
+      {
+        "type": "header",
         "content": "Coachmark copy"
       },
       {

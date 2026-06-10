@@ -129,7 +129,11 @@
       "install_with_code": "Mit Ihrem Early-Access-Code installieren"
     },
     "promo": {
-      "label": "Bizmis Demo-Store"
+      "label": "Bizmis Demo-Store",
+      "landing": "Zu Bizmis",
+      "other_demos": "Weitere Demos",
+      "demos_hint": "Diese Demos sind passwortgeschützt.",
+      "password_label": "Passwort"
     }
   }
 }

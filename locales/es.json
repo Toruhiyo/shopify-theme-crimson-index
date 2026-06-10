@@ -157,7 +157,11 @@
       "install_with_code": "Instala con tu código de acceso anticipado"
     },
     "promo": {
-      "label": "Tienda demo de Bizmis"
+      "label": "Tienda demo de Bizmis",
+      "landing": "Ir a Bizmis",
+      "other_demos": "Otras demos",
+      "demos_hint": "Estas demos están protegidas con contraseña.",
+      "password_label": "Contraseña"
     }
   }
 }
