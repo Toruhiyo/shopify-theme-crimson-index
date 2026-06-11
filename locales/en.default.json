@@ -153,7 +153,8 @@
       "examples": "Looking for a laptop with great battery life.\nThese earbuds seem the same. Which is better for running?\nDoes this fast-charge an iPhone 15?\nWhere's my order? Tracking hasn't updated in days.\nThe charger came with the wrong plug type. Can I swap it?\nDo you ship to Spain, and is the warranty valid there?",
       "example_tags": "Boost sales · Turn browsers into buyers · Product discovery\nBoost sales · Win over the undecided · Product comparison\nBoost sales · Convert with expertise · Technical guidance\nCut support · Fewer status tickets · Order status\nCut support · Fewer return tickets · Returns guidance\nCut support · Fewer repeat questions · Pre-purchase FAQs",
       "install": "Install Bizmis",
-      "just_say": "Just say",      "install_with_code": "Install with your early-access code"
+      "just_say": "Just say",
+      "install_with_code": "Install with your early-access code"
     },
     "promo": {
       "label": "Bizmis demo store",
