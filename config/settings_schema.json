@@ -256,17 +256,6 @@
     ]
   },
   {
-    "name": "Favicon",
-    "settings": [
-      {
-        "type": "image_picker",
-        "id": "favicon",
-        "label": "Favicon image",
-        "info": "32x32px .png recommended"
-      }
-    ]
-  },
-  {
     "name": "Bizmis Demo",
     "settings": [
       {
