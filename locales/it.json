@@ -131,6 +131,7 @@
     },
     "promo": {
       "label": "Negozio demo Bizmis",
+      "label_suffix": "negozio demo",
       "landing": "Vai a Bizmis",
       "other_demos": "Altre demo",
       "demos_hint": "Queste demo sono protette da password.",

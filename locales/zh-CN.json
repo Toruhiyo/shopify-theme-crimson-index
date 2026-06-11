@@ -131,6 +131,7 @@
     },
     "promo": {
       "label": "Bizmis 演示商店",
+      "label_suffix": "演示商店",
       "landing": "访问 Bizmis",
       "other_demos": "其他演示",
       "demos_hint": "这些演示受密码保护。",

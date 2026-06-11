@@ -131,6 +131,7 @@
     },
     "promo": {
       "label": "Bizmis Demo-Store",
+      "label_suffix": "Demo-Store",
       "landing": "Zu Bizmis",
       "other_demos": "Weitere Demos",
       "demos_hint": "Diese Demos sind passwortgeschützt.",

@@ -1697,12 +1697,8 @@ textarea.input {
 .promo-bar__brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   min-width: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: inherit;
   text-decoration: none;
   transition: opacity 0.2s ease;
@@ -1712,9 +1708,10 @@ a.promo-bar__brand:hover {
   opacity: 0.85;
 }
 
-.promo-bar__mark {
-  width: 1.15rem;
-  height: 1.15rem;
+.promo-bar__logo {
+  display: block;
+  height: 1.35rem;
+  aspect-ratio: 1948 / 640;
   flex: 0 0 auto;
   background-color: #fff;
   -webkit-mask-position: center;
@@ -1723,6 +1720,15 @@ a.promo-bar__brand:hover {
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;
   mask-size: contain;
+}
+
+.promo-bar__suffix {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
 }
 
 .promo-bar__cta {
@@ -1893,9 +1899,13 @@ a.promo-bar__brand:hover {
   .promo-bar__inner {
     gap: 0.6rem;
   }
-  .promo-bar__brand {
-    font-size: 0.66rem;
-    letter-spacing: 0.05em;
+  .promo-bar__logo {
+    height: 1.15rem;
+  }
+
+  .promo-bar__suffix {
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
   }
   .promo-bar__actions {
     gap: 0.6rem;

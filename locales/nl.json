@@ -131,6 +131,7 @@
     },
     "promo": {
       "label": "Bizmis demowinkel",
+      "label_suffix": "demowinkel",
       "landing": "Naar Bizmis",
       "other_demos": "Andere demo's",
       "demos_hint": "Deze demo's zijn met een wachtwoord beveiligd.",
