@@ -1595,8 +1595,9 @@
         dot.addEventListener('click', () => this.goTo(parseInt(dot.dataset.heroDot, 10)));
       });
 
-      this.el.addEventListener('mouseenter', () => this.pause());
-      this.el.addEventListener('mouseleave', () => this.resume());
+      // No hover pause: the hero is fullscreen, so the cursor is almost always
+      // over it and pausing made the slideshow look stuck. Focus pause stays
+      // so keyboard users can operate the controls.
       this.el.addEventListener('focusin', () => this.pause());
       this.el.addEventListener('focusout', () => this.resume());
     }

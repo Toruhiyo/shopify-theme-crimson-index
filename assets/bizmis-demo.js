@@ -244,9 +244,16 @@
       }
     }
 
+    function deactivateAllSlides() {
+      for (var i = 0; i < slides.length; i++) slides[i].classList.remove('is-active');
+    }
+
     /* The card stays put; only the suggestion text fades in, lingers, fades
-       out, pauses, then the next one fades in. */
+       out, pauses, then the next one fades in. Only one slide may ever be
+       active, so we clear any pending timer and stray actives first. */
     function showText() {
+      if (timer) { window.clearTimeout(timer); timer = null; }
+      deactivateAllSlides();
       var slide = slides[index];
       showEyebrow(slide);
       slide.classList.add('is-active');
@@ -272,11 +279,13 @@
 
     if (bubble && slides.length > 1) {
       bubble.addEventListener('mouseenter', function () {
+        if (coach.classList.contains('is-collapsed')) return;
         if (timer) { window.clearTimeout(timer); timer = null; }
         showEyebrow(slides[index]);
         slides[index].classList.add('is-active');
       });
       bubble.addEventListener('mouseleave', function () {
+        if (coach.classList.contains('is-collapsed')) return;
         if (timer) window.clearTimeout(timer);
         timer = window.setTimeout(hideText, COACH_SHOW_MS);
       });
@@ -298,7 +307,7 @@
     function stopRotation() {
       if (timer) { window.clearTimeout(timer); timer = null; }
       clearWordTimers();
-      slides[index].classList.remove('is-active');
+      deactivateAllSlides();
       if (subEl) subEl.classList.remove('is-shown');
       if (benefitEl) benefitEl.classList.remove('is-shown');
       shownBenefit = null;
@@ -311,6 +320,7 @@
     }
 
     function expand() {
+      stopRotation();
       coach.classList.remove('is-collapsed');
       storeCollapsed(false);
       showText();

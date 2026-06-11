@@ -32,12 +32,6 @@
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
-      <span
-        class="bizmis-coach__watermark"
-        style="-webkit-mask-image: url('{{ 'bizmis-logo-white-transparent.png' | asset_url }}'); mask-image: url('{{ 'bizmis-logo-white-transparent.png' | asset_url }}');"
-        aria-hidden="true"
-      ></span>
-
       <div class="bizmis-coach__eyebrow" aria-hidden="true">
         <span class="bizmis-coach__tag-benefit" data-bizmis-coach-benefit></span>
         <span class="bizmis-coach__tag-sub" data-bizmis-coach-sub hidden></span>
@@ -74,7 +68,8 @@
       data-bizmis-coach-expand
       aria-label="{{ 'bizmis.panel.coach_show' | t | escape }}"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></svg>
+      {{ 'bizmis.panel.coach_examples' | t }}
     </button>
   </aside>
   {%- endunless -%}
