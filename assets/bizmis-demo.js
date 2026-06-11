@@ -104,8 +104,11 @@
   }
 
   function hasBackground(el) {
-    var bg = window.getComputedStyle(el).backgroundColor;
-    return bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)';
+    var style = window.getComputedStyle(el);
+    var bg = style.backgroundColor;
+    if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') return true;
+    /* Glassy surfaces may paint via a gradient only. */
+    return style.backgroundImage !== 'none';
   }
 
   /* The visible widget is a framer-motion draggable card inside the fixed mount.
