@@ -87,26 +87,18 @@
       {%- endif -%}
 
       {%- if section.settings.title != blank -%}
-        <h1 class="hero__title">{{ section.settings.title }}</h1>
-      {%- endif -%}
-
-      {%- if section.settings.cta_text != blank -%}
-        <button type="button" class="btn btn--primary hero__cta" data-open-voice-clerk>
-          <svg
-            class="hero__cta-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
-          </svg>
-          {{ section.settings.cta_text }}
-        </button>
+        <h1 class="hero__title">
+          <span class="hero__title-line">{{ section.settings.title }}</span>
+          {%- if section.settings.cta_text != blank -%}
+            {%- comment -%}
+              The CTA is the title's second line: same scale, brand color,
+              underlined, clickable. Starts a voice chat with the clerk.
+            {%- endcomment -%}
+            <button type="button" class="hero__title-cta" data-open-voice-clerk>
+              {{- section.settings.cta_text -}}
+            </button>
+          {%- endif -%}
+        </h1>
       {%- endif -%}
     </div>
   </div>
@@ -174,9 +166,9 @@
     {
       "type": "text",
       "id": "cta_text",
-      "label": "Voice clerk button",
-      "default": "Talk to the clerk",
-      "info": "Opens a voice chat with the store clerk."
+      "label": "Voice clerk line (second title line)",
+      "default": "Talk to the clerk.",
+      "info": "Rendered as the highlighted second line of the heading. Opens a voice chat with the store clerk."
     }
   ],
   "blocks": [
