@@ -1698,16 +1698,21 @@ textarea.input {
 }
 
 .promo-bar__brand {
+  --promo-brand-height: 1.35rem;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  height: var(--promo-brand-height);
   min-width: 0;
 }
 
 .promo-bar__brand-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  align-self: stretch;
+  flex-shrink: 0;
   color: inherit;
+  line-height: 0;
   text-decoration: none;
   transition: opacity 0.2s ease;
 }
@@ -1718,8 +1723,8 @@ textarea.input {
 
 .promo-bar__logo {
   display: block;
-  height: 1.35rem;
-  aspect-ratio: 1948 / 640;
+  height: var(--promo-brand-height);
+  width: calc(var(--promo-brand-height) * 1948 / 640);
   flex: 0 0 auto;
   background-color: #fff;
   -webkit-mask-position: center;
@@ -1732,12 +1737,16 @@ textarea.input {
 
 .promo-bar__divider {
   width: 1px;
-  height: 0.95em;
+  height: 0.9rem;
   flex: 0 0 auto;
+  align-self: center;
   background: rgba(255, 255, 255, 0.38);
 }
 
 .promo-bar__suffix {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
   flex: 0 0 auto;
   font-size: 0.62rem;
   font-weight: 600;
@@ -1929,12 +1938,13 @@ textarea.input {
   .promo-bar__inner {
     gap: 0.6rem;
   }
-  .promo-bar__logo {
-    height: 1.15rem;
+  .promo-bar__brand {
+    --promo-brand-height: 1.15rem;
+    gap: 0.4rem;
   }
 
-  .promo-bar__brand {
-    gap: 0.4rem;
+  .promo-bar__divider {
+    height: 0.75rem;
   }
 
   .promo-bar__suffix {
