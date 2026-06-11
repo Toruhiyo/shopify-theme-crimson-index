@@ -1780,45 +1780,6 @@ textarea.input {
   }
 }
 
-.promo-bar__talk {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.28rem 0.75rem;
-  border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.75);
-  background: transparent;
-  color: #fff;
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.promo-bar__talk:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: #fff;
-}
-
-.promo-bar__talk:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-
-.promo-bar__talk:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.promo-bar__talk-icon {
-  width: 0.85rem;
-  height: 0.85rem;
-  flex: 0 0 auto;
-}
-
 .promo-bar__cta {
   display: inline-flex;
   align-items: center;
@@ -2028,10 +1989,6 @@ textarea.input {
     font-size: 0.72rem;
     padding: 0.28rem 0.75rem;
   }
-  .promo-bar__talk {
-    font-size: 0.72rem;
-    padding: 0.26rem 0.6rem;
-  }
 }
 
 @media (max-width: 479px) {
@@ -2077,6 +2034,13 @@ textarea.input {
 
 .hero--large {
   min-height: 85vh;
+}
+
+/* Home: the promo bar + header float over the hero, so a full-viewport hero
+   makes the two together fill exactly one screen. */
+.template-index .hero,
+.template-index .hero--large {
+  min-height: 100dvh;
 }
 
 /* Light scrim under the floating transparent header so the nav stays
