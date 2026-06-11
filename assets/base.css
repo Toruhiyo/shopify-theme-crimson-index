@@ -2169,11 +2169,12 @@ textarea.input {
 }
 
 /* --- Bizmis voice demo (snippets/bizmis-voice-demo.liquid) ---
-   Two-part live component. The flow (this block) is a dark teleprompter
-   panel that reads like a script: pick a benefit tab -> read the line out
-   loud -> see the outcome it drives -> progress rail. The matching use case
-   scenes render separately as background slides (.voice-demo-scenes) under
-   the same scope. Sales accents run brand red, support accents run white. */
+   Two-part live component. The flow (this block) is a glassmorphic
+   teleprompter panel that reads like a script: pick a benefit tab -> read
+   the line out loud -> see the outcome it drives -> progress rail. The
+   matching use case scenes render separately as background slides
+   (.voice-demo-scenes) under the same scope and frost through the glass.
+   Sales accents run brand red, support accents run ink. */
 .voice-demo {
   display: flex;
   flex-direction: column;
@@ -2183,10 +2184,13 @@ textarea.input {
   min-width: 0;
   padding: 1.5rem 1.7rem 1.35rem;
   border-radius: 24px;
-  background: linear-gradient(150deg, #1b1b20 0%, #0e0e11 58%, #131318 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0.62) 100%);
+  backdrop-filter: blur(22px) saturate(1.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 36px 70px -42px rgba(0, 0, 0, 0.75);
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 30px 60px -42px rgba(0, 0, 0, 0.45);
 }
 
 .voice-demo__header {
@@ -2198,14 +2202,14 @@ textarea.input {
 }
 
 /* Benefit tabs: bare uppercase labels with a coloured underline on the
-   active one — red for sales, white for support. */
+   active one — red for sales, ink for support. */
 .voice-demo__benefits {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
   width: 100%;
   padding-bottom: 0.7rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-fg, #111) 10%, transparent);
 }
 
 .voice-demo__benefit {
@@ -2216,7 +2220,7 @@ textarea.input {
   padding: 0.2em 0;
   border: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.48);
+  color: var(--color-muted-fg, #6e6e73);
   font-family: inherit;
   font-size: 0.7rem;
   font-weight: 700;
@@ -2241,7 +2245,7 @@ textarea.input {
 }
 
 .voice-demo__benefit:not(.is-active):hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-fg, #111);
 }
 
 .voice-demo__benefit:focus-visible {
@@ -2257,7 +2261,7 @@ textarea.input {
 }
 
 .voice-demo__benefit.is-active {
-  color: #fff;
+  color: var(--color-fg, #111);
 }
 
 .voice-demo__benefit.is-active[data-benefit-pill='sales']::after {
@@ -2265,7 +2269,7 @@ textarea.input {
 }
 
 .voice-demo__benefit.is-active[data-benefit-pill='support']::after {
-  background: #fff;
+  background: var(--color-fg, #111);
 }
 
 /* Progress rail: one notch per use case, tinted by the active benefit. */
@@ -2282,13 +2286,13 @@ textarea.input {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
+  background: color-mix(in srgb, var(--color-fg, #111) 13%, transparent);
   cursor: pointer;
   transition: background-color 0.3s ease, width 0.3s ease;
 }
 
 .voice-demo__dot:not(.is-active):hover {
-  background: rgba(255, 255, 255, 0.38);
+  background: color-mix(in srgb, var(--color-fg, #111) 28%, transparent);
 }
 
 .voice-demo__dot:focus-visible {
@@ -2302,7 +2306,7 @@ textarea.input {
 }
 
 .voice-demo__dot.is-active.is-support {
-  background: #fff;
+  background: var(--color-fg, #111);
 }
 
 /* Outcome: the arrowed result line under the script — sub-benefit + the
@@ -2315,8 +2319,8 @@ textarea.input {
   min-height: 1.7rem;
 }
 
-/* The sub-benefit's colour follows the active benefit (red tint for sales,
-   white for support) to tie it to the tabs. The arrow makes it read as the
+/* The sub-benefit's colour follows the active benefit (brand red for sales,
+   ink for support) to tie it to the tabs. The arrow makes it read as the
    result the spoken line drives. */
 .voice-demo__subbenefit {
   font-family: var(--font-heading);
@@ -2324,7 +2328,7 @@ textarea.input {
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
-  color: color-mix(in srgb, var(--color-primary) 68%, #fff);
+  color: var(--color-primary);
   opacity: 0;
   transform: translateY(0.25rem);
   transition: opacity 0.4s ease, transform 0.4s ease, color 0.35s ease;
@@ -2337,7 +2341,7 @@ textarea.input {
 }
 
 .voice-demo__subbenefit.is-support {
-  color: #fff;
+  color: var(--color-fg, #111);
 }
 
 .voice-demo__subbenefit.is-shown {
@@ -2360,7 +2364,7 @@ textarea.input {
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--color-muted-fg, #6e6e73);
   white-space: nowrap;
   opacity: 0;
   transform: translateY(0.2rem);
@@ -2383,7 +2387,7 @@ textarea.input {
 }
 
 .voice-demo__feature.is-support::before {
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--color-fg, #111);
 }
 
 .voice-demo__feature[hidden] {
@@ -2407,7 +2411,7 @@ textarea.input {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--color-muted-fg, #6e6e73);
 }
 
 .voice-demo__say-icon {
@@ -2438,7 +2442,7 @@ textarea.input {
   font-size: clamp(1.18rem, 1.65vw, 1.5rem);
   line-height: 1.32;
   letter-spacing: -0.014em;
-  color: #fff;
+  color: var(--color-fg, #111);
   opacity: 0;
   pointer-events: none;
   transform: translateY(0.4rem);
