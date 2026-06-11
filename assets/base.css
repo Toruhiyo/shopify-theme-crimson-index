@@ -2309,35 +2309,29 @@ textarea.input {
   background: var(--color-fg, #111);
 }
 
-/* Outcome: the arrowed result line under the script — sub-benefit + the
-   feature that enables it. Kept compact so it never competes with the H1. */
+/* Outcome: the panel's headline — the sub-benefit the spoken line drives,
+   with the enabling feature tagged underneath. */
 .voice-demo__outcome {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.9rem;
-  min-height: 1.7rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-height: 3.9rem;
 }
 
 /* The sub-benefit's colour follows the active benefit (brand red for sales,
-   ink for support) to tie it to the tabs. The arrow makes it read as the
-   result the spoken line drives. */
+   ink for support) to tie it to the tabs. */
 .voice-demo__subbenefit {
   font-family: var(--font-heading);
-  font-size: clamp(1.18rem, 1.6vw, 1.42rem);
+  font-size: clamp(1.55rem, 2.3vw, 2rem);
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  letter-spacing: -0.04em;
+  line-height: 1;
   color: var(--color-primary);
+  text-wrap: balance;
   opacity: 0;
   transform: translateY(0.25rem);
   transition: opacity 0.4s ease, transform 0.4s ease, color 0.35s ease;
-}
-
-.voice-demo__subbenefit::before {
-  content: '→';
-  margin-right: 0.45em;
-  font-weight: 700;
 }
 
 .voice-demo__subbenefit.is-support {
@@ -2439,9 +2433,9 @@ textarea.input {
   padding: 0.18em 0.12em 0.18em 0;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(1.18rem, 1.65vw, 1.5rem);
-  line-height: 1.32;
-  letter-spacing: -0.014em;
+  font-size: clamp(1.02rem, 1.35vw, 1.24rem);
+  line-height: 1.34;
+  letter-spacing: -0.012em;
   color: var(--color-fg, #111);
   opacity: 0;
   pointer-events: none;
