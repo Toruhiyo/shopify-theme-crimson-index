@@ -1700,6 +1700,7 @@ textarea.input {
 .promo-bar__brand {
   display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
   justify-self: start;
   min-width: 0;
   color: inherit;
@@ -1729,7 +1730,6 @@ a.promo-bar__brand:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
   margin: 0;
   justify-self: center;
   min-width: 0;
@@ -1743,7 +1743,6 @@ a.promo-bar__brand:hover {
   text-overflow: ellipsis;
   font-weight: 600;
   letter-spacing: 0.015em;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
 }
 
 .promo-bar__divider {
@@ -1753,34 +1752,13 @@ a.promo-bar__brand:hover {
   background: rgba(255, 255, 255, 0.38);
 }
 
-.promo-bar__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.32rem;
+.promo-bar__suffix {
   flex: 0 0 auto;
-  padding: 0.16rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  background: rgba(255, 255, 255, 0.12);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.promo-bar__badge::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #fff;
-  animation: promo-badge-pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes promo-badge-pulse {
-  0%, 100% { opacity: 0.95; }
-  50% { opacity: 0.35; }
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .promo-bar__cta {
@@ -1971,15 +1949,17 @@ a.promo-bar__brand:hover {
     height: 1.15rem;
   }
 
-  .promo-bar__title {
-    font-size: 0.68rem;
-    gap: 0.35rem;
+  .promo-bar__brand {
+    gap: 0.4rem;
   }
 
-  .promo-bar__badge {
-    padding: 0.12rem 0.45rem;
-    font-size: 0.54rem;
-    letter-spacing: 0.09em;
+  .promo-bar__title {
+    font-size: 0.68rem;
+  }
+
+  .promo-bar__suffix {
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
   }
   .promo-bar__actions {
     gap: 0.35rem;
@@ -1999,16 +1979,12 @@ a.promo-bar__brand:hover {
 
 @media (max-width: 479px) {
   .promo-bar__divider,
-  .promo-bar__badge {
+  .promo-bar__suffix {
     display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .promo-bar__badge::before {
-    animation: none;
-  }
-
   .promo-bar__demos-menu {
     animation: none;
   }
