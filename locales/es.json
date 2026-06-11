@@ -155,6 +155,7 @@
       "example_tags": "Aumenta ventas · De mirar a comprar · Descubrir producto\nAumenta ventas · Convence a los indecisos · Comparar productos\nAumenta ventas · Vende con experiencia · Guía técnica\nReduce consultas · Menos tickets de seguimiento · Estado del pedido\nReduce consultas · Menos tickets de devolución · Guía de devoluciones\nReduce consultas · Menos preguntas repetidas · Preguntas previas",
       "install": "Instalar Bizmis",
       "just_say": "Solo di",
+      "feature_prefix": "Gracias a",
       "install_with_code": "Instala con tu código de acceso anticipado"
     },
     "promo": {

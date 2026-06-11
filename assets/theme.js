@@ -979,23 +979,22 @@
     }
   }
 
-  /* --- Hero voice demo ---
-     Cycles the shopper "say this" prompts in the hero. The benefit eyebrow holds
-     steady across same-benefit slides and the sub-benefit fades in with each one,
-     mirroring the coachmark. Pauses on hover so a prompt can be read. */
-  class HeroVoiceDemo {
+  /* --- Bizmis voice demo (snippets/bizmis-voice-demo.liquid) ---
+     Cycles the shopper "say this" prompts. The benefit pills hold steady across
+     same-benefit slides while the sub-benefit + enabling feature fade in with
+     each one, mirroring the coachmark. Pauses on hover so a prompt can be read. */
+  class VoiceDemo {
     constructor(root) {
       this.root = root;
-      this.slides = Array.from(root.querySelectorAll('[data-hero-voice-slide]'));
+      this.slides = Array.from(root.querySelectorAll('[data-voice-demo-slide]'));
       if (!this.slides.length) return;
 
-      const sceneScope = root.closest('.hero-voice') || document;
-      this.scenes = Array.from(sceneScope.querySelectorAll('[data-hero-voice-scene]'));
+      this.scenes = Array.from(root.querySelectorAll('[data-voice-demo-scene]'));
 
       this.benefitPills = Array.from(root.querySelectorAll('[data-benefit-pill]'));
-      this.subEl = root.querySelector('[data-hero-voice-sub]');
-      this.featureEl = root.querySelector('[data-hero-voice-feature]');
-      this.dotsWrap = root.querySelector('[data-hero-voice-dots]');
+      this.subEl = root.querySelector('[data-voice-demo-sub]');
+      this.featureEl = root.querySelector('[data-voice-demo-feature]');
+      this.dotsWrap = root.querySelector('[data-voice-demo-dots]');
       this.index = 0;
       this.timer = null;
       this.paused = false;
@@ -1035,7 +1034,7 @@
       return this.slides.map((slide, i) => {
         const dot = document.createElement('button');
         dot.type = 'button';
-        dot.className = 'hero-voice__dot';
+        dot.className = 'voice-demo__dot';
         dot.setAttribute('aria-label', `Show example ${i + 1} of ${this.slides.length}`);
         dot.addEventListener('click', () => this.jumpTo(i));
         this.dotsWrap.appendChild(dot);
@@ -1071,7 +1070,7 @@
       this.clearTimer();
       const current = this.slides[this.index];
       current.classList.remove('is-active');
-      current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
+      current.querySelectorAll('.voice-demo__word').forEach(w => w.classList.remove('is-current'));
       if (this.subEl) this.subEl.classList.remove('is-shown');
       if (this.featureEl) this.featureEl.classList.remove('is-shown');
       this.index = i;
@@ -1130,7 +1129,7 @@
       this.setScene(this.index);
       this.slides.forEach((s, i) => s.classList.toggle('is-active', i === this.index));
 
-      const words = slide.querySelectorAll('.hero-voice__word');
+      const words = slide.querySelectorAll('.voice-demo__word');
       this.runKaraoke(words);
       const dwell = Math.max(this.showMs, words.length * this.wordMs + 1400);
       if (!this.reduceMotion && this.slides.length > 1) {
@@ -1143,7 +1142,7 @@
       this.clearWordTimers();
       this.clearTimer();
       const current = this.slides[this.index];
-      current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
+      current.querySelectorAll('.voice-demo__word').forEach(w => w.classList.remove('is-current'));
       current.classList.remove('is-active');
       if (this.subEl) this.subEl.classList.remove('is-shown');
       if (this.featureEl) this.featureEl.classList.remove('is-shown');
@@ -1821,7 +1820,7 @@
     document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
-    document.querySelectorAll('[data-hero-voice]').forEach(el => new HeroVoiceDemo(el));
+    document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
     initPromoBar();
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
