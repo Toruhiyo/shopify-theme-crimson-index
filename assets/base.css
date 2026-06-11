@@ -2128,8 +2128,44 @@ a.promo-bar__brand:hover {
 
 .hero-voice__outcome {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.7rem;
   min-height: 2rem;
+}
+
+/* The capability (docs feature) that drives the value, shown beside it. */
+.hero-voice__feature {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted-fg, #6e6e73);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(0.2rem);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.hero-voice__feature::before {
+  content: '';
+  display: inline-block;
+  width: 0.3rem;
+  height: 0.3rem;
+  margin-right: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: middle;
+  opacity: 0.55;
+}
+
+.hero-voice__feature.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+.hero-voice__feature[hidden] {
+  display: none;
 }
 
 /* Both benefits stay visible; the current one is filled, the other dimmed. */
@@ -2148,11 +2184,25 @@ a.promo-bar__brand:hover {
   border: 1.5px solid var(--color-border-raw, #e5e5ea);
   background: transparent;
   color: var(--color-muted-fg, #6e6e73);
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.hero-voice__benefit:not(.is-active):hover {
+  border-color: var(--color-fg, #111);
+  color: var(--color-fg, #111);
+}
+
+.hero-voice__benefit:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .hero-voice__benefit-icon {
@@ -2220,6 +2270,8 @@ a.promo-bar__brand:hover {
 }
 
 .hero-voice__say {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.32rem;

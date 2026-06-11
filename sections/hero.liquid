@@ -90,22 +90,23 @@
     {%- endcomment -%}
     <div class="hero-voice__live" data-hero-voice>
       <div class="hero-voice__ask">
-        <div class="hero-voice__benefits" aria-hidden="true">
+        <div class="hero-voice__benefits">
           {%- if benefit_sales != blank -%}
-            <span class="hero-voice__benefit" data-benefit-pill="sales">
+            <button type="button" class="hero-voice__benefit" data-benefit-pill="sales" aria-label="{{ benefit_sales | escape }}">
               <svg class="hero-voice__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
               {{ benefit_sales }}
-            </span>
+            </button>
           {%- endif -%}
           {%- if benefit_support != blank -%}
-            <span class="hero-voice__benefit" data-benefit-pill="support">
+            <button type="button" class="hero-voice__benefit" data-benefit-pill="support" aria-label="{{ benefit_support | escape }}">
               <svg class="hero-voice__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
               {{ benefit_support }}
-            </span>
+            </button>
           {%- endif -%}
         </div>
         <div class="hero-voice__outcome" aria-hidden="true">
           <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
+          <span class="hero-voice__feature" data-hero-voice-feature hidden></span>
         </div>
       </div>
 
@@ -128,6 +129,10 @@
               {%- if tag_parts.size > 1 -%}
                 {%- assign sub = tag_parts[1] | strip -%}
               {%- endif -%}
+              {%- assign feature = '' -%}
+              {%- if tag_parts.size > 2 -%}
+                {%- assign feature = tag_parts[2] | strip -%}
+              {%- endif -%}
               {%- assign btype = 'support' -%}
               {%- if idx < half -%}
                 {%- assign btype = 'sales' -%}
@@ -137,6 +142,7 @@
                 data-hero-voice-slide
                 data-benefit="{{ benefit | escape }}"
                 data-sub="{{ sub | escape }}"
+                data-feature="{{ feature | escape }}"
                 data-benefit-type="{{ btype }}"
               >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
             {%- endif -%}
@@ -195,7 +201,7 @@
                     alt="{{ scene_label | escape }}"
                     width="760"
                     height="475"
-                    loading="lazy"
+                    {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
                   >
                 {%- else -%}
                   {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}

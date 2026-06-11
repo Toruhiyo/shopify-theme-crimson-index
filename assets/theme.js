@@ -985,6 +985,7 @@
 
       this.benefitPills = Array.from(root.querySelectorAll('[data-benefit-pill]'));
       this.subEl = root.querySelector('[data-hero-voice-sub]');
+      this.featureEl = root.querySelector('[data-hero-voice-feature]');
       this.dotsWrap = root.querySelector('[data-hero-voice-dots]');
       this.index = 0;
       this.timer = null;
@@ -997,20 +998,27 @@
 
       this.show = this.show.bind(this);
       this.hide = this.hide.bind(this);
+      this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       this.dots = this.buildDots();
-
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduceMotion || this.slides.length < 2) {
-        this.showEyebrow(this.slides[0]);
-        this.updateDots(this.slides[0]);
-        this.setScene(0);
-        this.slides[0].classList.add('is-active');
-        return;
-      }
+      this.bindBenefitPills();
 
       this.show();
-      root.addEventListener('mouseenter', () => this.pause());
-      root.addEventListener('mouseleave', () => this.resume());
+
+      if (!this.reduceMotion && this.slides.length > 1) {
+        root.addEventListener('mouseenter', () => this.pause());
+        root.addEventListener('mouseleave', () => this.resume());
+      }
+    }
+
+    /* Benefit badges act as tabs: jump to the first sub-benefit of that branch. */
+    bindBenefitPills() {
+      this.benefitPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          const type = pill.getAttribute('data-benefit-pill');
+          const idx = this.slides.findIndex(s => s.getAttribute('data-benefit-type') === type);
+          if (idx >= 0) this.jumpTo(idx);
+        });
+      });
     }
 
     buildDots() {
@@ -1056,6 +1064,7 @@
       current.classList.remove('is-active');
       current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
       if (this.subEl) this.subEl.classList.remove('is-shown');
+      if (this.featureEl) this.featureEl.classList.remove('is-shown');
       this.index = i;
       this.paused = false;
       this.show();
@@ -1074,6 +1083,13 @@
         this.subEl.hidden = !sub;
         this.subEl.classList.toggle('is-support', benefitType === 'support');
         this.subEl.classList.add('is-shown');
+      }
+
+      if (this.featureEl) {
+        const feature = slide.getAttribute('data-feature') || '';
+        this.featureEl.textContent = feature;
+        this.featureEl.hidden = !feature;
+        this.featureEl.classList.add('is-shown');
       }
     }
 
@@ -1107,7 +1123,9 @@
       const words = slide.querySelectorAll('.hero-voice__word');
       this.runKaraoke(words);
       const dwell = Math.max(this.showMs, words.length * this.wordMs + 1400);
-      this.timer = window.setTimeout(this.hide, dwell);
+      if (!this.reduceMotion && this.slides.length > 1) {
+        this.timer = window.setTimeout(this.hide, dwell);
+      }
     }
 
     hide() {
@@ -1118,6 +1136,7 @@
       current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
       current.classList.remove('is-active');
       if (this.subEl) this.subEl.classList.remove('is-shown');
+      if (this.featureEl) this.featureEl.classList.remove('is-shown');
 
       this.timer = window.setTimeout(() => {
         this.timer = null;
