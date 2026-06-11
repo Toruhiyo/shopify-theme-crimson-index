@@ -1072,6 +1072,8 @@ textarea.input {
   }
 }
 
+/* No overflow clipping: the "More" dropdown is positioned inside the list and
+   would be cut off. NavOverflow hides items that don't fit instead. */
 .header__nav-list {
   display: flex;
   align-items: center;
@@ -1079,7 +1081,6 @@ textarea.input {
   gap: 0;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 }
 
 .header__nav-item {

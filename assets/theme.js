@@ -515,6 +515,12 @@
       this.resizeObserver = new ResizeObserver(() => this.update());
       this.resizeObserver.observe(this.nav);
       this.update();
+      // Re-measure once the web font is in: fallback-font widths at
+      // DOMContentLoaded are narrower and skip the collapse.
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => this.update());
+      }
+      window.addEventListener('load', () => this.update());
     }
 
     update() {
@@ -525,13 +531,16 @@
         return;
       }
 
+      // Reveal everything before measuring: hidden items report 0 width.
+      const itemEls = this.items();
+      itemEls.forEach(el => el.classList.remove(this.overflowClass));
       this.moreItem.removeAttribute('aria-hidden');
+
       const listWidth = this.list.getBoundingClientRect().width;
       const moreWidth = this.moreItem.getBoundingClientRect().width;
       const available = listWidth - moreWidth - 8;
 
       let total = 0;
-      const itemEls = this.items();
       let overflowStart = itemEls.length;
 
       for (let i = 0; i < itemEls.length; i++) {
