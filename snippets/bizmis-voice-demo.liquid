@@ -70,21 +70,21 @@
         {%- liquid
           assign pos = forloop.index0
           assign scene_block = scene_blocks[pos]
-          assign scene_collection = scene_block.settings.collection
 
+          comment
+            Visual priority: block image override -> dedicated studio shot
+            (assets/bizmis-hero-scene-{idx}.png, one per canonical use case)
+            -> mapped collection imagery as last resort.
+          endcomment
+          assign scene_img = scene_block.settings.image
+          assign scene_asset = 'bizmis-hero-scene-' | append: idx | append: '.png'
+
+          assign scene_collection = scene_block.settings.collection
           if scene_collection == blank
             assign mapped_handle = scene_collection_map[idx]
             if mapped_handle != blank
               assign scene_collection = collections[mapped_handle]
             endif
-          endif
-
-          assign scene_img = scene_block.settings.image
-          if scene_img == blank
-            assign scene_img = scene_collection.image
-          endif
-          if scene_img == blank and scene_collection.products.first.featured_image != blank
-            assign scene_img = scene_collection.products.first.featured_image
           endif
 
           assign scene_label = scene_block.settings.label
@@ -111,7 +111,13 @@
               {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
             >
           {%- else -%}
-            {{ 'collection-1' | placeholder_svg_tag: 'placeholder' }}
+            <img
+              src="{{ scene_asset | asset_url }}"
+              alt="{{ scene_label | escape }}"
+              width="1400"
+              height="933"
+              {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+            >
           {%- endif -%}
         </div>
       {%- endif -%}
