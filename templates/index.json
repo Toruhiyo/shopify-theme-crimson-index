@@ -12,7 +12,7 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "autoplay_interval": 4
+        "autoplay_interval": 3
       }
     },
     "feature-strip": {
