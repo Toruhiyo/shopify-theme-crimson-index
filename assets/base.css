@@ -1672,10 +1672,15 @@ textarea.input {
    measured pixel height (handles wrapping on small screens). */
 .bizmis-demo {
   --promo-height: 2.75rem;
+  /* Bizmis brand orange (Visual Identity: primary #F9A353, dark #EC7709).
+     Deliberately NOT the store's primary color: the bar must read as the
+     vendor's surface, distinct from whatever brand the demo store wears. */
+  --bizmis-orange: #f9a353;
+  --bizmis-orange-dark: #ec7709;
 }
 
 .promo-bar {
-  background: var(--color-primary);
+  background: linear-gradient(180deg, var(--bizmis-orange) 0%, var(--bizmis-orange-dark) 170%);
   color: #fff;
   min-height: var(--promo-height);
 }
@@ -1756,6 +1761,64 @@ textarea.input {
   color: rgba(255, 255, 255, 0.92);
 }
 
+.promo-bar__message {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (max-width: 989.98px) {
+  .promo-bar__message {
+    display: none;
+  }
+}
+
+.promo-bar__talk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.promo-bar__talk:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #fff;
+}
+
+.promo-bar__talk:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.promo-bar__talk:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.promo-bar__talk-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
+}
+
 .promo-bar__cta {
   display: inline-flex;
   align-items: center;
@@ -1764,7 +1827,7 @@ textarea.input {
   border-radius: 999px;
   border: 1.5px solid #fff;
   background: #fff;
-  color: var(--color-primary);
+  color: var(--bizmis-orange-dark, #ec7709);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -1930,7 +1993,7 @@ textarea.input {
   background: rgba(0, 0, 0, 0.05);
   font-family: inherit;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--bizmis-orange-dark, #ec7709);
   user-select: all;
 }
 
@@ -1964,6 +2027,10 @@ textarea.input {
   .promo-bar__cta {
     font-size: 0.72rem;
     padding: 0.28rem 0.75rem;
+  }
+  .promo-bar__talk {
+    font-size: 0.72rem;
+    padding: 0.26rem 0.6rem;
   }
 }
 
@@ -1999,7 +2066,144 @@ textarea.input {
   text-underline-offset: 2px;
 }
 
-/* --- Hero Section --- */
+/* --- Hero Section (merchant-style promo slideshow) --- */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 70vh;
+  overflow: hidden;
+}
+
+.hero--large {
+  min-height: 85vh;
+}
+
+/* Light scrim under the floating transparent header so the nav stays
+   readable over busy promo photography. */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 9rem;
+  z-index: 2;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.35) 55%, transparent 100%);
+  pointer-events: none;
+}
+
+.hero__slides {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+
+.hero__slide.is-active {
+  opacity: 1;
+}
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__media img,
+.hero__media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Hero slideshow nav */
+.hero__nav {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 100px;
+  padding: 0.375rem 0.5rem;
+}
+
+.hero__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease;
+  padding: 0;
+}
+
+.hero__arrow:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hero__arrow:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.hero__dots {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 0.25rem;
+}
+
+.hero__dot {
+  width: 6px;
+  height: 6px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: background 220ms ease, width 220ms ease;
+}
+
+.hero__dot.is-active {
+  width: 18px;
+  border-radius: 100px;
+  background: #fff;
+}
+
+.hero__dot:hover:not(.is-active) {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.hero__dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__slide,
+  .hero__dot {
+    transition: none;
+  }
+}
+
+/* --- Bizmis voice demo band (sections/bizmis-voice-demo.liquid) --- */
 .hero-text {
   position: relative;
   overflow: hidden;
@@ -2010,28 +2214,8 @@ textarea.input {
 
 @media (min-width: 750px) {
   .hero-text {
-    padding: 7rem 0 6rem;
+    padding: 6rem 0 5.5rem;
   }
-}
-
-@media (min-width: 1024px) {
-  .hero-text {
-    padding: 9rem 0 7rem;
-  }
-}
-
-.template-index .hero-section {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-}
-
-.template-index .hero-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2rem 0;
 }
 
 .hero-voice {

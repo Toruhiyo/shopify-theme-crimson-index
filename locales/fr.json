@@ -158,6 +158,8 @@
     "promo": {
       "label": "Boutique démo Bizmis",
       "demo_badge": "BOUTIQUE DÉMO",
+      "message": "Vous êtes dans une boutique démo Bizmis. Tout cela fonctionne aussi sur votre boutique.",
+      "talk": "Parlez au vendeur",
       "landing": "Voir Bizmis",
       "other_demos": "Autres démos",
       "demos_hint": "Ces démos sont protégées par mot de passe.",

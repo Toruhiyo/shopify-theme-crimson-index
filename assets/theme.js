@@ -1807,6 +1807,36 @@
     window.addEventListener('bizmis:voicechat-ended', () => setVoiceClerkLocked(false));
   }
 
+  /* One gentle attention pulse on the widget shortly after it mounts, so a
+     fresh visitor's eye lands on the clerk without anything auto-opening.
+     Skipped once a voicechat has started. */
+  const WIDGET_PULSE_DELAY_MS = 2500;
+  const WIDGET_MOUNT_POLL_MS = 400;
+  const WIDGET_MOUNT_TIMEOUT_MS = 10000;
+
+  function initVoiceWidgetAttentionPulse() {
+    if (!document.body.classList.contains('bizmis-demo')) return;
+
+    let voicechatStarted = false;
+    window.addEventListener('bizmis:voicechat-started', () => { voicechatStarted = true; }, { once: true });
+
+    const startedAt = Date.now();
+    const poll = window.setInterval(() => {
+      if (voicechatStarted || Date.now() - startedAt > WIDGET_MOUNT_TIMEOUT_MS) {
+        window.clearInterval(poll);
+        return;
+      }
+      const widget = findVoiceWidget();
+      if (!widget) return;
+      window.clearInterval(poll);
+      window.setTimeout(() => {
+        if (voicechatStarted) return;
+        widget.classList.add('bizmis-widget-pulse');
+        window.setTimeout(() => widget.classList.remove('bizmis-widget-pulse'), 1800);
+      }, WIDGET_PULSE_DELAY_MS);
+    }, WIDGET_MOUNT_POLL_MS);
+  }
+
   /* Measure the demo promo bar so the index header floats just below it (and the
      hero fills exactly the remaining viewport). Handles wrapping on small screens. */
   function initPromoBar() {
@@ -1840,6 +1870,7 @@
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
+    initVoiceWidgetAttentionPulse();
     initPromoBar();
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);

@@ -272,9 +272,9 @@
       {
         "type": "checkbox",
         "id": "bizmis_coachmark_enabled",
-        "default": false,
+        "default": true,
         "label": "Show floating coachmark",
-        "info": "Legacy floating speech bubble above the voice widget. Superseded by the hero voice demo; off by default."
+        "info": "Speech bubble above the voice widget with a single suggested phrase, so visitors know what to say right away."
       },
       {
         "type": "url",

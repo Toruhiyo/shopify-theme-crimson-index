@@ -70,10 +70,14 @@
         "show_view_all": true
       }
     },
+    "bizmis-voice-demo": {
+      "type": "bizmis-voice-demo",
+      "settings": {}
+    },
     "featured-collection-2": {
       "type": "featured-collection",
       "settings": {
-        "subtitle": "Just in",
+        "subtitle": "This week",
         "title": "Hot deals",
         "products_count": 8,
         "columns": "4",
@@ -86,7 +90,7 @@
       "type": "accessories-upsell",
       "settings": {
         "subtitle": "You may also need",
-        "title": "Complete your order",
+        "title": "Complete your setup",
         "products_count": 8,
         "show_vendor": false
       }
@@ -96,6 +100,7 @@
     "hero",
     "feature-strip",
     "featured-collection-2",
+    "bizmis-voice-demo",
     "category-grid",
     "new-arrivals",
     "accessories"

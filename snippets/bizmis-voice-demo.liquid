@@ -102,13 +102,16 @@
           data-voice-demo-scene
           data-benefit-type="{{ btype }}"
         >
+          {%- comment -%}
+            The demo band renders below the fold, so every scene loads lazily.
+          {%- endcomment -%}
           {%- if scene_img != blank -%}
             <img
               src="{{ scene_img | image_url: width: 1400 }}"
               alt="{{ scene_label | escape }}"
               width="1400"
               height="875"
-              {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+              loading="lazy"
             >
           {%- else -%}
             <img
@@ -116,7 +119,7 @@
               alt="{{ scene_label | escape }}"
               width="1400"
               height="933"
-              {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+              loading="lazy"
             >
           {%- endif -%}
         </div>

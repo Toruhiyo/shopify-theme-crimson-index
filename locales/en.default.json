@@ -159,6 +159,8 @@
     "promo": {
       "label": "Bizmis demo store",
       "demo_badge": "DEMO STORE",
+      "message": "You're browsing a Bizmis demo store. Everything here works on your store too.",
+      "talk": "Talk to the clerk",
       "landing": "Visit Bizmis",
       "other_demos": "Other demos",
       "demos_hint": "These demos are password-protected.",

@@ -26,7 +26,16 @@
         <span class="promo-bar__suffix">{{ 'bizmis.promo.demo_badge' | t }}</span>
       </div>
 
+      <p class="promo-bar__message">{{ 'bizmis.promo.message' | t }}</p>
+
       <div class="promo-bar__actions">
+        <button type="button" class="promo-bar__talk" data-open-voice-clerk>
+          <svg class="promo-bar__talk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
+          </svg>
+          {{ 'bizmis.promo.talk' | t }}
+        </button>
+
         <a class="promo-bar__link" href="{{ landing_url | escape }}" target="_blank" rel="noopener">
           {{ 'bizmis.promo.landing' | t }}
           <svg class="promo-bar__link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M9 7h8v8"/></svg>

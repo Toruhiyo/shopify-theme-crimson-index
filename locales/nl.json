@@ -132,6 +132,8 @@
     "promo": {
       "label": "Bizmis demowinkel",
       "demo_badge": "DEMOWINKEL",
+      "message": "Je bekijkt een Bizmis demowinkel. Alles hier werkt ook in jouw winkel.",
+      "talk": "Praat met de verkoper",
       "landing": "Naar Bizmis",
       "other_demos": "Andere demo's",
       "demos_hint": "Deze demo's zijn met een wachtwoord beveiligd.",
