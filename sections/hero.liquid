@@ -107,13 +107,16 @@
         <div class="hero-voice__outcome" aria-hidden="true">
           <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
         </div>
+      </div>
 
-        <span class="hero-voice__say" aria-hidden="true">
-          <svg class="hero-voice__say-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-          {{ 'bizmis.panel.just_say' | t }}
-        </span>
+      <div class="hero-voice__stage" data-hero-voice-stage>
+        <div class="hero-voice__caption" aria-hidden="true">
+          <span class="hero-voice__say">
+            <svg class="hero-voice__say-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+            {{ 'bizmis.panel.just_say' | t }}
+          </span>
 
-        <div class="hero-voice__slides" data-hero-voice-slides>
+          <div class="hero-voice__slides" data-hero-voice-slides>
           {%- for idx_str in order_list -%}
             {%- assign idx = idx_str | times: 1 -%}
             {%- assign trimmed = prompts[idx] | strip -%}
@@ -138,10 +141,9 @@
               >{% assign words = trimmed | split: ' ' %}{% for word in words %}<span class="hero-voice__word">{{ word }}</span>{% endfor %}</blockquote>
             {%- endif -%}
           {%- endfor -%}
+          </div>
         </div>
-      </div>
 
-      <div class="hero-voice__stage" data-hero-voice-stage>
         {%- for idx_str in order_list -%}
           {%- assign idx = idx_str | times: 1 -%}
           {%- assign trimmed = prompts[idx] | strip -%}
