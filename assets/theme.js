@@ -1089,6 +1089,7 @@
         const feature = slide.getAttribute('data-feature') || '';
         this.featureEl.textContent = feature;
         this.featureEl.hidden = !feature;
+        this.featureEl.classList.toggle('is-support', benefitType === 'support');
         this.featureEl.classList.add('is-shown');
       }
     }
