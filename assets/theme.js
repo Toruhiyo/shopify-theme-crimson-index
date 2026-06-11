@@ -989,7 +989,8 @@
       this.slides = Array.from(root.querySelectorAll('[data-voice-demo-slide]'));
       if (!this.slides.length) return;
 
-      this.scenes = Array.from(root.querySelectorAll('[data-voice-demo-scene]'));
+      const sceneScope = root.closest('[data-voice-demo-scope]') || document;
+      this.scenes = Array.from(sceneScope.querySelectorAll('[data-voice-demo-scene]'));
 
       this.benefitPills = Array.from(root.querySelectorAll('[data-benefit-pill]'));
       this.subEl = root.querySelector('[data-voice-demo-sub]');

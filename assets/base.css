@@ -2034,6 +2034,42 @@ textarea.input {
   padding: 2rem 0;
 }
 
+.hero-voice {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Use case scenes as a full-bleed background slideshow on the right half,
+   masked so the slides melt into the page background behind the text column. */
+.hero-voice__visual {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 34%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 34%);
+}
+
+/* Light veil so the floating widget and page chrome keep contrast over busy
+   scene images. */
+.hero-voice__visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(to top, rgba(255, 255, 255, 0.5) 0%, transparent 38%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 26%);
+}
+
+@media (max-width: 989.98px) {
+  .hero-voice__visual {
+    display: none;
+  }
+}
+
 .hero-voice__inner {
   display: grid;
   grid-template-columns: 1fr;
@@ -2046,7 +2082,7 @@ textarea.input {
 
 @media (min-width: 990px) {
   .hero-voice__inner {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
     gap: 4rem;
   }
 }
@@ -2080,12 +2116,8 @@ textarea.input {
   max-width: 18ch;
 }
 
-.hero-voice__sub {
-  margin-top: 1.1rem;
-  font-size: clamp(1rem, 1.3vw, 1.15rem);
-  line-height: 1.55;
-  color: var(--color-muted-fg, #6e6e73);
-  max-width: 46ch;
+.hero-voice__main .voice-demo {
+  margin-top: 1.9rem;
 }
 
 .hero-voice__actions {
@@ -2130,37 +2162,22 @@ textarea.input {
 }
 
 /* --- Bizmis voice demo (snippets/bizmis-voice-demo.liquid) ---
-   Standalone live component, one continuous flow with no outer card:
-   benefit pills + progress rail -> sub-benefit headline + the feature that
-   enables it -> spoken phrase (karaoke) over the matching catalog scene. */
+   Two-part live component. The flow (this block) runs in the text column:
+   benefit pills -> sub-benefit headline + enabling feature -> spoken phrase
+   (karaoke) -> progress rail. The matching use case scenes render separately
+   as background slides (.voice-demo-scenes) under the same scope. */
 .voice-demo {
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  align-items: flex-start;
+  gap: 1.05rem;
   width: 100%;
   min-width: 0;
 }
 
-.voice-demo::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset: -3.5rem -2.25rem -2.5rem -2.25rem;
-  background:
-    radial-gradient(circle at 52% 38%, rgba(209, 0, 26, 0.11), transparent 36%),
-    radial-gradient(circle at 72% 64%, rgba(255, 255, 255, 0.8), transparent 44%);
-  filter: blur(20px);
-  opacity: 0.9;
-  pointer-events: none;
-}
-
 /* Header: benefit pills on top, the rotating outcome (sub-benefit headline +
-   enabling feature) as a ladder underneath. Kept above the stage so the
-   caption stain can spill slightly over the image. */
+   enabling feature) as a ladder underneath. */
 .voice-demo__header {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -2235,13 +2252,12 @@ textarea.input {
   box-shadow: 0 12px 24px -14px rgba(0, 0, 0, 0.7);
 }
 
-/* Progress rail: one notch per use case, tinted by the active benefit,
-   centered under the scene stage. */
+/* Progress rail: one notch per use case, tinted by the active benefit. */
 .voice-demo__rail {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.32rem;
+  padding-left: 0.1rem;
 }
 
 .voice-demo__dot {
@@ -2350,33 +2366,19 @@ textarea.input {
   display: none;
 }
 
-/* Caption overlay — the "Just say" cue + spoken phrase float inside the top of
-   the scene image (inset from the corner), reading as words on the picture. */
-.voice-demo__caption {
-  position: absolute;
-  z-index: 4;
-  top: 1.45rem;
-  left: 1.35rem;
-  right: 1.35rem;
+/* The ask: "Just say" cue + the rotating spoken phrase, in flow with the rest
+   of the text column. */
+.voice-demo__ask {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.44rem;
-  pointer-events: none;
+  gap: 0.55rem;
 }
 
 .voice-demo__say {
-  position: relative;
-  z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 0.32rem;
-  padding: 0.24rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(12px) saturate(1.25);
-  -webkit-backdrop-filter: blur(12px) saturate(1.25);
-  box-shadow: 0 8px 18px -12px rgba(0, 0, 0, 0.5);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -2391,26 +2393,26 @@ textarea.input {
   color: var(--color-primary);
 }
 
+/* Quotes are grid-stacked so the block sizes to the tallest phrase and the
+   rotation never reflows the column. */
 .voice-demo__slides {
   display: grid;
 }
 
 .voice-demo__quote {
   grid-area: 1 / 1;
-  position: relative;
-  isolation: isolate;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   width: fit-content;
-  max-width: min(100%, 27rem);
+  max-width: min(100%, 30rem);
   gap: 0.14em 0.34em;
   margin: 0;
-  padding: 0.18em 0.12em;
+  padding: 0.18em 0.12em 0.18em 0;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(0.88rem, 1.08vw, 1.06rem);
-  line-height: 1.3;
+  font-size: clamp(0.98rem, 1.25vw, 1.18rem);
+  line-height: 1.35;
   letter-spacing: -0.01em;
   color: var(--color-fg, #111);
   opacity: 0;
@@ -2423,46 +2425,6 @@ textarea.input {
   opacity: 1;
   pointer-events: auto;
   transform: none;
-}
-
-/* Diffuse whitish "stain" behind the caption (soft halo + denser core), like
-   the Bizmis landing captions — dark words sit on an on-theme light wash that
-   frosts over the scene image. */
-.voice-demo__quote::before,
-.voice-demo__quote::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 24px;
-}
-
-.voice-demo__quote::before {
-  inset: -1em -1.75em -1.1em -1.55em;
-  background: radial-gradient(
-    ellipse 138% 86% at 50% 50%,
-    color-mix(in srgb, var(--color-bg, #fff) 100%, transparent) 0%,
-    color-mix(in srgb, var(--color-bg, #fff) 90%, transparent) 36%,
-    color-mix(in srgb, var(--color-bg, #fff) 68%, transparent) 58%,
-    color-mix(in srgb, var(--color-bg, #fff) 42%, transparent) 74%,
-    color-mix(in srgb, var(--color-bg, #fff) 18%, transparent) 90%,
-    transparent 100%
-  );
-  filter: blur(42px);
-}
-
-.voice-demo__quote::after {
-  inset: -0.52em -1.08em -0.62em -0.98em;
-  background: radial-gradient(
-    ellipse 130% 78% at 50% 50%,
-    var(--color-bg, #fff) 0%,
-    var(--color-bg, #fff) 52%,
-    color-mix(in srgb, var(--color-bg, #fff) 88%, transparent) 68%,
-    color-mix(in srgb, var(--color-bg, #fff) 56%, transparent) 82%,
-    color-mix(in srgb, var(--color-bg, #fff) 22%, transparent) 92%,
-    transparent 100%
-  );
-  filter: blur(15px);
 }
 
 /* Karaoke caption: a primary chip highlight sweeps word by word. Painted with
@@ -2480,159 +2442,33 @@ textarea.input {
   transform: scale(1.04);
 }
 
-/* Live scene — mirrors the current use case with the matching catalog moment.
-   Scenes are grid-stacked so the stage sizes to the tallest one and they
-   crossfade in place as the rotation advances. The media is the visual anchor
-   of the component (no surrounding card chrome). */
-.voice-demo__stage {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  filter: drop-shadow(0 28px 38px rgba(0, 0, 0, 0.08));
-}
-
-.voice-demo__stage::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset: 8% -5% -9%;
-  border-radius: 2rem;
-  background: radial-gradient(ellipse at center, rgba(209, 0, 26, 0.12), transparent 68%);
-  filter: blur(18px);
-  pointer-events: none;
-}
-
-.voice-demo__scene {
-  grid-area: 1 / 1;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(0.5rem);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.voice-demo__scene.is-active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: none;
-}
-
-.voice-demo__scene-media {
-  position: relative;
-  display: block;
-  aspect-ratio: 16 / 10;
-  border-radius: calc(var(--radius-card, 18px) + 2px);
-  overflow: hidden;
-  background: var(--color-card, #f5f5f7);
-  border: 1px solid var(--color-border-raw, #e5e5ea);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 34px 70px -38px rgba(0, 0, 0, 0.62);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.voice-demo__scene-media::before,
-.voice-demo__scene-media::after {
-  content: '';
+/* Use case scenes as background slides (rendered inside .hero-voice__visual):
+   stacked full-bleed images that crossfade with a slow settle-in zoom as the
+   rotation advances. */
+.voice-demo-scenes {
   position: absolute;
   inset: 0;
-  pointer-events: none;
 }
 
-.voice-demo__scene-media::before {
-  z-index: 1;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: inherit;
-}
-
-.voice-demo__scene-media::after {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, transparent 28%),
-    linear-gradient(0deg, rgba(255, 255, 255, 0.28) 0%, transparent 24%);
-}
-
-.voice-demo__scene-media:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 40px 72px -34px rgba(0, 0, 0, 0.6);
-}
-
-.voice-demo__scene-media img,
-.voice-demo__scene-media svg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Products float as a frosted overlay so the image + picks read as one piece. */
-.voice-demo__scene-products {
+.voice-demo-scenes__scene {
   position: absolute;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 0.7rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-  padding: 0.5rem;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px) saturate(1.22);
-  -webkit-backdrop-filter: blur(16px) saturate(1.22);
-  box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.6);
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 0.8s ease, transform 7s ease;
 }
 
-.voice-demo__chip {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-  padding: 0.25rem;
-  border-radius: 10px;
-  transition: background-color 0.2s ease;
+.voice-demo-scenes__scene.is-active {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.voice-demo__chip:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.voice-demo__chip-thumb {
-  flex: 0 0 auto;
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 9px;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.voice-demo__chip-thumb img {
+.voice-demo-scenes__scene img,
+.voice-demo-scenes__scene svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.voice-demo__chip-meta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.voice-demo__chip-name {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--color-fg, #111);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.voice-demo__chip-price {
-  font-size: 0.75rem;
-  color: var(--color-muted-fg, #6e6e73);
 }
 
 @media (max-width: 989.98px) {
@@ -2647,10 +2483,11 @@ textarea.input {
   .voice-demo__feature,
   .voice-demo__quote,
   .voice-demo__word,
-  .voice-demo__scene {
+  .voice-demo-scenes__scene {
     transition: none;
   }
-  .voice-demo__word.is-current {
+  .voice-demo__word.is-current,
+  .voice-demo-scenes__scene {
     transform: none;
   }
 }

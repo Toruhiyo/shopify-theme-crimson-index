@@ -1,13 +1,20 @@
 {%- liquid
   assign eyebrow = section.settings.eyebrow
   assign heading = section.settings.heading
-  assign subheading = section.settings.subheading
   assign secondary_text = section.settings.secondary_cta_text
 
   assign listing_url = settings.bizmis_app_listing_url | default: settings.bizmis_app_listing_url_fallback
 -%}
 
-<section class="hero-text hero-voice" {{ section.shopify_attributes }}>
+<section class="hero-text hero-voice" data-voice-demo-scope {{ section.shopify_attributes }}>
+  {%- comment -%}
+    The use case scenes ride as full-bleed background slides on the right,
+    crossfading in sync with the voice demo flow in the left column.
+  {%- endcomment -%}
+  <div class="hero-voice__visual" aria-hidden="true">
+    {% render 'bizmis-voice-demo', part: 'scenes', scene_blocks: section.blocks %}
+  </div>
+
   <div class="page-width hero-voice__inner">
     <div class="hero-voice__main">
       {%- if eyebrow != blank -%}
@@ -18,9 +25,7 @@
         <h1 class="hero-voice__heading">{{ heading }}</h1>
       {%- endif -%}
 
-      {%- if subheading != blank -%}
-        <p class="hero-voice__sub">{{ subheading }}</p>
-      {%- endif -%}
+      {% render 'bizmis-voice-demo', part: 'flow' %}
 
       <div class="hero-voice__actions">
         <a
@@ -44,13 +49,6 @@
         {%- endif -%}
       </div>
     </div>
-
-    {%- comment -%}
-      Standalone live component (snippets/bizmis-voice-demo.liquid): benefits,
-      sub-benefits with the features that enable them, and the rotating use
-      case scenes. Scene blocks below override the auto collection mapping.
-    {%- endcomment -%}
-    {% render 'bizmis-voice-demo', scene_blocks: section.blocks %}
   </div>
 </section>
 
@@ -71,18 +69,6 @@
       "id": "heading",
       "label": "Heading",
       "default": "Go ahead, talk to the clerk."
-    },
-    {
-      "type": "textarea",
-      "id": "subheading",
-      "label": "Subheading",
-      "default": "This isn't a chatbot. It's the Bizmis Store Clerk, live on this demo store. Start a voice chat and say one of the example lines, or ask anything you'd ask the best associate on the floor."
-    },
-    {
-      "type": "text",
-      "id": "say_label",
-      "label": "Voice cue label",
-      "default": "Say it out loud, just like this"
     },
     {
       "type": "text",
