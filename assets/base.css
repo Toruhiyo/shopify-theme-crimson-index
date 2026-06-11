@@ -2113,6 +2113,9 @@ textarea.input {
 
 .hero__title {
   margin: 0;
+  /* 8em (of the title's own size) fits "The store clerk" but not "… is",
+     so the headline breaks as "The store clerk / is in." at every width. */
+  max-width: 8em;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(2.2rem, 4.2vw, 3.4rem);
@@ -2123,7 +2126,6 @@ textarea.input {
 
 .hero__title-line {
   display: block;
-  text-wrap: balance;
 }
 
 /* The heading's second line doubles as the conversion action: same scale as

@@ -124,7 +124,7 @@
     "panel": {
       "title": "Conheça seu atendente por voz",
       "examples": "Procuro um notebook que aguente o dia inteiro.\nEsses fones parecem iguais. Qual é melhor para correr?\nTem carregamento rápido para iPhone 15?\nCadê meu pedido? O rastreamento não atualiza há dias.\nO carregador veio com o plugue errado. Posso trocar?\nVocês entregam na Espanha? A garantia vale lá?",
-      "example_tags": "Aumente vendas · De curioso a cliente · Descoberta de produto\nAumente vendas · Convença os indecisos · Comparação de produtos\nAumente vendas · Venda com expertise · Orientação técnica\nEconomize horas de suporte · Menos tickets de status · Status do pedido\nEconomize horas de suporte · Menos tickets de troca · Ajuda com trocas\nEconomize horas de suporte · Menos perguntas repetidas · Dúvidas pré-compra",
+      "example_tags": "Aumente vendas · Descoberta de produto\nAumente vendas · Comparação de produtos\nAumente vendas · Orientação técnica\nEconomize horas de suporte · Status do pedido\nEconomize horas de suporte · Ajuda com trocas\nEconomize horas de suporte · Dúvidas pré-compra",
       "install": "Instalar o Bizmis",
       "just_say": "É só dizer",
       "coach_hide": "Ocultar sugestões",
