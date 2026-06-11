@@ -1005,33 +1005,28 @@ textarea.input {
 }
 
 .header {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transition: background-color 300ms ease, backdrop-filter 300ms ease, border-color 300ms ease;
+  background: transparent;
 }
 
 /* Transparent while it sits over the hero; turns into solid chrome once the
    hero has scrolled past. Text stays dark since the hero is light. */
-.header.is-transparent {
+.header__primary > .page-width {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 300ms ease, backdrop-filter 300ms ease, border-color 300ms ease;
+}
+
+.header.is-transparent .header__primary > .page-width {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-
-.header.is-transparent .header__primary {
   border-bottom-color: transparent;
 }
 
 .header__primary {
   position: relative;
-  border-bottom: 1px solid var(--color-border);
-}
-
-/* The bar spans the full viewport so the nav can use the entire width; the
-   rest of the site keeps the page-width cap. */
-.header__primary > .page-width {
-  max-width: none;
 }
 
 .header__inner {
@@ -1680,15 +1675,8 @@ textarea.input {
 
 .promo-bar {
   background: var(--color-primary);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-primary) 90%, #fff) 0%,
-    var(--color-primary) 55%,
-    color-mix(in srgb, var(--color-primary) 92%, #000) 100%
-  );
   color: #fff;
   min-height: var(--promo-height);
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18);
 }
 
 .promo-bar a:focus-visible,
