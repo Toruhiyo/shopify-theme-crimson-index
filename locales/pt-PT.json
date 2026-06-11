@@ -124,7 +124,7 @@
     "panel": {
       "title": "Conheça o seu assistente de loja por voz",
       "examples": "Procuro um portátil que aguente o dia todo.\nEstes auriculares parecem iguais. Quais são melhores para correr?\nTem carregamento rápido para iPhone 15?\nOnde está a minha encomenda? O rastreio não atualiza há dias.\nO carregador veio com a ficha errada. Posso trocá-lo?\nEnviam para Espanha? A garantia é válida lá?",
-      "example_tags": "Aumente vendas · De curioso a cliente · Descoberta de produto\nAumente vendas · Convença os indecisos · Comparação de produtos\nAumente vendas · Venda com competência · Orientação técnica\nReduza dúvidas · Menos tickets de estado · Estado da encomenda\nReduza dúvidas · Menos tickets de troca · Ajuda com trocas\nReduza dúvidas · Menos perguntas repetidas · Dúvidas pré-compra",
+      "example_tags": "Aumente vendas · De curioso a cliente · Descoberta de produto\nAumente vendas · Convença os indecisos · Comparação de produtos\nAumente vendas · Venda com competência · Orientação técnica\nPoupe horas de suporte · Menos tickets de estado · Estado da encomenda\nPoupe horas de suporte · Menos tickets de troca · Ajuda com trocas\nPoupe horas de suporte · Menos perguntas repetidas · Dúvidas pré-compra",
       "install": "Instalar o Bizmis",
       "just_say": "Basta dizer",
       "install_with_code": "Instale com o seu código de acesso antecipado"
