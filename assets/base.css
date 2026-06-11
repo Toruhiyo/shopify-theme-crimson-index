@@ -2169,26 +2169,24 @@ textarea.input {
 }
 
 /* --- Bizmis voice demo (snippets/bizmis-voice-demo.liquid) ---
-   Two-part live component. The flow (this block) is a frosted cue card that
-   reads like a script: pick a benefit -> read the line out loud -> see the
-   outcome it drives -> progress rail. The matching use case scenes render
-   separately as background slides (.voice-demo-scenes) under the same scope. */
+   Two-part live component. The flow (this block) is a dark teleprompter
+   panel that reads like a script: pick a benefit tab -> read the line out
+   loud -> see the outcome it drives -> progress rail. The matching use case
+   scenes render separately as background slides (.voice-demo-scenes) under
+   the same scope. Sales accents run brand red, support accents run white. */
 .voice-demo {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.95rem;
+  gap: 1.05rem;
   width: 100%;
   min-width: 0;
-  padding: 1.3rem 1.5rem 1.2rem;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  background: rgba(255, 255, 255, 0.66);
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  padding: 1.5rem 1.7rem 1.35rem;
+  border-radius: 24px;
+  background: linear-gradient(150deg, #1b1b20 0%, #0e0e11 58%, #131318 100%);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.85) inset,
-    0 30px 60px -42px rgba(0, 0, 0, 0.5);
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 36px 70px -42px rgba(0, 0, 0, 0.75);
 }
 
 .voice-demo__header {
@@ -2196,45 +2194,54 @@ textarea.input {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.9rem;
+  width: 100%;
 }
 
-/* Both benefits stay visible as a segmented control; the current one is
-   filled, the other dimmed. */
+/* Benefit tabs: bare uppercase labels with a coloured underline on the
+   active one — red for sales, white for support. */
 .voice-demo__benefits {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.32rem;
-  width: fit-content;
-  padding: 0.24rem;
-  border: 1px solid color-mix(in srgb, var(--color-border-raw, #e5e5ea) 85%, transparent);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
+  gap: 1.5rem;
+  width: 100%;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .voice-demo__benefit {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  padding: 0.52em 1em;
-  border-radius: 999px;
-  border: 1px solid transparent;
+  gap: 0.45em;
+  padding: 0.2em 0;
+  border: 0;
   background: transparent;
-  color: var(--color-muted-fg, #6e6e73);
+  color: rgba(255, 255, 255, 0.48);
   font-family: inherit;
-  font-size: 0.69rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
-  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: color 0.35s ease;
+}
+
+.voice-demo__benefit::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.78rem;
+  height: 2px;
+  border-radius: 999px;
+  background: transparent;
+  transition: background-color 0.35s ease;
 }
 
 .voice-demo__benefit:not(.is-active):hover {
-  border-color: color-mix(in srgb, var(--color-fg, #111) 18%, transparent);
-  background: rgba(255, 255, 255, 0.65);
-  color: var(--color-fg, #111);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .voice-demo__benefit:focus-visible {
@@ -2249,18 +2256,16 @@ textarea.input {
   opacity: 0.85;
 }
 
-.voice-demo__benefit.is-active[data-benefit-pill='sales'] {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-primary-fg, #fff);
-  box-shadow: 0 12px 24px -14px var(--color-primary);
+.voice-demo__benefit.is-active {
+  color: #fff;
 }
 
-.voice-demo__benefit.is-active[data-benefit-pill='support'] {
-  background: var(--color-fg, #111);
-  border-color: var(--color-fg, #111);
-  color: #fff;
-  box-shadow: 0 12px 24px -14px rgba(0, 0, 0, 0.7);
+.voice-demo__benefit.is-active[data-benefit-pill='sales']::after {
+  background: var(--color-primary);
+}
+
+.voice-demo__benefit.is-active[data-benefit-pill='support']::after {
+  background: #fff;
 }
 
 /* Progress rail: one notch per use case, tinted by the active benefit. */
@@ -2268,7 +2273,7 @@ textarea.input {
   display: flex;
   align-items: center;
   gap: 0.32rem;
-  padding-left: 0.1rem;
+  margin-top: 0.15rem;
 }
 
 .voice-demo__dot {
@@ -2277,13 +2282,13 @@ textarea.input {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-fg, #111) 11%, transparent);
+  background: rgba(255, 255, 255, 0.18);
   cursor: pointer;
   transition: background-color 0.3s ease, width 0.3s ease;
 }
 
 .voice-demo__dot:not(.is-active):hover {
-  background: color-mix(in srgb, var(--color-fg, #111) 26%, transparent);
+  background: rgba(255, 255, 255, 0.38);
 }
 
 .voice-demo__dot:focus-visible {
@@ -2297,35 +2302,42 @@ textarea.input {
 }
 
 .voice-demo__dot.is-active.is-support {
-  background: var(--color-fg, #111);
+  background: #fff;
 }
 
-/* Outcome: a compact result line under the script — sub-benefit + the feature
-   that enables it, side by side. Kept small so it never competes with the H1. */
+/* Outcome: the arrowed result line under the script — sub-benefit + the
+   feature that enables it. Kept compact so it never competes with the H1. */
 .voice-demo__outcome {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35rem 0.85rem;
-  min-height: 1.6rem;
+  gap: 0.35rem 0.9rem;
+  min-height: 1.7rem;
 }
 
-/* The sub-benefit's colour follows the active benefit (brand red for sales,
-   ink for support) to tie it to the pills. */
+/* The sub-benefit's colour follows the active benefit (red tint for sales,
+   white for support) to tie it to the tabs. The arrow makes it read as the
+   result the spoken line drives. */
 .voice-demo__subbenefit {
   font-family: var(--font-heading);
   font-size: clamp(1.18rem, 1.6vw, 1.42rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
-  color: var(--color-primary);
+  color: color-mix(in srgb, var(--color-primary) 68%, #fff);
   opacity: 0;
   transform: translateY(0.25rem);
   transition: opacity 0.4s ease, transform 0.4s ease, color 0.35s ease;
 }
 
+.voice-demo__subbenefit::before {
+  content: '→';
+  margin-right: 0.45em;
+  font-weight: 700;
+}
+
 .voice-demo__subbenefit.is-support {
-  color: var(--color-fg, #111);
+  color: #fff;
 }
 
 .voice-demo__subbenefit.is-shown {
@@ -2337,8 +2349,8 @@ textarea.input {
   display: none;
 }
 
-/* The feature that enables the sub-benefit: a quiet uppercase tag under the
-   headline, introduced by a short tick in the active benefit's colour. */
+/* The feature that enables the sub-benefit: a quiet uppercase tag beside it,
+   introduced by a short tick in the active benefit's colour. */
 .voice-demo__feature {
   display: inline-flex;
   align-items: center;
@@ -2348,7 +2360,7 @@ textarea.input {
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--color-muted-fg, #6e6e73);
+  color: rgba(255, 255, 255, 0.52);
   white-space: nowrap;
   opacity: 0;
   transform: translateY(0.2rem);
@@ -2362,7 +2374,7 @@ textarea.input {
   height: 1.5px;
   border-radius: 999px;
   background: var(--color-primary);
-  opacity: 0.72;
+  opacity: 0.85;
 }
 
 .voice-demo__feature.is-shown {
@@ -2371,7 +2383,7 @@ textarea.input {
 }
 
 .voice-demo__feature.is-support::before {
-  background: var(--color-fg, #111);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .voice-demo__feature[hidden] {
@@ -2395,7 +2407,7 @@ textarea.input {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-fg, #111);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .voice-demo__say-icon {
@@ -2423,10 +2435,10 @@ textarea.input {
   padding: 0.18em 0.12em 0.18em 0;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(1.06rem, 1.4vw, 1.3rem);
-  line-height: 1.35;
-  letter-spacing: -0.012em;
-  color: var(--color-fg, #111);
+  font-size: clamp(1.18rem, 1.65vw, 1.5rem);
+  line-height: 1.32;
+  letter-spacing: -0.014em;
+  color: #fff;
   opacity: 0;
   pointer-events: none;
   transform: translateY(0.4rem);
