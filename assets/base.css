@@ -2121,12 +2121,36 @@ textarea.input {
   color: var(--color-fg, #111);
 }
 
-.hero__description {
-  margin: 0;
+/* The hero's single conversion action: start a voice chat with the clerk. */
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+  padding: 1.05em 1.9em;
   font-size: 1.05rem;
-  line-height: 1.55;
-  color: var(--color-muted-fg, #6e6e73);
-  max-width: 24rem;
+  font-weight: 700;
+  background: var(--color-primary);
+  color: var(--color-primary-fg, #fff);
+  box-shadow: 0 18px 38px -16px color-mix(in srgb, var(--color-primary) 65%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 44px -16px color-mix(in srgb, var(--color-primary) 75%, transparent);
+}
+
+.hero__cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.hero__cta-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: 0 0 auto;
 }
 
 @media (max-width: 749px) {
@@ -2135,8 +2159,14 @@ textarea.input {
     gap: 0.85rem;
   }
 
-  .hero__description {
+  .hero__cta {
     font-size: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta:hover {
+    transform: none;
   }
 }
 
@@ -4633,6 +4663,89 @@ textarea.input {
 .bizmis-coach.is-shown {
   opacity: 1;
   transform: none;
+}
+
+/* Collapsed: the bubble tucks away into a compact chip above the widget. */
+.bizmis-coach.is-collapsed .bizmis-coach__bubble {
+  display: none;
+}
+
+.bizmis-coach.is-collapsed {
+  width: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.bizmis-coach__close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted-fg, #6e6e73);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.bizmis-coach__close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-fg, #111);
+}
+
+.bizmis-coach__close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.bizmis-coach__close svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.bizmis-coach__chip {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border: 1px solid var(--color-border-raw, #e5e5ea);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.3);
+  color: var(--color-primary);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.bizmis-coach__chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-primary);
+}
+
+.bizmis-coach__chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.bizmis-coach__chip svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.bizmis-coach.is-collapsed .bizmis-coach__chip {
+  display: inline-flex;
 }
 
 .bizmis-coach__bubble {

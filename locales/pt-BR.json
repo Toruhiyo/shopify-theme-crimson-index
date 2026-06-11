@@ -127,6 +127,8 @@
       "example_tags": "Aumente vendas · De curioso a cliente · Descoberta de produto\nAumente vendas · Convença os indecisos · Comparação de produtos\nAumente vendas · Venda com expertise · Orientação técnica\nEconomize horas de suporte · Menos tickets de status · Status do pedido\nEconomize horas de suporte · Menos tickets de troca · Ajuda com trocas\nEconomize horas de suporte · Menos perguntas repetidas · Dúvidas pré-compra",
       "install": "Instalar o Bizmis",
       "just_say": "É só dizer",
+      "coach_hide": "Ocultar sugestões",
+      "coach_show": "Mostrar sugestões",
       "install_with_code": "Instale com seu código de acesso antecipado"
     },
     "promo": {

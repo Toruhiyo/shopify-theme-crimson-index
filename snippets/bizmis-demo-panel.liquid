@@ -25,6 +25,14 @@
   -%}
   <aside class="bizmis-coach" data-bizmis-coach data-fallback-code="{{ settings.bizmis_demo_fallback_code | escape }}" aria-label="{{ 'bizmis.panel.title' | t | escape }}" aria-live="polite" hidden>
     <div class="bizmis-coach__bubble" data-bizmis-coach-bubble>
+      <button
+        type="button"
+        class="bizmis-coach__close"
+        data-bizmis-coach-close
+        aria-label="{{ 'bizmis.panel.coach_hide' | t | escape }}"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
       <span
         class="bizmis-coach__watermark"
         style="-webkit-mask-image: url('{{ 'bizmis-logo-white-transparent.png' | asset_url }}'); mask-image: url('{{ 'bizmis-logo-white-transparent.png' | asset_url }}');"
@@ -72,6 +80,15 @@
         <span data-bizmis-install-label>{{ 'bizmis.panel.install' | t }}</span>
       </a>
     </div>
+
+    <button
+      type="button"
+      class="bizmis-coach__chip"
+      data-bizmis-coach-expand
+      aria-label="{{ 'bizmis.panel.coach_show' | t | escape }}"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    </button>
   </aside>
   {%- endunless -%}
 {%- endif -%}

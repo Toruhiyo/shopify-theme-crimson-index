@@ -127,6 +127,8 @@
       "example_tags": "Umsatz steigern · Vom Stöbern zum Kauf · Produktsuche\nUmsatz steigern · Unentschlossene überzeugen · Produktvergleich\nUmsatz steigern · Mit Expertise verkaufen · Technische Beratung\nSupport-Stunden sparen · Weniger Status-Tickets · Bestellstatus\nSupport-Stunden sparen · Weniger Retouren-Tickets · Retourenhilfe\nSupport-Stunden sparen · Weniger wiederkehrende Fragen · Vorab-Fragen",
       "install": "Bizmis installieren",
       "just_say": "Sag einfach",
+      "coach_hide": "Vorschläge ausblenden",
+      "coach_show": "Vorschläge anzeigen",
       "install_with_code": "Mit Ihrem Early-Access-Code installieren"
     },
     "promo": {

@@ -10,6 +10,7 @@
   'use strict';
 
   var STORAGE_KEY = 'bizmis:demo:attribution';
+  var COACH_COLLAPSED_KEY = 'bizmis:coach:collapsed';
 
   /* Coachmark timing (kept slow + calm) and layout. */
   var COACH_START_MS = 1600;   // wait for the widget to mount before the first hint
@@ -147,8 +148,13 @@
 
       var rect = target ? target.getBoundingClientRect() : (root ? root.getBoundingClientRect() : null);
 
-      /* Match the widget card's width so the two stack as one column. */
-      if (rect && rect.width) coach.style.width = rect.width + 'px';
+      /* Match the widget card's width so the two stack as one column. The
+         collapsed chip keeps its own compact size instead. */
+      if (coach.classList.contains('is-collapsed')) {
+        coach.style.width = '';
+      } else if (rect && rect.width) {
+        coach.style.width = rect.width + 'px';
+      }
 
       var vw = window.innerWidth;
       var vh = window.innerHeight;
@@ -276,9 +282,50 @@
       });
     }
 
+    /* Collapse to a compact chip / expand back. The choice persists across
+       pages so a visitor who tucked the hint away isn't nagged again. */
+    function readCollapsed() {
+      try { return localStorage.getItem(COACH_COLLAPSED_KEY) === '1'; } catch (error) { return false; }
+    }
+
+    function storeCollapsed(collapsed) {
+      try {
+        if (collapsed) localStorage.setItem(COACH_COLLAPSED_KEY, '1');
+        else localStorage.removeItem(COACH_COLLAPSED_KEY);
+      } catch (error) { /* Private mode — state lasts this page only. */ }
+    }
+
+    function stopRotation() {
+      if (timer) { window.clearTimeout(timer); timer = null; }
+      clearWordTimers();
+      slides[index].classList.remove('is-active');
+      if (subEl) subEl.classList.remove('is-shown');
+      if (benefitEl) benefitEl.classList.remove('is-shown');
+      shownBenefit = null;
+    }
+
+    function collapse() {
+      stopRotation();
+      coach.classList.add('is-collapsed');
+      storeCollapsed(true);
+    }
+
+    function expand() {
+      coach.classList.remove('is-collapsed');
+      storeCollapsed(false);
+      showText();
+    }
+
+    var closeBtn = coach.querySelector('[data-bizmis-coach-close]');
+    var expandBtn = coach.querySelector('[data-bizmis-coach-expand]');
+    if (closeBtn) closeBtn.addEventListener('click', collapse);
+    if (expandBtn) expandBtn.addEventListener('click', expand);
+
+    if (readCollapsed()) coach.classList.add('is-collapsed');
+
     timer = window.setTimeout(function () {
       coach.classList.add('is-shown');
-      showText();
+      if (!coach.classList.contains('is-collapsed')) showText();
     }, COACH_START_MS);
   }
 

@@ -154,6 +154,8 @@
       "example_tags": "Boost sales · Turn browsers into buyers · Product discovery\nBoost sales · Win over the undecided · Product comparison\nBoost sales · Convert with expertise · Technical guidance\nSave support hours · Fewer status tickets · Order status\nSave support hours · Fewer return tickets · Returns guidance\nSave support hours · Fewer repeat questions · Pre-purchase FAQs",
       "install": "Install Bizmis",
       "just_say": "Just say",
+      "coach_hide": "Hide suggestions",
+      "coach_show": "Show suggestions",
       "install_with_code": "Install with your early-access code"
     },
     "promo": {
