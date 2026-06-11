@@ -22,8 +22,6 @@
 
   <link rel="canonical" href="{{ canonical_url }}">
 
-  {% render 'favicon' %}
-
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +34,7 @@
 
   {{ 'base.css' | asset_url | stylesheet_tag }}
   {{ content_for_header }}
+  {% render 'favicon' %}
 
   {%- assign type_modifier = 1.0 -%}
   {%- if settings.typography_scale == 'small' -%}
