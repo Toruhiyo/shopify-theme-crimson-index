@@ -995,6 +995,7 @@
       this.benefitPills = Array.from(root.querySelectorAll('[data-benefit-pill]'));
       this.subEl = root.querySelector('[data-voice-demo-sub]');
       this.featureEl = root.querySelector('[data-voice-demo-feature]');
+      this.askEl = root.querySelector('[data-voice-demo-ask]');
       this.dotsWrap = root.querySelector('[data-voice-demo-dots]');
       this.index = 0;
       this.timer = null;
@@ -1003,6 +1004,7 @@
       this.fadeMs = 600;
       this.gapMs = 250;
       this.wordMs = 340;
+      this.askDelayMs = 550;
       this.wordTimers = [];
 
       this.show = this.show.bind(this);
@@ -1072,6 +1074,7 @@
       const current = this.slides[this.index];
       current.classList.remove('is-active');
       current.querySelectorAll('.voice-demo__word').forEach(w => w.classList.remove('is-current'));
+      if (this.askEl) this.askEl.classList.remove('is-shown');
       if (this.subEl) this.subEl.classList.remove('is-shown');
       if (this.featureEl) this.featureEl.classList.remove('is-shown');
       this.index = i;
@@ -1122,19 +1125,32 @@
       step(0);
     }
 
+    /* Staggered reveal: the outcome (sub-benefit + feature) lands first, then
+       the ask ("Just say" + use case phrase) follows and the karaoke starts. */
     show() {
       this.clearTimer();
       const slide = this.slides[this.index];
       this.showEyebrow(slide);
       this.updateDots(slide);
       this.setScene(this.index);
-      this.slides.forEach((s, i) => s.classList.toggle('is-active', i === this.index));
+      this.slides.forEach(s => s.classList.remove('is-active'));
+      if (this.askEl) this.askEl.classList.remove('is-shown');
 
-      const words = slide.querySelectorAll('.voice-demo__word');
-      this.runKaraoke(words);
-      const dwell = Math.max(this.showMs, words.length * this.wordMs + 1400);
-      if (!this.reduceMotion && this.slides.length > 1) {
-        this.timer = window.setTimeout(this.hide, dwell);
+      const revealAsk = () => {
+        slide.classList.add('is-active');
+        if (this.askEl) this.askEl.classList.add('is-shown');
+        const words = slide.querySelectorAll('.voice-demo__word');
+        this.runKaraoke(words);
+        const dwell = Math.max(this.showMs, words.length * this.wordMs + 1400);
+        if (!this.reduceMotion && this.slides.length > 1) {
+          this.timer = window.setTimeout(this.hide, dwell);
+        }
+      };
+
+      if (this.reduceMotion) {
+        revealAsk();
+      } else {
+        this.timer = window.setTimeout(revealAsk, this.askDelayMs);
       }
     }
 
@@ -1145,6 +1161,7 @@
       const current = this.slides[this.index];
       current.querySelectorAll('.voice-demo__word').forEach(w => w.classList.remove('is-current'));
       current.classList.remove('is-active');
+      if (this.askEl) this.askEl.classList.remove('is-shown');
       if (this.subEl) this.subEl.classList.remove('is-shown');
       if (this.featureEl) this.featureEl.classList.remove('is-shown');
 

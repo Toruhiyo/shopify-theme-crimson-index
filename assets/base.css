@@ -2046,10 +2046,10 @@ textarea.input {
   top: 0;
   right: 0;
   bottom: 0;
-  width: 64%;
+  width: 48%;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 38%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 38%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 30%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 30%);
 }
 
 /* Light veil so the floating widget and page chrome keep contrast over busy
@@ -2388,13 +2388,21 @@ textarea.input {
   display: none;
 }
 
-/* The ask: "Just say" cue + the rotating spoken phrase, in flow with the rest
-   of the text column. */
+/* The ask: "Just say" cue + the rotating spoken phrase. Arrives as the second
+   beat of the stagger, after the outcome has landed (is-shown via JS). */
 .voice-demo__ask {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.55rem;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.voice-demo__ask.is-shown {
+  opacity: 1;
+  transform: none;
 }
 
 .voice-demo__say {
@@ -2503,6 +2511,7 @@ textarea.input {
   .voice-demo__benefit,
   .voice-demo__subbenefit,
   .voice-demo__feature,
+  .voice-demo__ask,
   .voice-demo__quote,
   .voice-demo__word,
   .voice-demo-scenes__scene {
