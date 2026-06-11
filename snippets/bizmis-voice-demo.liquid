@@ -54,33 +54,24 @@
 
 <div class="voice-demo" data-voice-demo>
   <header class="voice-demo__header">
-    <div class="voice-demo__controls">
-      <div class="voice-demo__benefits">
-        {%- if benefit_sales != blank -%}
-          <button type="button" class="voice-demo__benefit" data-benefit-pill="sales" aria-label="{{ benefit_sales | escape }}">
-            <svg class="voice-demo__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-            {{ benefit_sales }}
-          </button>
-        {%- endif -%}
-        {%- if benefit_support != blank -%}
-          <button type="button" class="voice-demo__benefit" data-benefit-pill="support" aria-label="{{ benefit_support | escape }}">
-            <svg class="voice-demo__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-            {{ benefit_support }}
-          </button>
-        {%- endif -%}
-      </div>
-
-      <div class="voice-demo__rail" data-voice-demo-dots></div>
+    <div class="voice-demo__benefits">
+      {%- if benefit_sales != blank -%}
+        <button type="button" class="voice-demo__benefit" data-benefit-pill="sales" aria-label="{{ benefit_sales | escape }}">
+          <svg class="voice-demo__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          {{ benefit_sales }}
+        </button>
+      {%- endif -%}
+      {%- if benefit_support != blank -%}
+        <button type="button" class="voice-demo__benefit" data-benefit-pill="support" aria-label="{{ benefit_support | escape }}">
+          <svg class="voice-demo__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          {{ benefit_support }}
+        </button>
+      {%- endif -%}
     </div>
 
     <div class="voice-demo__outcome" aria-hidden="true">
       <span class="voice-demo__subbenefit" data-voice-demo-sub hidden></span>
-      <span
-        class="voice-demo__feature"
-        data-voice-demo-feature
-        data-prefix="{{ 'bizmis.panel.feature_prefix' | t | escape }}"
-        hidden
-      ></span>
+      <span class="voice-demo__feature" data-voice-demo-feature hidden></span>
     </div>
   </header>
 
@@ -209,4 +200,6 @@
       {%- endif -%}
     {%- endfor -%}
   </div>
+
+  <div class="voice-demo__rail" data-voice-demo-dots></div>
 </div>

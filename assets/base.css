@@ -2156,9 +2156,9 @@ textarea.input {
   pointer-events: none;
 }
 
-/* Header: pills + rail share the top line; the rotating outcome (sub-benefit
-   headline + enabling feature) reads as a ladder underneath. Kept above the
-   stage so the caption stain can spill slightly over the image. */
+/* Header: benefit pills on top, the rotating outcome (sub-benefit headline +
+   enabling feature) as a ladder underneath. Kept above the stage so the
+   caption stain can spill slightly over the image. */
 .voice-demo__header {
   position: relative;
   z-index: 2;
@@ -2166,15 +2166,6 @@ textarea.input {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.9rem;
-}
-
-.voice-demo__controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem 1.25rem;
-  width: 100%;
 }
 
 /* Both benefits stay visible as a segmented control; the current one is
@@ -2245,12 +2236,13 @@ textarea.input {
   box-shadow: 0 12px 24px -14px rgba(0, 0, 0, 0.7);
 }
 
-/* Progress rail: one notch per use case, tinted by the active benefit. */
+/* Progress rail: one notch per use case, tinted by the active benefit,
+   centered under the scene stage. */
 .voice-demo__rail {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.32rem;
-  padding-right: 0.2rem;
 }
 
 .voice-demo__dot {
@@ -2318,33 +2310,32 @@ textarea.input {
   display: none;
 }
 
-/* The feature that enables the sub-benefit, as a labelled chip under the
-   headline ("Powered by  Order status"). The static prefix rides in via
-   data-prefix so JS can keep swapping textContent freely. */
+/* The feature that enables the sub-benefit: a quiet uppercase tag under the
+   headline, introduced by a short tick in the active benefit's colour. */
 .voice-demo__feature {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.45em;
-  padding: 0.4em 0.95em;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 26%, transparent);
-  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg, #fff));
-  font-size: 0.63rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.18rem 0;
+  font-size: 0.64rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--color-primary);
+  color: var(--color-muted-fg, #6e6e73);
   white-space: nowrap;
   opacity: 0;
   transform: translateY(0.2rem);
-  transition: opacity 0.4s ease, transform 0.4s ease, color 0.35s ease, border-color 0.35s ease, background-color 0.35s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .voice-demo__feature::before {
-  content: attr(data-prefix);
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  color: var(--color-muted-fg, #6e6e73);
+  content: '';
+  display: block;
+  width: 1.15rem;
+  height: 1.5px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  opacity: 0.72;
 }
 
 .voice-demo__feature.is-shown {
@@ -2352,10 +2343,8 @@ textarea.input {
   transform: none;
 }
 
-.voice-demo__feature.is-support {
-  border-color: color-mix(in srgb, var(--color-fg, #111) 22%, transparent);
-  background: color-mix(in srgb, var(--color-fg, #111) 5%, var(--color-bg, #fff));
-  color: var(--color-fg, #111);
+.voice-demo__feature.is-support::before {
+  background: var(--color-fg, #111);
 }
 
 .voice-demo__feature[hidden] {
@@ -2650,10 +2639,6 @@ textarea.input {
 @media (max-width: 989.98px) {
   .voice-demo {
     max-width: 34rem;
-  }
-
-  .voice-demo__controls {
-    justify-content: flex-start;
   }
 }
 

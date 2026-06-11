@@ -126,9 +126,7 @@
       "examples": "Ich suche einen Laptop, der den ganzen Tag durchhält.\nDiese Kopfhörer sehen gleich aus. Welche sind besser zum Joggen?\nHat das Schnellladen fürs iPhone 15?\nWo ist meine Bestellung? Die Sendungsverfolgung wurde seit Tagen nicht aktualisiert.\nDas Ladegerät kam mit dem falschen Stecker. Kann ich es umtauschen?\nLiefern Sie nach Spanien? Gilt die Garantie dort?",
       "example_tags": "Umsatz steigern · Vom Stöbern zum Kauf · Produktsuche\nUmsatz steigern · Unentschlossene überzeugen · Produktvergleich\nUmsatz steigern · Mit Expertise verkaufen · Technische Beratung\nAnfragen reduzieren · Weniger Status-Tickets · Bestellstatus\nAnfragen reduzieren · Weniger Retouren-Tickets · Retourenhilfe\nAnfragen reduzieren · Weniger wiederkehrende Fragen · Vorab-Fragen",
       "install": "Bizmis installieren",
-      "just_say": "Sag einfach",
-      "feature_prefix": "Möglich dank",
-      "install_with_code": "Mit Ihrem Early-Access-Code installieren"
+      "just_say": "Sag einfach",      "install_with_code": "Mit Ihrem Early-Access-Code installieren"
     },
     "promo": {
       "label": "Bizmis Demo-Store",

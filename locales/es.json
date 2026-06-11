@@ -154,9 +154,7 @@
       "examples": "Busco un portátil que aguante todo el día.\nEstos auriculares parecen iguales. ¿Cuál es mejor para correr?\n¿Tiene carga rápida para iPhone 15?\n¿Dónde está mi pedido? El seguimiento lleva días sin actualizarse.\nEl cargador ha llegado con el enchufe equivocado. ¿Puedo cambiarlo?\n¿Enviáis a España? ¿La garantía vale allí?",
       "example_tags": "Aumenta ventas · De mirar a comprar · Descubrir producto\nAumenta ventas · Convence a los indecisos · Comparar productos\nAumenta ventas · Vende con experiencia · Guía técnica\nReduce consultas · Menos tickets de seguimiento · Estado del pedido\nReduce consultas · Menos tickets de devolución · Guía de devoluciones\nReduce consultas · Menos preguntas repetidas · Preguntas previas",
       "install": "Instalar Bizmis",
-      "just_say": "Solo di",
-      "feature_prefix": "Gracias a",
-      "install_with_code": "Instala con tu código de acceso anticipado"
+      "just_say": "Solo di",      "install_with_code": "Instala con tu código de acceso anticipado"
     },
     "promo": {
       "label": "Tienda demo de Bizmis",
