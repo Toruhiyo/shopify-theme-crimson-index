@@ -92,15 +92,26 @@
       <div class="hero-voice__ask">
         <div class="hero-voice__benefits" aria-hidden="true">
           {%- if benefit_sales != blank -%}
-            <span class="hero-voice__benefit" data-benefit-pill="sales">{{ benefit_sales }}</span>
+            <span class="hero-voice__benefit" data-benefit-pill="sales">
+              <svg class="hero-voice__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+              {{ benefit_sales }}
+            </span>
           {%- endif -%}
           {%- if benefit_support != blank -%}
-            <span class="hero-voice__benefit" data-benefit-pill="support">{{ benefit_support }}</span>
+            <span class="hero-voice__benefit" data-benefit-pill="support">
+              <svg class="hero-voice__benefit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+              {{ benefit_support }}
+            </span>
           {%- endif -%}
         </div>
         <div class="hero-voice__outcome" aria-hidden="true">
           <span class="hero-voice__subbenefit" data-hero-voice-sub hidden></span>
         </div>
+
+        <span class="hero-voice__say" aria-hidden="true">
+          <svg class="hero-voice__say-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+          {{ 'bizmis.panel.just_say' | t }}
+        </span>
 
         <div class="hero-voice__slides" data-hero-voice-slides>
           {%- for idx_str in order_list -%}

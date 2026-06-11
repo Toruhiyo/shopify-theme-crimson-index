@@ -2041,6 +2041,7 @@ a.promo-bar__brand:hover {
   display: grid;
   align-items: end;
   min-height: 3.2rem;
+  padding-left: 0.6rem;
 }
 
 .hero-voice__quote {
@@ -2086,31 +2087,31 @@ a.promo-bar__brand:hover {
 }
 
 .hero-voice__quote::before {
-  inset: -0.55em -1.05em;
+  inset: -0.9em -1.55em;
   background: radial-gradient(
-    ellipse 132% 80% at 50% 50%,
-    color-mix(in srgb, var(--color-bg, #fff) 95%, transparent) 0%,
-    color-mix(in srgb, var(--color-bg, #fff) 78%, transparent) 32%,
-    color-mix(in srgb, var(--color-bg, #fff) 55%, transparent) 54%,
-    color-mix(in srgb, var(--color-bg, #fff) 32%, transparent) 72%,
-    color-mix(in srgb, var(--color-bg, #fff) 12%, transparent) 88%,
-    transparent 100%
-  );
-  filter: blur(34px);
-}
-
-.hero-voice__quote::after {
-  inset: -0.32em -0.78em;
-  background: radial-gradient(
-    ellipse 126% 72% at 50% 50%,
-    var(--color-bg, #fff) 0%,
-    var(--color-bg, #fff) 46%,
-    color-mix(in srgb, var(--color-bg, #fff) 82%, transparent) 64%,
-    color-mix(in srgb, var(--color-bg, #fff) 48%, transparent) 80%,
+    ellipse 138% 86% at 50% 50%,
+    color-mix(in srgb, var(--color-bg, #fff) 100%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg, #fff) 90%, transparent) 36%,
+    color-mix(in srgb, var(--color-bg, #fff) 68%, transparent) 58%,
+    color-mix(in srgb, var(--color-bg, #fff) 42%, transparent) 74%,
     color-mix(in srgb, var(--color-bg, #fff) 18%, transparent) 90%,
     transparent 100%
   );
-  filter: blur(12px);
+  filter: blur(40px);
+}
+
+.hero-voice__quote::after {
+  inset: -0.5em -1em;
+  background: radial-gradient(
+    ellipse 130% 78% at 50% 50%,
+    var(--color-bg, #fff) 0%,
+    var(--color-bg, #fff) 52%,
+    color-mix(in srgb, var(--color-bg, #fff) 88%, transparent) 68%,
+    color-mix(in srgb, var(--color-bg, #fff) 56%, transparent) 82%,
+    color-mix(in srgb, var(--color-bg, #fff) 22%, transparent) 92%,
+    transparent 100%
+  );
+  filter: blur(15px);
 }
 
 /* Karaoke caption: a primary chip highlight sweeps word by word. Painted with
@@ -2144,16 +2145,24 @@ a.promo-bar__brand:hover {
 .hero-voice__benefit {
   display: inline-flex;
   align-items: center;
-  padding: 0.34em 0.8em;
+  gap: 0.4em;
+  padding: 0.42em 0.9em;
   border-radius: 999px;
   border: 1.5px solid var(--color-border-raw, #e5e5ea);
   background: transparent;
   color: var(--color-muted-fg, #6e6e73);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.hero-voice__benefit-icon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  opacity: 0.85;
 }
 
 .hero-voice__benefit.is-active[data-benefit-pill='sales'] {
@@ -2174,13 +2183,14 @@ a.promo-bar__brand:hover {
    benefit (brand red for sales, ink for support) to tie it to the pills. */
 .hero-voice__subbenefit {
   font-family: var(--font-heading);
-  font-size: clamp(1.1rem, 1.7vw, 1.4rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-size: clamp(1.35rem, 2.3vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
   color: var(--color-primary);
+  text-wrap: balance;
   opacity: 0;
-  transform: translateY(0.2rem);
+  transform: translateY(0.25rem);
   transition: opacity 0.4s ease, transform 0.4s ease, color 0.35s ease;
 }
 
@@ -2195,6 +2205,26 @@ a.promo-bar__brand:hover {
 
 .hero-voice__subbenefit[hidden] {
   display: none;
+}
+
+/* "Just say" cue that frames the karaoke line as something to speak aloud. */
+.hero-voice__say {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  margin-bottom: -0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted-fg, #6e6e73);
+}
+
+.hero-voice__say-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  color: var(--color-primary);
 }
 
 .hero-voice__dots {

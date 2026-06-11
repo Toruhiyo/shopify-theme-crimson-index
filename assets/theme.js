@@ -988,6 +988,7 @@
       this.dotsWrap = root.querySelector('[data-hero-voice-dots]');
       this.index = 0;
       this.timer = null;
+      this.paused = false;
       this.showMs = 3600;
       this.fadeMs = 600;
       this.gapMs = 250;
@@ -1040,18 +1041,23 @@
       });
     }
 
-    jumpTo(i) {
-      if (i === this.index && this.timer) return;
-      this.clearWordTimers();
+    clearTimer() {
       if (this.timer) {
         window.clearTimeout(this.timer);
         this.timer = null;
       }
+    }
+
+    jumpTo(i) {
+      if (i === this.index && this.timer) return;
+      this.clearWordTimers();
+      this.clearTimer();
       const current = this.slides[this.index];
       current.classList.remove('is-active');
       current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
       if (this.subEl) this.subEl.classList.remove('is-shown');
       this.index = i;
+      this.paused = false;
       this.show();
     }
 
@@ -1091,11 +1097,12 @@
     }
 
     show() {
+      this.clearTimer();
       const slide = this.slides[this.index];
       this.showEyebrow(slide);
       this.updateDots(slide);
       this.setScene(this.index);
-      slide.classList.add('is-active');
+      this.slides.forEach((s, i) => s.classList.toggle('is-active', i === this.index));
 
       const words = slide.querySelectorAll('.hero-voice__word');
       this.runKaraoke(words);
@@ -1104,31 +1111,34 @@
     }
 
     hide() {
+      if (this.paused) return;
       this.clearWordTimers();
+      this.clearTimer();
       const current = this.slides[this.index];
       current.querySelectorAll('.hero-voice__word').forEach(w => w.classList.remove('is-current'));
-
-      const nextIndex = (this.index + 1) % this.slides.length;
-
       current.classList.remove('is-active');
       if (this.subEl) this.subEl.classList.remove('is-shown');
 
       this.timer = window.setTimeout(() => {
-        this.index = nextIndex;
+        this.timer = null;
+        if (this.paused) return;
+        this.index = (this.index + 1) % this.slides.length;
         this.show();
       }, this.fadeMs + this.gapMs);
     }
 
+    /* Pause/resume always restart the current slide cleanly so the rotation can
+       never get stranded mid-fade with no active slide. */
     pause() {
+      this.paused = true;
       this.clearWordTimers();
-      if (this.timer) {
-        window.clearTimeout(this.timer);
-        this.timer = null;
-      }
+      this.clearTimer();
     }
 
     resume() {
-      if (!this.timer) this.timer = window.setTimeout(this.hide, this.showMs);
+      if (!this.paused) return;
+      this.paused = false;
+      this.show();
     }
   }
 
