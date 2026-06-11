@@ -131,7 +131,8 @@
     },
     "promo": {
       "label": "Loja demo da Bizmis",
-      "label_suffix": "loja demo",
+      "store_name": "Meridian Consumer Electronics",
+      "demo_badge": "LOJA DEMO",
       "landing": "Ir para a Bizmis",
       "other_demos": "Outras demos",
       "demos_hint": "Estas demos são protegidas por senha.",

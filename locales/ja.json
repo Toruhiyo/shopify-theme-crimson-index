@@ -131,7 +131,8 @@
     },
     "promo": {
       "label": "Bizmis デモストア",
-      "label_suffix": "デモストア",
+      "store_name": "Meridian Consumer Electronics",
+      "demo_badge": "デモストア",
       "landing": "Bizmis を見る",
       "other_demos": "他のデモ",
       "demos_hint": "これらのデモはパスワードで保護されています。",
