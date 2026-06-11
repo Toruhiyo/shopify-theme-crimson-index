@@ -2164,10 +2164,52 @@ textarea.input {
   pointer-events: none;
 }
 
+/* Mobile: the landscape studio shots crop to their center on a portrait
+   screen, leaving nowhere readable for overlay copy. Stack instead: copy
+   band on the page background up top (under the floating chrome), then the
+   slideshow fills the remaining viewport. */
 @media (max-width: 749px) {
+  .hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* No photo under the chrome anymore, so the header scrim would just gray
+     out the copy band. */
+  .hero::before {
+    display: none;
+  }
+
+  .hero__container {
+    /* The slides sit first in the DOM; pull the copy band above them. */
+    order: -1;
+    align-self: stretch;
+    padding-top: calc(var(--promo-height, 0px) + var(--header-height) + 1.5rem);
+    padding-bottom: 0.5rem;
+  }
+
   .hero__content {
     max-width: 100%;
     gap: 0.85rem;
+  }
+
+  .hero__slides {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* Bottom-left, dots only: the mobile voice widget owns the bottom center,
+     and swipeless arrows just crowd a thumb-sized screen. */
+  .hero__nav {
+    left: 1rem;
+    bottom: 1rem;
+    transform: none;
+  }
+
+  .hero__arrow {
+    display: none;
   }
 }
 
