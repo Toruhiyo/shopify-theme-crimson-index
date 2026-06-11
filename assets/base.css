@@ -1688,9 +1688,9 @@ textarea.input {
 }
 
 .promo-bar__inner {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   min-height: var(--promo-height);
   padding-top: 0.45rem;
@@ -1701,14 +1701,18 @@ textarea.input {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  justify-self: start;
   min-width: 0;
+}
+
+.promo-bar__brand-link {
+  display: inline-flex;
+  align-items: center;
   color: inherit;
   text-decoration: none;
   transition: opacity 0.2s ease;
 }
 
-a.promo-bar__brand:hover {
+.promo-bar__brand-link:hover {
   opacity: 0.85;
 }
 
@@ -1726,25 +1730,6 @@ a.promo-bar__brand:hover {
   mask-size: contain;
 }
 
-.promo-bar__title {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  justify-self: center;
-  min-width: 0;
-  font-size: 0.78rem;
-  color: #fff;
-  white-space: nowrap;
-}
-
-.promo-bar__store {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 600;
-  letter-spacing: 0.015em;
-}
-
 .promo-bar__divider {
   width: 1px;
   height: 0.95em;
@@ -1756,6 +1741,7 @@ a.promo-bar__brand:hover {
   flex: 0 0 auto;
   font-size: 0.62rem;
   font-weight: 600;
+  line-height: 1;
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
@@ -1792,7 +1778,6 @@ a.promo-bar__brand:hover {
 .promo-bar__actions {
   display: inline-flex;
   align-items: center;
-  justify-self: end;
   gap: 0.45rem;
   flex: 0 0 auto;
 }
@@ -1942,7 +1927,6 @@ a.promo-bar__brand:hover {
 
 @media (max-width: 749px) {
   .promo-bar__inner {
-    grid-template-columns: auto 1fr auto;
     gap: 0.6rem;
   }
   .promo-bar__logo {
@@ -1951,10 +1935,6 @@ a.promo-bar__brand:hover {
 
   .promo-bar__brand {
     gap: 0.4rem;
-  }
-
-  .promo-bar__title {
-    font-size: 0.68rem;
   }
 
   .promo-bar__suffix {

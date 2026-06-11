@@ -8,25 +8,23 @@
   -%}
   <div class="promo-bar" role="region" aria-label="{{ 'bizmis.promo.label' | t | escape }}">
     <div class="page-width promo-bar__inner">
-      <a
-        class="promo-bar__brand"
-        href="{{ landing_url | escape }}"
-        target="_blank"
-        rel="noopener"
-        aria-label="{{ 'bizmis.promo.label' | t | escape }}"
-      >
-        <span
-          class="promo-bar__logo"
-          style="-webkit-mask-image: url('{{ logo_url }}'); mask-image: url('{{ logo_url }}');"
-          aria-hidden="true"
-        ></span>
+      <div class="promo-bar__brand">
+        <a
+          class="promo-bar__brand-link"
+          href="{{ landing_url | escape }}"
+          target="_blank"
+          rel="noopener"
+          aria-label="{{ 'bizmis.promo.label' | t | escape }}"
+        >
+          <span
+            class="promo-bar__logo"
+            style="-webkit-mask-image: url('{{ logo_url }}'); mask-image: url('{{ logo_url }}');"
+            aria-hidden="true"
+          ></span>
+        </a>
         <span class="promo-bar__divider" aria-hidden="true"></span>
         <span class="promo-bar__suffix">{{ 'bizmis.promo.demo_badge' | t }}</span>
-      </a>
-
-      <p class="promo-bar__title">
-        <span class="promo-bar__store">{{ 'bizmis.promo.store_name' | t }}</span>
-      </p>
+      </div>
 
       <div class="promo-bar__actions">
         <a class="promo-bar__link" href="{{ landing_url | escape }}" target="_blank" rel="noopener">
