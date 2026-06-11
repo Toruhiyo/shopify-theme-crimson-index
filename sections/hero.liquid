@@ -69,6 +69,8 @@
             <img
               src="{{ img_file | strip | asset_url }}"
               alt="{{ shop.name | escape }}"
+              width="1536"
+              height="1024"
               loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
               {%- if forloop.first %} fetchpriority="high"{% endif %}
             >
@@ -76,6 +78,22 @@
         </div>
       {%- endfor -%}
     {%- endif -%}
+  </div>
+
+  <div class="page-width hero__container">
+    <div class="hero__content">
+      {%- if section.settings.subtitle != blank -%}
+        <p class="hero__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.title != blank -%}
+        <h1 class="hero__title">{{ section.settings.title }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.description != blank -%}
+        <p class="hero__description">{{ section.settings.description }}</p>
+      {%- endif -%}
+    </div>
   </div>
 
   {%- if slide_count > 1 -%}
@@ -125,6 +143,24 @@
       "max": 12,
       "step": 1,
       "default": 6
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Consumer electronics, curated"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Welcome to Meridian."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Browse around, or do it the easy way: talk to our store clerk. Say what you're looking for and get walked straight to it."
     }
   ],
   "blocks": [

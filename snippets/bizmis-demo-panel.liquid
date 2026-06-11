@@ -1,12 +1,12 @@
 {%- comment -%}
   Floating Bizmis coachmark (BIZ-134).
 
-  A compact speech bubble that pops above the Bizmis voice widget with a single
-  suggested phrase (tagged with its benefit / sub-benefit), so a visitor knows
-  what to say within seconds of landing. It tracks the widget element so it
-  stays anchored even while the widget is dragged. The early-access code rides
-  in from bizmis.ai/demo (?code=) and is applied by bizmis-demo.js via the
-  shared data-bizmis-* hooks.
+  A compact speech bubble that pops above the Bizmis voice widget, rotating the
+  use cases one at a time with a TikTok-style karaoke caption (each tagged with
+  its benefit / sub-benefit), so a visitor knows what to say within seconds of
+  landing. It tracks the widget element so it stays anchored even while the
+  widget is dragged. The early-access code rides in from bizmis.ai/demo
+  (?code=) and is applied by bizmis-demo.js via the shared data-bizmis-* hooks.
 {%- endcomment -%}
 
 {%- if settings.bizmis_demo_enabled -%}
@@ -37,11 +37,7 @@
       </div>
 
       <div class="bizmis-coach__slides" data-bizmis-coach-slides>
-        {%- comment -%}
-          One suggestion only: a single phrase invites talking, a rotation
-          invites watching. The full set lives in the voice demo band.
-        {%- endcomment -%}
-        {%- for prompt in prompts limit: 1 -%}
+        {%- for prompt in prompts -%}
           {%- assign trimmed = prompt | strip -%}
           {%- if trimmed != blank -%}
             {%- assign tag = tags[forloop.index0] | strip -%}
