@@ -2231,9 +2231,10 @@ textarea.input {
     min-height: 100dvh;
   }
 
-  /* Repurpose the header-scrim slot as a full dark overlay between the
-     photos and the copy, heavier at the edges for chrome and widget
-     legibility. */
+  /* Repurpose the header-scrim slot as a full frosted-white veil between
+     the photos and the copy, heavier at the edges for chrome and widget
+     legibility. Light, not dark: the store is light mode and the studio
+     shots should stay airy. */
   .hero::before {
     top: 0;
     bottom: 0;
@@ -2241,9 +2242,9 @@ textarea.input {
     z-index: 1;
     background: linear-gradient(
       to bottom,
-      rgba(17, 17, 17, 0.6) 0%,
-      rgba(17, 17, 17, 0.42) 45%,
-      rgba(17, 17, 17, 0.6) 100%
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(255, 255, 255, 0.6) 45%,
+      rgba(255, 255, 255, 0.82) 100%
     );
   }
 
@@ -2263,19 +2264,10 @@ textarea.input {
 
   .hero__title {
     font-size: 2.1rem;
-    color: #fff;
-  }
-
-  .hero__subtitle {
-    /* Lightened Meridian red: the brand #D1001A is too dark to read on
-       the scrim. */
-    color: #ff8a96;
   }
 
   .hero__title-cta {
-    color: #fff;
     text-align: inherit;
-    text-decoration-color: rgba(255, 255, 255, 0.85);
   }
 
   /* Swipe changes slides on phones; the pill would collide with the
