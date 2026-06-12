@@ -2166,10 +2166,12 @@ textarea.input {
   pointer-events: none;
 }
 
-/* Mobile: the landscape studio shots crop to their center on a portrait
-   screen, leaving nowhere readable for overlay copy. Stack instead: copy
-   band on the page background up top (under the floating chrome), then the
-   slideshow right below. */
+/* Mobile: the landscape studio shots have no readable corner once they're
+   center-cropped to portrait, and any photo band ends up fighting the fixed
+   voice widget for the same pixels. So the phone hero drops the slideshow
+   entirely: the copy sits on top and the clerk widget IS the hero visual,
+   standing on a soft brand-tinted stage. Products get their spotlight in
+   the featured collections right below. */
 @media (max-width: 749px) {
   .hero,
   .hero--large,
@@ -2177,23 +2179,35 @@ textarea.input {
   .template-index .hero--large {
     flex-direction: column;
     align-items: stretch;
-    /* Don't force a full screen: stretching the photo band to fill 100dvh
-       just dead-centers the product behind the voice widget. A natural
-       height also lets the next section peek up as a scroll cue. */
-    min-height: 0;
+    justify-content: flex-start;
+    /* Copy on top, the fixed widget visually anchors the bottom; just shy
+       of full screen so the next section peeks up as a scroll cue. */
+    min-height: 88dvh;
   }
 
-  /* No photo under the chrome anymore, so the header scrim would just gray
-     out the copy band. */
-  .hero::before {
+  .hero__slides,
+  .hero__nav {
     display: none;
   }
 
+  /* Repurpose the header scrim slot as the clerk's stage: a soft brand
+     glow rising from the bottom, echoing the red studio light of the
+     desktop shots. */
+  .hero::before {
+    top: auto;
+    bottom: 0;
+    height: 60%;
+    z-index: 0;
+    background: radial-gradient(
+      ellipse 120% 100% at 50% 100%,
+      rgba(209, 0, 26, 0.14) 0%,
+      rgba(209, 0, 26, 0.06) 45%,
+      transparent 75%
+    );
+  }
+
   .hero__container {
-    /* The slides sit first in the DOM; pull the copy band above them. */
-    order: -1;
-    align-self: stretch;
-    padding-top: calc(var(--promo-height, 0px) + var(--header-height) + 1rem);
+    padding-top: calc(var(--promo-height, 0px) + var(--header-height) + 1.5rem);
     padding-bottom: 0;
   }
 
@@ -2203,35 +2217,7 @@ textarea.input {
   }
 
   .hero__title {
-    font-size: 2rem;
-  }
-
-  .hero__slides {
-    position: relative;
-    inset: auto;
-    flex: none;
-    /* Short photo band so the product sits above the fixed voice widget
-       instead of behind it: the widget then floats over the seam between
-       sections, where overlap is expected, not over the hero product. */
-    height: clamp(12rem, 32vh, 16rem);
-  }
-
-  /* The band is wider than the 3:2 shots are tall, so the crop is vertical;
-     bias it upward to keep the product clear of the bottom edge. */
-  .hero__media img {
-    object-position: center 30%;
-  }
-
-  /* Bottom-left, dots only: the mobile voice widget owns the bottom center,
-     and swipeless arrows just crowd a thumb-sized screen. */
-  .hero__nav {
-    left: 1rem;
-    bottom: 1rem;
-    transform: none;
-  }
-
-  .hero__arrow {
-    display: none;
+    font-size: 2.1rem;
   }
 }
 
