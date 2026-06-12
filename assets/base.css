@@ -2113,10 +2113,11 @@ textarea.input {
 
 .hero__title {
   margin: 0;
-  /* 7.5em (of the title's own size) fits "The store clerk" but not "… is",
+  /* 7em (of the title's own size) fits "The store clerk" but not "… is",
      so the headline breaks as "The store clerk / is in." at every width.
-     8em proved marginal: some renderings squeezed "is" onto the first line. */
-  max-width: 7.5em;
+     8em and 7.5em both proved marginal: this heading font squeezed "is"
+     onto the first line, orphaning "in." on its own. */
+  max-width: 7em;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(2.2rem, 4.2vw, 3.4rem);
@@ -2192,7 +2193,7 @@ textarea.input {
     /* The slides sit first in the DOM; pull the copy band above them. */
     order: -1;
     align-self: stretch;
-    padding-top: calc(var(--promo-height, 0px) + var(--header-height) + 1.25rem);
+    padding-top: calc(var(--promo-height, 0px) + var(--header-height) + 1rem);
     padding-bottom: 0;
   }
 
@@ -2209,7 +2210,16 @@ textarea.input {
     position: relative;
     inset: auto;
     flex: none;
-    height: min(56vh, 30rem);
+    /* Short photo band so the product sits above the fixed voice widget
+       instead of behind it: the widget then floats over the seam between
+       sections, where overlap is expected, not over the hero product. */
+    height: clamp(12rem, 32vh, 16rem);
+  }
+
+  /* The band is wider than the 3:2 shots are tall, so the crop is vertical;
+     bias it upward to keep the product clear of the bottom edge. */
+  .hero__media img {
+    object-position: center 30%;
   }
 
   /* Bottom-left, dots only: the mobile voice widget owns the bottom center,
