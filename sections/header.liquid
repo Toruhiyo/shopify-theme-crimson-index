@@ -132,7 +132,7 @@
           <button class="header__icon-btn" data-search-toggle aria-label="{{ 'header.search' | t }}">
             {% render 'icon-search' %}
           </button>
-          <a href="{{ routes.account_url }}" class="header__icon-btn" aria-label="{{ 'header.account' | t }}">
+          <a href="{{ routes.account_url }}" class="header__icon-btn header__icon-btn--account" aria-label="{{ 'header.account' | t }}">
             {% render 'icon-account' %}
           </a>
           <button class="header__icon-btn" data-cart-toggle aria-label="{{ 'header.cart' | t }}">
@@ -198,6 +198,12 @@
         <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title }}</a>
       {%- endif -%}
     {%- endfor -%}
+
+    {%- comment -%}
+      Account entry point for the smallest phones, where the header hides
+      the account icon to keep the icon row from clipping.
+    {%- endcomment -%}
+    <a href="{{ routes.account_url }}" class="mobile-menu__link mobile-menu__link--account">{{ 'header.account' | t }}</a>
   </nav>
 </div>
 

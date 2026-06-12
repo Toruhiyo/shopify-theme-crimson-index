@@ -1600,6 +1600,32 @@
       // so keyboard users can operate the controls.
       this.el.addEventListener('focusin', () => this.pause());
       this.el.addEventListener('focusout', () => this.resume());
+
+      this.bindSwipe();
+    }
+
+    // Touch devices hide the nav pill (base.css), so a horizontal swipe is
+    // the way to change slides there.
+    bindSwipe() {
+      const SWIPE_MIN_PX = 48;
+      let startX = null;
+      let startY = null;
+
+      this.el.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+
+      this.el.addEventListener('touchend', (e) => {
+        if (startX === null) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        startX = null;
+        startY = null;
+        // Mostly-horizontal gestures only; let vertical scrolling through.
+        if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx < 0) this.next(); else this.prev();
+      }, { passive: true });
     }
 
     goTo(index) {
