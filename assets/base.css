@@ -1303,14 +1303,6 @@ textarea.input {
   }
 }
 
-/* Smallest phones: account access lives in the menu drawer; the icon is the
-   most expendable on a demo store where nobody logs in. */
-@media (max-width: 419px) {
-  .header__icon-btn--account {
-    display: none;
-  }
-}
-
 .header__cart-count {
   position: absolute;
   top: 0.25rem;
@@ -2046,6 +2038,19 @@ textarea.input {
   .promo-bar__divider,
   .promo-bar__suffix {
     display: none;
+  }
+}
+
+/* Phones: anchored to the toggle's right edge the menu dangles off toward
+   the screen edge, so pin it under the promo bar as a full-width sheet. */
+@media (max-width: 749px) {
+  .promo-bar__demos-menu {
+    position: fixed;
+    top: calc(var(--promo-height, 2.75rem) + 0.5rem);
+    left: 1rem;
+    right: 1rem;
+    min-width: 0;
+    max-width: none;
   }
 }
 
