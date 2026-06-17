@@ -81,19 +81,28 @@ html {
   font-size: var(--font-body-size, 16px);
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--color-border-raw, #E5E5EA) transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-muted-fg, #6E6E73) 35%, transparent) transparent;
   scrollbar-width: thin;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-raw, #E5E5EA);
-  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-muted-fg, #6E6E73) 35%, transparent);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted-fg, #6E6E73);
+  background: color-mix(in srgb, var(--color-muted-fg, #6E6E73) 60%, transparent);
 }
+::-webkit-scrollbar-thumb:active {
+  background: var(--color-primary, #D1001A);
+}
+::-webkit-scrollbar-corner { background: transparent; }
 
 body {
   font-family: var(--font-body);
