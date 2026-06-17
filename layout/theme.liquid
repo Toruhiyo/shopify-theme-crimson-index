@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="{{ request.locale.iso_code }}">
+<html class="no-js" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -32,6 +32,7 @@
     {{ settings.font_body | font_face: font_display: 'swap' }}
   {% endstyle %}
 
+  {{ 'overlayscrollbars.min.css' | asset_url | stylesheet_tag }}
   {{ 'base.css' | asset_url | stylesheet_tag }}
   {{ content_for_header }}
   {% render 'favicon' %}
@@ -112,7 +113,7 @@
   </script>
 </head>
 
-<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %}">
+<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %}" data-overlayscrollbars-initialize>
 
   <div class="loader" id="page-loader" aria-hidden="true">
     <img src="{{ 'logo-mono.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="160" height="40">
@@ -138,6 +139,9 @@
   {% render 'cart-drawer' %}
 
   {% render 'bizmis-demo-panel' %}
+
+  <script src="{{ 'overlayscrollbars.browser.es6.min.js' | asset_url }}" defer></script>
+  <script src="{{ 'scrollbar.js' | asset_url }}" defer></script>
 
   <script src="{{ 'theme.js' | asset_url }}" defer></script>
 
