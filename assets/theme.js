@@ -900,46 +900,68 @@
     }
 
     initDrag() {
-      let isDragging = false;
+      const DRAG_THRESHOLD_PX = 8;
+      const SNAP_THRESHOLD_PX = 30;
+      let isPointerDown = false;
+      let hasDragged = false;
       let startX = 0;
       let scrollStart = 0;
+      let activePointerId = null;
 
-      const onPointerDown = (e) => {
-        if (e.button !== 0) return;
-        isDragging = true;
-        startX = e.clientX;
-        scrollStart = this.track.scrollLeft;
-        this.track.style.scrollSnapType = 'none';
-        this.track.style.cursor = 'grabbing';
-        this.track.setPointerCapture(e.pointerId);
-      };
-
-      const onPointerMove = (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - startX;
-        this.track.scrollLeft = scrollStart - dx;
-      };
-
-      const onPointerUp = (e) => {
-        if (!isDragging) return;
-        isDragging = false;
+      const endDrag = (e) => {
+        if (!isPointerDown) return;
+        isPointerDown = false;
         this.track.style.scrollSnapType = '';
         this.track.style.cursor = '';
-        this.track.releasePointerCapture(e.pointerId);
 
-        const dx = e.clientX - startX;
-        if (Math.abs(dx) > 30) {
-          this.scroll(dx < 0 ? 1 : -1);
+        if (hasDragged && activePointerId != null) {
+          try {
+            this.track.releasePointerCapture(activePointerId);
+          } catch (_) { /* already released */ }
+
+          const dx = e.clientX - startX;
+          if (Math.abs(dx) > SNAP_THRESHOLD_PX) {
+            this.scroll(dx < 0 ? 1 : -1);
+          }
         }
+
+        activePointerId = null;
       };
 
-      this.track.addEventListener('pointerdown', onPointerDown);
-      this.track.addEventListener('pointermove', onPointerMove);
-      this.track.addEventListener('pointerup', onPointerUp);
-      this.track.addEventListener('pointercancel', onPointerUp);
+      this.track.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        isPointerDown = true;
+        hasDragged = false;
+        startX = e.clientX;
+        scrollStart = this.track.scrollLeft;
+        activePointerId = e.pointerId;
+      });
 
+      this.track.addEventListener('pointermove', (e) => {
+        if (!isPointerDown) return;
+
+        const dx = e.clientX - startX;
+        if (!hasDragged) {
+          if (Math.abs(dx) < DRAG_THRESHOLD_PX) return;
+          hasDragged = true;
+          this.track.style.scrollSnapType = 'none';
+          this.track.style.cursor = 'grabbing';
+          this.track.setPointerCapture(e.pointerId);
+        }
+
+        this.track.scrollLeft = scrollStart - dx;
+      });
+
+      this.track.addEventListener('pointerup', endDrag);
+      this.track.addEventListener('pointercancel', endDrag);
+
+      // Only suppress link/button activation after a real drag, not on a tap/click.
       this.track.addEventListener('click', (e) => {
-        if (Math.abs(e.clientX - startX) > 5) e.preventDefault();
+        if (hasDragged) {
+          e.preventDefault();
+          e.stopPropagation();
+          hasDragged = false;
+        }
       }, true);
     }
   }

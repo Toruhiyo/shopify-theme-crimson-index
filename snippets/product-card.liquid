@@ -16,30 +16,30 @@
 -%}
 
 <div class="product-card" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+  <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title | escape }}"></a>
+
   <div class="product-card__media" style="--card-aspect-ratio: {{ aspect_ratio }};">
-    <a href="{{ product.url }}" aria-label="{{ product.title | escape }}">
-      {%- if product.featured_image -%}
+    {%- if product.featured_image -%}
+      <img
+        src="{{ product.featured_image | image_url: width: 600 }}"
+        alt="{{ product.featured_image.alt | escape }}"
+        width="600"
+        height="600"
+        loading="lazy"
+      >
+      {%- if has_hover_image -%}
         <img
-          src="{{ product.featured_image | image_url: width: 600 }}"
-          alt="{{ product.featured_image.alt | escape }}"
+          class="product-card__hover-image"
+          src="{{ product.images[1] | image_url: width: 600 }}"
+          alt="{{ product.images[1].alt | escape }}"
           width="600"
           height="600"
           loading="lazy"
         >
-        {%- if has_hover_image -%}
-          <img
-            class="product-card__hover-image"
-            src="{{ product.images[1] | image_url: width: 600 }}"
-            alt="{{ product.images[1].alt | escape }}"
-            width="600"
-            height="600"
-            loading="lazy"
-          >
-        {%- endif -%}
-      {%- else -%}
-        {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
       {%- endif -%}
-    </a>
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder' }}
+    {%- endif -%}
 
     {%- comment -%} Badges row: left = condition tags, right = discount {%- endcomment -%}
     <div class="product-card__badge-row">
@@ -89,9 +89,7 @@
       <p class="product-card__vendor">{{ product.vendor }}</p>
     {%- endif -%}
 
-    <h3 class="product-card__title">
-      <a href="{{ product.url }}">{{ product.title }}</a>
-    </h3>
+    <h3 class="product-card__title">{{ product.title }}</h3>
 
     <div class="product-card__price {% if product.compare_at_price > product.price %}product-card__price--sale{% endif %}" data-price-wrapper>
       <span data-display-price>{{ product.price | money }}</span>
