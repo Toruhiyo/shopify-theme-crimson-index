@@ -54,6 +54,7 @@
   },
   "products": {
     "add_to_cart": "Ajouter au panier",
+    "added_to_cart": "Ajouté au panier",
     "buy_now": "Acheter maintenant",
     "sold_out": "Épuisé",
     "quick_view": "Aperçu rapide",

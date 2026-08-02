@@ -45,6 +45,7 @@
   },
   "products": {
     "add_to_cart": "In winkelwagen",
+    "added_to_cart": "Toegevoegd aan winkelwagen",
     "buy_now": "Nu kopen",
     "sold_out": "Uitverkocht",
     "quick_view": "Snelle weergave",

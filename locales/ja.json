@@ -45,6 +45,7 @@
   },
   "products": {
     "add_to_cart": "カートに追加",
+    "added_to_cart": "カートに追加しました",
     "buy_now": "今すぐ購入",
     "sold_out": "売り切れ",
     "quick_view": "クイックビュー",

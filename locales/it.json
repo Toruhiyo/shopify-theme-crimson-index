@@ -45,6 +45,7 @@
   },
   "products": {
     "add_to_cart": "Aggiungi al carrello",
+    "added_to_cart": "Aggiunto al carrello",
     "buy_now": "Acquista ora",
     "sold_out": "Esaurito",
     "quick_view": "Anteprima rapida",

@@ -56,14 +56,18 @@
       document.querySelectorAll('[data-cart-toggle]').forEach(btn => {
         btn.addEventListener('click', (e) => { e.preventDefault(); this.toggle(); });
       });
-      if (this.backdrop) this.backdrop.addEventListener('click', () => this.close());
-      this.drawer.querySelector('[data-cart-close]')?.addEventListener('click', () => this.close());
+      this.bindCloseControls();
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           if (this.modal?.style.display !== 'none') { this.hideModal(); return; }
           if (this.isOpen()) this.close();
         }
       });
+    }
+
+    bindCloseControls() {
+      if (this.backdrop) this.backdrop.addEventListener('click', () => this.close());
+      this.drawer.querySelector('[data-cart-close]')?.addEventListener('click', () => this.close());
     }
 
     _itemId(el) {
@@ -261,6 +265,122 @@
     }
 
     toggle() { this.isOpen() ? this.close() : this.open(); }
+
+    async reload() {
+      if (!this.drawer) return;
+      try {
+        const res = await fetch(window.location.pathname + window.location.search);
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const newDrawer = doc.querySelector('.cart-drawer');
+        const newBackdrop = doc.querySelector('.cart-drawer__backdrop');
+        if (!newDrawer) return;
+
+        const wasOpen = this.isOpen();
+        this.drawer.replaceWith(newDrawer);
+        this.drawer = newDrawer;
+        this.modal = this.drawer.querySelector('[data-remove-modal]');
+        this.modalBackdrop = this.drawer.querySelector('[data-modal-backdrop]');
+        this.bindCartItems();
+        this.bindModal();
+
+        if (newBackdrop) {
+          if (this.backdrop) this.backdrop.replaceWith(newBackdrop);
+          else document.body.prepend(newBackdrop);
+          this.backdrop = newBackdrop;
+        }
+        this.bindCloseControls();
+        if (wasOpen) this.open();
+      } catch { /* keep existing drawer markup */ }
+    }
+  }
+
+  /* --- Add to Cart (AJAX — stay on page, success feedback) --- */
+  class AddToCart {
+    constructor(cartDrawer) {
+      this.cartDrawer = cartDrawer;
+      this.SUCCESS_MS = 1800;
+      this.PULSE_MS = 900;
+      document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        const action = form.getAttribute('action') || '';
+        if (!action.includes('/cart/add')) return;
+        e.preventDefault();
+        this.submit(form);
+      });
+    }
+
+    async submit(form) {
+      const submitBtn = form.querySelector('[type="submit"]');
+      const stickyBtn = document.querySelector('.pdp-sticky-bar .btn--primary:not([disabled])');
+      if (submitBtn) submitBtn.disabled = true;
+      if (stickyBtn) stickyBtn.disabled = true;
+
+      try {
+        await cartLock.acquire();
+        const root = window.Shopify?.routes?.root || '/';
+        const res = await fetch(`${root}cart/add.js`, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(form)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.description || data.message || 'Could not add to cart');
+        }
+
+        const cart = await (await fetch(`${root}cart.js`)).json();
+        cartBus.emit(cart);
+        this.playSuccess(submitBtn);
+        if (stickyBtn && stickyBtn !== submitBtn) this.playSuccess(stickyBtn);
+        this.pulseCartIcon();
+        if (this.cartDrawer?.drawer) this.cartDrawer.reload();
+      } catch (err) {
+        window.alert(err.message || 'Could not add to cart');
+        if (submitBtn) submitBtn.disabled = false;
+        if (stickyBtn) stickyBtn.disabled = false;
+      } finally {
+        cartLock.release();
+      }
+    }
+
+    playSuccess(btn) {
+      if (!btn) return;
+      clearTimeout(btn._addedTimer);
+      const label = window.themeStrings?.addedToCart || 'Added to cart';
+      const isIcon = btn.classList.contains('btn--icon');
+      if (!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
+      btn.classList.add('is-added-to-cart');
+      btn.disabled = true;
+      if (isIcon) {
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+      } else {
+        btn.textContent = label;
+      }
+      btn._addedTimer = setTimeout(() => {
+        btn.classList.remove('is-added-to-cart');
+        btn.innerHTML = btn.dataset.originalHtml;
+        delete btn.dataset.originalHtml;
+        btn.disabled = false;
+      }, this.SUCCESS_MS);
+    }
+
+    pulseCartIcon() {
+      const toggle = document.querySelector('[data-cart-toggle]');
+      const badge = document.querySelector('[data-cart-count]');
+      if (!toggle) return;
+      toggle.classList.remove('is-cart-pulse');
+      badge?.classList.remove('is-cart-count-pop');
+      void toggle.offsetWidth;
+      toggle.classList.add('is-cart-pulse');
+      badge?.classList.add('is-cart-count-pop');
+      clearTimeout(this._pulseTimer);
+      this._pulseTimer = setTimeout(() => {
+        toggle.classList.remove('is-cart-pulse');
+        badge?.classList.remove('is-cart-count-pop');
+      }, this.PULSE_MS);
+    }
   }
 
   /* --- Cart Page (AJAX qty updates for /cart) --- */
@@ -1869,7 +1989,8 @@
 
   /* --- Initialize --- */
   function init() {
-    new CartDrawer();
+    const cartDrawer = new CartDrawer();
+    new AddToCart(cartDrawer);
     new CartPage();
     new CollectionFilters();
     new SearchInfiniteScroll();

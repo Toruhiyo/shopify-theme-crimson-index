@@ -45,6 +45,7 @@
   },
   "products": {
     "add_to_cart": "加入购物车",
+    "added_to_cart": "已加入购物车",
     "buy_now": "立即购买",
     "sold_out": "已售罄",
     "quick_view": "快速预览",
