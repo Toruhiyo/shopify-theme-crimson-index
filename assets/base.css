@@ -3985,19 +3985,23 @@ textarea.input {
 .product-back {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  margin-bottom: 1rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-muted-fg);
+  gap: 0.4rem;
+  margin: 0 0 0.85rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-fg);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
   cursor: pointer;
+  z-index: 2;
 }
 
 .product-back:hover {
-  color: var(--color-fg);
+  border-color: var(--color-fg);
 }
 
 .product-back:focus-visible {

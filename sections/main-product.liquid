@@ -5,7 +5,6 @@
 
 <section class="section-spacing section-spacing--pdp">
   <div class="page-width">
-    {% render 'product-back' %}
     <div class="pdp">
       {%- comment -%} Gallery {%- endcomment -%}
       <div class="pdp__gallery">
@@ -68,6 +67,7 @@
 
       {%- comment -%} Product Info (Sticky) {%- endcomment -%}
       <div class="pdp__info">
+        {% render 'product-back' %}
         {%- if product.vendor != blank -%}
           <p class="pdp__vendor">{{ product.vendor }}</p>
         {%- endif -%}
