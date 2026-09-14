@@ -5195,6 +5195,10 @@ textarea.input {
   color: var(--legacy-chat-ink);
 }
 
+.legacy-chat[hidden] {
+  display: none;
+}
+
 .legacy-chat--left {
   left: 20px;
   right: auto;

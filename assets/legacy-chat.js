@@ -10,6 +10,7 @@
   const TYPING_PER_CHAR_MS = 9;
   const TYPING_MAX_MS = 3400;
   const BUBBLE_GAP_MS = 420;
+  const MOCK_CHAT_PARAM = 'mock_competitor_chatbot';
 
   const GREETING = [
     "Hi there! Thank you so much for contacting {brand}. My name is {agent} and I'm a virtual assistant, available 24 hours a day, 7 days a week!",
@@ -86,6 +87,54 @@
 
   const FEEDBACK_PROMPT = 'Did that answer your question?';
   const FEEDBACK_THANKS = 'Thank you for your feedback! It helps us improve our service.';
+
+  function mockChatRequested() {
+    return new URLSearchParams(window.location.search).get(MOCK_CHAT_PARAM) === 'true';
+  }
+
+  function propagateMockChatParam() {
+    const updateLink = (link) => {
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+
+      let url;
+      try {
+        url = new URL(href, window.location.href);
+      } catch {
+        return;
+      }
+
+      if (url.origin !== window.location.origin) return;
+      url.searchParams.set(MOCK_CHAT_PARAM, 'true');
+      link.href = url.toString();
+    };
+
+    const updateForm = (form) => {
+      const method = (form.getAttribute('method') || 'get').toLowerCase();
+      if (method !== 'get' || form.querySelector(`[name="${MOCK_CHAT_PARAM}"]`)) return;
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = MOCK_CHAT_PARAM;
+      input.value = 'true';
+      form.appendChild(input);
+    };
+
+    const updateNode = (node) => {
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      if (node.matches('a[href]')) updateLink(node);
+      if (node.matches('form')) updateForm(node);
+      node.querySelectorAll('a[href]').forEach(updateLink);
+      node.querySelectorAll('form').forEach(updateForm);
+    };
+
+    document.querySelectorAll('a[href]').forEach(updateLink);
+    document.querySelectorAll('form').forEach(updateForm);
+
+    new MutationObserver((records) => {
+      records.forEach(record => record.addedNodes.forEach(updateNode));
+    }).observe(document.body, { childList: true, subtree: true });
+  }
 
   class LegacyChat {
     constructor(root) {
@@ -268,7 +317,14 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    if (!mockChatRequested()) return;
+
+    propagateMockChatParam();
+
     const root = document.querySelector('[data-legacy-chat]');
-    if (root) new LegacyChat(root);
+    if (!root) return;
+
+    root.hidden = false;
+    new LegacyChat(root);
   });
 })();
