@@ -1,0 +1,23 @@
+<button
+  type="button"
+  class="product-back"
+  data-product-back
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="19" y1="12" x2="5" y2="12"/>
+    <polyline points="12 19 5 12 12 5"/>
+  </svg>
+  <span>{{ 'products.back' | t }}</span>
+</button>
+
+<script>
+  if (!window.__productBackBound) {
+    window.__productBackBound = true;
+    document.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-product-back]');
+      if (!button) return;
+      event.preventDefault();
+      window.history.back();
+    });
+  }
+</script>

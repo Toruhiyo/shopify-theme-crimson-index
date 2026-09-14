@@ -3982,6 +3982,29 @@ textarea.input {
   color: var(--color-primary);
 }
 
+.product-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted-fg);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.product-back:hover {
+  color: var(--color-fg);
+}
+
+.product-back:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
 /* --- PDP (Product Detail Page) --- */
 .pdp {
   display: grid;
