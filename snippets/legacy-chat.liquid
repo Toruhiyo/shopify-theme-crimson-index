@@ -11,27 +11,29 @@
 
 {%- if settings.legacy_chat_enabled -%}
   {%- liquid
-    assign brand = settings.legacy_chat_brand | default: shop.name
-    assign agent = settings.legacy_chat_agent | default: 'Ava'
-    assign vendor = settings.legacy_chat_vendor | default: 'Helpdesk Live Chat'
+    assign brand = settings.legacy_chat_brand | default: 'Dull Chatbot'
+    assign vendor = settings.legacy_chat_vendor | default: 'Every Chatbot Ever'
     assign side = settings.legacy_chat_position | default: 'right'
-    assign initial = agent | slice: 0
   -%}
+
+  {%- capture legacy_chat_glyph -%}
+    <svg viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+      <path d="M4 3h20a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H12l-7.2 4.5.9-4.5H4a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z" fill="currentColor"/>
+      <ellipse cx="10" cy="13" rx="2" ry="2.5" fill="#fff"/>
+      <ellipse cx="18" cy="13" rx="2" ry="2.5" fill="#fff"/>
+    </svg>
+  {%- endcapture -%}
 
   <div
     class="legacy-chat legacy-chat--{{ side }}"
     data-legacy-chat
     data-brand="{{ brand | escape }}"
-    data-agent="{{ agent | escape }}"
     hidden
   >
     <div class="legacy-chat__window" data-legacy-chat-window hidden>
       <header class="legacy-chat__header">
-        <span class="legacy-chat__avatar" aria-hidden="true">{{ initial | upcase }}</span>
-        <span class="legacy-chat__identity">
-          <span class="legacy-chat__brand">{{ brand }}</span>
-          <span class="legacy-chat__status">{{ agent }} &middot; Virtual Assistant</span>
-        </span>
+        <span class="legacy-chat__avatar" aria-hidden="true">{{ legacy_chat_glyph }}</span>
+        <span class="legacy-chat__brand">{{ brand }}</span>
         <button
           type="button"
           class="legacy-chat__minimize"
@@ -42,11 +44,16 @@
         </button>
       </header>
 
-      <div class="legacy-chat__log" data-legacy-chat-log role="log" aria-live="polite" hidden></div>
+      <div class="legacy-chat__log" data-legacy-chat-log role="log" aria-live="polite">
+        <div class="legacy-chat__msg legacy-chat__msg--bot">
+          <span class="legacy-chat__avatar" aria-hidden="true">{{ legacy_chat_glyph }}</span>
+          <p class="legacy-chat__bubble">Hi! How can I help you today?</p>
+        </div>
+      </div>
 
-      <div class="legacy-chat__quick" data-legacy-chat-quick hidden></div>
+      <div class="legacy-chat__quick" data-legacy-chat-quick></div>
 
-      <form class="legacy-chat__composer" data-legacy-chat-composer hidden>
+      <form class="legacy-chat__composer" data-legacy-chat-composer>
         <input
           type="text"
           class="legacy-chat__input"
@@ -58,7 +65,7 @@
         <button type="submit" class="legacy-chat__send">Send</button>
       </form>
 
-      <p class="legacy-chat__powered">Powered by {{ vendor }}&trade;</p>
+      <p class="legacy-chat__powered">Powered by {{ vendor }}</p>
     </div>
 
     <button
@@ -68,11 +75,7 @@
       aria-expanded="false"
       aria-label="Chat with us"
     >
-      <svg viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-        <path d="M4 3h20a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H12l-7.2 4.5.9-4.5H4a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z" fill="currentColor"/>
-        <ellipse cx="10" cy="13" rx="2" ry="2.5" fill="#fff"/>
-        <ellipse cx="18" cy="13" rx="2" ry="2.5" fill="#fff"/>
-      </svg>
+      {{ legacy_chat_glyph }}
     </button>
   </div>
 {%- endif -%}

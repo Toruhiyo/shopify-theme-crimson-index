@@ -341,7 +341,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "A fake legacy helpdesk chat widget used as a prop in marketing footage. Every answer is scripted in assets/legacy-chat.js, nothing is sent anywhere. When enabled here, it only appears on visits carrying ?mock_competitor_chatbot=true. The parameter follows internal navigation."
+        "content": "A fake bolted-on support chat used as a prop in marketing footage. Every answer is scripted in assets/legacy-chat.js, nothing is sent anywhere. When enabled here, it only appears on visits carrying ?mock_competitor_chatbot=true. The parameter follows internal navigation."
       },
       {
         "type": "checkbox",
@@ -363,19 +363,13 @@
       {
         "type": "text",
         "id": "legacy_chat_brand",
-        "default": "Meridian Customer Care",
+        "default": "Dull Chatbot",
         "label": "Header title"
       },
       {
         "type": "text",
-        "id": "legacy_chat_agent",
-        "default": "Ava",
-        "label": "Bot name"
-      },
-      {
-        "type": "text",
         "id": "legacy_chat_vendor",
-        "default": "Helpdesk Live Chat",
+        "default": "Every Chatbot Ever",
         "label": "Powered-by vendor"
       }
     ]

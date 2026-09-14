@@ -12,11 +12,6 @@
   const BUBBLE_GAP_MS = 420;
   const MOCK_CHAT_PARAM = 'mock_competitor_chatbot';
 
-  const GREETING = [
-    "Hi there! Thank you so much for contacting {brand}. My name is {agent} and I'm a virtual assistant, available 24 hours a day, 7 days a week!",
-    "Please let me know how I can assist you today by typing your question below or selecting one of the commonly requested topics."
-  ];
-
   const QUICK_REPLIES = [
     'Where is my order?',
     "I'd like to return an item",
@@ -139,8 +134,8 @@
   class LegacyChat {
     constructor(root) {
       this.root = root;
-      this.brand = root.dataset.brand || 'Customer Care';
-      this.agent = root.dataset.agent || 'Ava';
+      this.brand = root.dataset.brand || 'Dull Chatbot';
+      this.avatarTemplate = root.querySelector('.legacy-chat__header .legacy-chat__avatar');
 
       this.window = root.querySelector('[data-legacy-chat-window]');
       this.launcher = root.querySelector('[data-legacy-chat-toggle]');
@@ -193,12 +188,7 @@
 
     startConversation() {
       this.hasStarted = true;
-      this.log.hidden = false;
-      this.composer.hidden = false;
-      this.quick.hidden = false;
-
       this.renderQuickReplies();
-      this.sendBotBubbles(GREETING);
     }
 
     renderQuickReplies() {
@@ -248,9 +238,12 @@
     }
 
     interpolate(text) {
-      return text
-        .replace('{brand}', this.brand)
-        .replace('{agent}', this.agent);
+      return text.replace('{brand}', this.brand);
+    }
+
+    createAvatar() {
+      if (!this.avatarTemplate) return null;
+      return this.avatarTemplate.cloneNode(true);
     }
 
     appendMessage(text, author) {
@@ -258,10 +251,8 @@
       row.className = `legacy-chat__msg legacy-chat__msg--${author}`;
 
       if (author === 'bot') {
-        const who = document.createElement('span');
-        who.className = 'legacy-chat__msg-author';
-        who.textContent = this.agent;
-        row.appendChild(who);
+        const avatar = this.createAvatar();
+        if (avatar) row.appendChild(avatar);
       }
 
       const bubble = document.createElement('p');
@@ -301,7 +292,15 @@
       if (this.typingRow) return;
       this.typingRow = document.createElement('div');
       this.typingRow.className = 'legacy-chat__typing';
-      this.typingRow.innerHTML = `<span class="legacy-chat__typing-label">${this.agent} is typing</span><span class="legacy-chat__dots"><i></i><i></i><i></i></span>`;
+
+      const avatar = this.createAvatar();
+      if (avatar) this.typingRow.appendChild(avatar);
+
+      const dots = document.createElement('span');
+      dots.className = 'legacy-chat__dots';
+      dots.innerHTML = '<i></i><i></i><i></i>';
+      this.typingRow.appendChild(dots);
+
       this.log.appendChild(this.typingRow);
       this.scrollToLatest();
     }
