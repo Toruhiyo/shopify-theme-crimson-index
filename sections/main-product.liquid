@@ -9,6 +9,7 @@
       {%- comment -%} Gallery {%- endcomment -%}
       <div class="pdp__gallery">
         <div class="pdp__gallery-main">
+          {% render 'product-back' %}
           <img
             src="{{ featured_image | image_url: width: 1200 }}"
             alt="{{ featured_image.alt | escape }}"
@@ -67,7 +68,6 @@
 
       {%- comment -%} Product Info (Sticky) {%- endcomment -%}
       <div class="pdp__info">
-        {% render 'product-back' %}
         {%- if product.vendor != blank -%}
           <p class="pdp__vendor">{{ product.vendor }}</p>
         {%- endif -%}
