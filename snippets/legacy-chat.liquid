@@ -2,9 +2,8 @@
   Mock legacy support chat, a video prop.
 
   Imitates the bolted-on ticketing widget (Zendesk / Gorgias / Intercom class):
-  proactive teaser, pre-chat form, canned deflection answers, "powered by"
-  footer. Nothing here talks to a backend, every reply is scripted in
-  assets/legacy-chat.js.
+  canned deflection answers and a "powered by" footer. Nothing here talks to a
+  backend, every reply is scripted in assets/legacy-chat.js.
 
   Copy stays in the asset rather than the locale files: it is a prop for
   English-language marketing footage, not store copy shoppers must read.
@@ -25,18 +24,6 @@
     data-brand="{{ brand | escape }}"
     data-agent="{{ agent | escape }}"
   >
-    <div class="legacy-chat__teaser" data-legacy-chat-teaser hidden>
-      <button
-        type="button"
-        class="legacy-chat__teaser-close"
-        data-legacy-chat-teaser-close
-        aria-label="Close"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-      <p class="legacy-chat__teaser-text">Hi there! 👋 Do you have any questions? I'm here to help!</p>
-    </div>
-
     <div class="legacy-chat__window" data-legacy-chat-window hidden>
       <header class="legacy-chat__header">
         <span class="legacy-chat__avatar" aria-hidden="true">{{ initial | upcase }}</span>
@@ -53,46 +40,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg>
         </button>
       </header>
-
-      <form class="legacy-chat__prechat" data-legacy-chat-prechat>
-        <p class="legacy-chat__prechat-intro">
-          Please complete all required fields below so that we can better assist you.
-        </p>
-
-        <label class="legacy-chat__field">
-          <span>Full name <em>*</em></span>
-          <input type="text" name="name" autocomplete="name" required>
-        </label>
-
-        <label class="legacy-chat__field">
-          <span>Email address <em>*</em></span>
-          <input type="email" name="email" autocomplete="email" required>
-        </label>
-
-        <label class="legacy-chat__field">
-          <span>Order number</span>
-          <input type="text" name="order" placeholder="e.g. #1024">
-        </label>
-
-        <label class="legacy-chat__field">
-          <span>Department <em>*</em></span>
-          <select name="department" required>
-            <option value="">Please select&hellip;</option>
-            <option>Sales enquiry</option>
-            <option>Order status</option>
-            <option>Returns &amp; refunds</option>
-            <option>Technical support</option>
-            <option>Other</option>
-          </select>
-        </label>
-
-        <button type="submit" class="legacy-chat__submit">Start chat</button>
-
-        <p class="legacy-chat__consent">
-          By starting this chat you agree to our Privacy Policy, Cookie Policy and Terms of
-          Service, and consent to receiving occasional marketing communications.
-        </p>
-      </form>
 
       <div class="legacy-chat__log" data-legacy-chat-log role="log" aria-live="polite" hidden></div>
 
@@ -120,9 +67,11 @@
       aria-expanded="false"
       aria-label="Chat with us"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="legacy-chat__launcher-label">Chat with us</span>
-      <span class="legacy-chat__badge" data-legacy-chat-badge hidden>1</span>
+      <svg viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+        <path d="M4 3h20a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H12l-7.2 4.5.9-4.5H4a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z" fill="currentColor"/>
+        <ellipse cx="10" cy="13" rx="2" ry="2.5" fill="#fff"/>
+        <ellipse cx="18" cy="13" rx="2" ry="2.5" fill="#fff"/>
+      </svg>
     </button>
   </div>
 {%- endif -%}

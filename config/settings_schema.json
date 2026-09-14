@@ -354,10 +354,10 @@
         "id": "legacy_chat_position",
         "default": "right",
         "label": "Corner",
-        "info": "Places the mock chat at the top of the selected side.",
+        "info": "Places the mock chat at the bottom of the selected side.",
         "options": [
-          { "value": "left", "label": "Top left" },
-          { "value": "right", "label": "Top right" }
+          { "value": "left", "label": "Bottom left" },
+          { "value": "right", "label": "Bottom right" }
         ]
       },
       {

@@ -6,15 +6,14 @@
 (function () {
   'use strict';
 
-  const TEASER_DELAY_MS = 6000;
   const TYPING_BASE_MS = 1300;
   const TYPING_PER_CHAR_MS = 9;
   const TYPING_MAX_MS = 3400;
   const BUBBLE_GAP_MS = 420;
 
   const GREETING = [
-    "Hi {name}! Thank you so much for contacting {brand}. My name is {agent} and I'm a virtual assistant, available 24 hours a day, 7 days a week!",
-    "Before we begin, could you please confirm your order number and the email address associated with your account?"
+    "Hi there! Thank you so much for contacting {brand}. My name is {agent} and I'm a virtual assistant, available 24 hours a day, 7 days a week!",
+    "Please let me know how I can assist you today by typing your question below or selecting one of the commonly requested topics."
   ];
 
   const QUICK_REPLIES = [
@@ -95,33 +94,22 @@
       this.agent = root.dataset.agent || 'Ava';
 
       this.window = root.querySelector('[data-legacy-chat-window]');
-      this.teaser = root.querySelector('[data-legacy-chat-teaser]');
       this.launcher = root.querySelector('[data-legacy-chat-toggle]');
-      this.badge = root.querySelector('[data-legacy-chat-badge]');
-      this.prechat = root.querySelector('[data-legacy-chat-prechat]');
       this.log = root.querySelector('[data-legacy-chat-log]');
       this.quick = root.querySelector('[data-legacy-chat-quick]');
       this.composer = root.querySelector('[data-legacy-chat-composer]');
       this.input = root.querySelector('[data-legacy-chat-input]');
 
-      this.visitorName = 'there';
+      this.hasStarted = false;
       this.fallbackIndex = 0;
       this.exchanges = 0;
 
       this.bindEvents();
-      this.scheduleTeaser();
     }
 
     bindEvents() {
       this.launcher.addEventListener('click', () => this.toggle());
       this.root.querySelector('[data-legacy-chat-close]')?.addEventListener('click', () => this.close());
-      this.root.querySelector('[data-legacy-chat-teaser-close]')?.addEventListener('click', () => this.hideTeaser());
-      this.teaser?.addEventListener('click', () => this.open());
-
-      this.prechat.addEventListener('submit', (event) => {
-        event.preventDefault();
-        this.startConversation();
-      });
 
       this.composer.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -130,19 +118,6 @@
         this.input.value = '';
         this.sendVisitorMessage(text);
       });
-    }
-
-    scheduleTeaser() {
-      setTimeout(() => {
-        if (this.isOpen() || this.teaserDismissed) return;
-        this.teaser.hidden = false;
-        this.badge.hidden = false;
-      }, TEASER_DELAY_MS);
-    }
-
-    hideTeaser() {
-      this.teaserDismissed = true;
-      this.teaser.hidden = true;
     }
 
     isOpen() {
@@ -154,13 +129,11 @@
     }
 
     open() {
-      this.hideTeaser();
-      this.badge.hidden = true;
       this.window.hidden = false;
       this.launcher.setAttribute('aria-expanded', 'true');
       this.root.classList.add('is-open');
-      if (!this.prechat.hidden) this.prechat.querySelector('input')?.focus();
-      else this.input.focus();
+      if (!this.hasStarted) this.startConversation();
+      this.input.focus();
     }
 
     close() {
@@ -170,10 +143,7 @@
     }
 
     startConversation() {
-      const name = this.prechat.querySelector('[name="name"]').value.trim();
-      this.visitorName = name.split(' ')[0] || 'there';
-
-      this.prechat.hidden = true;
+      this.hasStarted = true;
       this.log.hidden = false;
       this.composer.hidden = false;
       this.quick.hidden = false;
@@ -230,7 +200,6 @@
 
     interpolate(text) {
       return text
-        .replace('{name}', this.visitorName)
         .replace('{brand}', this.brand)
         .replace('{agent}', this.agent);
     }
