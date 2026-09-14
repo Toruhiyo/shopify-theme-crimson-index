@@ -15,7 +15,7 @@
     assign brand = settings.legacy_chat_brand | default: shop.name
     assign agent = settings.legacy_chat_agent | default: 'Ava'
     assign vendor = settings.legacy_chat_vendor | default: 'Helpdesk Live Chat'
-    assign side = settings.legacy_chat_position | default: 'left'
+    assign side = settings.legacy_chat_position | default: 'right'
     assign initial = agent | slice: 0
   -%}
 

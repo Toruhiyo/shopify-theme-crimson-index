@@ -32,6 +32,7 @@
     "cart_upsell_enabled": true,
     "bizmis_promo_bar_enabled": false,
     "legacy_chat_enabled": true,
+    "legacy_chat_position": "right",
     "content_for_index": [],
     "blocks": {
       "9413881465143053370": {

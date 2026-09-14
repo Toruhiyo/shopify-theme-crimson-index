@@ -5175,19 +5175,20 @@ textarea.input {
 }
 
 /* --- Mock legacy support chat (video prop) ---
-   Deliberately off-brand: generic SaaS blue, system sans, tight radii. It has
-   to read as a third-party widget bolted onto the storefront, not as Crimson
-   Index chrome, so it does not consume the theme color tokens. */
+   Deliberately generic: greyscale, system sans, tight radii. It has to read as
+   a third-party widget bolted onto the storefront, not as Crimson Index chrome,
+   so it does not consume the theme color tokens. */
 .legacy-chat {
-  --legacy-chat-blue: #1f73b7;
-  --legacy-chat-blue-dark: #17568a;
+  --legacy-chat-accent: #3f464c;
+  --legacy-chat-accent-hover: #252a2e;
   --legacy-chat-ink: #2f3941;
   --legacy-chat-line: #d8dcde;
   position: fixed;
-  bottom: 20px;
-  z-index: 95;
+  top: 20px;
+  bottom: auto;
+  z-index: 110;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: flex-start;
   gap: 0.625rem;
   font-family: Arial, Helvetica, sans-serif;
@@ -5196,11 +5197,13 @@ textarea.input {
 
 .legacy-chat--left {
   left: 20px;
+  right: auto;
   align-items: flex-start;
 }
 
 .legacy-chat--right {
   right: 20px;
+  left: auto;
   align-items: flex-end;
 }
 
@@ -5211,7 +5214,7 @@ textarea.input {
   padding: 0.75rem 1.125rem;
   border: 0;
   border-radius: 4px;
-  background: var(--legacy-chat-blue);
+  background: var(--legacy-chat-accent);
   color: #fff;
   font: inherit;
   font-size: 0.9375rem;
@@ -5222,7 +5225,7 @@ textarea.input {
 }
 
 .legacy-chat__launcher:hover {
-  background: var(--legacy-chat-blue-dark);
+  background: var(--legacy-chat-accent-hover);
 }
 
 .legacy-chat__launcher svg {
@@ -5237,7 +5240,7 @@ textarea.input {
   min-width: 1.25rem;
   height: 1.25rem;
   border-radius: 999px;
-  background: #cc3340;
+  background: #5f676e;
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -5296,7 +5299,7 @@ textarea.input {
   align-items: center;
   gap: 0.625rem;
   padding: 0.875rem 1rem;
-  background: var(--legacy-chat-blue);
+  background: var(--legacy-chat-accent);
   color: #fff;
 }
 
@@ -5366,7 +5369,7 @@ textarea.input {
 }
 
 .legacy-chat__field em {
-  color: #cc3340;
+  color: #5f676e;
   font-style: normal;
 }
 
@@ -5384,7 +5387,7 @@ textarea.input {
 
 .legacy-chat__field input:focus,
 .legacy-chat__field select:focus {
-  outline: 2px solid var(--legacy-chat-blue);
+  outline: 2px solid var(--legacy-chat-accent);
   outline-offset: -1px;
 }
 
@@ -5392,7 +5395,7 @@ textarea.input {
   padding: 0.625rem 1rem;
   border: 0;
   border-radius: 4px;
-  background: var(--legacy-chat-blue);
+  background: var(--legacy-chat-accent);
   color: #fff;
   font: inherit;
   font-size: 0.9375rem;
@@ -5401,7 +5404,7 @@ textarea.input {
 }
 
 .legacy-chat__submit:hover {
-  background: var(--legacy-chat-blue-dark);
+  background: var(--legacy-chat-accent-hover);
 }
 
 .legacy-chat__consent {
@@ -5450,8 +5453,8 @@ textarea.input {
 }
 
 .legacy-chat__msg--visitor .legacy-chat__bubble {
-  background: var(--legacy-chat-blue);
-  border-color: var(--legacy-chat-blue);
+  background: var(--legacy-chat-accent);
+  border-color: var(--legacy-chat-accent);
   color: #fff;
 }
 
@@ -5521,10 +5524,10 @@ textarea.input {
 
 .legacy-chat__chip {
   padding: 0.35rem 0.625rem;
-  border: 1px solid var(--legacy-chat-blue);
+  border: 1px solid var(--legacy-chat-accent);
   border-radius: 999px;
   background: #fff;
-  color: var(--legacy-chat-blue);
+  color: var(--legacy-chat-accent);
   font: inherit;
   font-size: 0.75rem;
   cursor: pointer;
@@ -5552,7 +5555,7 @@ textarea.input {
 }
 
 .legacy-chat__input:focus {
-  outline: 2px solid var(--legacy-chat-blue);
+  outline: 2px solid var(--legacy-chat-accent);
   outline-offset: -1px;
 }
 
@@ -5560,7 +5563,7 @@ textarea.input {
   padding: 0.5rem 0.875rem;
   border: 0;
   border-radius: 4px;
-  background: var(--legacy-chat-blue);
+  background: var(--legacy-chat-accent);
   color: #fff;
   font: inherit;
   font-size: 0.875rem;

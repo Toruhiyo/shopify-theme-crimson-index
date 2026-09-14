@@ -352,12 +352,12 @@
       {
         "type": "select",
         "id": "legacy_chat_position",
-        "default": "left",
+        "default": "right",
         "label": "Corner",
-        "info": "Bottom left keeps it clear of the Bizmis widget, so both fit in one shot.",
+        "info": "Places the mock chat at the top of the selected side.",
         "options": [
-          { "value": "left", "label": "Bottom left" },
-          { "value": "right", "label": "Bottom right" }
+          { "value": "left", "label": "Top left" },
+          { "value": "right", "label": "Top right" }
         ]
       },
       {
