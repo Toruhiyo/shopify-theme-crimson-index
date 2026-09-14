@@ -12,7 +12,7 @@
     "main-collection": {
       "type": "main-collection",
       "settings": {
-        "products_per_page": 16,
+        "products_per_page": 48,
         "columns": "4",
         "aspect_ratio": "1 / 1",
         "show_vendor": true,

@@ -2,7 +2,7 @@
   assign columns = section.settings.columns | default: 4
   assign show_vendor = section.settings.show_vendor
   assign aspect_ratio = section.settings.aspect_ratio
-  assign products_per_page = section.settings.products_per_page | default: 16
+  assign products_per_page = section.settings.products_per_page | default: 48
 -%}
 
 <section class="section-spacing" data-collection-section data-section-id="{{ section.id }}">
@@ -212,9 +212,9 @@
       "id": "products_per_page",
       "label": "Products per page",
       "min": 8,
-      "max": 36,
+      "max": 48,
       "step": 4,
-      "default": 16
+      "default": 48
     },
     {
       "type": "select",
