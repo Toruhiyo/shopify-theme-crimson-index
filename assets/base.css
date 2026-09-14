@@ -3985,7 +3985,7 @@ textarea.input {
 .product-back {
   position: absolute;
   top: 22%;
-  left: 0.15rem;
+  left: 2rem;
   z-index: 2;
   display: flex;
   align-items: center;
