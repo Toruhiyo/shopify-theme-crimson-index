@@ -335,5 +335,49 @@
         "content": "All copy (title, example prompts, tags, buttons) is localized in the theme locale files under bizmis.panel.*"
       }
     ]
+  },
+  {
+    "name": "Mock support chat",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "A fake legacy helpdesk chat widget used as a prop in marketing footage. Every answer is scripted in assets/legacy-chat.js, nothing is sent anywhere. Keep this off outside of recordings."
+      },
+      {
+        "type": "checkbox",
+        "id": "legacy_chat_enabled",
+        "default": false,
+        "label": "Show mock support chat"
+      },
+      {
+        "type": "select",
+        "id": "legacy_chat_position",
+        "default": "left",
+        "label": "Corner",
+        "info": "Bottom left keeps it clear of the Bizmis widget, so both fit in one shot.",
+        "options": [
+          { "value": "left", "label": "Bottom left" },
+          { "value": "right", "label": "Bottom right" }
+        ]
+      },
+      {
+        "type": "text",
+        "id": "legacy_chat_brand",
+        "default": "Meridian Customer Care",
+        "label": "Header title"
+      },
+      {
+        "type": "text",
+        "id": "legacy_chat_agent",
+        "default": "Ava",
+        "label": "Bot name"
+      },
+      {
+        "type": "text",
+        "id": "legacy_chat_vendor",
+        "default": "Helpdesk Live Chat",
+        "label": "Powered-by vendor"
+      }
+    ]
   }
 ]

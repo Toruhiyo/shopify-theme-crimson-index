@@ -1,0 +1,128 @@
+{%- comment -%}
+  Mock legacy support chat, a video prop.
+
+  Imitates the bolted-on ticketing widget (Zendesk / Gorgias / Intercom class):
+  proactive teaser, pre-chat form, canned deflection answers, "powered by"
+  footer. Nothing here talks to a backend, every reply is scripted in
+  assets/legacy-chat.js.
+
+  Copy stays in the asset rather than the locale files: it is a prop for
+  English-language marketing footage, not store copy shoppers must read.
+{%- endcomment -%}
+
+{%- if settings.legacy_chat_enabled -%}
+  {%- liquid
+    assign brand = settings.legacy_chat_brand | default: shop.name
+    assign agent = settings.legacy_chat_agent | default: 'Ava'
+    assign vendor = settings.legacy_chat_vendor | default: 'Helpdesk Live Chat'
+    assign side = settings.legacy_chat_position | default: 'left'
+    assign initial = agent | slice: 0
+  -%}
+
+  <div
+    class="legacy-chat legacy-chat--{{ side }}"
+    data-legacy-chat
+    data-brand="{{ brand | escape }}"
+    data-agent="{{ agent | escape }}"
+  >
+    <div class="legacy-chat__teaser" data-legacy-chat-teaser hidden>
+      <button
+        type="button"
+        class="legacy-chat__teaser-close"
+        data-legacy-chat-teaser-close
+        aria-label="Close"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <p class="legacy-chat__teaser-text">Hi there! 👋 Do you have any questions? I'm here to help!</p>
+    </div>
+
+    <div class="legacy-chat__window" data-legacy-chat-window hidden>
+      <header class="legacy-chat__header">
+        <span class="legacy-chat__avatar" aria-hidden="true">{{ initial | upcase }}</span>
+        <span class="legacy-chat__identity">
+          <span class="legacy-chat__brand">{{ brand }}</span>
+          <span class="legacy-chat__status">{{ agent }} &middot; Virtual Assistant</span>
+        </span>
+        <button
+          type="button"
+          class="legacy-chat__minimize"
+          data-legacy-chat-close
+          aria-label="Minimize chat"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg>
+        </button>
+      </header>
+
+      <form class="legacy-chat__prechat" data-legacy-chat-prechat>
+        <p class="legacy-chat__prechat-intro">
+          Please complete all required fields below so that we can better assist you.
+        </p>
+
+        <label class="legacy-chat__field">
+          <span>Full name <em>*</em></span>
+          <input type="text" name="name" autocomplete="name" required>
+        </label>
+
+        <label class="legacy-chat__field">
+          <span>Email address <em>*</em></span>
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+
+        <label class="legacy-chat__field">
+          <span>Order number</span>
+          <input type="text" name="order" placeholder="e.g. #1024">
+        </label>
+
+        <label class="legacy-chat__field">
+          <span>Department <em>*</em></span>
+          <select name="department" required>
+            <option value="">Please select&hellip;</option>
+            <option>Sales enquiry</option>
+            <option>Order status</option>
+            <option>Returns &amp; refunds</option>
+            <option>Technical support</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <button type="submit" class="legacy-chat__submit">Start chat</button>
+
+        <p class="legacy-chat__consent">
+          By starting this chat you agree to our Privacy Policy, Cookie Policy and Terms of
+          Service, and consent to receiving occasional marketing communications.
+        </p>
+      </form>
+
+      <div class="legacy-chat__log" data-legacy-chat-log role="log" aria-live="polite" hidden></div>
+
+      <div class="legacy-chat__quick" data-legacy-chat-quick hidden></div>
+
+      <form class="legacy-chat__composer" data-legacy-chat-composer hidden>
+        <input
+          type="text"
+          class="legacy-chat__input"
+          data-legacy-chat-input
+          placeholder="Type your message here&hellip;"
+          autocomplete="off"
+          aria-label="Type your message"
+        >
+        <button type="submit" class="legacy-chat__send">Send</button>
+      </form>
+
+      <p class="legacy-chat__powered">Powered by {{ vendor }}&trade;</p>
+    </div>
+
+    <button
+      type="button"
+      class="legacy-chat__launcher"
+      data-legacy-chat-toggle
+      aria-expanded="false"
+      aria-label="Chat with us"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="legacy-chat__launcher-label">Chat with us</span>
+      <span class="legacy-chat__badge" data-legacy-chat-badge hidden>1</span>
+    </button>
+  </div>
+{%- endif -%}

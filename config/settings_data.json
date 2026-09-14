@@ -31,6 +31,7 @@
     "cart_type": "drawer",
     "cart_upsell_enabled": true,
     "bizmis_promo_bar_enabled": false,
+    "legacy_chat_enabled": true,
     "content_for_index": [],
     "blocks": {
       "9413881465143053370": {
