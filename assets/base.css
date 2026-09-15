@@ -2292,11 +2292,6 @@ body.is-mock-competitor-chatbot .hero__media video {
 
 .hero__title {
   margin: 0;
-  /* 7em (of the title's own size) fits "The store clerk" but not "… is",
-     so the headline breaks as "The store clerk / is in." at every width.
-     8em and 7.5em both proved marginal: this heading font squeezed "is"
-     onto the first line, orphaning "in." on its own. */
-  max-width: 7em;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(3.2rem, 6.4vw, 5.1rem);
@@ -2307,6 +2302,12 @@ body.is-mock-competitor-chatbot .hero__media video {
 
 .hero__title-line {
   display: block;
+  white-space: nowrap;
+}
+
+.hero__title-line[data-hero-redefine] {
+  white-space: normal;
+  max-width: 7em;
 }
 
 .hero__redefine {
@@ -2375,6 +2376,7 @@ body.is-mock-competitor-chatbot .hero__media video {
    the title, brand color, underlined, clickable. */
 .hero__title-cta {
   display: block;
+  max-width: 7em;
   padding: 0;
   border: 0;
   background: transparent;
@@ -2512,6 +2514,10 @@ body.is-mock-competitor-chatbot .hero__media video {
 
   .hero__title {
     font-size: 3.05rem;
+  }
+
+  .hero__title-line {
+    white-space: normal;
   }
 
   .hero__title-cta {
