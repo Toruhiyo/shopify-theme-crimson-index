@@ -2253,12 +2253,12 @@ body.is-mock-competitor-chatbot .hero__media video {
   flex-direction: column;
   align-items: flex-start;
   gap: 1.1rem;
-  max-width: 30rem;
+  max-width: 36rem;
 }
 
 .hero__subtitle {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2274,7 +2274,7 @@ body.is-mock-competitor-chatbot .hero__media video {
   max-width: 7em;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+  font-size: clamp(2.7rem, 5.4vw, 4.25rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
   color: var(--color-fg, #111);
@@ -2411,7 +2411,7 @@ body.is-mock-competitor-chatbot .hero__media video {
   }
 
   .hero__title {
-    font-size: 2.1rem;
+    font-size: 2.55rem;
   }
 
   .hero__title-cta {

@@ -84,8 +84,8 @@
             <img
               src="{{ img_file | strip | asset_url }}"
               alt="{{ shop.name | escape }}"
-              width="1536"
-              height="1024"
+              width="1280"
+              height="720"
               loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
               {%- if forloop.first %} fetchpriority="high"{% endif %}
             >
