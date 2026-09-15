@@ -1911,6 +1911,7 @@
       window.setTimeout(() => {
         const nextWidth = to.scrollWidth;
         line.classList.add('is-redefined');
+        line.classList.remove('is-striking', 'is-erasing');
         to.style.width = `${nextWidth}px`;
         window.setTimeout(() => {
           from.style.width = '';

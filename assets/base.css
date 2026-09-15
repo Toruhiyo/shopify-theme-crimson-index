@@ -2340,11 +2340,9 @@ body.is-mock-competitor-chatbot .hero__media video {
 .hero__title-line.is-redefined .hero__redefine-to {
   width: auto;
   opacity: 1;
-  margin-left: 0.28em;
   transition:
     width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-    margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* The heading's second line doubles as the conversion action: same scale as
@@ -2591,7 +2589,6 @@ body.is-mock-competitor-chatbot .hero__media video {
   .hero__title-line[data-hero-redefine] .hero__redefine-to {
     width: auto;
     opacity: 1;
-    margin-left: 0.28em;
     transition: none;
   }
 }
