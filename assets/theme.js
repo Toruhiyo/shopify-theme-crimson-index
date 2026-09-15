@@ -1808,10 +1808,12 @@
      Starts once the page loader is out of the way. */
   const HERO_WORD_STAGGER_MS = 150;
   const HERO_LINE_PAUSE_MS = 420;
-  const HERO_REDEFINE_HOLD_MS = 520;
-  const HERO_REDEFINE_STRIKE_MS = 200;
-  const HERO_REDEFINE_ERASE_MS = 240;
-  const HERO_REDEFINE_REPLACE_MS = 260;
+  const HERO_REDEFINE_HOLD_MS = 400;
+  const HERO_REDEFINE_STRIKE_MS = 320;
+  const HERO_REDEFINE_MORPH_MS = 480;
+  const HERO_REDEFINE_SETTLE_MS = 160;
+  const HERO_REDEFINE_TOTAL_MS =
+    HERO_REDEFINE_HOLD_MS + HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_MORPH_MS + HERO_REDEFINE_SETTLE_MS;
 
   class HeroCopyReveal {
     constructor(slideshow) {
@@ -1828,13 +1830,12 @@
     prepare() {
       this.cta = this.root.querySelector('.hero__title-cta');
       this.titleLine = this.root.querySelector('.hero__title-line');
-      const lines = [
+      const intro = [
         this.root.querySelector('.hero__subtitle'),
-        this.titleLine,
-        this.cta
+        this.titleLine
       ].filter(Boolean);
 
-      if (!lines.length) return;
+      if (!intro.length && !this.cta) return;
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.titleLine?.classList.add('is-redefined');
@@ -1844,19 +1845,32 @@
         return;
       }
 
+      intro.forEach((line) => this.wrapWords(line));
+      if (this.cta) this.wrapWords(this.cta);
+
       let delay = 140;
-      lines.forEach((line, index) => {
-        const count = this.wrapWords(line);
-        line.querySelectorAll('.hero__word').forEach((word, wordIndex) => {
+      intro.forEach((line) => {
+        const words = line.querySelectorAll('.hero__word');
+        words.forEach((word, wordIndex) => {
           word.style.animationDelay = `${delay + wordIndex * HERO_WORD_STAGGER_MS}ms`;
         });
-        const lineEnd = delay + Math.max(count - 1, 0) * HERO_WORD_STAGGER_MS;
-        if (index === lines.length - 1) this.underlineAt = lineEnd + 280;
+        const lineEnd = delay + Math.max(words.length - 1, 0) * HERO_WORD_STAGGER_MS;
         delay = lineEnd + HERO_WORD_STAGGER_MS + HERO_LINE_PAUSE_MS;
       });
 
       if (this.titleLine?.hasAttribute('data-hero-redefine')) {
-        this.redefineAt = this.underlineAt + 900 + HERO_REDEFINE_HOLD_MS;
+        const titleEnd = delay - HERO_WORD_STAGGER_MS - HERO_LINE_PAUSE_MS;
+        this.redefineAt = titleEnd + HERO_REDEFINE_HOLD_MS;
+        delay = titleEnd + HERO_REDEFINE_TOTAL_MS + HERO_LINE_PAUSE_MS;
+      }
+
+      if (this.cta) {
+        const words = this.cta.querySelectorAll('.hero__word');
+        words.forEach((word, wordIndex) => {
+          word.style.animationDelay = `${delay + wordIndex * HERO_WORD_STAGGER_MS}ms`;
+        });
+        const lineEnd = delay + Math.max(words.length - 1, 0) * HERO_WORD_STAGGER_MS;
+        this.underlineAt = lineEnd + 280;
       }
 
       this.root.classList.add('is-hero-animated');
@@ -1904,20 +1918,17 @@
       line.classList.add('is-striking');
 
       window.setTimeout(() => {
-        line.classList.add('is-erasing');
+        const nextWidth = to.scrollWidth;
+        line.classList.add('is-erasing', 'is-redefined');
         from.style.width = '0px';
+        to.style.width = `${nextWidth}px`;
       }, HERO_REDEFINE_STRIKE_MS);
 
       window.setTimeout(() => {
-        const nextWidth = to.scrollWidth;
-        line.classList.add('is-redefined');
         line.classList.remove('is-striking', 'is-erasing');
-        to.style.width = `${nextWidth}px`;
-        window.setTimeout(() => {
-          from.style.width = '';
-          to.style.width = '';
-        }, HERO_REDEFINE_REPLACE_MS);
-      }, HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_ERASE_MS);
+        from.style.width = '';
+        to.style.width = '';
+      }, HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_MORPH_MS);
     }
 
     startWhenVisible() {
