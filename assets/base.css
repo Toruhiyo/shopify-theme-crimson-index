@@ -39,6 +39,19 @@
   }
 }
 
+/* Mock competitor landing: wash the whole storefront, images included. */
+html.is-mock-competitor-chatbot .loader,
+html.is-mock-competitor-chatbot .header-section,
+html.is-mock-competitor-chatbot .announcement-bar-section,
+html.is-mock-competitor-chatbot #main-content,
+html.is-mock-competitor-chatbot .footer,
+html.is-mock-competitor-chatbot .cart-drawer,
+html.is-mock-competitor-chatbot .cart-drawer__backdrop,
+html.is-mock-competitor-chatbot .legacy-chat,
+html.is-mock-competitor-chatbot .bizmis-coach {
+  filter: grayscale(1);
+}
+
 /* --- Page Loader --- */
 .loader {
   position: fixed;
