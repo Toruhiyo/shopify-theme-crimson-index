@@ -2329,6 +2329,7 @@ body.is-mock-competitor-chatbot .hero__media video {
 .hero__redefine-to {
   width: 0;
   opacity: 0;
+  white-space: pre;
 }
 
 .hero__title-line.is-redefined .hero__redefine-from {
