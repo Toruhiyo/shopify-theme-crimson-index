@@ -2298,6 +2298,7 @@ textarea.input {
 .hero__content.is-hero-animated .hero__title-cta {
   display: inline-block;
   position: relative;
+  padding-bottom: 0.2em;
   text-decoration: none;
 }
 
@@ -2306,7 +2307,7 @@ textarea.input {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0.14em;
+  bottom: 0;
   height: 0.055em;
   background: currentColor;
   transform: scaleX(0);
