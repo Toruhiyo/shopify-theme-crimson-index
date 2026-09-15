@@ -8,7 +8,8 @@
 
   const TYPING_MS = 800;
   const BUBBLE_GAP_MS = 420;
-  const MOCK_CHAT_PARAM = 'mock_competitor_chatbot';
+  const PROMO_VIDEO_PARAM = 'promo_video';
+  const PROMO_VIDEO_MOCK = 'mock';
 
   const QUICK_REPLIES = [
     'Where is my order?',
@@ -53,7 +54,7 @@
   const FEEDBACK_THANKS = 'Thank you for your feedback! It helps us improve our service.';
 
   function mockChatRequested() {
-    return new URLSearchParams(window.location.search).get(MOCK_CHAT_PARAM) === 'true';
+    return new URLSearchParams(window.location.search).get(PROMO_VIDEO_PARAM) === PROMO_VIDEO_MOCK;
   }
 
   function propagateMockChatParam() {
@@ -69,18 +70,18 @@
       }
 
       if (url.origin !== window.location.origin) return;
-      url.searchParams.set(MOCK_CHAT_PARAM, 'true');
+      url.searchParams.set(PROMO_VIDEO_PARAM, PROMO_VIDEO_MOCK);
       link.href = url.toString();
     };
 
     const updateForm = (form) => {
       const method = (form.getAttribute('method') || 'get').toLowerCase();
-      if (method !== 'get' || form.querySelector(`[name="${MOCK_CHAT_PARAM}"]`)) return;
+      if (method !== 'get' || form.querySelector(`[name="${PROMO_VIDEO_PARAM}"]`)) return;
 
       const input = document.createElement('input');
       input.type = 'hidden';
-      input.name = MOCK_CHAT_PARAM;
-      input.value = 'true';
+      input.name = PROMO_VIDEO_PARAM;
+      input.value = PROMO_VIDEO_MOCK;
       form.appendChild(input);
     };
 

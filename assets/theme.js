@@ -5,9 +5,57 @@
 (function () {
   'use strict';
 
-  const MOCK_COMPETITOR_CHATBOT = new URLSearchParams(location.search).get('mock_competitor_chatbot') === 'true';
+  const PROMO_VIDEO_PARAM = 'promo_video';
+  const promoVideo = new URLSearchParams(location.search).get(PROMO_VIDEO_PARAM);
+  const MOCK_COMPETITOR_CHATBOT = promoVideo === 'mock';
   document.documentElement.classList.toggle('is-mock-competitor-chatbot', MOCK_COMPETITOR_CHATBOT);
   document.body.classList.toggle('is-mock-competitor-chatbot', MOCK_COMPETITOR_CHATBOT);
+
+  function propagatePromoVideoParam() {
+    if (!promoVideo) return;
+
+    const updateLink = (link) => {
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+
+      let url;
+      try {
+        url = new URL(href, window.location.href);
+      } catch {
+        return;
+      }
+
+      if (url.origin !== window.location.origin) return;
+      url.searchParams.set(PROMO_VIDEO_PARAM, promoVideo);
+      link.href = url.toString();
+    };
+
+    const updateForm = (form) => {
+      const method = (form.getAttribute('method') || 'get').toLowerCase();
+      if (method !== 'get' || form.querySelector(`[name="${PROMO_VIDEO_PARAM}"]`)) return;
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = PROMO_VIDEO_PARAM;
+      input.value = promoVideo;
+      form.appendChild(input);
+    };
+
+    const updateNode = (node) => {
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      if (node.matches('a[href]')) updateLink(node);
+      if (node.matches('form')) updateForm(node);
+      node.querySelectorAll('a[href]').forEach(updateLink);
+      node.querySelectorAll('form').forEach(updateForm);
+    };
+
+    document.querySelectorAll('a[href]').forEach(updateLink);
+    document.querySelectorAll('form').forEach(updateForm);
+
+    new MutationObserver((records) => {
+      records.forEach(record => record.addedNodes.forEach(updateNode));
+    }).observe(document.body, { childList: true, subtree: true });
+  }
 
   /* --- Cart Lock (prevents concurrent cart API mutations) --- */
   const cartLock = {
@@ -2173,6 +2221,7 @@
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
     initPromoBar();
+    propagatePromoVideoParam();
     document.querySelectorAll('[data-variant-selector]').forEach(el => {
       new VariantSelector(el);
     });

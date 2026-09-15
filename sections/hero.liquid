@@ -31,17 +31,24 @@
   assign interval = section.settings.autoplay_interval | times: 1000
 
   assign mock_chat = false
-  if request.query_string contains 'mock_competitor_chatbot=true'
+  assign promo_video = false
+  if request.query_string contains 'promo_video=mock'
     assign mock_chat = true
+    assign promo_video = true
+  elsif request.query_string contains 'promo_video=true'
+    assign promo_video = true
   endif
 
+  assign hero_eyebrow = section.settings.subtitle
+  assign hero_title = section.settings.title
+  assign hero_cta = section.settings.cta_text
   assign hero_redefine = false
   assign hero_eyebrow_mark = false
   if mock_chat
     assign hero_eyebrow = 'YOUR STORE, WITH A TYPICAL CHATBOT.'
     assign hero_title = 'It always replies.'
     assign hero_cta = 'It never sells.'
-  else
+  elsif promo_video
     assign hero_eyebrow = 'AGENTIC SALES ON, WITH'
     assign hero_title = 'Your store salesperson.'
     assign hero_cta = 'Built to sell.'
@@ -201,19 +208,19 @@
       "type": "text",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "AGENTIC SALES ON, WITH BIZMIS"
+      "default": "Consumer electronics, curated"
     },
     {
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "Your store salesperson."
+      "default": "The store clerk is in."
     },
     {
       "type": "text",
       "id": "cta_text",
       "label": "Voice clerk line (second title line)",
-      "default": "Built to sell.",
+      "default": "Just say what you need.",
       "info": "Rendered as the highlighted second line of the heading. Opens a voice chat with the store clerk."
     }
   ],

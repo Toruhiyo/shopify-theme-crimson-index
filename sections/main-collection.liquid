@@ -5,7 +5,7 @@
   assign products_per_page = section.settings.products_per_page | default: 48
 
   assign mock_chat = false
-  if request.query_string contains 'mock_competitor_chatbot=true'
+  if request.query_string contains 'promo_video=mock'
     assign mock_chat = true
   endif
 
