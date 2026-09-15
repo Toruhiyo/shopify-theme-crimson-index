@@ -5,8 +5,11 @@
   assign products_per_page = section.settings.products_per_page | default: 48
 
   assign mock_chat = false
+  assign lost_shopper = false
   if request.query_string contains 'promo_video=mock'
     assign mock_chat = true
+  elsif request.query_string contains 'promo_video=lost-shopper'
+    assign lost_shopper = true
   endif
 
   assign collection_blurb = collection.description | strip_html | downcase
@@ -26,6 +29,11 @@
           <p class="text-muted mt-sm" style="max-width: 40rem;">
             <span>It always replies.</span>
             <button type="button" class="hero__title-cta" data-open-voice-clerk>It never sells.</button>
+          </p>
+        {%- elsif lost_shopper and mentions_clerk -%}
+          <p class="text-muted mt-sm" style="max-width: 40rem;">
+            <span>They came to buy.</span>
+            <button type="button" class="hero__title-cta" data-open-voice-clerk>They bounce.</button>
           </p>
         {%- elsif collection.description != blank -%}
           <p class="text-muted mt-sm" style="max-width: 40rem;">{{ collection.description }}</p>

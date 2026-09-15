@@ -444,37 +444,10 @@
     }
   }
 
-  function overrideHeroCopy() {
-    const subtitle = document.querySelector('.hero__subtitle');
-    const titleLine = document.querySelector('.hero__title-line');
-    const cta = document.querySelector('.hero__title-cta');
-
-    if (subtitle) subtitle.textContent = 'YOUR STORE, WITH A TYPICAL CHATBOT.';
-    if (titleLine) titleLine.textContent = 'It always replies.';
-    if (cta) cta.textContent = 'It never sells.';
-
-    const collectionBlurb = document.querySelector('.collection-header .text-muted');
-    if (collectionBlurb && /clerk|just say what you need/i.test(collectionBlurb.textContent)) {
-      collectionBlurb.replaceChildren();
-
-      const headline = document.createElement('span');
-      headline.textContent = 'It always replies.';
-      collectionBlurb.appendChild(headline);
-
-      const line = document.createElement('button');
-      line.type = 'button';
-      line.className = 'hero__title-cta';
-      line.setAttribute('data-open-voice-clerk', '');
-      line.textContent = 'It never sells.';
-      collectionBlurb.appendChild(line);
-    }
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
     if (!mockChatRequested()) return;
 
     propagateMockChatParam();
-    overrideHeroCopy();
 
     const root = document.querySelector('[data-legacy-chat]');
     if (!root) return;

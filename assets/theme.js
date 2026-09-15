@@ -7,9 +7,9 @@
 
   const PROMO_VIDEO_PARAM = 'promo_video';
   const promoVideo = new URLSearchParams(location.search).get(PROMO_VIDEO_PARAM);
-  const MOCK_COMPETITOR_CHATBOT = promoVideo === 'mock';
-  document.documentElement.classList.toggle('is-mock-competitor-chatbot', MOCK_COMPETITOR_CHATBOT);
-  document.body.classList.toggle('is-mock-competitor-chatbot', MOCK_COMPETITOR_CHATBOT);
+  const PROMO_GREYSCALE = promoVideo === 'mock' || promoVideo === 'lost-shopper';
+  document.documentElement.classList.toggle('is-promo-greyscale', PROMO_GREYSCALE);
+  document.body.classList.toggle('is-promo-greyscale', PROMO_GREYSCALE);
 
   function propagatePromoVideoParam() {
     if (!promoVideo) return;
@@ -57,7 +57,72 @@
     }).observe(document.body, { childList: true, subtree: true });
   }
 
+  function applyCollectionPromoBlurb(title, cta) {
+    const collectionBlurb = document.querySelector('.collection-header .text-muted');
+    if (!collectionBlurb) return;
+    if (!/clerk|just say what you need|always replies|came to buy/i.test(collectionBlurb.textContent)) return;
+
+    collectionBlurb.replaceChildren();
+
+    const headline = document.createElement('span');
+    headline.textContent = title;
+    collectionBlurb.appendChild(headline);
+
+    const line = document.createElement('button');
+    line.type = 'button';
+    line.className = 'hero__title-cta';
+    line.setAttribute('data-open-voice-clerk', '');
+    line.textContent = cta;
+    collectionBlurb.appendChild(line);
+  }
+
+  function applyPlainPromoHero(eyebrow, title, cta) {
+    const subtitle = document.querySelector('.hero__subtitle');
+    const titleLine = document.querySelector('.hero__title-line');
+    const ctaEl = document.querySelector('.hero__title-cta');
+
+    if (subtitle) {
+      subtitle.classList.remove('hero__subtitle--mark');
+      subtitle.removeAttribute('aria-label');
+      subtitle.textContent = eyebrow;
+    }
+    if (titleLine) {
+      titleLine.removeAttribute('data-hero-redefine');
+      titleLine.removeAttribute('aria-label');
+      titleLine.textContent = title;
+    }
+    if (ctaEl) ctaEl.textContent = cta;
+
+    applyCollectionPromoBlurb(title, cta);
+  }
+
+  function applyLostShopperLandingCopy() {
+    const eyebrow = document.querySelector('.hero-voice__eyebrow');
+    const heading = document.querySelector('.hero-voice__heading');
+    if (eyebrow) eyebrow.textContent = 'NO CLERK. NO CHAT.';
+    if (heading) heading.textContent = 'They figure it out alone.';
+  }
+
   function applyPromoVideoHero() {
+    if (promoVideo === 'mock') {
+      applyPlainPromoHero(
+        'YOUR STORE, WITH A TYPICAL CHATBOT.',
+        'It always replies.',
+        'It never sells.'
+      );
+      return;
+    }
+
+    if (promoVideo === 'lost-shopper') {
+      applyPlainPromoHero(
+        'YOUR STORE, WITH A LOST SHOPPER.',
+        'They came to buy.',
+        'They bounce.'
+      );
+      applyLostShopperLandingCopy();
+      return;
+    }
+
     if (promoVideo !== 'true') return;
     if (document.querySelector('[data-hero-redefine]')) return;
 

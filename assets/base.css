@@ -42,41 +42,41 @@
 }
 
 /* Mock competitor landing: wash the whole storefront, images included. */
-html.is-mock-competitor-chatbot .loader,
-html.is-mock-competitor-chatbot .header-section,
-html.is-mock-competitor-chatbot .announcement-bar-section,
-html.is-mock-competitor-chatbot #main-content,
-html.is-mock-competitor-chatbot .footer,
-html.is-mock-competitor-chatbot .cart-drawer,
-html.is-mock-competitor-chatbot .cart-drawer__backdrop,
-html.is-mock-competitor-chatbot .legacy-chat,
-html.is-mock-competitor-chatbot .bizmis-coach,
-html.is-mock-competitor-chatbot .os-scrollbar,
-html.is-mock-competitor-chatbot.os-scrollbar,
-body.is-mock-competitor-chatbot .loader,
-body.is-mock-competitor-chatbot .header-section,
-body.is-mock-competitor-chatbot .announcement-bar-section,
-body.is-mock-competitor-chatbot #main-content,
-body.is-mock-competitor-chatbot .footer,
-body.is-mock-competitor-chatbot .cart-drawer,
-body.is-mock-competitor-chatbot .cart-drawer__backdrop,
-body.is-mock-competitor-chatbot .legacy-chat,
-body.is-mock-competitor-chatbot .bizmis-coach,
-body.is-mock-competitor-chatbot .os-scrollbar,
-body.is-mock-competitor-chatbot.os-scrollbar {
+html.is-promo-greyscale .loader,
+html.is-promo-greyscale .header-section,
+html.is-promo-greyscale .announcement-bar-section,
+html.is-promo-greyscale #main-content,
+html.is-promo-greyscale .footer,
+html.is-promo-greyscale .cart-drawer,
+html.is-promo-greyscale .cart-drawer__backdrop,
+html.is-promo-greyscale .legacy-chat,
+html.is-promo-greyscale .bizmis-coach,
+html.is-promo-greyscale .os-scrollbar,
+html.is-promo-greyscale.os-scrollbar,
+body.is-promo-greyscale .loader,
+body.is-promo-greyscale .header-section,
+body.is-promo-greyscale .announcement-bar-section,
+body.is-promo-greyscale #main-content,
+body.is-promo-greyscale .footer,
+body.is-promo-greyscale .cart-drawer,
+body.is-promo-greyscale .cart-drawer__backdrop,
+body.is-promo-greyscale .legacy-chat,
+body.is-promo-greyscale .bizmis-coach,
+body.is-promo-greyscale .os-scrollbar,
+body.is-promo-greyscale.os-scrollbar {
   filter: grayscale(1);
 }
 
-html.is-mock-competitor-chatbot .os-theme-crimson,
-html.is-mock-competitor-chatbot.os-theme-crimson,
-body.is-mock-competitor-chatbot .os-theme-crimson,
-body.is-mock-competitor-chatbot.os-theme-crimson {
+html.is-promo-greyscale .os-theme-crimson,
+html.is-promo-greyscale.os-theme-crimson,
+body.is-promo-greyscale .os-theme-crimson,
+body.is-promo-greyscale.os-theme-crimson {
   --os-handle-bg: color-mix(in srgb, #6b6b6b 55%, var(--color-border-raw, #E5E5EA));
   --os-handle-bg-hover: color-mix(in srgb, #6b6b6b 80%, var(--color-border-raw, #E5E5EA));
   --os-handle-bg-active: #6b6b6b;
 }
 
-html.is-mock-competitor-chatbot {
+html.is-promo-greyscale {
   scrollbar-color: #9a9a9a transparent;
 }
 
@@ -2250,10 +2250,10 @@ textarea.input {
   object-fit: cover;
 }
 
-html.is-mock-competitor-chatbot .hero__media img,
-html.is-mock-competitor-chatbot .hero__media video,
-body.is-mock-competitor-chatbot .hero__media img,
-body.is-mock-competitor-chatbot .hero__media video {
+html.is-promo-greyscale .hero__media img,
+html.is-promo-greyscale .hero__media video,
+body.is-promo-greyscale .hero__media img,
+body.is-promo-greyscale .hero__media video {
   object-fit: cover;
   filter: none;
 }
