@@ -2277,8 +2277,8 @@ body.is-mock-competitor-chatbot .hero__media video {
 
 .hero__bizmis-mark {
   display: block;
-  height: 1.85em;
-  width: calc(1.85em * 1948 / 640);
+  height: 2.55em;
+  width: calc(2.55em * 1948 / 640);
   background-color: var(--bizmis-orange);
   -webkit-mask-position: center;
   mask-position: center;
