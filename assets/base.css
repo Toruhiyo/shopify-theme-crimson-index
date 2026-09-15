@@ -51,6 +51,8 @@ html.is-mock-competitor-chatbot .cart-drawer,
 html.is-mock-competitor-chatbot .cart-drawer__backdrop,
 html.is-mock-competitor-chatbot .legacy-chat,
 html.is-mock-competitor-chatbot .bizmis-coach,
+html.is-mock-competitor-chatbot .os-scrollbar,
+html.is-mock-competitor-chatbot.os-scrollbar,
 body.is-mock-competitor-chatbot .loader,
 body.is-mock-competitor-chatbot .header-section,
 body.is-mock-competitor-chatbot .announcement-bar-section,
@@ -59,8 +61,23 @@ body.is-mock-competitor-chatbot .footer,
 body.is-mock-competitor-chatbot .cart-drawer,
 body.is-mock-competitor-chatbot .cart-drawer__backdrop,
 body.is-mock-competitor-chatbot .legacy-chat,
-body.is-mock-competitor-chatbot .bizmis-coach {
+body.is-mock-competitor-chatbot .bizmis-coach,
+body.is-mock-competitor-chatbot .os-scrollbar,
+body.is-mock-competitor-chatbot.os-scrollbar {
   filter: grayscale(1);
+}
+
+html.is-mock-competitor-chatbot .os-theme-crimson,
+html.is-mock-competitor-chatbot.os-theme-crimson,
+body.is-mock-competitor-chatbot .os-theme-crimson,
+body.is-mock-competitor-chatbot.os-theme-crimson {
+  --os-handle-bg: color-mix(in srgb, #6b6b6b 55%, var(--color-border-raw, #E5E5EA));
+  --os-handle-bg-hover: color-mix(in srgb, #6b6b6b 80%, var(--color-border-raw, #E5E5EA));
+  --os-handle-bg-active: #6b6b6b;
+}
+
+html.is-mock-competitor-chatbot {
+  scrollbar-color: #9a9a9a transparent;
 }
 
 /* --- Page Loader --- */
