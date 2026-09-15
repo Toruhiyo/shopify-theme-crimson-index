@@ -120,7 +120,7 @@
   </script>
 </head>
 
-<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %}{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" data-overlayscrollbars-initialize>
+<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %} {% render 'bizmis-top-banner', mode: 'class' %}{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" data-overlayscrollbars-initialize>
 
   <div class="loader" id="page-loader" aria-hidden="true">
     <img src="{{ 'logo-mono.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="160" height="40">
