@@ -14,6 +14,8 @@
   --color-border-raw: #E5E5EA;
   --color-primary: #D1001A;
   --color-primary-fg: #FFFFFF;
+  --bizmis-orange: #f9a353;
+  --bizmis-orange-dark: #ec7709;
   --color-success: #34C759;
   --color-warning: #FF9500;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -43,29 +45,42 @@
 }
 
 /* Mock competitor landing: wash the whole storefront, images included. */
-html.is-mock-competitor-chatbot .loader,
-html.is-mock-competitor-chatbot .header-section,
-html.is-mock-competitor-chatbot .announcement-bar-section,
-html.is-mock-competitor-chatbot #main-content,
-html.is-mock-competitor-chatbot .footer,
-html.is-mock-competitor-chatbot .cart-drawer,
-html.is-mock-competitor-chatbot .cart-drawer__backdrop,
-html.is-mock-competitor-chatbot .legacy-chat,
-html.is-mock-competitor-chatbot .bizmis-coach,
-html.is-mock-competitor-chatbot img,
-html.is-mock-competitor-chatbot video,
-body.is-mock-competitor-chatbot .loader,
-body.is-mock-competitor-chatbot .header-section,
-body.is-mock-competitor-chatbot .announcement-bar-section,
-body.is-mock-competitor-chatbot #main-content,
-body.is-mock-competitor-chatbot .footer,
-body.is-mock-competitor-chatbot .cart-drawer,
-body.is-mock-competitor-chatbot .cart-drawer__backdrop,
-body.is-mock-competitor-chatbot .legacy-chat,
-body.is-mock-competitor-chatbot .bizmis-coach,
-body.is-mock-competitor-chatbot img,
-body.is-mock-competitor-chatbot video {
+html.is-promo-greyscale .loader,
+html.is-promo-greyscale .header-section,
+html.is-promo-greyscale .announcement-bar-section,
+html.is-promo-greyscale #main-content,
+html.is-promo-greyscale .footer,
+html.is-promo-greyscale .cart-drawer,
+html.is-promo-greyscale .cart-drawer__backdrop,
+html.is-promo-greyscale .legacy-chat,
+html.is-promo-greyscale .bizmis-coach,
+html.is-promo-greyscale .os-scrollbar,
+html.is-promo-greyscale.os-scrollbar,
+body.is-promo-greyscale .loader,
+body.is-promo-greyscale .header-section,
+body.is-promo-greyscale .announcement-bar-section,
+body.is-promo-greyscale #main-content,
+body.is-promo-greyscale .footer,
+body.is-promo-greyscale .cart-drawer,
+body.is-promo-greyscale .cart-drawer__backdrop,
+body.is-promo-greyscale .legacy-chat,
+body.is-promo-greyscale .bizmis-coach,
+body.is-promo-greyscale .os-scrollbar,
+body.is-promo-greyscale.os-scrollbar {
   filter: grayscale(1);
+}
+
+html.is-promo-greyscale .os-theme-crimson,
+html.is-promo-greyscale.os-theme-crimson,
+body.is-promo-greyscale .os-theme-crimson,
+body.is-promo-greyscale.os-theme-crimson {
+  --os-handle-bg: color-mix(in srgb, #6b6b6b 55%, var(--color-border-raw, #E5E5EA));
+  --os-handle-bg-hover: color-mix(in srgb, #6b6b6b 80%, var(--color-border-raw, #E5E5EA));
+  --os-handle-bg-active: #6b6b6b;
+}
+
+html.is-promo-greyscale {
+  scrollbar-color: #9a9a9a transparent;
 }
 
 /* --- Page Loader --- */
@@ -1806,17 +1821,23 @@ textarea.input {
 }
 
 /* --- Announcement Bar --- */
-/* Bizmis demo promo bar (top strip, above the navbar). The body carries
-   .bizmis-demo only when the promo is rendered, so the header offset never
-   leaves a gap on non-demo stores. theme.js refines --promo-height to the
-   measured pixel height (handles wrapping on small screens). */
+/* --promo-height is set only when snippets/bizmis-top-banner.liquid
+   adds .has-promo-bar. Demo mode alone must not reserve that strip.
+   theme.js refines --promo-height to the measured pixel height. */
 .bizmis-demo {
-  --promo-height: 2.75rem;
   /* Bizmis brand orange (Visual Identity: primary #F9A353, dark #EC7709).
      Deliberately NOT the store's primary color: the bar must read as the
      vendor's surface, distinct from whatever brand the demo store wears. */
   --bizmis-orange: #f9a353;
   --bizmis-orange-dark: #ec7709;
+}
+
+.has-promo-bar {
+  --promo-height: 2.75rem;
+}
+
+.announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {
+  display: none;
 }
 
 .promo-bar {
@@ -2238,6 +2259,14 @@ textarea.input {
   object-fit: cover;
 }
 
+html.is-promo-greyscale .hero__media img,
+html.is-promo-greyscale .hero__media video,
+body.is-promo-greyscale .hero__media img,
+body.is-promo-greyscale .hero__media video {
+  object-fit: cover;
+  filter: none;
+}
+
 /* Welcome copy in the left column, over the white side of the studio shots.
    Invites the visitor to talk to the clerk in the merchant's own voice. */
 .hero__container {
@@ -2252,28 +2281,53 @@ textarea.input {
   flex-direction: column;
   align-items: flex-start;
   gap: 1.1rem;
-  max-width: 30rem;
+  max-width: 36rem;
 }
 
 .hero__subtitle {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-primary);
 }
 
+.hero__subtitle--mark {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.4em;
+  row-gap: 0.2em;
+  color: #6b6560;
+  font-size: 0.8rem;
+}
+
+.hero__subtitle--mark .hero__word:has(.hero__bizmis-mark) {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.hero__bizmis-mark {
+  display: block;
+  height: 2.68rem;
+  width: calc(2.68rem * 1948 / 640);
+  background-color: var(--bizmis-orange);
+  transform: translateY(-0.18rem);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .hero__title {
   margin: 0;
-  /* 7em (of the title's own size) fits "The store clerk" but not "… is",
-     so the headline breaks as "The store clerk / is in." at every width.
-     8em and 7.5em both proved marginal: this heading font squeezed "is"
-     onto the first line, orphaning "in." on its own. */
-  max-width: 7em;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+  font-size: clamp(3.2rem, 6.4vw, 5.1rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
   color: var(--color-fg, #111);
@@ -2281,12 +2335,81 @@ textarea.input {
 
 .hero__title-line {
   display: block;
+  white-space: nowrap;
+}
+
+.hero__title-line[data-hero-redefine] {
+  white-space: normal;
+  max-width: 7em;
+}
+
+.hero__redefine {
+  display: inline-flex;
+  align-items: baseline;
+  position: relative;
+}
+
+.hero__redefine-from,
+.hero__redefine-to {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.hero__redefine-from {
+  position: relative;
+  transition:
+    width 0.92s cubic-bezier(0.33, 0.05, 0.15, 1),
+    opacity 0.78s cubic-bezier(0.33, 0.05, 0.15, 1);
+}
+
+.hero__redefine-from::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.52em;
+  height: 0.065em;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.64s cubic-bezier(0.33, 0.05, 0.15, 1);
+}
+
+.hero__title-line.is-striking .hero__redefine-from::after {
+  transform: scaleX(1);
+}
+
+.hero__title-line.is-erasing .hero__redefine-from,
+.hero__title-line.is-redefined .hero__redefine-from {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero__redefine-to {
+  width: 0;
+  opacity: 0;
+  white-space: pre;
+  transition:
+    width 0.92s cubic-bezier(0.33, 0.05, 0.15, 1),
+    opacity 0.78s cubic-bezier(0.33, 0.05, 0.15, 1);
+}
+
+.hero__title-line.is-redefined .hero__redefine-from {
+  width: 0;
+}
+
+.hero__title-line.is-redefined .hero__redefine-to {
+  width: auto;
+  opacity: 1;
 }
 
 /* The heading's second line doubles as the conversion action: same scale as
    the title, brand color, underlined, clickable. */
 .hero__title-cta {
   display: block;
+  max-width: 7em;
   padding: 0;
   border: 0;
   background: transparent;
@@ -2325,13 +2448,22 @@ textarea.input {
 }
 
 .hero__content.is-hero-animated .hero__title-cta {
-  display: inline-block;
-  position: relative;
-  padding-bottom: 0.11em;
   text-decoration: none;
 }
 
-.hero__content.is-hero-animated .hero__title-cta::after {
+.hero__title-cta-ink {
+  display: block;
+}
+
+.hero__title-cta-line {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  position: relative;
+  padding-bottom: 0.11em;
+}
+
+.hero__title-cta-line::after {
   content: '';
   position: absolute;
   left: 0;
@@ -2343,12 +2475,12 @@ textarea.input {
   transform-origin: left center;
 }
 
-.hero__content.is-hero-animated .hero__title-cta.is-underlined::after {
+.hero__title-cta-line.is-underlined::after {
   transform: scaleX(1);
   transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.hero__content.is-hero-animated .hero__title-cta:hover::after {
+.hero__title-cta.is-underlined:hover .hero__title-cta-line::after {
   height: 0.085em;
 }
 
@@ -2356,12 +2488,6 @@ textarea.input {
   outline: 2px solid var(--color-primary);
   outline-offset: 4px;
   border-radius: 4px;
-}
-
-.hero__title-cta:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 /* Mobile: bookshop-demo style. The slideshow runs full-bleed behind a dark
@@ -2409,8 +2535,16 @@ textarea.input {
     text-align: center;
   }
 
+  .hero__subtitle--mark {
+    justify-content: center;
+  }
+
   .hero__title {
-    font-size: 2.1rem;
+    font-size: 3.05rem;
+  }
+
+  .hero__title-line {
+    white-space: normal;
   }
 
   .hero__title-cta {
@@ -2426,12 +2560,12 @@ textarea.input {
 
 /* Hero slideshow nav */
 .hero__nav {
+  display: none;
   position: absolute;
   bottom: 1.25rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
-  display: flex;
   align-items: center;
   gap: 0.25rem;
   background: rgba(0, 0, 0, 0.25);
@@ -2511,8 +2645,22 @@ textarea.input {
     animation: none;
   }
 
-  .hero__content.is-hero-animated .hero__title-cta::after {
+  .hero__title-cta-line.is-underlined::after {
     transform: scaleX(1);
+    transition: none;
+  }
+
+  .hero__title-line[data-hero-redefine] .hero__redefine-from,
+  .hero__title-line[data-hero-redefine] .hero__redefine-from::after {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: none;
+  }
+
+  .hero__title-line[data-hero-redefine] .hero__redefine-to {
+    width: auto;
+    opacity: 1;
     transition: none;
   }
 }
@@ -5491,6 +5639,10 @@ textarea.input {
   font-size: inherit;
   text-decoration: underline;
   cursor: pointer;
+}
+
+a.legacy-chat__fake-link {
+  color: #3f464c;
 }
 
 .legacy-chat__actions {
