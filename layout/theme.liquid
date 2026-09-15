@@ -108,12 +108,15 @@
 
   <script>
     document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+    if (location.search.indexOf('mock_competitor_chatbot=true') !== -1) {
+      document.documentElement.classList.add('is-mock-competitor-chatbot');
+    }
     window.Shopify = window.Shopify || {};
     window.Shopify.money_format = {{ shop.money_format | json }};
   </script>
 </head>
 
-<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %}" data-overlayscrollbars-initialize>
+<body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %}{% if request.query_string contains 'mock_competitor_chatbot=true' %} is-mock-competitor-chatbot{% endif %}" data-overlayscrollbars-initialize>
 
   <div class="loader" id="page-loader" aria-hidden="true">
     <img src="{{ 'logo-mono.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="160" height="40">

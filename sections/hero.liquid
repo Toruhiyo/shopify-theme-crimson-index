@@ -46,6 +46,13 @@
   endif
 -%}
 
+{%- if mock_chat -%}
+  <script>
+    document.documentElement.classList.add('is-mock-competitor-chatbot');
+    document.body.classList.add('is-mock-competitor-chatbot');
+  </script>
+{%- endif -%}
+
 <section
   class="hero {{ height_class }}"
   data-hero-slideshow

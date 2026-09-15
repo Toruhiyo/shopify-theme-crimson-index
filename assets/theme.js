@@ -5,6 +5,11 @@
 (function () {
   'use strict';
 
+  if (location.search.indexOf('mock_competitor_chatbot=true') !== -1) {
+    document.documentElement.classList.add('is-mock-competitor-chatbot');
+    document.body.classList.add('is-mock-competitor-chatbot');
+  }
+
   /* --- Cart Lock (prevents concurrent cart API mutations) --- */
   const cartLock = {
     _locked: false,

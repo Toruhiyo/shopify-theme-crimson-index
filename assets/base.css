@@ -48,7 +48,20 @@ html.is-mock-competitor-chatbot .footer,
 html.is-mock-competitor-chatbot .cart-drawer,
 html.is-mock-competitor-chatbot .cart-drawer__backdrop,
 html.is-mock-competitor-chatbot .legacy-chat,
-html.is-mock-competitor-chatbot .bizmis-coach {
+html.is-mock-competitor-chatbot .bizmis-coach,
+html.is-mock-competitor-chatbot img,
+html.is-mock-competitor-chatbot video,
+body.is-mock-competitor-chatbot .loader,
+body.is-mock-competitor-chatbot .header-section,
+body.is-mock-competitor-chatbot .announcement-bar-section,
+body.is-mock-competitor-chatbot #main-content,
+body.is-mock-competitor-chatbot .footer,
+body.is-mock-competitor-chatbot .cart-drawer,
+body.is-mock-competitor-chatbot .cart-drawer__backdrop,
+body.is-mock-competitor-chatbot .legacy-chat,
+body.is-mock-competitor-chatbot .bizmis-coach,
+body.is-mock-competitor-chatbot img,
+body.is-mock-competitor-chatbot video {
   filter: grayscale(1);
 }
 
