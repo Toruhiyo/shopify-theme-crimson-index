@@ -23,7 +23,10 @@
       bubbles: [
         {
           text: 'You can browse all laptops in Computers & Peripherals. Try the filters for price and weight.',
-          links: ['Laptops collection', 'Compare specifications']
+          links: [
+            { label: 'Laptops collection', href: '/collections/laptops' },
+            { label: 'Compare specifications' }
+          ]
         }
       ]
     },
@@ -223,6 +226,11 @@
       return String(text).replace('{brand}', this.brand);
     }
 
+    normalizeLink(link) {
+      if (typeof link === 'string') return { label: link, href: '' };
+      return { label: link.label || '', href: link.href || '' };
+    }
+
     normalizeBubble(payload) {
       if (typeof payload === 'string' || payload == null) {
         return { text: payload ? String(payload) : '', links: [], actions: [] };
@@ -264,12 +272,17 @@
       if (content.links.length) {
         const list = document.createElement('ul');
         list.className = 'legacy-chat__bubble-links';
-        content.links.forEach((label) => {
+        content.links.forEach((entry) => {
+          const { label, href } = this.normalizeLink(entry);
           const item = document.createElement('li');
-          const link = document.createElement('button');
-          link.type = 'button';
+          const link = href ? document.createElement('a') : document.createElement('button');
           link.className = 'legacy-chat__fake-link';
           link.textContent = label;
+          if (href) {
+            link.href = href;
+          } else {
+            link.type = 'button';
+          }
           item.appendChild(link);
           list.appendChild(item);
         });

@@ -5615,6 +5615,10 @@ body.is-mock-competitor-chatbot .hero__media video {
   cursor: pointer;
 }
 
+a.legacy-chat__fake-link {
+  color: #3f464c;
+}
+
 .legacy-chat__actions {
   display: flex;
   flex-wrap: wrap;
