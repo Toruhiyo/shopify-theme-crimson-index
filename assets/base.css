@@ -2516,12 +2516,12 @@ body.is-mock-competitor-chatbot .hero__media video {
 
 /* Hero slideshow nav */
 .hero__nav {
+  display: none;
   position: absolute;
   bottom: 1.25rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
-  display: flex;
   align-items: center;
   gap: 0.25rem;
   background: rgba(0, 0, 0, 0.25);
