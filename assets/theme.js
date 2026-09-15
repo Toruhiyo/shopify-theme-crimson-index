@@ -2105,7 +2105,7 @@
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => {
       new HeroSlideshow(el);
-      if (MOCK_COMPETITOR_CHATBOT) new HeroCopyReveal(el);
+      new HeroCopyReveal(el);
     });
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
