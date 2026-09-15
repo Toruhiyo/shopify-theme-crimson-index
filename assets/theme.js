@@ -1956,6 +1956,7 @@
       if (!intro.length && !this.cta) return;
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.ensureCtaInk(this.cta);
         this.titleLine?.classList.add('is-redefined');
         this.cta?.classList.add('is-underlined');
         this.root.classList.add('is-hero-animated');
@@ -1964,7 +1965,10 @@
       }
 
       intro.forEach((line) => this.wrapWords(line));
-      if (this.cta) this.wrapWords(this.cta);
+      if (this.cta) {
+        this.ensureCtaInk(this.cta);
+        this.wrapWords(this.cta.querySelector('.hero__title-cta-ink') || this.cta);
+      }
 
       let delay = 140;
       intro.forEach((line) => {
@@ -2019,6 +2023,14 @@
       });
 
       return words.length;
+    }
+
+    ensureCtaInk(el) {
+      if (!el || el.querySelector(':scope > .hero__title-cta-ink')) return;
+      const ink = document.createElement('span');
+      ink.className = 'hero__title-cta-ink';
+      while (el.firstChild) ink.appendChild(el.firstChild);
+      el.appendChild(ink);
     }
 
     playRedefine(line) {
