@@ -341,7 +341,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "A fake bolted-on support chat used as a prop in marketing footage. Every answer is scripted in assets/legacy-chat.js, nothing is sent anywhere. When enabled here, it only appears on visits carrying ?promo_video=mock. ?promo_video=lost-shopper is the same greyscale storefront without this chat. The parameter follows internal navigation."
+        "content": "A fake bolted-on support chat used as a prop in marketing footage. Every answer is scripted in assets/legacy-chat.js, nothing is sent anywhere. When enabled here, it only appears on visits carrying ?promo_video=mock. ?promo_video=unattended is the same greyscale storefront without this chat. The parameter follows internal navigation."
       },
       {
         "type": "checkbox",

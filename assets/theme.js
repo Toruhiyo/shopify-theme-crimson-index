@@ -7,7 +7,7 @@
 
   const PROMO_VIDEO_PARAM = 'promo_video';
   const promoVideo = new URLSearchParams(location.search).get(PROMO_VIDEO_PARAM);
-  const PROMO_GREYSCALE = promoVideo === 'mock' || promoVideo === 'lost-shopper';
+  const PROMO_GREYSCALE = promoVideo === 'mock' || promoVideo === 'unattended';
   document.documentElement.classList.toggle('is-promo-greyscale', PROMO_GREYSCALE);
   document.body.classList.toggle('is-promo-greyscale', PROMO_GREYSCALE);
 
@@ -60,7 +60,7 @@
   function applyCollectionPromoBlurb(title, cta) {
     const collectionBlurb = document.querySelector('.collection-header .text-muted');
     if (!collectionBlurb) return;
-    if (!/clerk|just say what you need|always replies|came to buy/i.test(collectionBlurb.textContent)) return;
+    if (!/clerk|just say what you need|always replies|shoppers browse|came to buy/i.test(collectionBlurb.textContent)) return;
 
     collectionBlurb.replaceChildren();
 
@@ -96,7 +96,7 @@
     applyCollectionPromoBlurb(title, cta);
   }
 
-  function applyLostShopperLandingCopy() {
+  function applyUnattendedLandingCopy() {
     const eyebrow = document.querySelector('.hero-voice__eyebrow');
     const heading = document.querySelector('.hero-voice__heading');
     if (eyebrow) eyebrow.textContent = 'NO CLERK. NO CHAT.';
@@ -113,13 +113,13 @@
       return;
     }
 
-    if (promoVideo === 'lost-shopper') {
+    if (promoVideo === 'unattended') {
       applyPlainPromoHero(
-        'YOUR STORE, WITH A LOST SHOPPER.',
-        'They came to buy.',
-        'They bounce.'
+        'YOUR STORE, UNATTENDED.',
+        'Shoppers browse.',
+        'Nobody sells.'
       );
-      applyLostShopperLandingCopy();
+      applyUnattendedLandingCopy();
       return;
     }
 

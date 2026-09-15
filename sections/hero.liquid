@@ -31,13 +31,13 @@
   assign interval = section.settings.autoplay_interval | times: 1000
 
   assign mock_chat = false
-  assign lost_shopper = false
+  assign unattended = false
   assign promo_video = false
   if request.query_string contains 'promo_video=mock'
     assign mock_chat = true
     assign promo_video = true
-  elsif request.query_string contains 'promo_video=lost-shopper'
-    assign lost_shopper = true
+  elsif request.query_string contains 'promo_video=unattended'
+    assign unattended = true
     assign promo_video = true
   elsif request.query_string contains 'promo_video=true'
     assign promo_video = true
@@ -52,10 +52,10 @@
     assign hero_eyebrow = 'YOUR STORE, WITH A TYPICAL CHATBOT.'
     assign hero_title = 'It always replies.'
     assign hero_cta = 'It never sells.'
-  elsif lost_shopper
-    assign hero_eyebrow = 'YOUR STORE, WITH A LOST SHOPPER.'
-    assign hero_title = 'They came to buy.'
-    assign hero_cta = 'They bounce.'
+  elsif unattended
+    assign hero_eyebrow = 'YOUR STORE, UNATTENDED.'
+    assign hero_title = 'Shoppers browse.'
+    assign hero_cta = 'Nobody sells.'
   elsif promo_video
     assign hero_eyebrow = 'AGENTIC SALES ON, WITH'
     assign hero_title = 'Your store salesperson.'
