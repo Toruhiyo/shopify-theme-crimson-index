@@ -3,6 +3,17 @@
   assign show_vendor = section.settings.show_vendor
   assign aspect_ratio = section.settings.aspect_ratio
   assign products_per_page = section.settings.products_per_page | default: 48
+
+  assign mock_chat = false
+  if request.query_string contains 'mock_competitor_chatbot=true'
+    assign mock_chat = true
+  endif
+
+  assign collection_blurb = collection.description | strip_html | downcase
+  assign mentions_clerk = false
+  if collection_blurb contains 'clerk' or collection_blurb contains 'just say what you need'
+    assign mentions_clerk = true
+  endif
 -%}
 
 <section class="section-spacing" data-collection-section data-section-id="{{ section.id }}">
@@ -11,7 +22,12 @@
     <div class="collection-header">
       <div>
         <h1 class="h2">{{ collection.title }}</h1>
-        {%- if collection.description != blank -%}
+        {%- if mock_chat and mentions_clerk -%}
+          <p class="text-muted mt-sm" style="max-width: 40rem;">
+            <span>It always replies.</span>
+            <button type="button" class="hero__title-cta" data-open-voice-clerk>It never sells.</button>
+          </p>
+        {%- elsif collection.description != blank -%}
           <p class="text-muted mt-sm" style="max-width: 40rem;">{{ collection.description }}</p>
         {%- endif -%}
       </div>

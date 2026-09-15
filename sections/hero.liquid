@@ -29,6 +29,21 @@
   endif
 
   assign interval = section.settings.autoplay_interval | times: 1000
+
+  assign mock_chat = false
+  if request.query_string contains 'mock_competitor_chatbot=true'
+    assign mock_chat = true
+  endif
+
+  assign hero_eyebrow = section.settings.subtitle
+  assign hero_title = section.settings.title
+  assign hero_cta = section.settings.cta_text
+
+  if mock_chat
+    assign hero_eyebrow = 'YOUR STORE, WITH A TYPICAL CHATBOT.'
+    assign hero_title = 'It always replies.'
+    assign hero_cta = 'It never sells.'
+  endif
 -%}
 
 <section
@@ -82,20 +97,20 @@
 
   <div class="page-width hero__container">
     <div class="hero__content">
-      {%- if section.settings.subtitle != blank -%}
-        <p class="hero__subtitle">{{ section.settings.subtitle }}</p>
+      {%- if hero_eyebrow != blank -%}
+        <p class="hero__subtitle">{{ hero_eyebrow }}</p>
       {%- endif -%}
 
-      {%- if section.settings.title != blank -%}
+      {%- if hero_title != blank -%}
         <h1 class="hero__title">
-          <span class="hero__title-line">{{ section.settings.title }}</span>
-          {%- if section.settings.cta_text != blank -%}
+          <span class="hero__title-line">{{ hero_title }}</span>
+          {%- if hero_cta != blank -%}
             {%- comment -%}
               The CTA is the title's second line: same scale, brand color,
               underlined, clickable. Starts a voice chat with the clerk.
             {%- endcomment -%}
             <button type="button" class="hero__title-cta" data-open-voice-clerk>
-              {{- section.settings.cta_text -}}
+              {{- hero_cta -}}
             </button>
           {%- endif -%}
         </h1>
