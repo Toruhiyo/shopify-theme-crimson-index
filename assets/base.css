@@ -2362,7 +2362,7 @@ body.is-promo-greyscale .hero__media video {
   right: 0;
   top: 0.52em;
   height: 0.065em;
-  background: currentColor;
+  background: var(--color-primary);
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.64s cubic-bezier(0.33, 0.05, 0.15, 1);
