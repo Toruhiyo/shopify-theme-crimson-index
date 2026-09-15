@@ -35,14 +35,16 @@
     assign mock_chat = true
   endif
 
-  assign hero_eyebrow = section.settings.subtitle
-  assign hero_title = section.settings.title
-  assign hero_cta = section.settings.cta_text
-
+  assign hero_redefine = false
   if mock_chat
     assign hero_eyebrow = 'YOUR STORE, WITH A TYPICAL CHATBOT.'
     assign hero_title = 'It always replies.'
     assign hero_cta = 'It never sells.'
+  else
+    assign hero_eyebrow = 'YOUR STORE, WITH BIZMIS.'
+    assign hero_title = 'Your store salesperson.'
+    assign hero_cta = 'Built to sell.'
+    assign hero_redefine = true
   endif
 -%}
 
@@ -103,7 +105,19 @@
 
       {%- if hero_title != blank -%}
         <h1 class="hero__title">
-          <span class="hero__title-line">{{ hero_title }}</span>
+          {%- if hero_redefine -%}
+            <span class="hero__title-line" data-hero-redefine aria-label="Your store sales agent.">
+              <span class="hero__word">Your</span>
+              {{- ' ' -}}
+              <span class="hero__word">store</span>
+              {{- ' ' -}}
+              <span class="hero__word">
+                <span class="hero__redefine-stem">sales</span><span class="hero__redefine" aria-hidden="true"><span class="hero__redefine-from">person</span><span class="hero__redefine-to">agent</span></span><span class="hero__redefine-dot">.</span>
+              </span>
+            </span>
+          {%- else -%}
+            <span class="hero__title-line">{{ hero_title }}</span>
+          {%- endif -%}
           {%- if hero_cta != blank -%}
             {%- comment -%}
               The CTA is the title's second line: same scale, brand color,
@@ -170,19 +184,19 @@
       "type": "text",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "Consumer electronics, curated"
+      "default": "YOUR STORE, WITH BIZMIS."
     },
     {
       "type": "text",
       "id": "title",
       "label": "Heading",
-      "default": "The store clerk is in."
+      "default": "Your store salesperson."
     },
     {
       "type": "text",
       "id": "cta_text",
       "label": "Voice clerk line (second title line)",
-      "default": "Just say what you need.",
+      "default": "Built to sell.",
       "info": "Rendered as the highlighted second line of the heading. Opens a voice chat with the store clerk."
     }
   ],

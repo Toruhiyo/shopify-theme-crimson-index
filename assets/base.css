@@ -2284,6 +2284,69 @@ body.is-mock-competitor-chatbot .hero__media video {
   display: block;
 }
 
+.hero__redefine {
+  display: inline-flex;
+  align-items: baseline;
+  position: relative;
+}
+
+.hero__redefine-from,
+.hero__redefine-to {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.hero__redefine-from {
+  position: relative;
+}
+
+.hero__redefine-from::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.52em;
+  height: 0.065em;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.hero__title-line.is-striking .hero__redefine-from::after {
+  transform: scaleX(1);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero__title-line.is-erasing .hero__redefine-from {
+  opacity: 0;
+  transition:
+    width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero__redefine-to {
+  width: 0;
+  opacity: 0;
+}
+
+.hero__title-line.is-redefined .hero__redefine-from {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero__title-line.is-redefined .hero__redefine-to {
+  width: auto;
+  opacity: 1;
+  margin-left: 0.28em;
+  transition:
+    width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* The heading's second line doubles as the conversion action: same scale as
    the title, brand color, underlined, clickable. */
 .hero__title-cta {
@@ -2514,6 +2577,21 @@ body.is-mock-competitor-chatbot .hero__media video {
 
   .hero__content.is-hero-animated .hero__title-cta::after {
     transform: scaleX(1);
+    transition: none;
+  }
+
+  .hero__title-line[data-hero-redefine] .hero__redefine-from,
+  .hero__title-line[data-hero-redefine] .hero__redefine-from::after {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: none;
+  }
+
+  .hero__title-line[data-hero-redefine] .hero__redefine-to {
+    width: auto;
+    opacity: 1;
+    margin-left: 0.28em;
     transition: none;
   }
 }

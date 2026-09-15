@@ -1808,12 +1808,18 @@
      Starts once the page loader is out of the way. */
   const HERO_WORD_STAGGER_MS = 150;
   const HERO_LINE_PAUSE_MS = 420;
+  const HERO_REDEFINE_HOLD_MS = 520;
+  const HERO_REDEFINE_STRIKE_MS = 200;
+  const HERO_REDEFINE_ERASE_MS = 240;
+  const HERO_REDEFINE_REPLACE_MS = 260;
 
   class HeroCopyReveal {
     constructor(slideshow) {
       this.root = slideshow.querySelector('.hero__content');
       this.cta = null;
+      this.titleLine = null;
       this.underlineAt = 0;
+      this.redefineAt = 0;
       this.started = false;
       if (!this.root) return;
       requestAnimationFrame(() => this.prepare());
@@ -1821,15 +1827,17 @@
 
     prepare() {
       this.cta = this.root.querySelector('.hero__title-cta');
+      this.titleLine = this.root.querySelector('.hero__title-line');
       const lines = [
         this.root.querySelector('.hero__subtitle'),
-        this.root.querySelector('.hero__title-line'),
+        this.titleLine,
         this.cta
       ].filter(Boolean);
 
       if (!lines.length) return;
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.titleLine?.classList.add('is-redefined');
         this.cta?.classList.add('is-underlined');
         this.root.classList.add('is-hero-animated');
         this.root.classList.add('is-revealing');
@@ -1847,11 +1855,21 @@
         delay = lineEnd + HERO_WORD_STAGGER_MS + HERO_LINE_PAUSE_MS;
       });
 
+      if (this.titleLine?.hasAttribute('data-hero-redefine')) {
+        this.redefineAt = this.underlineAt + 900 + HERO_REDEFINE_HOLD_MS;
+      }
+
       this.root.classList.add('is-hero-animated');
       this.startWhenVisible();
     }
 
     wrapWords(el) {
+      const existing = el.querySelectorAll('.hero__word');
+      if (existing.length) {
+        existing.forEach((word) => word.setAttribute('aria-hidden', 'true'));
+        return existing.length;
+      }
+
       const text = el.textContent.replace(/\s+/g, ' ').trim();
       if (!text) return 0;
 
@@ -1871,6 +1889,36 @@
       return words.length;
     }
 
+    playRedefine(line) {
+      if (!line || line.classList.contains('is-redefined')) return;
+
+      const from = line.querySelector('.hero__redefine-from');
+      const to = line.querySelector('.hero__redefine-to');
+      if (!from || !to) {
+        line.classList.add('is-redefined');
+        return;
+      }
+
+      from.style.width = `${from.getBoundingClientRect().width}px`;
+      to.style.width = '0px';
+      line.classList.add('is-striking');
+
+      window.setTimeout(() => {
+        line.classList.add('is-erasing');
+        from.style.width = '0px';
+      }, HERO_REDEFINE_STRIKE_MS);
+
+      window.setTimeout(() => {
+        const nextWidth = to.scrollWidth;
+        line.classList.add('is-redefined');
+        to.style.width = `${nextWidth}px`;
+        window.setTimeout(() => {
+          from.style.width = '';
+          to.style.width = '';
+        }, HERO_REDEFINE_REPLACE_MS);
+      }, HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_ERASE_MS);
+    }
+
     startWhenVisible() {
       const start = () => {
         if (this.started) return;
@@ -1878,6 +1926,9 @@
         this.root.classList.add('is-revealing');
         if (this.cta) {
           window.setTimeout(() => this.cta.classList.add('is-underlined'), this.underlineAt);
+        }
+        if (this.redefineAt) {
+          window.setTimeout(() => this.playRedefine(this.titleLine), this.redefineAt);
         }
       };
 
