@@ -49,8 +49,6 @@ html.is-mock-competitor-chatbot .cart-drawer,
 html.is-mock-competitor-chatbot .cart-drawer__backdrop,
 html.is-mock-competitor-chatbot .legacy-chat,
 html.is-mock-competitor-chatbot .bizmis-coach,
-html.is-mock-competitor-chatbot img,
-html.is-mock-competitor-chatbot video,
 body.is-mock-competitor-chatbot .loader,
 body.is-mock-competitor-chatbot .header-section,
 body.is-mock-competitor-chatbot .announcement-bar-section,
@@ -59,9 +57,7 @@ body.is-mock-competitor-chatbot .footer,
 body.is-mock-competitor-chatbot .cart-drawer,
 body.is-mock-competitor-chatbot .cart-drawer__backdrop,
 body.is-mock-competitor-chatbot .legacy-chat,
-body.is-mock-competitor-chatbot .bizmis-coach,
-body.is-mock-competitor-chatbot img,
-body.is-mock-competitor-chatbot video {
+body.is-mock-competitor-chatbot .bizmis-coach {
   filter: grayscale(1);
 }
 
@@ -2235,6 +2231,14 @@ textarea.input {
   object-fit: cover;
 }
 
+html.is-mock-competitor-chatbot .hero__media img,
+html.is-mock-competitor-chatbot .hero__media video,
+body.is-mock-competitor-chatbot .hero__media img,
+body.is-mock-competitor-chatbot .hero__media video {
+  object-fit: cover;
+  filter: none;
+}
+
 /* Welcome copy in the left column, over the white side of the studio shots.
    Invites the visitor to talk to the clerk in the merchant's own voice. */
 .hero__container {
@@ -2361,35 +2365,6 @@ textarea.input {
   pointer-events: none;
 }
 
-html.is-mock-competitor-chatbot .hero__media img,
-html.is-mock-competitor-chatbot .hero__media video {
-  position: absolute;
-  top: 50%;
-  right: 3%;
-  left: auto;
-  bottom: auto;
-  width: 58%;
-  height: 72%;
-  transform: translateY(-50%);
-  object-fit: contain;
-  object-position: right center;
-}
-
-html.is-mock-competitor-chatbot .hero__content {
-  max-width: 38rem;
-  gap: 1.35rem;
-}
-
-html.is-mock-competitor-chatbot .hero__subtitle {
-  font-size: 0.95rem;
-  letter-spacing: 0.12em;
-}
-
-html.is-mock-competitor-chatbot .hero__title {
-  max-width: 11em;
-  font-size: clamp(3.1rem, 6vw, 4.75rem);
-}
-
 /* Mobile: bookshop-demo style. The slideshow runs full-bleed behind a dark
    scrim, with light copy centered above the voice widget. The scrim is what
    makes centered text workable over photos that have a centered subject. */
@@ -2437,19 +2412,6 @@ html.is-mock-competitor-chatbot .hero__title {
 
   .hero__title {
     font-size: 2.1rem;
-  }
-
-  html.is-mock-competitor-chatbot .hero__media img,
-  html.is-mock-competitor-chatbot .hero__media video {
-    width: 78%;
-    height: 48%;
-    right: 50%;
-    transform: translate(50%, -58%);
-    object-position: center;
-  }
-
-  html.is-mock-competitor-chatbot .hero__title {
-    font-size: 2.7rem;
   }
 
   .hero__title-cta {
