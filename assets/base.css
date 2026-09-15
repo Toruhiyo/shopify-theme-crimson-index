@@ -5319,7 +5319,24 @@ textarea.input {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  max-width: 90%;
+  max-width: 78%;
+}
+
+.legacy-chat__msg--bot {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.legacy-chat__msg--bot .legacy-chat__avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.2rem;
+}
+
+.legacy-chat__msg--bot .legacy-chat__avatar svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .legacy-chat__msg--bot {
@@ -5348,8 +5365,8 @@ textarea.input {
   margin: 0;
   padding: 0.625rem 0.75rem;
   border-radius: 4px;
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  line-height: 1.4;
   background: #fff;
   border: 1px solid var(--legacy-chat-line);
 }

@@ -22,17 +22,13 @@
     {
       pattern: /(order|track|deliver|shipping|shipment|dispatch|arriv|late|where)/i,
       bubbles: [
-        "Thank you so much for reaching out, and thank you for your patience! I completely understand how important it is to know exactly where your order is at this moment in time.",
-        "Delivery estimates can vary depending on a number of factors, including your delivery address, the carrier's current capacity, seasonal volumes and the fulfilment centre that processes your order.",
-        "So that I can look into this further, could you please confirm your order number, the email address used at checkout, the billing postcode and the approximate date of purchase?"
+        "Thank you so much for reaching out, and thank you for your patience! I completely understand how important it is to know exactly where your order is at this moment in time. Delivery estimates can vary depending on a number of factors, including your delivery address, the carrier's current capacity, seasonal volumes and the fulfilment centre that processes your order. So that I can look into this further, could you please confirm your order number, the email address used at checkout, the billing postcode and the approximate date of purchase?"
       ]
     },
     {
       pattern: /(return|refund|exchange|send back|money back)/i,
       bubbles: [
-        "I'm very sorry to hear that your purchase did not fully meet your expectations! Customer satisfaction is extremely important to all of us here.",
-        "Returns are generally accepted within 30 days of delivery, provided that the item is unused, in its original packaging, and accompanied by all original accessories, documentation and proof of purchase. Please note that certain product categories may be excluded.",
-        "Full details are available in our Help Center article 'How do I return an item?'."
+        "I'm very sorry to hear that your purchase did not fully meet your expectations! Customer satisfaction is extremely important to all of us here. Returns are generally accepted within 30 days of delivery, provided that the item is unused, in its original packaging, and accompanied by all original accessories, documentation and proof of purchase. Please note that certain product categories may be excluded. Full details are available in our Help Center article 'How do I return an item?'."
       ]
     },
     {
@@ -145,6 +141,7 @@
       this.input = root.querySelector('[data-legacy-chat-input]');
 
       this.hasStarted = false;
+      this.chipsDismissed = false;
       this.fallbackIndex = 0;
       this.exchanges = 0;
 
@@ -188,10 +185,12 @@
 
     startConversation() {
       this.hasStarted = true;
-      this.renderQuickReplies();
+      if (!this.chipsDismissed) this.renderQuickReplies();
     }
 
     renderQuickReplies() {
+      if (this.chipsDismissed) return;
+      this.quick.hidden = false;
       this.quick.innerHTML = '';
       QUICK_REPLIES.forEach(label => {
         const chip = document.createElement('button');
@@ -203,7 +202,14 @@
       });
     }
 
+    dismissQuickReplies() {
+      this.chipsDismissed = true;
+      this.quick.innerHTML = '';
+      this.quick.hidden = true;
+    }
+
     sendVisitorMessage(text) {
+      this.dismissQuickReplies();
       this.appendMessage(text, 'visitor');
       this.exchanges += 1;
       this.sendBotBubbles(this.answerFor(text), { withFeedback: true });
