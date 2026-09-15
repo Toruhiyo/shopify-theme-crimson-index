@@ -2346,9 +2346,8 @@
 
   /* --- Bizmis voice clerk trigger ---
      "Talk to the clerk" starts a voicechat through the widget's imperative API
-     (window.AvatarVoicechat.startVoicechat) and locks itself for the duration
-     of the call via the widget's lifecycle events. Older widget builds without
-     that API fall back to surfacing + pulsing the floating widget. */
+     (window.AvatarVoicechat.startVoicechat). Older widget builds without that
+     API fall back to surfacing + pulsing the floating widget. */
   const VOICE_WIDGET_SELECTORS = ['#bizmis-avatar-embed', '.bizmis-avatar-widget-root', '#avatar-root', '[data-avatar-widget]'];
 
   function findVoiceWidget() {
@@ -2371,19 +2370,10 @@
     window.setTimeout(() => widget.classList.remove('bizmis-widget-pulse'), 1800);
   }
 
-  function setVoiceClerkLocked(locked) {
-    document.querySelectorAll('[data-open-voice-clerk]').forEach(btn => {
-      btn.disabled = locked;
-    });
-  }
-
   function initVoiceClerkTriggers() {
     document.querySelectorAll('[data-open-voice-clerk]').forEach(btn => {
       btn.addEventListener('click', openVoiceClerk);
     });
-
-    window.addEventListener('bizmis:voicechat-started', () => setVoiceClerkLocked(true));
-    window.addEventListener('bizmis:voicechat-ended', () => setVoiceClerkLocked(false));
   }
 
   /* Measure the demo promo bar so the index header floats just below it (and the

@@ -2481,12 +2481,6 @@ body.is-promo-greyscale .hero__media video {
   border-radius: 4px;
 }
 
-.hero__title-cta:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
 /* Mobile: bookshop-demo style. The slideshow runs full-bleed behind a dark
    scrim, with light copy centered above the voice widget. The scrim is what
    makes centered text workable over photos that have a centered subject. */
