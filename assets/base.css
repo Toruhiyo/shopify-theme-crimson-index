@@ -2361,6 +2361,35 @@ textarea.input {
   pointer-events: none;
 }
 
+.hero--mock .hero__media img,
+.hero--mock .hero__media video {
+  position: absolute;
+  top: 50%;
+  right: 3%;
+  left: auto;
+  bottom: auto;
+  width: 58%;
+  height: 72%;
+  transform: translateY(-50%);
+  object-fit: contain;
+  object-position: right center;
+}
+
+.hero--mock .hero__content {
+  max-width: 38rem;
+  gap: 1.35rem;
+}
+
+.hero--mock .hero__subtitle {
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+}
+
+.hero--mock .hero__title {
+  max-width: 11em;
+  font-size: clamp(3.1rem, 6vw, 4.75rem);
+}
+
 /* Mobile: bookshop-demo style. The slideshow runs full-bleed behind a dark
    scrim, with light copy centered above the voice widget. The scrim is what
    makes centered text workable over photos that have a centered subject. */
@@ -2408,6 +2437,19 @@ textarea.input {
 
   .hero__title {
     font-size: 2.1rem;
+  }
+
+  .hero--mock .hero__media img,
+  .hero--mock .hero__media video {
+    width: 78%;
+    height: 48%;
+    right: 50%;
+    transform: translate(50%, -58%);
+    object-position: center;
+  }
+
+  .hero--mock .hero__title {
+    font-size: 2.7rem;
   }
 
   .hero__title-cta {

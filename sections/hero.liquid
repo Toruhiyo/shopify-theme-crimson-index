@@ -54,7 +54,7 @@
 {%- endif -%}
 
 <section
-  class="hero {{ height_class }}"
+  class="hero {{ height_class }}{% if mock_chat %} hero--mock{% endif %}"
   data-hero-slideshow
   data-autoplay-interval="{{ interval }}"
   {{ section.shopify_attributes }}
