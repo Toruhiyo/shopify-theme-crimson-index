@@ -1932,6 +1932,7 @@
     + HERO_REDEFINE_STRIKE_HOLD_MS
     + HERO_REDEFINE_MORPH_MS
     + HERO_REDEFINE_SETTLE_MS;
+  const HERO_LINE_UNDERLINE_MS = 1050;
 
   class HeroCopyReveal {
     constructor(slideshow) {
@@ -1956,11 +1957,18 @@
       if (!intro.length && !this.cta) return;
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        this.ensureCtaInk(this.cta);
+        if (this.cta) {
+          this.ensureCtaInk(this.cta);
+          this.wrapWords(this.cta.querySelector('.hero__title-cta-ink') || this.cta);
+        }
         this.titleLine?.classList.add('is-redefined');
-        this.cta?.classList.add('is-underlined');
         this.root.classList.add('is-hero-animated');
         this.root.classList.add('is-revealing');
+        this.groupCtaLines();
+        this.cta?.classList.add('is-underlined');
+        this.cta?.querySelectorAll('.hero__title-cta-line').forEach((line) => {
+          line.classList.add('is-underlined');
+        });
         return;
       }
 
@@ -1996,6 +2004,7 @@
       }
 
       this.root.classList.add('is-hero-animated');
+      requestAnimationFrame(() => this.groupCtaLines());
       this.startWhenVisible();
     }
 
@@ -2033,6 +2042,52 @@
       el.appendChild(ink);
     }
 
+    groupCtaLines() {
+      const ink = this.cta?.querySelector('.hero__title-cta-ink');
+      if (!ink || ink.querySelector('.hero__title-cta-line')) return;
+
+      const words = [...ink.querySelectorAll('.hero__word')];
+      if (!words.length) return;
+
+      const buckets = [];
+      words.forEach((word, index) => {
+        const top = Math.round(word.getBoundingClientRect().top);
+        let bucket = buckets.find((entry) => Math.abs(entry.top - top) < 6);
+        if (!bucket) {
+          bucket = { top, nodes: [] };
+          buckets.push(bucket);
+        }
+        bucket.nodes.push(word);
+        const nextWord = words[index + 1];
+        const space = word.nextSibling;
+        if (
+          nextWord
+          && space
+          && space.nodeType === Node.TEXT_NODE
+          && Math.abs(Math.round(nextWord.getBoundingClientRect().top) - top) < 6
+        ) {
+          bucket.nodes.push(space);
+        }
+      });
+
+      buckets.forEach((bucket) => {
+        const line = document.createElement('span');
+        line.className = 'hero__title-cta-line';
+        bucket.nodes[0].parentNode.insertBefore(line, bucket.nodes[0]);
+        bucket.nodes.forEach((node) => line.appendChild(node));
+      });
+    }
+
+    playCtaUnderline() {
+      if (!this.cta) return;
+      this.groupCtaLines();
+      this.cta.classList.add('is-underlined');
+      const lines = this.cta.querySelectorAll('.hero__title-cta-line');
+      lines.forEach((line, index) => {
+        window.setTimeout(() => line.classList.add('is-underlined'), index * HERO_LINE_UNDERLINE_MS);
+      });
+    }
+
     playRedefine(line) {
       if (!line || line.classList.contains('is-redefined')) return;
 
@@ -2068,7 +2123,7 @@
         this.started = true;
         this.root.classList.add('is-revealing');
         if (this.cta) {
-          window.setTimeout(() => this.cta.classList.add('is-underlined'), this.underlineAt);
+          window.setTimeout(() => this.playCtaUnderline(), this.underlineAt);
         }
         if (this.redefineAt) {
           window.setTimeout(() => this.playRedefine(this.titleLine), this.redefineAt);
