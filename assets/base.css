@@ -5377,6 +5377,49 @@ textarea.input {
   color: #fff;
 }
 
+.legacy-chat__bubble-text {
+  margin: 0;
+}
+
+.legacy-chat__bubble-links {
+  margin: 0.5rem 0 0 1.15rem;
+  padding: 0;
+}
+
+.legacy-chat__bubble-links li {
+  margin: 0.15rem 0;
+}
+
+.legacy-chat__fake-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #3f464c;
+  font: inherit;
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.legacy-chat__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+}
+
+.legacy-chat__action {
+  padding: 0.35rem 0.625rem;
+  border: 1px solid var(--legacy-chat-accent);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--legacy-chat-accent);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
 .legacy-chat__typing {
   display: flex;
   align-items: center;

@@ -6,9 +6,7 @@
 (function () {
   'use strict';
 
-  const TYPING_BASE_MS = 1300;
-  const TYPING_PER_CHAR_MS = 9;
-  const TYPING_MAX_MS = 3400;
+  const TYPING_MS = 800;
   const BUBBLE_GAP_MS = 420;
   const MOCK_CHAT_PARAM = 'mock_competitor_chatbot';
 
@@ -20,46 +18,21 @@
 
   const SCRIPTED_ANSWERS = [
     {
-      pattern: /(order|track|deliver|shipping|shipment|dispatch|arriv|late|where)/i,
+      pattern: /4k|1,?500/i,
       bubbles: [
-        "Thank you so much for reaching out, and thank you for your patience! I completely understand how important it is to know exactly where your order is at this moment in time. Delivery estimates can vary depending on a number of factors, including your delivery address, the carrier's current capacity, seasonal volumes and the fulfilment centre that processes your order. So that I can look into this further, could you please confirm your order number, the email address used at checkout, the billing postcode and the approximate date of purchase?"
+        {
+          text: 'You can browse all laptops in Computers & Peripherals. Try the filters for price and weight.',
+          links: ['Laptops collection', 'Compare specifications']
+        }
       ]
     },
     {
-      pattern: /(return|refund|exchange|send back|money back)/i,
+      pattern: /battery/i,
       bubbles: [
-        "I'm very sorry to hear that your purchase did not fully meet your expectations! Customer satisfaction is extremely important to all of us here. Returns are generally accepted within 30 days of delivery, provided that the item is unused, in its original packaging, and accompanied by all original accessories, documentation and proof of purchase. Please note that certain product categories may be excluded. Full details are available in our Help Center article 'How do I return an item?'."
-      ]
-    },
-    {
-      pattern: /(warrant|guarantee|broken|faulty|repair|defect)/i,
-      bubbles: [
-        "That's a great question, and I'm glad you asked! Warranty coverage varies by manufacturer, by product category, and by the country in which the product was originally purchased.",
-        "Coverage typically applies to manufacturing defects under normal use, and does not extend to accidental damage, liquid damage, cosmetic wear or unauthorised repairs.",
-        "I would recommend reviewing the documentation supplied in the box, or the manufacturer's official website, for the terms applicable to your specific model."
-      ]
-    },
-    {
-      pattern: /(which|compare|better|best|recommend|spec|compatib|difference|batter)/i,
-      bubbles: [
-        "Great question! Every product in our catalogue is carefully selected to meet the highest standards of quality, performance and value for money.",
-        "For detailed specifications and side-by-side comparisons, I would recommend visiting the relevant category page, where you can filter by the features that matter most to you.",
-        "If you would like, I can email you a link to our Buying Guide."
-      ]
-    },
-    {
-      pattern: /(discount|coupon|code|cheap|price|deal|promo|sale|deliver free)/i,
-      bubbles: [
-        "I would absolutely love to help you save on your purchase today! Unfortunately I am not able to create, validate, apply or extend discount codes within this chat window.",
-        "I would encourage you to subscribe to our newsletter, as subscribers are often among the first to be notified about seasonal promotions and exclusive offers."
-      ]
-    },
-    {
-      pattern: /(human|agent|person|someone|manager|representative|call|phone)/i,
-      bubbles: [
-        "I would be delighted to connect you with a member of our Customer Care team!",
-        "All of our agents are currently assisting other customers. Your estimated wait time is 47 minutes.",
-        "Alternatively, I can create a ticket on your behalf and a member of the team will respond within 24 to 48 business hours, excluding weekends and public holidays. Ticket #8842-179 has been created for your reference."
+        {
+          text: 'Battery life varies by model. Check the Specifications tab on each product page, or I can open a support ticket.',
+          actions: ['Open a ticket', 'No, thanks']
+        }
       ]
     }
   ];
@@ -228,14 +201,11 @@
       let delay = 0;
 
       bubbles.forEach((bubble, index) => {
-        const text = this.interpolate(bubble);
-        const typing = Math.min(TYPING_BASE_MS + text.length * TYPING_PER_CHAR_MS, TYPING_MAX_MS);
-
         setTimeout(() => this.showTyping(), delay);
-        delay += typing;
+        delay += TYPING_MS;
         setTimeout(() => {
           this.hideTyping();
-          this.appendMessage(text, 'bot');
+          this.appendMessage(bubble, 'bot');
           const isLast = index === bubbles.length - 1;
           if (isLast && options.withFeedback) this.appendFeedback();
         }, delay);
@@ -244,7 +214,19 @@
     }
 
     interpolate(text) {
-      return text.replace('{brand}', this.brand);
+      return String(text).replace('{brand}', this.brand);
+    }
+
+    normalizeBubble(payload) {
+      if (typeof payload === 'string' || payload == null) {
+        return { text: payload ? String(payload) : '', links: [], actions: [] };
+      }
+
+      return {
+        text: payload.text || '',
+        links: payload.links || [],
+        actions: payload.actions || []
+      };
     }
 
     createAvatar() {
@@ -252,7 +234,11 @@
       return this.avatarTemplate.cloneNode(true);
     }
 
-    appendMessage(text, author) {
+    appendMessage(payload, author) {
+      const content = author === 'bot'
+        ? this.normalizeBubble(payload)
+        : { text: String(payload), links: [], actions: [] };
+
       const row = document.createElement('div');
       row.className = `legacy-chat__msg legacy-chat__msg--${author}`;
 
@@ -261,11 +247,43 @@
         if (avatar) row.appendChild(avatar);
       }
 
-      const bubble = document.createElement('p');
+      const bubble = document.createElement('div');
       bubble.className = 'legacy-chat__bubble';
-      bubble.textContent = text;
-      row.appendChild(bubble);
 
+      const text = document.createElement('p');
+      text.className = 'legacy-chat__bubble-text';
+      text.textContent = this.interpolate(content.text);
+      bubble.appendChild(text);
+
+      if (content.links.length) {
+        const list = document.createElement('ul');
+        list.className = 'legacy-chat__bubble-links';
+        content.links.forEach((label) => {
+          const item = document.createElement('li');
+          const link = document.createElement('button');
+          link.type = 'button';
+          link.className = 'legacy-chat__fake-link';
+          link.textContent = label;
+          item.appendChild(link);
+          list.appendChild(item);
+        });
+        bubble.appendChild(list);
+      }
+
+      if (content.actions.length) {
+        const actions = document.createElement('div');
+        actions.className = 'legacy-chat__actions';
+        content.actions.forEach((label) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'legacy-chat__action';
+          button.textContent = label;
+          actions.appendChild(button);
+        });
+        bubble.appendChild(actions);
+      }
+
+      row.appendChild(bubble);
       this.log.appendChild(row);
       this.scrollToLatest();
     }
