@@ -1921,12 +1921,17 @@
      Starts once the page loader is out of the way. */
   const HERO_WORD_STAGGER_MS = 150;
   const HERO_LINE_PAUSE_MS = 420;
-  const HERO_REDEFINE_HOLD_MS = 400;
-  const HERO_REDEFINE_STRIKE_MS = 320;
-  const HERO_REDEFINE_MORPH_MS = 480;
-  const HERO_REDEFINE_SETTLE_MS = 160;
+  const HERO_REDEFINE_HOLD_MS = 640;
+  const HERO_REDEFINE_STRIKE_MS = 640;
+  const HERO_REDEFINE_STRIKE_HOLD_MS = 260;
+  const HERO_REDEFINE_MORPH_MS = 920;
+  const HERO_REDEFINE_SETTLE_MS = 280;
   const HERO_REDEFINE_TOTAL_MS =
-    HERO_REDEFINE_HOLD_MS + HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_MORPH_MS + HERO_REDEFINE_SETTLE_MS;
+    HERO_REDEFINE_HOLD_MS
+    + HERO_REDEFINE_STRIKE_MS
+    + HERO_REDEFINE_STRIKE_HOLD_MS
+    + HERO_REDEFINE_MORPH_MS
+    + HERO_REDEFINE_SETTLE_MS;
 
   class HeroCopyReveal {
     constructor(slideshow) {
@@ -2030,18 +2035,19 @@
       to.style.width = '0px';
       line.classList.add('is-striking');
 
+      const morphAt = HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_STRIKE_HOLD_MS;
       window.setTimeout(() => {
         const nextWidth = to.scrollWidth;
         line.classList.add('is-erasing', 'is-redefined');
         from.style.width = '0px';
         to.style.width = `${nextWidth}px`;
-      }, HERO_REDEFINE_STRIKE_MS);
+      }, morphAt);
 
       window.setTimeout(() => {
         line.classList.remove('is-striking', 'is-erasing');
         from.style.width = '';
         to.style.width = '';
-      }, HERO_REDEFINE_STRIKE_MS + HERO_REDEFINE_MORPH_MS);
+      }, morphAt + HERO_REDEFINE_MORPH_MS);
     }
 
     startWhenVisible() {

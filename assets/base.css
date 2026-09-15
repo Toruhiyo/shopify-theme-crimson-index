@@ -2324,8 +2324,8 @@ body.is-mock-competitor-chatbot .hero__media video {
 .hero__redefine-from {
   position: relative;
   transition:
-    width 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    width 0.92s cubic-bezier(0.33, 0.05, 0.15, 1),
+    opacity 0.78s cubic-bezier(0.33, 0.05, 0.15, 1);
 }
 
 .hero__redefine-from::after {
@@ -2338,7 +2338,7 @@ body.is-mock-competitor-chatbot .hero__media video {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.64s cubic-bezier(0.33, 0.05, 0.15, 1);
 }
 
 .hero__title-line.is-striking .hero__redefine-from::after {
@@ -2356,8 +2356,8 @@ body.is-mock-competitor-chatbot .hero__media video {
   opacity: 0;
   white-space: pre;
   transition:
-    width 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    width 0.92s cubic-bezier(0.33, 0.05, 0.15, 1),
+    opacity 0.78s cubic-bezier(0.33, 0.05, 0.15, 1);
 }
 
 .hero__title-line.is-redefined .hero__redefine-from {
