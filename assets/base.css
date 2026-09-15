@@ -2277,11 +2277,18 @@ body.is-mock-competitor-chatbot .hero__media video {
   font-size: 0.9rem;
 }
 
+.hero__subtitle--mark .hero__word:has(.hero__bizmis-mark) {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
 .hero__bizmis-mark {
   display: block;
   height: 2.68rem;
   width: calc(2.68rem * 1948 / 640);
   background-color: var(--bizmis-orange);
+  transform: translateY(-0.18rem);
   -webkit-mask-position: center;
   mask-position: center;
   -webkit-mask-repeat: no-repeat;
