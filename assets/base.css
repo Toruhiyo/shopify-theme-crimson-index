@@ -14,6 +14,8 @@
   --color-border-raw: #E5E5EA;
   --color-primary: #D1001A;
   --color-primary-fg: #FFFFFF;
+  --bizmis-orange: #f9a353;
+  --bizmis-orange-dark: #ec7709;
   --color-success: #34C759;
   --color-warning: #FF9500;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2277,7 +2279,7 @@ body.is-mock-competitor-chatbot .hero__media video {
   display: block;
   height: 1.85em;
   width: calc(1.85em * 1948 / 640);
-  background-color: currentColor;
+  background-color: var(--bizmis-orange);
   -webkit-mask-position: center;
   mask-position: center;
   -webkit-mask-repeat: no-repeat;
