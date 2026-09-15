@@ -1798,6 +1798,98 @@
     resume() { this.paused = false; }
   }
 
+  /* --- Hero copy intro ---
+     Word-by-word fade on the shared overlay: eyebrow, then headline, then
+     the red line. The underline paints after the last red-line word lands.
+     Starts once the page loader is out of the way. */
+  const HERO_WORD_STAGGER_MS = 85;
+  const HERO_LINE_PAUSE_MS = 260;
+
+  class HeroCopyReveal {
+    constructor(slideshow) {
+      this.root = slideshow.querySelector('.hero__content');
+      this.cta = null;
+      this.underlineAt = 0;
+      this.started = false;
+      if (!this.root) return;
+      requestAnimationFrame(() => this.prepare());
+    }
+
+    prepare() {
+      this.cta = this.root.querySelector('.hero__title-cta');
+      const lines = [
+        this.root.querySelector('.hero__subtitle'),
+        this.root.querySelector('.hero__title-line'),
+        this.cta
+      ].filter(Boolean);
+
+      if (!lines.length) return;
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.cta?.classList.add('is-underlined');
+        this.root.classList.add('is-hero-animated');
+        this.root.classList.add('is-revealing');
+        return;
+      }
+
+      let delay = 80;
+      lines.forEach((line, index) => {
+        const count = this.wrapWords(line);
+        line.querySelectorAll('.hero__word').forEach((word, wordIndex) => {
+          word.style.animationDelay = `${delay + wordIndex * HERO_WORD_STAGGER_MS}ms`;
+        });
+        const lineEnd = delay + Math.max(count - 1, 0) * HERO_WORD_STAGGER_MS;
+        if (index === lines.length - 1) this.underlineAt = lineEnd + 160;
+        delay = lineEnd + HERO_WORD_STAGGER_MS + HERO_LINE_PAUSE_MS;
+      });
+
+      this.root.classList.add('is-hero-animated');
+      this.startWhenVisible();
+    }
+
+    wrapWords(el) {
+      const text = el.textContent.replace(/\s+/g, ' ').trim();
+      if (!text) return 0;
+
+      el.setAttribute('aria-label', text);
+      el.textContent = '';
+
+      const words = text.split(' ');
+      words.forEach((word, index) => {
+        const span = document.createElement('span');
+        span.className = 'hero__word';
+        span.textContent = word;
+        span.setAttribute('aria-hidden', 'true');
+        el.appendChild(span);
+        if (index < words.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+
+      return words.length;
+    }
+
+    startWhenVisible() {
+      const start = () => {
+        if (this.started) return;
+        this.started = true;
+        this.root.classList.add('is-revealing');
+        if (this.cta) {
+          window.setTimeout(() => this.cta.classList.add('is-underlined'), this.underlineAt);
+        }
+      };
+
+      const loader = document.getElementById('page-loader');
+      if (!loader || loader.classList.contains('is-hidden')) {
+        start();
+        return;
+      }
+
+      loader.addEventListener('transitionend', (event) => {
+        if (event.target === loader) start();
+      });
+      window.addEventListener('load', () => window.setTimeout(start, 520), { once: true });
+    }
+  }
+
   /* --- Money Formatter --- */
   function formatMoney(cents) {
     const fmt = window.Shopify?.money_format || '${{amount}}';
@@ -2007,7 +2099,10 @@
     document.querySelectorAll('.pdp__gallery').forEach(el => new ProductGallery(el));
     document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
-    document.querySelectorAll('[data-hero-slideshow]').forEach(el => new HeroSlideshow(el));
+    document.querySelectorAll('[data-hero-slideshow]').forEach(el => {
+      new HeroSlideshow(el);
+      new HeroCopyReveal(el);
+    });
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
     initPromoBar();
