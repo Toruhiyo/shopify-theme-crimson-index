@@ -2291,7 +2291,7 @@ body.is-promo-greyscale .hero__media video {
   column-gap: 0.4em;
   row-gap: 0.2em;
   color: #6b6560;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .hero__subtitle--mark .hero__word:has(.hero__bizmis-mark) {
