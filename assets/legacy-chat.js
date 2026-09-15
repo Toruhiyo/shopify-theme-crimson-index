@@ -55,6 +55,24 @@
 
   const FEEDBACK_PROMPT = 'Did that answer your question?';
   const FEEDBACK_THANKS = 'Thank you for your feedback! It helps us improve our service.';
+  const SESSION_KEY = 'legacy-chat-mock';
+
+  function loadSession() {
+    try {
+      const parsed = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveSession(state) {
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
+    } catch {
+      /* quota / private mode */
+    }
+  }
 
   function matchesKeywords(text, keywords) {
     const haystack = text.toLowerCase();
@@ -126,8 +144,10 @@
       this.chipsDismissed = false;
       this.fallbackIndex = 0;
       this.exchanges = 0;
+      this.entries = [];
 
       this.bindEvents();
+      this.restoreSession();
     }
 
     bindEvents() {
@@ -151,23 +171,64 @@
       this.isOpen() ? this.close() : this.open();
     }
 
-    open() {
+    open(options = {}) {
       this.window.hidden = false;
       this.launcher.setAttribute('aria-expanded', 'true');
       this.root.classList.add('is-open');
       if (!this.hasStarted) this.startConversation();
-      this.input.focus();
+      this.persistSession();
+      if (!options.fromSession) this.input.focus();
     }
 
     close() {
       this.window.hidden = true;
       this.launcher.setAttribute('aria-expanded', 'false');
       this.root.classList.remove('is-open');
+      this.persistSession();
     }
 
     startConversation() {
       this.hasStarted = true;
       if (!this.chipsDismissed) this.renderQuickReplies();
+      this.persistSession();
+    }
+
+    persistSession() {
+      saveSession({
+        open: this.isOpen(),
+        hasStarted: this.hasStarted,
+        chipsDismissed: this.chipsDismissed,
+        fallbackIndex: this.fallbackIndex,
+        exchanges: this.exchanges,
+        entries: this.entries
+      });
+    }
+
+    rememberEntry(entry) {
+      this.entries.push(entry);
+      this.persistSession();
+    }
+
+    restoreSession() {
+      const saved = loadSession();
+      if (!saved) return;
+
+      this.hasStarted = Boolean(saved.hasStarted);
+      this.chipsDismissed = Boolean(saved.chipsDismissed);
+      this.fallbackIndex = Number(saved.fallbackIndex) || 0;
+      this.exchanges = Number(saved.exchanges) || 0;
+      this.entries = Array.isArray(saved.entries) ? saved.entries : [];
+
+      this.entries.forEach((entry) => {
+        if (entry.type === 'feedback') {
+          this.renderFeedback(entry);
+          return;
+        }
+        this.renderMessage(entry);
+      });
+
+      if (this.hasStarted && !this.chipsDismissed) this.renderQuickReplies();
+      if (saved.open) this.open({ fromSession: true });
     }
 
     renderQuickReplies() {
@@ -188,13 +249,24 @@
       this.chipsDismissed = true;
       this.quick.innerHTML = '';
       this.quick.hidden = true;
+      this.persistSession();
     }
 
     sendVisitorMessage(text) {
       this.dismissQuickReplies();
-      this.appendMessage(text, 'visitor');
+      this.rememberEntry({ type: 'message', author: 'visitor', text });
+      this.renderMessage({ author: 'visitor', text, links: [], actions: [] });
       this.exchanges += 1;
-      this.sendBotBubbles(this.answerFor(text), { withFeedback: true });
+
+      const botEntries = this.answerFor(text).map((bubble) => ({
+        type: 'message',
+        author: 'bot',
+        ...this.normalizeBubble(bubble)
+      }));
+      const feedbackEntry = { type: 'feedback', answered: false };
+      botEntries.forEach((entry) => this.rememberEntry(entry));
+      this.rememberEntry(feedbackEntry);
+      this.playBotEntries(botEntries, feedbackEntry);
     }
 
     answerFor(text) {
@@ -206,17 +278,18 @@
       return fallback;
     }
 
-    sendBotBubbles(bubbles, options = {}) {
+    playBotEntries(botEntries, feedbackEntry) {
       let delay = 0;
 
-      bubbles.forEach((bubble, index) => {
+      botEntries.forEach((entry, index) => {
         setTimeout(() => this.showTyping(), delay);
         delay += TYPING_MS;
         setTimeout(() => {
           this.hideTyping();
-          this.appendMessage(bubble, 'bot');
-          const isLast = index === bubbles.length - 1;
-          if (isLast && options.withFeedback) this.appendFeedback();
+          this.renderMessage(entry);
+          if (index === botEntries.length - 1 && feedbackEntry) {
+            this.renderFeedback(feedbackEntry);
+          }
         }, delay);
         delay += BUBBLE_GAP_MS;
       });
@@ -248,10 +321,13 @@
       return this.avatarTemplate.cloneNode(true);
     }
 
-    appendMessage(payload, author) {
-      const content = author === 'bot'
-        ? this.normalizeBubble(payload)
-        : { text: String(payload), links: [], actions: [] };
+    renderMessage(entry) {
+      const author = entry.author === 'visitor' ? 'visitor' : 'bot';
+      const content = {
+        text: entry.text || '',
+        links: entry.links || [],
+        actions: entry.actions || []
+      };
 
       const row = document.createElement('div');
       row.className = `legacy-chat__msg legacy-chat__msg--${author}`;
@@ -272,8 +348,8 @@
       if (content.links.length) {
         const list = document.createElement('ul');
         list.className = 'legacy-chat__bubble-links';
-        content.links.forEach((entry) => {
-          const { label, href } = this.normalizeLink(entry);
+        content.links.forEach((linkEntry) => {
+          const { label, href } = this.normalizeLink(linkEntry);
           const item = document.createElement('li');
           const link = href ? document.createElement('a') : document.createElement('button');
           link.className = 'legacy-chat__fake-link';
@@ -307,15 +383,23 @@
       this.scrollToLatest();
     }
 
-    appendFeedback() {
+    renderFeedback(entry) {
       const row = document.createElement('div');
       row.className = 'legacy-chat__feedback';
+
+      if (entry.answered) {
+        row.textContent = FEEDBACK_THANKS;
+        row.classList.add('is-answered');
+        this.log.appendChild(row);
+        this.scrollToLatest();
+        return;
+      }
 
       const label = document.createElement('span');
       label.textContent = FEEDBACK_PROMPT;
       row.appendChild(label);
 
-      ['👍', '👎'].forEach(glyph => {
+      ['👍', '👎'].forEach((glyph) => {
         const vote = document.createElement('button');
         vote.type = 'button';
         vote.className = 'legacy-chat__vote';
@@ -323,6 +407,8 @@
         vote.addEventListener('click', () => {
           row.textContent = FEEDBACK_THANKS;
           row.classList.add('is-answered');
+          entry.answered = true;
+          this.persistSession();
         });
         row.appendChild(vote);
       });
