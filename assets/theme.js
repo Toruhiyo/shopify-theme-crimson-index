@@ -5,10 +5,9 @@
 (function () {
   'use strict';
 
-  if (location.search.indexOf('mock_competitor_chatbot=true') !== -1) {
-    document.documentElement.classList.add('is-mock-competitor-chatbot');
-    document.body.classList.add('is-mock-competitor-chatbot');
-  }
+  const MOCK_COMPETITOR_CHATBOT = new URLSearchParams(location.search).get('mock_competitor_chatbot') === 'true';
+  document.documentElement.classList.toggle('is-mock-competitor-chatbot', MOCK_COMPETITOR_CHATBOT);
+  document.body.classList.toggle('is-mock-competitor-chatbot', MOCK_COMPETITOR_CHATBOT);
 
   /* --- Cart Lock (prevents concurrent cart API mutations) --- */
   const cartLock = {
@@ -2106,7 +2105,7 @@
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => {
       new HeroSlideshow(el);
-      new HeroCopyReveal(el);
+      if (MOCK_COMPETITOR_CHATBOT) new HeroCopyReveal(el);
     });
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();

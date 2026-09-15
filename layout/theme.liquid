@@ -108,9 +108,10 @@
 
   <script>
     document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-    if (location.search.indexOf('mock_competitor_chatbot=true') !== -1) {
-      document.documentElement.classList.add('is-mock-competitor-chatbot');
-    }
+    document.documentElement.classList.toggle(
+      'is-mock-competitor-chatbot',
+      new URLSearchParams(location.search).get('mock_competitor_chatbot') === 'true'
+    );
     window.Shopify = window.Shopify || {};
     window.Shopify.money_format = {{ shop.money_format | json }};
   </script>

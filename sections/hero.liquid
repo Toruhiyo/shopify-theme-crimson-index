@@ -46,16 +46,8 @@
   endif
 -%}
 
-{%- if mock_chat -%}
-  <script>
-    document.documentElement.classList.add('is-mock-competitor-chatbot');
-    document.body.classList.add('is-mock-competitor-chatbot');
-    document.querySelector('[data-hero-slideshow]')?.classList.add('hero--mock');
-  </script>
-{%- endif -%}
-
 <section
-  class="hero {{ height_class }}{% if mock_chat %} hero--mock{% endif %}"
+  class="hero {{ height_class }}"
   data-hero-slideshow
   data-autoplay-interval="{{ interval }}"
   {{ section.shopify_attributes }}
