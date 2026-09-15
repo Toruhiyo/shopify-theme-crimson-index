@@ -19,7 +19,7 @@
 
   const SCRIPTED_ANSWERS = [
     {
-      pattern: /4k|1,?500/i,
+      keywords: ['laptop', 'editing', 'light'],
       bubbles: [
         {
           text: 'You can browse all laptops in Computers & Peripherals. Try the filters for price and weight.',
@@ -28,7 +28,7 @@
       ]
     },
     {
-      pattern: /battery/i,
+      keywords: ['battery'],
       bubbles: [
         {
           text: 'Battery life varies by model. Check the Specifications tab on each product page, or I can open a support ticket.',
@@ -52,6 +52,11 @@
 
   const FEEDBACK_PROMPT = 'Did that answer your question?';
   const FEEDBACK_THANKS = 'Thank you for your feedback! It helps us improve our service.';
+
+  function matchesKeywords(text, keywords) {
+    const haystack = text.toLowerCase();
+    return keywords.some((keyword) => haystack.includes(keyword.toLowerCase()));
+  }
 
   function mockChatRequested() {
     return new URLSearchParams(window.location.search).get(PROMO_VIDEO_PARAM) === PROMO_VIDEO_MOCK;
@@ -190,7 +195,7 @@
     }
 
     answerFor(text) {
-      const match = SCRIPTED_ANSWERS.find(answer => answer.pattern.test(text));
+      const match = SCRIPTED_ANSWERS.find((answer) => matchesKeywords(text, answer.keywords));
       if (match) return match.bubbles;
 
       const fallback = FALLBACKS[this.fallbackIndex % FALLBACKS.length];
