@@ -2274,12 +2274,13 @@ body.is-mock-competitor-chatbot .hero__media video {
   column-gap: 0.4em;
   row-gap: 0.2em;
   color: #6b6560;
+  font-size: 0.9rem;
 }
 
 .hero__bizmis-mark {
   display: block;
-  height: 2.55em;
-  width: calc(2.55em * 1948 / 640);
+  height: 2.68rem;
+  width: calc(2.68rem * 1948 / 640);
   background-color: var(--bizmis-orange);
   -webkit-mask-position: center;
   mask-position: center;
