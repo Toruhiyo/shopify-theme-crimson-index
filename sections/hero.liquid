@@ -57,7 +57,7 @@
     assign hero_title = 'Shoppers browse.'
     assign hero_cta = 'Nobody sells.'
   elsif promo_video
-    assign hero_eyebrow = 'AGENTIC SALES ON, WITH'
+    assign hero_eyebrow = 'AGENTIC SALES, WITH'
     assign hero_title = 'Your store salesperson.'
     assign hero_cta = 'Built to sell.'
     assign hero_redefine = true
@@ -119,10 +119,9 @@
     <div class="hero__content">
       {%- if hero_eyebrow_mark -%}
         {%- assign bizmis_mark_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
-        <p class="hero__subtitle hero__subtitle--mark" aria-label="AGENTIC SALES ON, WITH BIZMIS">
+        <p class="hero__subtitle hero__subtitle--mark" aria-label="AGENTIC SALES, WITH BIZMIS">
           <span class="hero__word">AGENTIC</span>
-          <span class="hero__word">SALES</span>
-          <span class="hero__word">ON,</span>
+          <span class="hero__word">SALES,</span>
           <span class="hero__word">WITH</span>
           <span class="hero__word">
             <span

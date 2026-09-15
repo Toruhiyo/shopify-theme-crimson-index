@@ -134,9 +134,9 @@
 
     const markUrl = hero.getAttribute('data-bizmis-mark-url');
     subtitle.classList.add('hero__subtitle--mark');
-    subtitle.setAttribute('aria-label', 'AGENTIC SALES ON, WITH BIZMIS');
+    subtitle.setAttribute('aria-label', 'AGENTIC SALES, WITH BIZMIS');
     subtitle.replaceChildren();
-    ['AGENTIC', 'SALES', 'ON,', 'WITH'].forEach((word) => {
+    ['AGENTIC', 'SALES,', 'WITH'].forEach((word) => {
       const span = document.createElement('span');
       span.className = 'hero__word';
       span.textContent = word;
