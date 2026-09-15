@@ -2285,7 +2285,7 @@ textarea.input {
 }
 
 .hero__content.is-revealing .hero__word {
-  animation: hero-word-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: hero-word-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes hero-word-in {
@@ -2316,7 +2316,7 @@ textarea.input {
 
 .hero__content.is-hero-animated .hero__title-cta.is-underlined::after {
   transform: scaleX(1);
-  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hero__content.is-hero-animated .hero__title-cta:hover::after {

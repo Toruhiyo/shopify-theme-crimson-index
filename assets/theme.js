@@ -1802,8 +1802,8 @@
      Word-by-word fade on the shared overlay: eyebrow, then headline, then
      the red line. The underline paints after the last red-line word lands.
      Starts once the page loader is out of the way. */
-  const HERO_WORD_STAGGER_MS = 85;
-  const HERO_LINE_PAUSE_MS = 260;
+  const HERO_WORD_STAGGER_MS = 150;
+  const HERO_LINE_PAUSE_MS = 420;
 
   class HeroCopyReveal {
     constructor(slideshow) {
@@ -1832,14 +1832,14 @@
         return;
       }
 
-      let delay = 80;
+      let delay = 140;
       lines.forEach((line, index) => {
         const count = this.wrapWords(line);
         line.querySelectorAll('.hero__word').forEach((word, wordIndex) => {
           word.style.animationDelay = `${delay + wordIndex * HERO_WORD_STAGGER_MS}ms`;
         });
         const lineEnd = delay + Math.max(count - 1, 0) * HERO_WORD_STAGGER_MS;
-        if (index === lines.length - 1) this.underlineAt = lineEnd + 160;
+        if (index === lines.length - 1) this.underlineAt = lineEnd + 280;
         delay = lineEnd + HERO_WORD_STAGGER_MS + HERO_LINE_PAUSE_MS;
       });
 
