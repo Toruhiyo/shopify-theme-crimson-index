@@ -8,10 +8,6 @@
     <div class="pdp" data-variant-selector>
       <div class="pdp__topbar">
         <div class="pdp__identity">
-          {%- if product.vendor != blank -%}
-            <p class="pdp__vendor">{{ product.vendor }}</p>
-          {%- endif -%}
-
           <h1 class="pdp__title">{{ product.title }}</h1>
 
           {%- if product.tags contains 'subcategory-certified-refurbished' -%}

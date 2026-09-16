@@ -4772,13 +4772,6 @@ body.is-promo-greyscale .hero__media video {
   }
 }
 
-.pdp__vendor {
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: var(--color-muted-fg);
-  margin-bottom: 0.25rem;
-}
-
 .pdp__title {
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 600;
