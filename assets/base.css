@@ -28,9 +28,6 @@
   --heading-scale: 1;
   --type-scale: 1;
   --page-width: 1280px;
-  /* Resting desktop widget (card + composer) plus a small gap. Used so the
-     PDP buy buttons stay clear of Teo on laptop widths (BIZ-399). */
-  --bizmis-widget-resting-width: 19rem;
   --section-spacing: 64px;
   --radius-button: 10px;
   --radius-card: 16px;
@@ -4257,16 +4254,56 @@ body.is-promo-greyscale .hero__media video {
 
 @media (min-width: 990px) {
   .pdp {
-    /* Only consume space the widget actually overlaps: viewport margin
-       outside --page-width already clears a 19rem corner on wide screens. */
-    --pdp-widget-clearance: max(
-      0px,
-      var(--bizmis-widget-resting-width) - 2.5rem - max(0px, (100vw - var(--page-width)) / 2)
-    );
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--pdp-widget-clearance);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1.75rem;
     align-items: start;
   }
+}
+
+.pdp__topbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 990px) {
+  .pdp__topbar {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+}
+
+.pdp__identity {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.pdp__identity .pdp__title {
+  margin-bottom: 0.375rem;
+}
+
+.pdp__identity .pdp__rating {
+  margin-bottom: 0;
+}
+
+.pdp__purchase {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  flex-shrink: 0;
+}
+
+.pdp__purchase .pdp__price-row {
+  margin-bottom: 0;
+}
+
+.pdp__purchase .btn {
+  white-space: nowrap;
+  padding: 0.7rem 1.35rem;
 }
 
 .pdp__gallery {

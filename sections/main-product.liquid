@@ -5,7 +5,93 @@
 
 <section class="section-spacing section-spacing--pdp">
   <div class="page-width">
-    <div class="pdp">
+    <div class="pdp" data-variant-selector>
+      <div class="pdp__topbar">
+        <div class="pdp__identity">
+          {%- if product.vendor != blank -%}
+            <p class="pdp__vendor">{{ product.vendor }}</p>
+          {%- endif -%}
+
+          <h1 class="pdp__title">{{ product.title }}</h1>
+
+          {%- if product.tags contains 'subcategory-certified-refurbished' -%}
+            <div class="pdp__condition-badge pdp__condition-badge--refurbished">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+              {{ 'products.badges.refurbished' | t }}
+            </div>
+          {%- endif -%}
+          {%- if product.tags contains 'subcategory-open-box' -%}
+            <div class="pdp__condition-badge pdp__condition-badge--open-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              {{ 'products.badges.open_box' | t }}
+            </div>
+          {%- endif -%}
+
+          <div class="pdp__rating">
+            <div class="rating">
+              {%- for i in (1..5) -%}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {%- endfor -%}
+            </div>
+            <span class="pdp__rating-count">{{ 'products.reviews_count' | t: count: 47 }}</span>
+          </div>
+        </div>
+
+        <form method="post" action="/cart/add" id="product-form" class="pdp__purchase">
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input>
+          <script data-product-variants type="application/json">
+            [
+              {%- for variant in product.variants -%}
+                {
+                  "id": {{ variant.id }},
+                  "available": {{ variant.available }},
+                  "price": {{ variant.price }},
+                  "compare_at_price": {{ variant.compare_at_price | default: 'null' }},
+                  "price_formatted": {{ variant.price | money | json }},
+                  "compare_at_price_formatted": {{ variant.compare_at_price | money | json }},
+                  "featured_image": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 | json }}{% else %}null{% endif %},
+                  "options": {{ variant.options | json }}
+                }{% unless forloop.last %},{% endunless %}
+              {%- endfor -%}
+            ]
+          </script>
+
+          <div class="pdp__price-row">
+            <span class="pdp__price {% if current_variant.compare_at_price > current_variant.price %}pdp__price--sale{% endif %}" data-display-price>
+              {{ current_variant.price | money }}
+            </span>
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <s class="pdp__compare-price" data-strike-price>{{ current_variant.compare_at_price | money }}</s>
+              {%- assign savings = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price -%}
+              <span class="badge badge--sale" data-discount-badge>-{{ savings }}%</span>
+            {%- else -%}
+              <s class="pdp__compare-price" data-strike-price style="display:none;"></s>
+              <span class="badge badge--sale" data-discount-badge style="display:none;"></span>
+            {%- endif -%}
+          </div>
+
+          <div class="qty-selector">
+            <button type="button" data-qty-minus aria-label="{{ 'products.decrease_quantity' | t }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <input type="number" name="quantity" value="1" min="1" max="99" aria-label="{{ 'products.quantity' | t }}">
+            <button type="button" data-qty-plus aria-label="{{ 'products.increase_quantity' | t }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          {%- if current_variant.available -%}
+            <button type="submit" class="btn btn--primary" data-add-btn data-add-text="{{ 'products.add_to_cart' | t }}">
+              {{ 'products.add_to_cart' | t }}
+            </button>
+          {%- else -%}
+            <button type="button" class="btn btn--primary" disabled>
+              {{ 'products.sold_out' | t }}
+            </button>
+          {%- endif -%}
+        </form>
+      </div>
+
       {%- comment -%} Gallery {%- endcomment -%}
       <div class="pdp__gallery">
         <div class="pdp__gallery-main">
@@ -24,6 +110,7 @@
           <div class="pdp__gallery-thumbs">
             {%- for image in product.images -%}
               <button
+                type="button"
                 class="pdp__gallery-thumb {% if image == featured_image %}is-active{% endif %}"
                 data-image-url="{{ image | image_url: width: 1200 }}"
                 aria-label="{{ 'products.thumbnail' | t }} {{ forloop.index }}"
@@ -66,138 +153,41 @@
         {%- endif -%}
       </div>
 
-      {%- comment -%} Product Info (Sticky) {%- endcomment -%}
       <div class="pdp__info">
-        {%- if product.vendor != blank -%}
-          <p class="pdp__vendor">{{ product.vendor }}</p>
-        {%- endif -%}
-
-        <h1 class="pdp__title">{{ product.title }}</h1>
-
-        {%- if product.tags contains 'subcategory-certified-refurbished' -%}
-          <div class="pdp__condition-badge pdp__condition-badge--refurbished">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
-            {{ 'products.badges.refurbished' | t }}
-          </div>
-        {%- endif -%}
-        {%- if product.tags contains 'subcategory-open-box' -%}
-          <div class="pdp__condition-badge pdp__condition-badge--open-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-            {{ 'products.badges.open_box' | t }}
-          </div>
-        {%- endif -%}
-
-        {%- comment -%} Rating {%- endcomment -%}
-        <div class="pdp__rating">
-          <div class="rating">
-            {%- for i in (1..5) -%}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            {%- endfor -%}
-          </div>
-          <span class="pdp__rating-count">{{ 'products.reviews_count' | t: count: 47 }}</span>
-        </div>
-
-        {%- comment -%} Price {%- endcomment -%}
-        <div class="pdp__price-row">
-          <span class="pdp__price {% if current_variant.compare_at_price > current_variant.price %}pdp__price--sale{% endif %}" data-display-price>
-            {{ current_variant.price | money }}
-          </span>
-          {%- if current_variant.compare_at_price > current_variant.price -%}
-            <s class="pdp__compare-price" data-strike-price>{{ current_variant.compare_at_price | money }}</s>
-            {%- assign savings = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price -%}
-            <span class="badge badge--sale" data-discount-badge>-{{ savings }}%</span>
-          {%- else -%}
-            <s class="pdp__compare-price" data-strike-price style="display:none;"></s>
-            <span class="badge badge--sale" data-discount-badge style="display:none;"></span>
-          {%- endif -%}
-        </div>
-
-        {%- comment -%} Short Description {%- endcomment -%}
         {%- if product.description != blank -%}
           <div class="pdp__description">
             {{ product.description | truncatewords: 40 }}
           </div>
         {%- endif -%}
 
-        {%- comment -%} Variant Selector {%- endcomment -%}
-        <form method="post" action="/cart/add" id="product-form" data-variant-selector>
-          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input>
-          <script data-product-variants type="application/json">
-            [
-              {%- for variant in product.variants -%}
-                {
-                  "id": {{ variant.id }},
-                  "available": {{ variant.available }},
-                  "price": {{ variant.price }},
-                  "compare_at_price": {{ variant.compare_at_price | default: 'null' }},
-                  "price_formatted": {{ variant.price | money | json }},
-                  "compare_at_price_formatted": {{ variant.compare_at_price | money | json }},
-                  "featured_image": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 | json }}{% else %}null{% endif %},
-                  "options": {{ variant.options | json }}
-                }{% unless forloop.last %},{% endunless %}
-              {%- endfor -%}
-            ]
-          </script>
+        {% render 'product-links', product: product %}
 
-          {%- comment -%} Product links (separate products linked by configurable metafields) {%- endcomment -%}
-          {% render 'product-links', product: product %}
-
-          {%- unless product.has_only_default_variant -%}
-            {%- for option in product.options_with_values -%}
-              {%- if option.name == 'Color' -%}{%- continue -%}{%- endif -%}
-              <div class="pdp__variants mb-md">
-                <p class="pdp__variant-label">{{ option.name }}</p>
-                <div class="variant-pills">
-                  {%- for value in option.values -%}
-                    {%- liquid
-                      assign is_active = false
-                      if option.selected_value == value
-                        assign is_active = true
-                      endif
-                    -%}
-                    <button
-                      type="button"
-                      class="variant-pill {% if is_active %}is-active{% endif %}"
-                      data-option-name="{{ option.name }}"
-                      data-option-value="{{ value }}"
-                    >
-                      {{ value }}
-                    </button>
-                  {%- endfor -%}
-                </div>
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            {%- if option.name == 'Color' -%}{%- continue -%}{%- endif -%}
+            <div class="pdp__variants mb-md">
+              <p class="pdp__variant-label">{{ option.name }}</p>
+              <div class="variant-pills">
+                {%- for value in option.values -%}
+                  {%- liquid
+                    assign is_active = false
+                    if option.selected_value == value
+                      assign is_active = true
+                    endif
+                  -%}
+                  <button
+                    type="button"
+                    class="variant-pill {% if is_active %}is-active{% endif %}"
+                    data-option-name="{{ option.name }}"
+                    data-option-value="{{ value }}"
+                  >
+                    {{ value }}
+                  </button>
+                {%- endfor -%}
               </div>
-            {%- endfor -%}
-          {%- endunless -%}
-
-          {%- comment -%} Quantity {%- endcomment -%}
-          <div class="pdp__variants mb-md">
-            <p class="pdp__variant-label">{{ 'products.quantity' | t }}</p>
-            <div class="qty-selector">
-              <button type="button" data-qty-minus aria-label="{{ 'products.decrease_quantity' | t }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </button>
-              <input type="number" name="quantity" value="1" min="1" max="99" aria-label="{{ 'products.quantity' | t }}">
-              <button type="button" data-qty-plus aria-label="{{ 'products.increase_quantity' | t }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </button>
             </div>
-          </div>
-
-          {%- comment -%} CTAs {%- endcomment -%}
-          <div class="pdp__ctas">
-            {%- if current_variant.available -%}
-              <button type="submit" class="btn btn--primary btn--lg btn--full" data-add-btn>
-                {{ 'products.add_to_cart' | t }} &mdash; {{ current_variant.price | money }}
-              </button>
-            {%- else -%}
-              <button type="button" class="btn btn--primary btn--lg btn--full" disabled>
-                {{ 'products.sold_out' | t }}
-              </button>
-            {%- endif -%}
-            <a href="/checkout" class="btn btn--outline btn--lg btn--full">{{ 'products.buy_now' | t }}</a>
-          </div>
-        </form>
-
+          {%- endfor -%}
+        {%- endunless -%}
       </div>
     </div>
 

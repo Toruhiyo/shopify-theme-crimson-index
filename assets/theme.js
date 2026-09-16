@@ -1650,7 +1650,7 @@
       if (this.addBtn) {
         if (variant.available) {
           this.addBtn.disabled = false;
-          this.addBtn.innerHTML = `${this.addBtn.textContent.split('\u2014')[0].trim()} \u2014 ${displayPrice}`;
+          this.addBtn.textContent = this.addBtn.dataset.addText || 'Add to Cart';
         } else {
           this.addBtn.disabled = true;
           this.addBtn.textContent = 'Sold Out';
