@@ -310,8 +310,16 @@
       }
 
       await new Promise((resolve) => window.setTimeout(resolve, PROMO_COVER_HOLD_MS));
+      this.revealPage();
       this.node.classList.add('is-fading');
       window.setTimeout(() => this.finish(), PROMO_COVER_FADE_MS);
+    }
+
+    revealPage() {
+      this.node.classList.add('is-held');
+      document.documentElement.classList.remove('is-promo-cover');
+      document.documentElement.style.background = '';
+      document.body.style.background = '';
     }
 
     finish() {

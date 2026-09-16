@@ -142,6 +142,11 @@ html:not(.is-promo-cover):not(.is-promo-opening) body {
   background: var(--color-bg, #fff);
 }
 
+html.is-promo-cover body > *:not(.promo-cover) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .promo-opening {
   --promo-knob-x: 50%;
   --promo-knob-y: 45%;
@@ -455,7 +460,9 @@ html.is-promo-opening .promo-opening {
   pointer-events: none;
 }
 
-html.is-promo-cover .promo-cover {
+html.is-promo-cover .promo-cover,
+.promo-cover.is-held,
+.promo-cover.is-fading {
   display: flex;
 }
 
