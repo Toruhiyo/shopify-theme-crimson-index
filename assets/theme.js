@@ -189,11 +189,10 @@
 
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_FLIP_BURST_MS = 600;
-  const PROMO_FLIP_HOLD_MS = 300;
+  const PROMO_FLIP_HOLD_MS = 700;
   const PROMO_FLIP_RED_MS = 700;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
-  const PROMO_OPENING_LABEL_ON = 'AGENTIC SALES ON';
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -221,7 +220,6 @@
       this.root = root;
       this.toggle = root.querySelector('[data-promo-opening-toggle]');
       this.knob = root.querySelector('.promo-opening__knob');
-      this.label = root.querySelector('.promo-opening__label');
       this.flipping = false;
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
@@ -250,7 +248,6 @@
         this.toggle.setAttribute('aria-pressed', 'true');
         this.toggle.disabled = true;
       }
-      if (this.label) this.label.textContent = PROMO_OPENING_LABEL_ON;
 
       if (prefersReducedMotion()) {
         this.root.classList.add('is-on', 'is-red', 'is-reduced');
@@ -266,7 +263,12 @@
     burst() {
       this.pinKnobOrigin();
       this.root.classList.add('is-bursting');
-      window.setTimeout(() => this.shiftToRed(), PROMO_FLIP_BURST_MS + PROMO_FLIP_HOLD_MS);
+      window.setTimeout(() => this.hold(), PROMO_FLIP_BURST_MS);
+    }
+
+    hold() {
+      this.root.classList.add('is-holding');
+      window.setTimeout(() => this.shiftToRed(), PROMO_FLIP_HOLD_MS);
     }
 
     shiftToRed() {

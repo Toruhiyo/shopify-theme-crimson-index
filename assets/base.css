@@ -200,10 +200,10 @@ html.is-promo-opening .promo-opening {
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  transition: opacity 600ms linear;
+  transition: opacity 250ms linear;
 }
 
-.promo-opening.is-bursting .promo-opening__logo {
+.promo-opening.is-holding .promo-opening__logo {
   opacity: 1;
 }
 
@@ -228,8 +228,9 @@ html.is-promo-opening .promo-opening {
 }
 
 .promo-opening__toggle {
-  position: relative;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 28px;
   padding: 0;
   border: 0;
   background: none;
@@ -245,10 +246,57 @@ html.is-promo-opening .promo-opening {
   border-radius: 999px;
 }
 
+.promo-opening__choice {
+  position: relative;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.promo-opening__choice-layer {
+  display: block;
+  transition: opacity 200ms linear;
+}
+
+.promo-opening__choice-layer--muted,
+.promo-opening__choice-layer--hot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.promo-opening__choice-layer--dark {
+  color: #2f3640;
+}
+
+.promo-opening__choice-layer--muted,
+.promo-opening__choice-layer--idle {
+  color: #b9bec6;
+}
+
+.promo-opening__choice-layer--hot {
+  color: var(--bizmis-orange, #f9a353);
+}
+
+.promo-opening.is-on .promo-opening__choice--left .promo-opening__choice-layer--dark,
+.promo-opening.is-on .promo-opening__choice--right .promo-opening__choice-layer--idle {
+  opacity: 0;
+}
+
+.promo-opening.is-on .promo-opening__choice--left .promo-opening__choice-layer--muted,
+.promo-opening.is-on .promo-opening__choice--right .promo-opening__choice-layer--hot {
+  opacity: 1;
+}
+
 .promo-opening__switch {
   display: block;
   position: relative;
-  width: 140px;
+  flex: 0 0 auto;
+  width: 200px;
   height: 70px;
   border: 1px solid #d5d7db;
   border-radius: 999px;
@@ -270,7 +318,7 @@ html.is-promo-opening .promo-opening {
 }
 
 .promo-opening.is-on .promo-opening__knob {
-  transform: translate3d(70px, 0, 0);
+  transform: translate3d(130px, 0, 0);
 }
 
 .promo-opening__knob-on {
@@ -284,20 +332,6 @@ html.is-promo-opening .promo-opening {
 
 .promo-opening.is-on .promo-opening__knob-on {
   opacity: 1;
-}
-
-.promo-opening__label {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-top: 20px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #6b6560;
-  white-space: nowrap;
-  transform: translateX(-50%);
 }
 
 .promo-opening.is-reduced .promo-opening__fill--orange {
@@ -356,6 +390,7 @@ html.is-promo-cover .promo-cover {
   .promo-opening__toggle,
   .promo-opening__logo,
   .promo-opening__logo-layer--white,
+  .promo-opening__choice-layer,
   .promo-opening__knob,
   .promo-opening__knob-on,
   .promo-opening__store-logo,
