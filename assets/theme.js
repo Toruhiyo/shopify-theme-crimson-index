@@ -226,7 +226,9 @@
     }
 
     armAutoFlip() {
-      const autoMs = Number(promoSearchParams().get('auto'));
+      const raw = promoSearchParams().get('auto');
+      if (raw == null || raw === '') return;
+      const autoMs = Number(raw);
       if (!Number.isFinite(autoMs) || autoMs < 0) return;
       this.autoTimer = window.setTimeout(() => this.flip(), autoMs);
     }
