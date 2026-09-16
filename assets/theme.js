@@ -2534,10 +2534,14 @@
       new HeroSlideshow(el);
       heroReveal = new HeroCopyReveal(el);
     });
-    const opening = document.querySelector('[data-promo-opening]');
-    if (opening) new PromoOpening(opening);
-    const cover = document.querySelector('[data-promo-cover]');
-    if (cover) new PromoCover(cover, heroReveal).start();
+    if (promoVideo === 'opening') {
+      const opening = document.querySelector('[data-promo-opening]');
+      if (opening) new PromoOpening(opening);
+    }
+    if (hasPromoCover()) {
+      const cover = document.querySelector('[data-promo-cover]');
+      if (cover) new PromoCover(cover, heroReveal).start();
+    }
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
     initPromoBar();

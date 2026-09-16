@@ -122,6 +122,11 @@ html.is-promo-opening .os-viewport {
   overflow: hidden !important;
 }
 
+html.is-promo-opening .loader,
+html.is-promo-cover .loader {
+  display: none !important;
+}
+
 html.is-promo-opening body > *:not([data-promo-opening]) {
   visibility: hidden !important;
   pointer-events: none !important;
@@ -133,16 +138,20 @@ html.is-promo-cover body {
 }
 
 .promo-opening {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 100000;
-  display: flex;
   align-items: center;
   justify-content: center;
   background: #111;
   color: #fff;
   visibility: visible !important;
   pointer-events: auto !important;
+}
+
+html.is-promo-opening .promo-opening {
+  display: flex;
 }
 
 .promo-opening__fill {
@@ -299,11 +308,16 @@ html.is-promo-cover body {
 }
 
 .promo-cover {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 100000;
   background: var(--color-primary, #D1001A);
   pointer-events: none;
+}
+
+html.is-promo-cover .promo-cover {
+  display: block;
 }
 
 .promo-cover.is-fading {

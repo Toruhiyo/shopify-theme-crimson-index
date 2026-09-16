@@ -1,29 +1,36 @@
 <!doctype html>
 {%- liquid
-  assign promo_opening = false
-  assign promo_cover = false
-  if request.query_string contains 'promo_video=opening'
-    assign promo_opening = true
-  endif
-  if request.query_string contains 'promo_video=true'
-    unless request.query_string contains 'nocover=1'
-      assign promo_cover = true
-    endunless
-  endif
   assign promo_red = settings.color_primary | default: '#D1001A'
 -%}
-<html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}{% if promo_opening %} is-promo-opening{% endif %}{% if promo_cover %} is-promo-cover{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
+<html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
 <head>
   <meta charset="utf-8">
-  {%- if promo_opening -%}
-    <style>html.is-promo-opening{background:#111}</style>
-  {%- elsif promo_cover -%}
-    <style>html.is-promo-cover{background:{{ promo_red }}}</style>
-  {%- endif -%}
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var promoVideo = params.get('promo_video');
+      var root = document.documentElement;
+      root.className = root.className.replace('no-js', 'js');
+      root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
+      root.classList.toggle('is-promo-opening', promoVideo === 'opening');
+      root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1');
+    })();
+  </script>
+  <style>html.is-promo-opening{background:#111}html.is-promo-cover{background:{{ promo_red }}}</style>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0">
   {%- assign _bg_check = settings.color_background | remove: '#' | downcase | slice: 0 -%}
-  <meta name="theme-color" content="{% if promo_opening %}#111111{% elsif promo_cover %}{{ promo_red }}{% elsif _bg_check == '0' or _bg_check == '1' %}#FFFFFF{% else %}{{ settings.color_background }}{% endif %}">
+  <meta name="theme-color" content="{% if _bg_check == '0' or _bg_check == '1' %}#FFFFFF{% else %}{{ settings.color_background }}{% endif %}">
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var promoVideo = params.get('promo_video');
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (!meta) return;
+      if (promoVideo === 'opening') meta.content = '#111111';
+      else if (promoVideo === 'true' && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
+    })();
+  </script>
 
   <title>
     {{ page_title }}
@@ -125,20 +132,6 @@
   {% endstyle %}
 
   <script>
-    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-    (function () {
-      var params = new URLSearchParams(location.search);
-      var promoVideo = params.get('promo_video');
-      document.documentElement.classList.toggle(
-        'is-promo-greyscale',
-        promoVideo === 'mock' || promoVideo === 'unattended'
-      );
-      document.documentElement.classList.toggle('is-promo-opening', promoVideo === 'opening');
-      document.documentElement.classList.toggle(
-        'is-promo-cover',
-        promoVideo === 'true' && params.get('nocover') !== '1'
-      );
-    })();
     window.Shopify = window.Shopify || {};
     window.Shopify.money_format = {{ shop.money_format | json }};
   </script>
@@ -146,44 +139,38 @@
 
 <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %} {% render 'bizmis-top-banner', mode: 'class' %}{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" data-overlayscrollbars-initialize>
 
-  {%- if promo_opening -%}
-    {%- assign promo_logo_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
-    <div class="promo-opening" id="promo-opening" data-promo-opening role="dialog" aria-modal="true" aria-label="Bizmis intro">
-      <div class="promo-opening__fill promo-opening__fill--orange" aria-hidden="true"></div>
-      <div class="promo-opening__fill promo-opening__fill--red" aria-hidden="true"></div>
-      <div class="promo-opening__center">
-        <div class="promo-opening__logo" aria-hidden="true">
-          <span
-            class="promo-opening__logo-layer promo-opening__logo-layer--orange"
-            style="-webkit-mask-image: url('{{ promo_logo_url }}'); mask-image: url('{{ promo_logo_url }}');"
-          ></span>
-          <span
-            class="promo-opening__logo-layer promo-opening__logo-layer--white"
-            style="-webkit-mask-image: url('{{ promo_logo_url }}'); mask-image: url('{{ promo_logo_url }}');"
-          ></span>
-        </div>
-        <button type="button" class="promo-opening__toggle" data-promo-opening-toggle aria-pressed="false">
-          <span class="promo-opening__switch" aria-hidden="true">
-            <span class="promo-opening__knob">
-              <span class="promo-opening__knob-on"></span>
-            </span>
-          </span>
-          <span class="promo-opening__label">Agentic sales</span>
-        </button>
+  {%- assign promo_logo_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
+  <div class="promo-opening" id="promo-opening" data-promo-opening role="dialog" aria-modal="true" aria-label="Bizmis intro">
+    <div class="promo-opening__fill promo-opening__fill--orange" aria-hidden="true"></div>
+    <div class="promo-opening__fill promo-opening__fill--red" aria-hidden="true"></div>
+    <div class="promo-opening__center">
+      <div class="promo-opening__logo" aria-hidden="true">
+        <span
+          class="promo-opening__logo-layer promo-opening__logo-layer--orange"
+          style="-webkit-mask-image: url('{{ promo_logo_url }}'); mask-image: url('{{ promo_logo_url }}');"
+        ></span>
+        <span
+          class="promo-opening__logo-layer promo-opening__logo-layer--white"
+          style="-webkit-mask-image: url('{{ promo_logo_url }}'); mask-image: url('{{ promo_logo_url }}');"
+        ></span>
       </div>
+      <button type="button" class="promo-opening__toggle" data-promo-opening-toggle aria-pressed="false">
+        <span class="promo-opening__switch" aria-hidden="true">
+          <span class="promo-opening__knob">
+            <span class="promo-opening__knob-on"></span>
+          </span>
+        </span>
+        <span class="promo-opening__label">Agentic sales</span>
+      </button>
     </div>
-  {%- endif -%}
+  </div>
 
-  {%- if promo_cover -%}
-    <div class="promo-cover" id="promo-cover" data-promo-cover aria-hidden="true"></div>
-  {%- endif -%}
+  <div class="promo-cover" id="promo-cover" data-promo-cover aria-hidden="true"></div>
 
-  {%- unless promo_opening or promo_cover -%}
   <div class="loader" id="page-loader" aria-hidden="true">
     <img src="{{ 'logo-mono.png' | asset_url }}" alt="{{ shop.name }}" class="loader__logo" width="160" height="40">
   </div>
   <script>window.addEventListener('load',function(){var l=document.getElementById('page-loader');if(l){l.classList.add('is-hidden');l.addEventListener('transitionend',function(){l.remove()})}})</script>
-  {%- endunless -%}
 
   <a class="skip-link" href="#main-content">{{ 'accessibility.skip_to_content' | t }}</a>
 
