@@ -24,7 +24,7 @@
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
       root.classList.toggle('is-promo-opening', promoVideo === 'opening');
       root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1' && isHome);
-      if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '56px');
+      if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '28px');
     })();
   </script>
   <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:{{ promo_red }}}</style>

@@ -323,6 +323,8 @@
     dismiss() {
       this.node.remove();
       document.documentElement.classList.remove('is-promo-cover');
+      document.documentElement.style.background = '';
+      document.body.style.background = '';
     }
   }
 
@@ -2640,8 +2642,8 @@
   function initPromoBar() {
     const bar = document.querySelector('.promo-bar');
     if (!bar) {
-      document.documentElement.style.setProperty('--promo-height', '56px');
-      document.body.style.setProperty('--promo-height', '56px');
+      document.documentElement.style.setProperty('--promo-height', '28px');
+      document.body.style.setProperty('--promo-height', '28px');
       return;
     }
     const apply = () => document.body.style.setProperty('--promo-height', `${bar.offsetHeight}px`);

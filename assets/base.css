@@ -137,6 +137,11 @@ html.is-promo-cover body {
   background: var(--color-primary, #D1001A) !important;
 }
 
+html:not(.is-promo-cover):not(.is-promo-opening),
+html:not(.is-promo-cover):not(.is-promo-opening) body {
+  background: var(--color-bg, #fff);
+}
+
 .promo-opening {
   --promo-knob-x: 50%;
   --promo-knob-y: 45%;
@@ -2206,24 +2211,12 @@ textarea.input {
   --promo-height: 2.75rem;
 }
 
-/* Temporary: with the Bizmis top bar off, keep a 56px top inset. */
+/* Temporary: with the Bizmis top bar off, inset the whole homepage
+   frame 28px. Do not pad the body: that only drops the nav and leaks
+   the red cover through the gap. */
 html:not(:has(.has-promo-bar)),
 body:not(.has-promo-bar) {
-  --promo-height: 56px;
-}
-
-body:not(.has-promo-bar) {
-  padding-top: 56px;
-}
-
-body:not(.has-promo-bar) .header-section,
-body:not(.has-promo-bar) .header-section.is-pinned {
-  top: 56px;
-}
-
-body:not(.has-promo-bar).template-index .hero,
-body:not(.has-promo-bar).template-index .hero--large {
-  min-height: calc(100dvh - 56px);
+  --promo-height: 28px;
 }
 
 .announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {
@@ -2605,6 +2598,15 @@ body:not(.has-promo-bar).template-index .hero--large {
 .template-index .hero,
 .template-index .hero--large {
   min-height: 100dvh;
+}
+
+body:not(.has-promo-bar).template-index .hero-section {
+  margin-top: 28px;
+}
+
+body:not(.has-promo-bar).template-index .hero,
+body:not(.has-promo-bar).template-index .hero--large {
+  min-height: calc(100dvh - 28px);
 }
 
 /* Light scrim under the floating transparent header so the nav stays
