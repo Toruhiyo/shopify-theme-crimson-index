@@ -2212,9 +2212,18 @@ body:not(.has-promo-bar) {
   --promo-height: 28px;
 }
 
+body:not(.has-promo-bar) {
+  padding-top: 28px;
+}
+
 body:not(.has-promo-bar) .header-section,
 body:not(.has-promo-bar) .header-section.is-pinned {
   top: 28px;
+}
+
+body:not(.has-promo-bar).template-index .hero,
+body:not(.has-promo-bar).template-index .hero--large {
+  min-height: calc(100dvh - 28px);
 }
 
 .announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {
