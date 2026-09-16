@@ -2206,6 +2206,11 @@ textarea.input {
   --promo-height: 2.75rem;
 }
 
+/* Temporary: with the Bizmis top bar off, keep a 28px top inset. */
+body:not(.has-promo-bar) {
+  --promo-height: 28px;
+}
+
 .announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {
   display: none;
 }
