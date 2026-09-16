@@ -286,7 +286,9 @@
     }
 
     async start() {
-      await whenImageReady(document.querySelector('.hero__slide.is-active .hero__media img'));
+      const img = document.querySelector('.hero__slide.is-active .hero__media img');
+      if (img) img.loading = 'eager';
+      await whenImageReady(img);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
       if (prefersReducedMotion()) {
