@@ -187,6 +187,125 @@
     cta.textContent = 'Built to sell.';
   }
 
+  const PROMO_FLIP_KNOB_MS = 200;
+  const PROMO_FLIP_BURST_MS = 600;
+  const PROMO_FLIP_HOLD_MS = 300;
+  const PROMO_FLIP_RED_MS = 700;
+  const PROMO_COVER_FADE_MS = 500;
+  const PROMO_REDUCED_NAV_MS = 400;
+
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function promoSearchParams() {
+    return new URLSearchParams(window.location.search);
+  }
+
+  function hasPromoCover() {
+    return promoVideo === 'true' && promoSearchParams().get('nocover') !== '1';
+  }
+
+  function whenImageReady(img) {
+    if (!img) return Promise.resolve();
+    if (img.complete && img.naturalWidth) return Promise.resolve();
+    return new Promise((resolve) => {
+      img.addEventListener('load', resolve, { once: true });
+      img.addEventListener('error', resolve, { once: true });
+    });
+  }
+
+  class PromoOpening {
+    constructor(root) {
+      this.root = root;
+      this.toggle = root.querySelector('[data-promo-opening-toggle]');
+      this.knob = root.querySelector('.promo-opening__knob');
+      this.flipping = false;
+      this.toggle?.addEventListener('click', () => this.flip());
+      this.armAutoFlip();
+    }
+
+    armAutoFlip() {
+      const autoMs = Number(promoSearchParams().get('auto'));
+      if (!Number.isFinite(autoMs) || autoMs < 0) return;
+      this.autoTimer = window.setTimeout(() => this.flip(), autoMs);
+    }
+
+    pinKnobOrigin() {
+      if (!this.knob) return;
+      const rect = this.knob.getBoundingClientRect();
+      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
+      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+    }
+
+    flip() {
+      if (this.flipping) return;
+      this.flipping = true;
+      window.clearTimeout(this.autoTimer);
+      if (this.toggle) {
+        this.toggle.setAttribute('aria-pressed', 'true');
+        this.toggle.disabled = true;
+      }
+
+      if (prefersReducedMotion()) {
+        this.root.classList.add('is-on', 'is-red', 'is-reduced');
+        window.setTimeout(() => this.navigate(), PROMO_REDUCED_NAV_MS);
+        return;
+      }
+
+      this.pinKnobOrigin();
+      this.root.classList.add('is-on');
+      window.setTimeout(() => this.burst(), PROMO_FLIP_KNOB_MS);
+    }
+
+    burst() {
+      this.pinKnobOrigin();
+      this.root.classList.add('is-bursting');
+      window.setTimeout(() => this.shiftToRed(), PROMO_FLIP_BURST_MS + PROMO_FLIP_HOLD_MS);
+    }
+
+    shiftToRed() {
+      this.root.classList.add('is-red');
+      window.setTimeout(() => this.navigate(), PROMO_FLIP_RED_MS);
+    }
+
+    navigate() {
+      const url = new URL(window.location.href);
+      url.searchParams.set(PROMO_VIDEO_PARAM, 'true');
+      url.searchParams.delete('auto');
+      window.location.replace(url.toString());
+    }
+  }
+
+  class PromoCover {
+    constructor(node, heroReveal) {
+      this.node = node;
+      this.heroReveal = heroReveal;
+    }
+
+    async start() {
+      await whenImageReady(document.querySelector('.hero__slide.is-active .hero__media img'));
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      if (prefersReducedMotion()) {
+        this.dismiss();
+        this.heroReveal?.begin();
+        return;
+      }
+
+      this.node.classList.add('is-fading');
+      window.setTimeout(() => {
+        this.dismiss();
+        this.heroReveal?.begin();
+      }, PROMO_COVER_FADE_MS);
+    }
+
+    dismiss() {
+      this.node.remove();
+      document.documentElement.classList.remove('is-promo-cover');
+    }
+  }
+
   /* --- Cart Lock (prevents concurrent cart API mutations) --- */
   const cartLock = {
     _locked: false,
@@ -2070,7 +2189,7 @@
 
       this.root.classList.add('is-hero-animated');
       requestAnimationFrame(() => this.groupCtaLines());
-      this.startWhenVisible();
+      this.armStart();
     }
 
     wrapWords(el) {
@@ -2182,29 +2301,31 @@
       }, morphAt + HERO_REDEFINE_MORPH_MS);
     }
 
-    startWhenVisible() {
-      const start = () => {
-        if (this.started) return;
-        this.started = true;
-        this.root.classList.add('is-revealing');
-        if (this.cta) {
-          window.setTimeout(() => this.playCtaUnderline(), this.underlineAt);
-        }
-        if (this.redefineAt) {
-          window.setTimeout(() => this.playRedefine(this.titleLine), this.redefineAt);
-        }
-      };
+    begin() {
+      if (this.started) return;
+      this.started = true;
+      this.root.classList.add('is-revealing');
+      if (this.cta) {
+        window.setTimeout(() => this.playCtaUnderline(), this.underlineAt);
+      }
+      if (this.redefineAt) {
+        window.setTimeout(() => this.playRedefine(this.titleLine), this.redefineAt);
+      }
+    }
+
+    armStart() {
+      if (promoVideo === 'opening' || hasPromoCover()) return;
 
       const loader = document.getElementById('page-loader');
       if (!loader || loader.classList.contains('is-hidden')) {
-        start();
+        this.begin();
         return;
       }
 
       loader.addEventListener('transitionend', (event) => {
-        if (event.target === loader) start();
+        if (event.target === loader) this.begin();
       });
-      window.addEventListener('load', () => window.setTimeout(start, 520), { once: true });
+      window.addEventListener('load', () => window.setTimeout(() => this.begin(), 520), { once: true });
     }
   }
 
@@ -2408,10 +2529,15 @@
     document.querySelectorAll('.qty-selector:not(.cart-drawer .qty-selector):not(.main-cart-section .qty-selector)').forEach(el => new QuantitySelector(el));
     document.querySelectorAll('.carousel').forEach(el => new Carousel(el));
     applyPromoVideoHero();
+    let heroReveal = null;
     document.querySelectorAll('[data-hero-slideshow]').forEach(el => {
       new HeroSlideshow(el);
-      new HeroCopyReveal(el);
+      heroReveal = new HeroCopyReveal(el);
     });
+    const opening = document.querySelector('[data-promo-opening]');
+    if (opening) new PromoOpening(opening);
+    const cover = document.querySelector('[data-promo-cover]');
+    if (cover) new PromoCover(cover, heroReveal).start();
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
     initPromoBar();
