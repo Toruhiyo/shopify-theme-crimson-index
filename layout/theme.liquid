@@ -6,6 +6,11 @@
     assign promo_home = true
   endif
 -%}
+{%- capture promo_bar_class -%}{% render 'bizmis-top-banner', mode: 'class' %}{%- endcapture -%}
+{%- assign has_promo_bar = false -%}
+{%- if promo_bar_class contains 'has-promo-bar' -%}
+  {%- assign has_promo_bar = true -%}
+{%- endif -%}
 <html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
 <head>
   <meta charset="utf-8">
@@ -19,6 +24,7 @@
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
       root.classList.toggle('is-promo-opening', promoVideo === 'opening');
       root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1' && isHome);
+      if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '28px');
     })();
   </script>
   <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:{{ promo_red }}}</style>

@@ -2207,8 +2207,14 @@ textarea.input {
 }
 
 /* Temporary: with the Bizmis top bar off, keep a 28px top inset. */
+html:not(:has(.has-promo-bar)),
 body:not(.has-promo-bar) {
   --promo-height: 28px;
+}
+
+body:not(.has-promo-bar) .header-section,
+body:not(.has-promo-bar) .header-section.is-pinned {
+  top: 28px;
 }
 
 .announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {

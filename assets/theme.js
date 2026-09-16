@@ -2639,7 +2639,11 @@
      hero fills exactly the remaining viewport). Handles wrapping on small screens. */
   function initPromoBar() {
     const bar = document.querySelector('.promo-bar');
-    if (!bar) return;
+    if (!bar) {
+      document.documentElement.style.setProperty('--promo-height', '28px');
+      document.body.style.setProperty('--promo-height', '28px');
+      return;
+    }
     const apply = () => document.body.style.setProperty('--promo-height', `${bar.offsetHeight}px`);
     apply();
     window.addEventListener('resize', apply, { passive: true });
