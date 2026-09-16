@@ -181,6 +181,10 @@ html.is-promo-opening .promo-opening {
   transform: scale(1);
 }
 
+.promo-opening.is-holding .promo-opening__fill--orange {
+  background: var(--bizmis-orange, #f9a353);
+}
+
 .promo-opening__radiance {
   position: absolute;
   left: var(--promo-knob-x);
@@ -265,18 +269,6 @@ html.is-promo-opening .promo-opening {
   transition: opacity 250ms linear;
 }
 
-.promo-opening__logo::before {
-  content: '';
-  position: absolute;
-  inset: -55%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.72) 0%,
-    rgba(255, 255, 255, 0.22) 38%,
-    rgba(255, 255, 255, 0) 68%
-  );
-}
-
 .promo-opening.is-holding .promo-opening__logo {
   opacity: 1;
 }
@@ -299,13 +291,6 @@ html.is-promo-opening .promo-opening {
 
 .promo-opening__logo-layer--white {
   background-color: #fff;
-}
-
-.promo-opening__logo-layer--glow {
-  inset: -3%;
-  background-color: #fff;
-  opacity: 0.55;
-  transform: scale(1.08);
 }
 
 .promo-opening__toggle {
