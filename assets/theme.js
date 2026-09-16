@@ -2586,6 +2586,20 @@
       this.timer = window.setTimeout(() => this.type(index + 1), PROMO_TYPE_CHAR_MS);
     }
 
+    followCaret() {
+      const input = this.input;
+      if (!input) return;
+      const len = input.value.length;
+      input.focus({ preventScroll: true });
+      try {
+        input.setSelectionRange(len, len);
+      } catch {
+        /* some input types reject selection */
+      }
+      input.scrollLeft = input.scrollWidth;
+      input.scrollTop = input.scrollHeight;
+    }
+
     setValue(value) {
       const proto = this.input.tagName === 'TEXTAREA'
         ? HTMLTextAreaElement.prototype
@@ -2593,6 +2607,11 @@
       const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
       setter.call(this.input, value);
       this.input.dispatchEvent(new Event('input', { bubbles: true }));
+      this.followCaret();
+      requestAnimationFrame(() => {
+        this.followCaret();
+        requestAnimationFrame(() => this.followCaret());
+      });
     }
   }
 
