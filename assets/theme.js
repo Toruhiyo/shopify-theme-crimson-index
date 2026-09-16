@@ -193,6 +193,7 @@
   const PROMO_FLIP_RED_MS = 700;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
+  const PROMO_OPENING_LABEL_ON = 'AGENTIC SALES ON';
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -219,8 +220,8 @@
     constructor(root) {
       this.root = root;
       this.toggle = root.querySelector('[data-promo-opening-toggle]');
-      this.label = root.querySelector('[data-promo-opening-label]');
       this.knob = root.querySelector('.promo-opening__knob');
+      this.label = root.querySelector('.promo-opening__label');
       this.flipping = false;
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
@@ -249,7 +250,7 @@
         this.toggle.setAttribute('aria-pressed', 'true');
         this.toggle.disabled = true;
       }
-      if (this.label) this.label.textContent = 'AGENTIC SALES ON';
+      if (this.label) this.label.textContent = PROMO_OPENING_LABEL_ON;
 
       if (prefersReducedMotion()) {
         this.root.classList.add('is-on', 'is-red', 'is-reduced');

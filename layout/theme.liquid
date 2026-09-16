@@ -136,6 +136,7 @@
 
 <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% if settings.bizmis_demo_enabled %} bizmis-demo{% endif %} {% render 'bizmis-top-banner', mode: 'class' %}{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" data-overlayscrollbars-initialize>
 
+  {%- assign promo_logo_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
   <div class="promo-opening" id="promo-opening" data-promo-opening role="dialog" aria-modal="true" aria-label="Bizmis intro">
     <div class="promo-opening__fill promo-opening__fill--orange" aria-hidden="true"></div>
     <div class="promo-opening__fill promo-opening__fill--red" aria-hidden="true"></div>
@@ -146,8 +147,14 @@
             <span class="promo-opening__knob-on"></span>
           </span>
         </span>
-        <span class="promo-opening__label" data-promo-opening-label>AGENTIC SALES</span>
+        <span class="promo-opening__label">AGENTIC SALES</span>
       </button>
+    </div>
+    <div class="promo-opening__logo" aria-hidden="true">
+      <span
+        class="promo-opening__logo-layer promo-opening__logo-layer--white"
+        style="-webkit-mask-image: url('{{ promo_logo_url }}'); mask-image: url('{{ promo_logo_url }}');"
+      ></span>
     </div>
     <div class="promo-opening__store-logo" aria-hidden="true">
       <img src="{{ 'logo-mono.png' | asset_url }}" alt="" class="loader__logo" width="160" height="40">
