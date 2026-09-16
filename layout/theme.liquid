@@ -16,7 +16,7 @@
       root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1');
     })();
   </script>
-  <style>html.is-promo-opening{background:#111}html.is-promo-cover{background:{{ promo_red }}}</style>
+  <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:{{ promo_red }}}</style>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0">
   {%- assign _bg_check = settings.color_background | remove: '#' | downcase | slice: 0 -%}
@@ -27,7 +27,7 @@
       var promoVideo = params.get('promo_video');
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
-      if (promoVideo === 'opening') meta.content = '#111111';
+      if (promoVideo === 'opening') meta.content = '#ffffff';
       else if (promoVideo === 'true' && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
     })();
   </script>
