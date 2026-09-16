@@ -134,7 +134,7 @@ html.is-promo-opening body > *:not([data-promo-opening]) {
 
 html.is-promo-cover,
 html.is-promo-cover body {
-  background: var(--color-primary, #D1001A) !important;
+  background: var(--color-bg, #fff) !important;
 }
 
 .promo-opening {
@@ -165,7 +165,7 @@ html.is-promo-opening .promo-opening {
 }
 
 .promo-opening__fill--red {
-  background: var(--color-primary, #D1001A);
+  background: var(--color-bg, #fff);
   opacity: 0;
   transition: clip-path 600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms linear;
 }
@@ -313,17 +313,36 @@ html.is-promo-opening .promo-opening {
   opacity: 0;
 }
 
+.promo-opening__store-logo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms linear;
+}
+
+.promo-opening.is-red .promo-opening__store-logo,
+.promo-opening.is-reduced .promo-opening__store-logo {
+  opacity: 1;
+}
+
 .promo-cover {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 100000;
-  background: var(--color-primary, #D1001A);
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg, #fff);
   pointer-events: none;
 }
 
 html.is-promo-cover .promo-cover {
-  display: block;
+  display: flex;
 }
 
 .promo-cover.is-fading {
@@ -339,6 +358,7 @@ html.is-promo-cover .promo-cover {
   .promo-opening__logo-layer--white,
   .promo-opening__knob,
   .promo-opening__knob-on,
+  .promo-opening__store-logo,
   .promo-cover {
     transition: none !important;
   }
