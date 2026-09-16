@@ -195,8 +195,8 @@
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
   const PROMO_TYPE_QUERY = 'I want a portable laptop with long battery life for coding.';
-  const PROMO_TYPE_AFTER_MS = 3000;
-  const PROMO_TYPE_CHAR_MS = 22;
+  const PROMO_TYPE_AFTER_MS = 8000;
+  const PROMO_TYPE_CHAR_MS = 55;
   const PROMO_TYPE_FIND_MS = 15000;
 
   function prefersReducedMotion() {
