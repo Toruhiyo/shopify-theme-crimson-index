@@ -1,6 +1,10 @@
 <!doctype html>
 {%- liquid
   assign promo_red = settings.color_primary | default: '#D1001A'
+  assign promo_home = false
+  if template.name == 'index'
+    assign promo_home = true
+  endif
 -%}
 <html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
 <head>
@@ -9,11 +13,12 @@
     (function () {
       var params = new URLSearchParams(location.search);
       var promoVideo = params.get('promo_video');
+      var isHome = {{ promo_home | json }};
       var root = document.documentElement;
       root.className = root.className.replace('no-js', 'js');
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
       root.classList.toggle('is-promo-opening', promoVideo === 'opening');
-      root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1');
+      root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1' && isHome);
     })();
   </script>
   <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:{{ promo_red }}}</style>
@@ -25,10 +30,11 @@
     (function () {
       var params = new URLSearchParams(location.search);
       var promoVideo = params.get('promo_video');
+      var isHome = {{ promo_home | json }};
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
       if (promoVideo === 'opening') meta.content = '#ffffff';
-      else if (promoVideo === 'true' && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
+      else if (promoVideo === 'true' && params.get('nocover') !== '1' && isHome) meta.content = {{ promo_red | json }};
     })();
   </script>
 

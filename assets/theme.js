@@ -208,7 +208,9 @@
   }
 
   function hasPromoCover() {
-    return promoVideo === 'true' && promoSearchParams().get('nocover') !== '1';
+    return promoVideo === 'true'
+      && document.body.classList.contains('template-index')
+      && promoSearchParams().get('nocover') !== '1';
   }
 
   function whenImageReady(img) {
