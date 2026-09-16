@@ -138,6 +138,8 @@ html.is-promo-cover body {
 }
 
 .promo-opening {
+  --promo-knob-x: 50%;
+  --promo-knob-y: 45%;
   display: none;
   position: fixed;
   inset: 0;
@@ -152,26 +154,122 @@ html.is-promo-opening .promo-opening {
   display: block;
 }
 
-.promo-opening__fill {
+.promo-opening__fill--orange {
   position: absolute;
-  inset: 0;
-  clip-path: circle(0px at var(--promo-knob-x, 50%) var(--promo-knob-y, 50%));
+  left: var(--promo-knob-x);
+  top: var(--promo-knob-y);
+  width: 280vmax;
+  height: 280vmax;
+  margin: -140vmax 0 0 -140vmax;
+  border-radius: 50%;
   pointer-events: none;
-  transition: clip-path 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: radial-gradient(
+    circle,
+    #ffd19a 0%,
+    #ffb56a 12%,
+    var(--bizmis-orange, #f9a353) 28%,
+    var(--bizmis-orange, #f9a353) 52%,
+    rgba(249, 163, 83, 0.55) 70%,
+    rgba(249, 163, 83, 0) 80%
+  );
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.promo-opening__fill--orange {
-  background: var(--bizmis-orange, #f9a353);
+.promo-opening.is-bursting .promo-opening__fill--orange {
+  transform: scale(1);
+}
+
+.promo-opening__radiance {
+  position: absolute;
+  left: var(--promo-knob-x);
+  top: var(--promo-knob-y);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.promo-opening__ray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 75vmax;
+  margin-left: -1.5px;
+  transform-origin: 50% 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.28) 22%,
+    rgba(255, 255, 255, 0) 68%
+  );
+  opacity: 0;
+  transform: rotate(calc(var(--ray) * 30deg)) scaleY(0);
+}
+
+.promo-opening.is-bursting .promo-opening__ray {
+  animation: promo-ray 560ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes promo-ray {
+  0% {
+    opacity: 0.95;
+    transform: rotate(calc(var(--ray) * 30deg)) scaleY(0.04);
+  }
+  35% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--ray) * 30deg)) scaleY(1);
+  }
+}
+
+.promo-opening__wave {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  transform: scale(0.2);
+}
+
+.promo-opening.is-bursting .promo-opening__wave {
+  animation: promo-wave 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.promo-opening.is-bursting .promo-opening__wave:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.promo-opening.is-bursting .promo-opening__wave:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+@keyframes promo-wave {
+  0% {
+    opacity: 0.75;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(36);
+  }
 }
 
 .promo-opening__fill--red {
+  position: absolute;
+  inset: 0;
   background: var(--color-bg, #fff);
   opacity: 0;
-  transition: clip-path 600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms linear;
-}
-
-.promo-opening.is-bursting .promo-opening__fill {
-  clip-path: circle(150vmax at var(--promo-knob-x, 50%) var(--promo-knob-y, 50%));
+  pointer-events: none;
+  transition: opacity 700ms linear;
 }
 
 .promo-opening.is-red .promo-opening__fill--red {
@@ -334,13 +432,13 @@ html.is-promo-opening .promo-opening {
   opacity: 1;
 }
 
-.promo-opening.is-reduced .promo-opening__fill--orange {
+.promo-opening.is-reduced .promo-opening__fill--orange,
+.promo-opening.is-reduced .promo-opening__radiance {
   opacity: 0;
 }
 
 .promo-opening.is-reduced .promo-opening__fill--red {
   opacity: 1;
-  clip-path: inset(0);
 }
 
 .promo-opening.is-reduced .promo-opening__center {
@@ -385,7 +483,7 @@ html.is-promo-cover .promo-cover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .promo-opening__fill,
+  .promo-opening__fill--orange,
   .promo-opening__fill--red,
   .promo-opening__toggle,
   .promo-opening__logo,
@@ -396,6 +494,11 @@ html.is-promo-cover .promo-cover {
   .promo-opening__store-logo,
   .promo-cover {
     transition: none !important;
+  }
+
+  .promo-opening__ray,
+  .promo-opening__wave {
+    animation: none !important;
   }
 }
 
