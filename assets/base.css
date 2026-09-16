@@ -183,10 +183,6 @@ html.is-promo-opening .promo-opening {
   top: 45%;
   left: 50%;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
   transform: translate(-50%, -50%);
 }
 
@@ -194,46 +190,9 @@ html.is-promo-opening .promo-opening {
   opacity: 0;
 }
 
-.promo-opening.is-red .promo-opening__logo {
-  opacity: 0;
-}
-
-.promo-opening__logo {
-  position: relative;
-  width: min(340px, 82vw);
-  height: calc(min(340px, 82vw) * 640 / 1948);
-  transition: opacity 700ms linear;
-}
-
-.promo-opening__logo-layer {
-  position: absolute;
-  inset: 0;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
-
-.promo-opening__logo-layer--orange {
-  background-color: var(--bizmis-orange, #f9a353);
-}
-
-.promo-opening__logo-layer--white {
-  background-color: #fff;
-  opacity: 0;
-  transition: opacity 600ms linear;
-}
-
-.promo-opening.is-bursting .promo-opening__logo-layer--white {
-  opacity: 1;
-}
-
 .promo-opening__toggle {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  position: relative;
+  display: block;
   padding: 0;
   border: 0;
   background: none;
@@ -250,10 +209,10 @@ html.is-promo-opening .promo-opening {
 }
 
 .promo-opening__switch {
+  display: block;
   position: relative;
-  width: 120px;
-  height: 60px;
-  flex: 0 0 auto;
+  width: 140px;
+  height: 70px;
   border: 1px solid #d5d7db;
   border-radius: 999px;
   background: #e4e6ea;
@@ -264,8 +223,8 @@ html.is-promo-opening .promo-opening {
   position: absolute;
   top: 4px;
   left: 4px;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(15, 18, 22, 0.16), 0 1px 1px rgba(15, 18, 22, 0.08);
@@ -274,7 +233,7 @@ html.is-promo-opening .promo-opening {
 }
 
 .promo-opening.is-on .promo-opening__knob {
-  transform: translate3d(60px, 0, 0);
+  transform: translate3d(70px, 0, 0);
 }
 
 .promo-opening__knob-on {
@@ -291,12 +250,16 @@ html.is-promo-opening .promo-opening {
 }
 
 .promo-opening__label {
-  font-family: var(--font-heading);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 20px;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
   font-weight: 700;
-  font-size: 56px;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  color: #2f3640;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b6560;
   white-space: nowrap;
 }
 
@@ -354,8 +317,6 @@ html.is-promo-cover .promo-cover {
   .promo-opening__fill,
   .promo-opening__fill--red,
   .promo-opening__toggle,
-  .promo-opening__logo,
-  .promo-opening__logo-layer--white,
   .promo-opening__knob,
   .promo-opening__knob-on,
   .promo-opening__store-logo,

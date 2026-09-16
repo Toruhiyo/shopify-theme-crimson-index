@@ -219,6 +219,7 @@
     constructor(root) {
       this.root = root;
       this.toggle = root.querySelector('[data-promo-opening-toggle]');
+      this.label = root.querySelector('[data-promo-opening-label]');
       this.knob = root.querySelector('.promo-opening__knob');
       this.flipping = false;
       this.toggle?.addEventListener('click', () => this.flip());
@@ -248,6 +249,7 @@
         this.toggle.setAttribute('aria-pressed', 'true');
         this.toggle.disabled = true;
       }
+      if (this.label) this.label.textContent = 'AGENTIC SALES ON';
 
       if (prefersReducedMotion()) {
         this.root.classList.add('is-on', 'is-red', 'is-reduced');
