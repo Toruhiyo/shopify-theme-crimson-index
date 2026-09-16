@@ -134,7 +134,7 @@ html.is-promo-opening body > *:not([data-promo-opening]) {
 
 html.is-promo-cover,
 html.is-promo-cover body {
-  background: var(--color-bg, #fff) !important;
+  background: var(--color-primary, #D1001A) !important;
 }
 
 .promo-opening {
@@ -234,7 +234,7 @@ html.is-promo-opening .promo-opening {
 .promo-opening__fill--red {
   position: absolute;
   inset: 0;
-  background: var(--color-bg, #fff);
+  background: var(--color-primary, #D1001A);
   opacity: 0;
   pointer-events: none;
   transition: opacity 700ms linear;
@@ -254,6 +254,11 @@ html.is-promo-opening .promo-opening {
 
 .promo-opening.is-bursting .promo-opening__toggle {
   opacity: 0;
+}
+
+.promo-mark {
+  width: min(420px, 72vw);
+  height: auto;
 }
 
 .promo-opening__logo {
@@ -425,6 +430,10 @@ html.is-promo-opening .promo-opening {
   transition: opacity 700ms linear;
 }
 
+.promo-opening__store-logo .promo-mark {
+  display: block;
+}
+
 .promo-opening.is-red .promo-opening__store-logo,
 .promo-opening.is-reduced .promo-opening__store-logo {
   opacity: 1;
@@ -437,12 +446,16 @@ html.is-promo-opening .promo-opening {
   z-index: 100000;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg, #fff);
+  background: var(--color-primary, #D1001A);
   pointer-events: none;
 }
 
 html.is-promo-cover .promo-cover {
   display: flex;
+}
+
+.promo-cover .promo-mark {
+  display: block;
 }
 
 .promo-cover.is-fading {

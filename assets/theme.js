@@ -191,6 +191,7 @@
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 2800;
   const PROMO_FLIP_RED_MS = 700;
+  const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
 
@@ -302,6 +303,7 @@
         return;
       }
 
+      await new Promise((resolve) => window.setTimeout(resolve, PROMO_COVER_HOLD_MS));
       this.node.classList.add('is-fading');
       window.setTimeout(() => {
         this.dismiss();

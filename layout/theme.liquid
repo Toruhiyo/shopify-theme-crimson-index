@@ -1,4 +1,7 @@
 <!doctype html>
+{%- liquid
+  assign promo_red = settings.color_primary | default: '#D1001A'
+-%}
 <html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
 <head>
   <meta charset="utf-8">
@@ -13,7 +16,7 @@
       root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1');
     })();
   </script>
-  <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:#fff}</style>
+  <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:{{ promo_red }}}</style>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0">
   {%- assign _bg_check = settings.color_background | remove: '#' | downcase | slice: 0 -%}
@@ -25,7 +28,7 @@
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
       if (promoVideo === 'opening') meta.content = '#ffffff';
-      else if (promoVideo === 'true' && params.get('nocover') !== '1') meta.content = '#ffffff';
+      else if (promoVideo === 'true' && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
     })();
   </script>
 
@@ -171,12 +174,12 @@
       ></span>
     </div>
     <div class="promo-opening__store-logo" aria-hidden="true">
-      <img src="{{ 'logo-mono.png' | asset_url }}" alt="" class="loader__logo" width="160" height="40">
+      <img src="{{ 'logo-white.png' | asset_url }}" alt="" class="promo-mark" width="933" height="205">
     </div>
   </div>
 
   <div class="promo-cover" id="promo-cover" data-promo-cover aria-hidden="true">
-    <img src="{{ 'logo-mono.png' | asset_url }}" alt="" class="loader__logo" width="160" height="40">
+    <img src="{{ 'logo-white.png' | asset_url }}" alt="" class="promo-mark" width="933" height="205">
   </div>
 
   <div class="loader" id="page-loader" aria-hidden="true">
