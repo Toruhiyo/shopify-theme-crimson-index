@@ -194,6 +194,10 @@
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
+  const PROMO_TYPE_QUERY = 'I want a portable laptop with long battery life for coding.';
+  const PROMO_TYPE_AFTER_MS = 3000;
+  const PROMO_TYPE_CHAR_MS = 22;
+  const PROMO_TYPE_FIND_MS = 15000;
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -286,9 +290,10 @@
   }
 
   class PromoCover {
-    constructor(node, heroReveal) {
+    constructor(node, heroReveal, onReady) {
       this.node = node;
       this.heroReveal = heroReveal;
+      this.onReady = onReady;
     }
 
     async start() {
@@ -298,17 +303,19 @@
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
       if (prefersReducedMotion()) {
-        this.dismiss();
-        this.heroReveal?.begin();
+        this.finish();
         return;
       }
 
       await new Promise((resolve) => window.setTimeout(resolve, PROMO_COVER_HOLD_MS));
       this.node.classList.add('is-fading');
-      window.setTimeout(() => {
-        this.dismiss();
-        this.heroReveal?.begin();
-      }, PROMO_COVER_FADE_MS);
+      window.setTimeout(() => this.finish(), PROMO_COVER_FADE_MS);
+    }
+
+    finish() {
+      this.dismiss();
+      this.heroReveal?.begin();
+      this.onReady?.();
     }
 
     dismiss() {
@@ -2487,7 +2494,106 @@
       const el = document.querySelector(VOICE_WIDGET_SELECTORS[i]);
       if (el) return el;
     }
-    return null;
+    return document.getElementById('bizmis-shopify-avatar-widget');
+  }
+
+  function isPromoTrueHome() {
+    return promoVideo === 'true' && document.body.classList.contains('template-index');
+  }
+
+  function promoTypeAfterMs() {
+    const raw = promoSearchParams().get('type_after');
+    if (raw == null || raw === '') return PROMO_TYPE_AFTER_MS;
+    const ms = Number(raw);
+    return Number.isFinite(ms) && ms >= 0 ? ms : PROMO_TYPE_AFTER_MS;
+  }
+
+  class PromoQueryTypewriter {
+    constructor() {
+      this.input = null;
+      this.timer = 0;
+      this.aborted = false;
+    }
+
+    schedule() {
+      if (!isPromoTrueHome()) return;
+      window.setTimeout(() => this.begin(), promoTypeAfterMs());
+    }
+
+    begin() {
+      this.findInput().then((input) => {
+        if (!input || this.aborted) return;
+        this.input = input;
+        this.watchAbort();
+        input.focus({ preventScroll: true });
+        if (prefersReducedMotion()) {
+          this.setValue(PROMO_TYPE_QUERY);
+          return;
+        }
+        this.type(0);
+      });
+    }
+
+    findInput() {
+      const deadline = Date.now() + PROMO_TYPE_FIND_MS;
+      return new Promise((resolve) => {
+        const tick = () => {
+          const input = this.locateInput();
+          if (input) {
+            resolve(input);
+            return;
+          }
+          if (Date.now() >= deadline) {
+            resolve(null);
+            return;
+          }
+          window.setTimeout(tick, 120);
+        };
+        tick();
+      });
+    }
+
+    locateInput() {
+      const widget = findVoiceWidget();
+      if (!widget) return null;
+      const candidates = widget.querySelectorAll('textarea, .bizmis-chat-input-bar input');
+      for (let i = 0; i < candidates.length; i++) {
+        if (this.isUsable(candidates[i])) return candidates[i];
+      }
+      return null;
+    }
+
+    isUsable(el) {
+      if (!el || el.disabled || el.value) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width > 8 && rect.height > 8;
+    }
+
+    watchAbort() {
+      const abort = (event) => {
+        if (!event.isTrusted) return;
+        this.aborted = true;
+        window.clearTimeout(this.timer);
+      };
+      this.input.addEventListener('keydown', abort);
+      this.input.addEventListener('pointerdown', abort);
+    }
+
+    type(index) {
+      if (this.aborted) return;
+      this.setValue(PROMO_TYPE_QUERY.slice(0, index));
+      if (index >= PROMO_TYPE_QUERY.length) return;
+      this.timer = window.setTimeout(() => this.type(index + 1), PROMO_TYPE_CHAR_MS);
+    }
+
+    setValue(value) {
+      const proto = this.input.tagName === 'TEXTAREA'
+        ? HTMLTextAreaElement.prototype
+        : HTMLInputElement.prototype;
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+      setter.call(this.input, value);
+      this.input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   }
 
   function openVoiceClerk() {
@@ -2549,9 +2655,14 @@
       const opening = document.querySelector('[data-promo-opening]');
       if (opening) new PromoOpening(opening);
     }
+    const promoTypewriter = new PromoQueryTypewriter();
+    const startPromoTypewriter = () => promoTypewriter.schedule();
     if (hasPromoCover()) {
       const cover = document.querySelector('[data-promo-cover]');
-      if (cover) new PromoCover(cover, heroReveal).start();
+      if (cover) new PromoCover(cover, heroReveal, startPromoTypewriter).start();
+      else startPromoTypewriter();
+    } else {
+      startPromoTypewriter();
     }
     document.querySelectorAll('[data-voice-demo]').forEach(el => new VoiceDemo(el));
     initVoiceClerkTriggers();
