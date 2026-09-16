@@ -2206,24 +2206,24 @@ textarea.input {
   --promo-height: 2.75rem;
 }
 
-/* Temporary: with the Bizmis top bar off, keep a 28px top inset. */
+/* Temporary: with the Bizmis top bar off, keep a 56px top inset. */
 html:not(:has(.has-promo-bar)),
 body:not(.has-promo-bar) {
-  --promo-height: 28px;
+  --promo-height: 56px;
 }
 
 body:not(.has-promo-bar) {
-  padding-top: 28px;
+  padding-top: 56px;
 }
 
 body:not(.has-promo-bar) .header-section,
 body:not(.has-promo-bar) .header-section.is-pinned {
-  top: 28px;
+  top: 56px;
 }
 
 body:not(.has-promo-bar).template-index .hero,
 body:not(.has-promo-bar).template-index .hero--large {
-  min-height: calc(100dvh - 28px);
+  min-height: calc(100dvh - 56px);
 }
 
 .announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {
