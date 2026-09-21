@@ -151,6 +151,7 @@
     UPPERBODY_Top: BIZMIS_ORANGE,
     HEAD_Hat: BIZMIS_ORANGE,
   };
+  const PROMO_BIZMIS_STAMP_SCALE = 0.7;
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
   const PROMO_COVER_HOLD_MS = 600;
@@ -178,7 +179,7 @@
       return Object.assign({}, config, {
         avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
         shirtStampUrl: stamp || config.shirtStampUrl,
-        shirtStampScale: 0.5,
+        shirtStampScale: PROMO_BIZMIS_STAMP_SCALE,
         themeColor: BIZMIS_ORANGE,
         secondaryColor: BIZMIS_ORANGE,
       });
