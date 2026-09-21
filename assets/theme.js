@@ -146,6 +146,16 @@
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_PITCH_SETTLE_MS = 700;
+  const PROMO_SEE_HOLD_MS = 700;
+  const PROMO_SEE_ROW_AT_MS = 900;
+  const PROMO_SEE_ROULETTE_AT_MS = 1000;
+  const PROMO_SEE_ROULETTE_MS = 1800;
+  const PROMO_SEE_LAND_HOLD_MS = 600;
+  const PROMO_SEE_TICK_CLASS_MS = 50;
+  const PROMO_SEE_TICK_MIN_MS = 60;
+  const PROMO_SEE_TICK_MAX_MS = 280;
+  const PROMO_SEE_REDUCED_HOLD_MS = 1000;
+  const PROMO_SEE_PASSES = 2;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
   const PROMO_BIZMIS_MESH_COLORS = {
@@ -221,9 +231,14 @@
       return config;
     }
 
-    function hardenStamp(url) {
+    const whiteStamps = new Map();
+
+    function hardenStamp(url, isGate) {
       if (!url) {
-        stampReady = true;
+        if (isGate) {
+          stampReady = true;
+          stampWaiters.splice(0).forEach((run) => run());
+        }
         return;
       }
       const img = new Image();
@@ -244,20 +259,53 @@
           px[i + 3] = 255;
         }
         ctx.putImageData(image, 0, 0);
-        solidStampUrl = canvas.toDataURL('image/png');
-        stampReady = true;
-        stampWaiters.splice(0).forEach((run) => run());
+        const dataUrl = canvas.toDataURL('image/png');
+        whiteStamps.set(url, dataUrl);
+        if (isGate) {
+          solidStampUrl = dataUrl;
+          stampReady = true;
+          stampWaiters.splice(0).forEach((run) => run());
+        }
       };
       img.onerror = () => {
-        solidStampUrl = url;
-        stampReady = true;
-        stampWaiters.splice(0).forEach((run) => run());
+        whiteStamps.set(url, url);
+        if (isGate) {
+          solidStampUrl = url;
+          stampReady = true;
+          stampWaiters.splice(0).forEach((run) => run());
+        }
       };
       img.src = url;
     }
 
+    function whiteStampFor(url) {
+      return whiteStamps.get(url) || url;
+    }
+
+    function preloadStoreStamps(stores) {
+      const seen = new Set();
+      (stores || []).forEach((store) => {
+        if (!store || !store.stamp || seen.has(store.stamp)) return;
+        seen.add(store.stamp);
+        hardenStamp(store.stamp, false);
+      });
+    }
+
+    function applyStoreLook(look) {
+      const api = window.AvatarVoicechat;
+      if (!look || !api || typeof api.setAppearance !== 'function') return;
+      const scale = typeof look.stampScale === 'number'
+        ? look.stampScale
+        : PROMO_BIZMIS_STAMP_SCALE;
+      api.setAppearance({
+        avatarMeshColors: look.meshColors || {},
+        shirtStampUrl: whiteStampFor(look.stamp) || null,
+        shirtStampScale: scale,
+      });
+    }
+
     if (promoVideo === 'opening') {
-      hardenStamp(document.documentElement.getAttribute('data-promo-bizmis-stamp'));
+      hardenStamp(document.documentElement.getAttribute('data-promo-bizmis-stamp'), true);
     } else {
       stampReady = true;
     }
@@ -314,7 +362,7 @@
       tick();
     }
 
-    return { arm, hide, remountForStore };
+    return { arm, hide, remountForStore, applyStoreLook, preloadStoreStamps };
   }
 
   let openingWaveStarted = false;
@@ -356,6 +404,117 @@
     return new URLSearchParams(window.location.search);
   }
 
+  function loadPromoStores() {
+    const node = document.getElementById('promo-opening-stores');
+    if (!node) return [];
+    try {
+      const parsed = JSON.parse(node.textContent || '[]');
+      return Array.isArray(parsed) ? parsed.filter((store) => store && store.slug) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function landingStoreIndex(stores) {
+    if (!stores.length) return 0;
+    const raw = (promoSearchParams().get('store') || 'meridian').trim().toLowerCase();
+    const match = stores.findIndex((store) => store.slug === raw);
+    if (match >= 0) return match;
+    const meridian = stores.findIndex((store) => store.slug === 'meridian');
+    return meridian >= 0 ? meridian : 0;
+  }
+
+  function shufflePass(count, avoidFirst) {
+    const order = [];
+    for (let i = 0; i < count; i += 1) order.push(i);
+    for (let i = count - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const hold = order[i];
+      order[i] = order[j];
+      order[j] = hold;
+    }
+    if (count > 1 && avoidFirst != null && order[0] === avoidFirst) {
+      const swap = 1 + Math.floor(Math.random() * (count - 1));
+      const hold = order[0];
+      order[0] = order[swap];
+      order[swap] = hold;
+    }
+    return order;
+  }
+
+  function rouletteWaits(storeCount) {
+    const minWaits = Math.max(storeCount * PROMO_SEE_PASSES, 1);
+    const waits = [];
+    let elapsed = 0;
+    while (waits.length < minWaits || elapsed < PROMO_SEE_ROULETTE_MS) {
+      const progress = Math.min(1, elapsed / PROMO_SEE_ROULETTE_MS);
+      const eased = 1 - (1 - progress) * (1 - progress);
+      const wait = PROMO_SEE_TICK_MIN_MS + (PROMO_SEE_TICK_MAX_MS - PROMO_SEE_TICK_MIN_MS) * eased;
+      waits.push(wait);
+      elapsed += wait;
+      if (waits.length > 48) break;
+    }
+    return waits;
+  }
+
+  function rouletteOrder(storeCount, landIndex, tickCount) {
+    if (storeCount <= 0) return [0];
+    if (storeCount === 1) return Array.from({ length: tickCount }, () => 0);
+    const order = [];
+    let last = -1;
+    while (order.length < tickCount - 1) {
+      const remaining = tickCount - 1 - order.length;
+      if (remaining >= storeCount) {
+        const pass = shufflePass(storeCount, last);
+        order.push(...pass);
+        last = pass[pass.length - 1];
+      } else {
+        let next;
+        do {
+          next = Math.floor(Math.random() * storeCount);
+        } while (next === last);
+        order.push(next);
+        last = next;
+      }
+    }
+    if (order.length > tickCount - 1) {
+      order.length = tickCount - 1;
+      last = order[order.length - 1];
+    }
+    if (last === landIndex) {
+      let next;
+      do {
+        next = Math.floor(Math.random() * storeCount);
+      } while (next === landIndex);
+      order[order.length - 1] = next;
+    }
+    order.push(landIndex);
+    return order;
+  }
+
+  function renderStoreCards(row, stores) {
+    if (!row) return;
+    row.replaceChildren();
+    stores.forEach((store) => {
+      const card = document.createElement('article');
+      card.className = 'promo-opening__store';
+      card.dataset.store = store.slug;
+      card.style.setProperty('--promo-store-accent', store.accent || '#1d1d1f');
+      const mark = document.createElement('img');
+      mark.className = 'promo-opening__card-mark';
+      mark.src = store.logo || store.stamp || '';
+      mark.alt = '';
+      const name = document.createElement('span');
+      name.className = 'promo-opening__store-name';
+      name.textContent = store.name || '';
+      const sector = document.createElement('span');
+      sector.className = 'promo-opening__store-sector';
+      sector.textContent = store.sector || '';
+      card.append(mark, name, sector);
+      row.appendChild(card);
+    });
+  }
+
   function hasPromoCover() {
     return document.body.classList.contains('template-index')
       && promoVideo !== 'opening'
@@ -378,6 +537,9 @@
       this.toggle = root.querySelector('[data-promo-opening-toggle]');
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
+      this.storesRow = root.querySelector('[data-promo-stores]');
+      this.stores = loadPromoStores();
+      this.landIndex = landingStoreIndex(this.stores);
       this.flipping = false;
       this.parkedEmbed = null;
       this.parkedParent = null;
@@ -386,6 +548,8 @@
       this.parkTimer = 0;
       this.boundDock = () => this.fitOpeningLayout();
       this.toggle?.addEventListener('click', () => this.flip());
+      renderStoreCards(this.storesRow, this.stores);
+      promoWidget.preloadStoreStamps(this.stores);
       this.armAutoFlip();
     }
 
@@ -487,7 +651,7 @@
       }
 
       if (prefersReducedMotion()) {
-        this.revealStore();
+        this.showReducedSee();
         return;
       }
 
@@ -555,7 +719,7 @@
       const fromFace = this.root.querySelector('[data-promo-face-from]');
       const toFace = this.root.querySelector('[data-promo-face-to]');
       if (!line || !fromFace) {
-        window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
+        this.playSeeForYourself();
         return;
       }
 
@@ -603,10 +767,122 @@
 
       window.setTimeout(() => {
         line.classList.add('is-replaced');
-        this.playHeroWords(toFace, () => {
-          window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
-        });
+        this.playHeroWords(toFace, () => this.playSeeForYourself());
       }, toInAt);
+    }
+
+    bizmisLook() {
+      return {
+        meshColors: PROMO_BIZMIS_MESH_COLORS,
+        stamp: document.documentElement.getAttribute('data-promo-bizmis-stamp'),
+        stampScale: PROMO_BIZMIS_STAMP_SCALE,
+      };
+    }
+
+    resetSee() {
+      this.root.classList.remove(
+        'is-see',
+        'is-see-in',
+        'is-see-docked',
+        'is-see-row',
+        'is-see-landed'
+      );
+      this.storesRow?.classList.remove('tick');
+      this.storesRow?.querySelectorAll('.promo-opening__store').forEach((card) => {
+        card.classList.remove('is-on', 'is-land');
+      });
+    }
+
+    highlightStore(index, landed) {
+      const cards = this.storesRow
+        ? [...this.storesRow.querySelectorAll('.promo-opening__store')]
+        : [];
+      cards.forEach((card, cardIndex) => {
+        const on = cardIndex === index;
+        card.classList.toggle('is-on', on);
+        card.classList.toggle('is-land', Boolean(landed && on));
+      });
+      this.root.classList.toggle('is-see-landed', Boolean(landed));
+    }
+
+    snapSeeLanded() {
+      this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed');
+      this.highlightStore(this.landIndex, true);
+      const store = this.stores[this.landIndex];
+      if (store) promoWidget.applyStoreLook(store);
+    }
+
+    showReducedSee() {
+      document.documentElement.classList.add('is-promo-pitch');
+      this.root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch', 'is-logo-leaving');
+      window.requestAnimationFrame(() => this.fitOpeningLayout());
+      this.armPark();
+      this.snapSeeLanded();
+      window.setTimeout(() => this.revealStore(), PROMO_SEE_REDUCED_HOLD_MS);
+    }
+
+    playSeeForYourself() {
+      if (!this.stores.length) {
+        window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
+        return;
+      }
+
+      if (prefersReducedMotion()) {
+        this.snapSeeLanded();
+        window.setTimeout(() => this.revealStore(), PROMO_SEE_REDUCED_HOLD_MS);
+        return;
+      }
+
+      const sell = this.root.querySelector('.promo-opening__word--sell');
+      sell?.classList.remove('is-in');
+      sell?.classList.add('is-out');
+
+      this.root.classList.add('is-see');
+      window.requestAnimationFrame(() => {
+        this.root.classList.add('is-see-in');
+      });
+
+      window.setTimeout(() => {
+        this.root.classList.add('is-see-docked');
+      }, PROMO_SEE_HOLD_MS);
+
+      window.setTimeout(() => {
+        this.root.classList.add('is-see-row');
+      }, PROMO_SEE_ROW_AT_MS);
+
+      window.setTimeout(() => {
+        this.playStoreRoulette(() => {
+          window.setTimeout(() => this.depart(), PROMO_SEE_LAND_HOLD_MS);
+        });
+      }, PROMO_SEE_ROULETTE_AT_MS);
+    }
+
+    playStoreRoulette(onDone) {
+      const waits = rouletteWaits(this.stores.length);
+      const order = rouletteOrder(this.stores.length, this.landIndex, waits.length + 1);
+      let step = 0;
+
+      const tick = () => {
+        const index = order[step];
+        const isLast = step === order.length - 1;
+        this.highlightStore(index, isLast);
+        const store = this.stores[index];
+        if (store) promoWidget.applyStoreLook(store);
+        if (this.storesRow) {
+          this.storesRow.classList.add('tick');
+          window.setTimeout(() => {
+            this.storesRow?.classList.remove('tick');
+          }, PROMO_SEE_TICK_CLASS_MS);
+        }
+        if (isLast) {
+          onDone();
+          return;
+        }
+        const wait = waits[step];
+        step += 1;
+        window.setTimeout(tick, wait);
+      };
+      tick();
     }
 
     depart() {
@@ -647,6 +923,7 @@
       const to = line?.querySelector('.promo-opening__to');
 
       const resetText = () => {
+        this.resetSee();
         line?.classList.remove('is-revealing', 'is-striking', 'is-erasing', 'is-redefined', 'is-replaced');
         fromFace?.classList.remove('is-exiting');
         if (fromFace) {
@@ -697,6 +974,7 @@
         hideToggle();
         this.parkWidget();
         this.fitOpeningLayout();
+        promoWidget.applyStoreLook(this.bizmisLook());
       };
 
       const hideCopy = () => {
@@ -754,6 +1032,36 @@
           word.style.transform = 'none';
           word.style.animation = 'none';
         });
+      };
+
+      const showSee = (phase) => {
+        showHero(2);
+        toWords.forEach((word) => {
+          word.classList.remove('is-in');
+          word.classList.add('is-out');
+          word.style.opacity = '0';
+        });
+        root.classList.add('is-see', 'is-see-in');
+        if (phase !== 'hero') root.classList.add('is-see-docked', 'is-see-row');
+        if (phase === 'landed') root.classList.add('is-see-landed');
+
+        const midIndex = Math.min(2, Math.max(0, this.stores.length - 1));
+        const highlight = phase === 'hero'
+          ? -1
+          : phase === 'row'
+            ? 0
+            : phase === 'roulette'
+              ? midIndex
+              : this.landIndex;
+        if (highlight >= 0) this.highlightStore(highlight, phase === 'landed');
+        if (phase === 'roulette') this.storesRow?.classList.add('tick');
+
+        if (phase === 'hero') {
+          promoWidget.applyStoreLook(this.bizmisLook());
+        } else {
+          const store = this.stores[highlight];
+          if (store) promoWidget.applyStoreLook(store);
+        }
       };
 
       const rest = () => {
@@ -866,6 +1174,22 @@
           openingWaveStarted = false;
           armOpeningWave();
           return 700;
+        },
+        '15-see-yourself': () => {
+          showSee('hero');
+          return 180;
+        },
+        '16-see-stores': () => {
+          showSee('row');
+          return 180;
+        },
+        '17-see-roulette': () => {
+          showSee('roulette');
+          return 120;
+        },
+        '18-see-meridian': () => {
+          showSee('landed');
+          return 220;
         },
       };
 

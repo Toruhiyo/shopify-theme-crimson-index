@@ -54,11 +54,23 @@ async function waitForAvatar(page) {
 
 async function shot(page, fileName) {
   const dest = path.join(OUT_DIR, fileName);
-  const embed = page.locator('#bizmis-avatar-embed');
-  if (await embed.isVisible()) {
-    await embed.screenshot({ path: dest, type: 'png', timeout: 5000 });
+  const canvas = page.locator('#bizmis-avatar-embed canvas');
+  const box = await canvas.boundingBox().catch(() => null);
+  if (box && box.width > 8 && box.height > 8) {
+    await page.screenshot({
+      path: dest,
+      type: 'png',
+      clip: {
+        x: Math.max(0, box.x),
+        y: Math.max(0, box.y),
+        width: box.width,
+        height: box.height,
+      },
+      animations: 'disabled',
+      timeout: 20000,
+    });
   } else {
-    await page.screenshot({ path: dest, type: 'png' });
+    await page.screenshot({ path: dest, type: 'png', animations: 'disabled', timeout: 20000 });
   }
   process.stdout.write(`wrote ${fileName}\n`);
 }

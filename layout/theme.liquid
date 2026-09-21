@@ -208,6 +208,8 @@
               </span>
             </span>
           </p>
+          <p class="promo-opening__see" data-promo-see aria-hidden="true">See for yourself.</p>
+          <div class="promo-opening__stores" data-promo-stores aria-hidden="true"></div>
         </div>
         <div class="promo-opening__widget" data-promo-widget></div>
       </div>
@@ -216,6 +218,70 @@
       <img src="{{ 'logo-white.png' | asset_url }}" alt="" class="promo-mark" width="933" height="205">
     </div>
   </div>
+  <script type="application/json" id="promo-opening-stores">
+    [
+      {
+        "slug": "paper-pine-books",
+        "name": "Paper & Pine Books",
+        "sector": "Books & stationery",
+        "accent": "#2F5D50",
+        "logo": {{ 'promo-store-paper-pine.svg' | asset_url | json }},
+        "stamp": {{ 'promo-store-paper-pine.svg' | asset_url | json }},
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#2F5D50", "HEAD_Hat": "#2F5D50" }
+      },
+      {
+        "slug": "apricot-theory",
+        "name": "The Apricot Theory",
+        "sector": "Beauty & skincare",
+        "accent": "#E07A5F",
+        "logo": {{ 'promo-store-apricot-theory.svg' | asset_url | json }},
+        "stamp": {{ 'promo-store-apricot-theory.svg' | asset_url | json }},
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#E07A5F", "HEAD_Hat": "#E07A5F" }
+      },
+      {
+        "slug": "weather-outfitters",
+        "name": "12 Weather Outfitters",
+        "sector": "Apparel & outdoor",
+        "accent": "#1B4F72",
+        "logo": {{ 'promo-store-weather-outfitters.svg' | asset_url | json }},
+        "stamp": {{ 'promo-store-weather-outfitters.svg' | asset_url | json }},
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#1B4F72", "HEAD_Hat": "#1B4F72" }
+      },
+      {
+        "slug": "pulse-forge",
+        "name": "Pulse Forge",
+        "sector": "Gaming gear",
+        "accent": "#6C2BD9",
+        "logo": {{ 'promo-store-pulse-forge.svg' | asset_url | json }},
+        "stamp": {{ 'promo-store-pulse-forge.svg' | asset_url | json }},
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#6C2BD9", "HEAD_Hat": "#6C2BD9" }
+      },
+      {
+        "slug": "build-right-home",
+        "name": "Build Right Home",
+        "sector": "Home & DIY",
+        "accent": "#C56A1A",
+        "logo": {{ 'promo-store-build-right.svg' | asset_url | json }},
+        "stamp": {{ 'promo-store-build-right.svg' | asset_url | json }},
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#C56A1A", "HEAD_Hat": "#C56A1A" }
+      },
+      {
+        "slug": "meridian",
+        "name": "Meridian",
+        "sector": "Consumer electronics",
+        "accent": {{ promo_red | json }},
+        "logo": {{ 'logo-transparent.png' | asset_url | json }},
+        "stamp": {{ 'logo-white.png' | asset_url | json }},
+        "stampScale": 0.76,
+        "meshColors": { "UPPERBODY_Top": {{ promo_red | json }}, "HEAD_Hat": {{ promo_red | json }} }
+      }
+    ]
+  </script>
 
   <div class="promo-cover" id="promo-cover" data-promo-cover aria-hidden="true">
     <img src="{{ 'logo-white.png' | asset_url }}" alt="" class="promo-mark" width="933" height="205">

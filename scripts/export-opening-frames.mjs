@@ -31,6 +31,10 @@ const FRAMES = [
   ['12-to', 'Only to, same type size.', 40],
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
   ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.', 220],
+  ['15-see-yourself', 'sell. is gone. See for yourself. in the same seat, about 60% of sell. size.', 80],
+  ['16-see-stores', 'See for yourself. docked as a small label. Six store cards in a row, first card highlighted.', 80],
+  ['17-see-roulette', 'Highlight on a mid-row store. Clerk in that store uniform. Row has a tick pulse.', 80],
+  ['18-see-meridian', 'Landed on Meridian. Other cards dim to 40%. Clerk in Meridian red.', 220],
 ];
 
 async function loadPlaywright() {
