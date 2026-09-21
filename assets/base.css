@@ -707,18 +707,38 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__widget {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
-  width: min(236px, 26vw);
-  height: min(236px, 26vw);
 }
 
-html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,
-html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root,
+#bizmis-avatar-embed.is-promo-widget-parked {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  z-index: 1 !important;
+  transition: none !important;
+}
+
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed:not(.is-promo-widget-parked),
+html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root:not(.is-promo-widget-parked) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed.is-promo-widget-parked,
+html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root.is-promo-widget-parked,
 html.is-promo-opening.is-promo-pitch .bizmis-viewport-portal-root,
 html.is-promo-opening.is-promo-pitch .avatar-widget-container {
   visibility: visible !important;
   pointer-events: none !important;
-  z-index: 100002 !important;
 }
 
 html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
@@ -758,8 +778,8 @@ html.is-promo-widget-entering .avatar-widget-container {
   }
 
   .promo-opening__widget {
-    width: min(200px, 56vw);
-    height: min(200px, 56vw);
+    width: auto;
+    height: auto;
   }
 }
 

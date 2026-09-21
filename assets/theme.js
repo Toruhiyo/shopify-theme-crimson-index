@@ -267,12 +267,12 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.flipping = false;
-      this.placedSurface = null;
-      this.placedStyle = null;
-      this.placedSize = null;
-      this.placeTimer = 0;
+      this.parkedEmbed = null;
+      this.parkedParent = null;
+      this.parkedNext = null;
+      this.parkedStyle = null;
+      this.parkTimer = 0;
       this.boundDock = () => this.dockLogo();
-      this.boundPlace = () => this.placeWidget();
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
     }
@@ -307,76 +307,44 @@
       this.root.classList.add('is-logo-docked');
     }
 
-    findWidgetSurface() {
-      const named = document.querySelector('.bizmis-desktop-lite-chat, .bizmis-closed-bubble');
-      if (named && named.getBoundingClientRect().height > 40) return named;
-
-      const canvas = document.querySelector('#bizmis-avatar-embed canvas, .bizmis-viewport-portal-root canvas');
-      const card = canvas?.closest('.bizmis-desktop-lite-chat, [class*="rounded-xl"], [class*="theme-bg-glassy"]');
-      if (card && card.getBoundingClientRect().height > 40) return card;
-
-      const embed = document.getElementById('bizmis-avatar-embed');
-      if (embed && embed.getBoundingClientRect().height > 40) return embed;
-      return embed;
-    }
-
-    placeWidget() {
+    parkWidget() {
+      if (this.parkedEmbed) return;
       const slot = this.root.querySelector('[data-promo-widget]');
-      const surface = this.placedSurface || this.findWidgetSurface();
-      if (!slot || !surface) return;
+      const embed = document.getElementById('bizmis-avatar-embed');
+      if (!slot || !embed) return;
 
-      const slotRect = slot.getBoundingClientRect();
-      if (slotRect.width < 8 || slotRect.height < 8) return;
-
-      if (!this.placedSurface) {
-        const natural = surface.getBoundingClientRect();
-        if (natural.height <= 40) return;
-        this.placedSurface = surface;
-        this.placedStyle = surface.getAttribute('style');
-        this.placedSize = natural;
-        surface.classList.add('is-promo-widget-placed');
-      }
-
-      const height = this.placedSize.height;
-      const width = this.placedSize.width;
-      const top = slotRect.top + (slotRect.height - height) / 2;
-      const left = slotRect.left + (slotRect.width - width) / 2;
-      surface.style.setProperty('position', 'fixed', 'important');
-      surface.style.setProperty('top', `${Math.round(top)}px`, 'important');
-      surface.style.setProperty('left', `${Math.round(left)}px`, 'important');
-      surface.style.setProperty('right', 'auto', 'important');
-      surface.style.setProperty('bottom', 'auto', 'important');
-      surface.style.setProperty('transform', 'none', 'important');
-      surface.style.setProperty('margin', '0', 'important');
-      surface.style.setProperty('z-index', '100003', 'important');
+      this.parkedEmbed = embed;
+      this.parkedParent = embed.parentNode;
+      this.parkedNext = embed.nextSibling;
+      this.parkedStyle = embed.getAttribute('style');
+      embed.removeAttribute('style');
+      embed.classList.add('is-promo-widget-parked');
+      slot.appendChild(embed);
     }
 
     restoreWidget() {
-      window.clearTimeout(this.placeTimer);
-      window.removeEventListener('resize', this.boundPlace);
-      const surface = this.placedSurface;
-      if (surface) {
-        if (this.placedStyle != null) surface.setAttribute('style', this.placedStyle);
-        else surface.removeAttribute('style');
-        surface.classList.remove('is-promo-widget-placed');
+      window.clearTimeout(this.parkTimer);
+      const embed = this.parkedEmbed;
+      if (embed && this.parkedParent) {
+        this.parkedParent.insertBefore(embed, this.parkedNext);
+        if (this.parkedStyle != null) embed.setAttribute('style', this.parkedStyle);
+        else embed.removeAttribute('style');
+        embed.classList.remove('is-promo-widget-parked');
       }
-      document.querySelectorAll('.is-promo-star-surface, .is-promo-widget-placed').forEach((node) => {
-        node.classList.remove('is-promo-star-surface', 'is-promo-widget-placed');
-      });
-      this.placedSurface = null;
-      this.placedStyle = null;
-      this.placedSize = null;
+      this.parkedEmbed = null;
+      this.parkedParent = null;
+      this.parkedNext = null;
+      this.parkedStyle = null;
     }
 
-    armPlace() {
+    armPark() {
       let tries = 0;
       const run = () => {
-        this.placeWidget();
+        this.parkWidget();
         tries += 1;
-        if (tries < 24) this.placeTimer = window.setTimeout(run, 160);
+        if (!this.parkedEmbed && tries < 40) this.parkTimer = window.setTimeout(run, 80);
       };
       run();
-      window.addEventListener('resize', this.boundPlace);
     }
 
     flip() {
@@ -416,7 +384,7 @@
         window.requestAnimationFrame(() => this.dockLogo());
       });
       window.addEventListener('resize', this.boundDock);
-      this.armPlace();
+      this.armPark();
       window.setTimeout(() => {
         this.root.classList.add('is-logo-leaving');
         window.setTimeout(() => this.playPitchLine(), PROMO_PITCH_LOGO_OUT_MS);
@@ -492,8 +460,8 @@
 
     depart() {
       window.removeEventListener('resize', this.boundDock);
-      this.restoreWidget();
       promoWidget.hide();
+      this.restoreWidget();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');
       this.root.classList.add('is-depart');
