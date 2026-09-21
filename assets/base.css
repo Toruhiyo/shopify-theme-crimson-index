@@ -740,6 +740,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: visible !important;
 }
 
+#bizmis-avatar-embed.is-promo-widget-parked .bizmis-desktop-lite-chat {
+  transform: none !important;
+}
+
 html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed:not(.is-promo-widget-parked),
 html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root:not(.is-promo-widget-parked) {
   visibility: hidden !important;
