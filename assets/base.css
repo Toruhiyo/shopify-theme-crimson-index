@@ -777,6 +777,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: visible !important;
 }
 
+#bizmis-avatar-embed.is-promo-widget-parked,
+#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
+#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > *,
 #bizmis-avatar-embed.is-promo-widget-parked .bizmis-desktop-lite-chat,
 #bizmis-avatar-embed.is-promo-widget-parked .theme-bg-glassy {
   transform: none !important;
