@@ -767,13 +767,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   --promo-avatar-w: 288px;
   --promo-avatar-h: 230px;
   --promo-avatar-scale: 2.3;
-  --promo-avatar-fade: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 58%,
-    rgba(0, 0, 0, 0.7) 74%,
-    transparent 100%
-  );
   position: relative !important;
   top: auto !important;
   left: auto !important;
@@ -786,12 +779,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 1 !important;
   transition: none !important;
   overflow: hidden !important;
-  -webkit-mask-image: var(--promo-avatar-fade);
-  mask-image: var(--promo-avatar-fade);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,

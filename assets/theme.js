@@ -170,6 +170,9 @@
     let originalDestroy = null;
     let storeConfig = null;
     let wrapped = false;
+    let solidStampUrl = null;
+    let stampReady = false;
+    const stampWaiters = [];
 
     function isOpening() {
       return promoSearchParams().get(PROMO_VIDEO_PARAM) === 'opening';
@@ -177,7 +180,8 @@
 
     function lookForPromo(config) {
       if (!isOpening()) return config;
-      const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp');
+      const stamp = solidStampUrl
+        || document.documentElement.getAttribute('data-promo-bizmis-stamp');
       return Object.assign({}, config, {
         avatarModelUrl: PROMO_BIZMIS_AVATAR_MODEL_URL,
         avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
@@ -188,6 +192,47 @@
       });
     }
 
+    function hardenStamp(url) {
+      if (!url) {
+        stampReady = true;
+        return;
+      }
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const px = image.data;
+        for (let i = 0; i < px.length; i += 4) {
+          if (!px[i + 3]) continue;
+          px[i] = 255;
+          px[i + 1] = 255;
+          px[i + 2] = 255;
+          px[i + 3] = 255;
+        }
+        ctx.putImageData(image, 0, 0);
+        solidStampUrl = canvas.toDataURL('image/png');
+        stampReady = true;
+        stampWaiters.splice(0).forEach((run) => run());
+      };
+      img.onerror = () => {
+        solidStampUrl = url;
+        stampReady = true;
+        stampWaiters.splice(0).forEach((run) => run());
+      };
+      img.src = url;
+    }
+
+    if (promoVideo === 'opening') {
+      hardenStamp(document.documentElement.getAttribute('data-promo-bizmis-stamp'));
+    } else {
+      stampReady = true;
+    }
+
     function wrap() {
       const api = window.AvatarVoicechat;
       if (!api || wrapped || typeof api.init !== 'function') return false;
@@ -195,7 +240,9 @@
       originalDestroy = typeof api.destroy === 'function' ? api.destroy.bind(api) : null;
       api.init = function (config) {
         storeConfig = config;
-        return originalInit(lookForPromo(config));
+        const start = () => originalInit(lookForPromo(config));
+        if (!isOpening() || stampReady) return start();
+        stampWaiters.push(start);
       };
       wrapped = true;
       return true;
