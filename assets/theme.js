@@ -858,10 +858,9 @@
       }, strikeAt);
 
       window.setTimeout(() => {
-        const nextWidth = to ? to.scrollWidth : 0;
         line.classList.add('is-erasing', 'is-redefined');
         if (from) from.style.width = '0px';
-        if (to) to.style.width = `${nextWidth}px`;
+        if (to) to.style.width = 'auto';
       }, morphAt);
 
       window.setTimeout(() => {

@@ -925,8 +925,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   vertical-align: baseline;
 }
 
-.promo-opening__line.is-erasing .promo-opening__from,
-.promo-opening__line.is-erasing .promo-opening__to {
+.promo-opening__line.is-erasing .promo-opening__from {
   overflow: hidden;
 }
 
@@ -958,10 +957,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__to {
   width: 0;
   opacity: 0;
+  overflow: visible;
   white-space: pre;
-  transition:
-    width 720ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 420ms linear;
+  transition: opacity 420ms linear;
 }
 
 .promo-opening__line.is-erasing .promo-opening__from,
@@ -978,6 +976,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__line.is-redefined .promo-opening__to {
   width: auto;
+  overflow: visible;
   opacity: 1;
 }
 
