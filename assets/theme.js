@@ -124,7 +124,10 @@
   }
 
   const PROMO_FLIP_KNOB_MS = 200;
-  const PROMO_FLIP_CENTER_MS = 340;
+  const PROMO_AGENTIC_MOVE_MS = 900;
+  const PROMO_AGENTIC_SETTLE_MS = 180;
+  const PROMO_FLIP_CENTER_MS = PROMO_AGENTIC_MOVE_MS + PROMO_AGENTIC_SETTLE_MS;
+  const PROMO_AGENTIC_SCALE = 1.45;
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
@@ -659,6 +662,7 @@
       this.pinKnobOrigin();
       this.root.classList.add('is-on');
       window.setTimeout(() => {
+        this.root.style.setProperty('--promo-center', `${PROMO_AGENTIC_MOVE_MS}ms`);
         this.root.classList.add('is-cleared');
         this.centerAgenticSales();
         window.setTimeout(() => this.burst(), PROMO_FLIP_CENTER_MS);
@@ -674,7 +678,7 @@
       const stageRect = stage.getBoundingClientRect();
       const dx = (stageRect.left + stageRect.width / 2) - (labelRect.left + labelRect.width / 2);
       const dy = (stageRect.top + stageRect.height / 2) - (labelRect.top + labelRect.height / 2);
-      label.style.transform = `translate(${dx}px, ${dy}px)`;
+      label.style.transform = `translate(${dx}px, ${dy}px) scale(${PROMO_AGENTIC_SCALE})`;
     }
 
     pinLabelOrigin() {
