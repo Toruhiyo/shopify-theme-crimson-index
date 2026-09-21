@@ -174,9 +174,6 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.flipping = false;
-      this.pinnedSurface = null;
-      this.pinTimer = 0;
-      this.boundPin = () => this.pinSurfaceToSlot();
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
     }
@@ -196,117 +193,27 @@
       this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
     }
 
-    pinWidgetOrigin() {
-      const target = this.pinnedSurface || this.root.querySelector('[data-promo-star]');
-      if (!target) return;
-      const rect = target.getBoundingClientRect();
-      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
-      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+    dockLogo() {
+      const logo = this.root.querySelector('.promo-opening__logo');
+      const target = this.root.querySelector('[data-promo-logo-target]');
+      if (!logo || !target) return;
+
+      const to = target.getBoundingClientRect();
+      if (to.width < 4 || to.height < 4) return;
+
+      this.root.style.setProperty('--promo-logo-left', `${to.left + to.width / 2}px`);
+      this.root.style.setProperty('--promo-logo-top', `${to.top + to.height / 2}px`);
+      this.root.style.setProperty('--promo-logo-w', `${to.width}px`);
+      this.root.style.setProperty('--promo-logo-h', `${to.height}px`);
+      this.root.classList.add('is-logo-docked');
     }
 
-    findWidgetSurface() {
-      const named = document.querySelector('.bizmis-desktop-lite-chat, .bizmis-closed-bubble');
-      if (named && named.getBoundingClientRect().height > 40) return named;
-
-      const canvas = document.querySelector('#bizmis-avatar-embed canvas, .bizmis-viewport-portal-root canvas');
-      const card = canvas?.closest('.bizmis-desktop-lite-chat, [class*="rounded-xl"], [class*="theme-bg-glassy"]');
-      if (card && card.getBoundingClientRect().height > 40) return card;
-
-      return canvas || document.getElementById('bizmis-avatar-embed');
-    }
-
-    pinSurfaceToSlot() {
-      const slot = this.root.querySelector('[data-promo-star]');
-      const surface = this.findWidgetSurface();
-      if (!slot || !surface) return;
-
-      const slotRect = slot.getBoundingClientRect();
-      if (slotRect.width < 8 || slotRect.height < 8) return;
-
-      this.pinnedSurface = surface;
-      surface.classList.add('is-promo-star-surface');
-      const natural = surface.getBoundingClientRect();
-      const width = natural.width > 40 ? Math.min(natural.width, slotRect.width) : slotRect.width;
-      const height = natural.height > 40 ? Math.min(natural.height, slotRect.height) : slotRect.height;
-      const top = slotRect.top + (slotRect.height - height) / 2;
-      const left = slotRect.left + (slotRect.width - width) / 2;
-      const pin = {
-        position: 'fixed',
-        top: `${Math.round(top)}px`,
-        left: `${Math.round(left)}px`,
-        right: 'auto',
-        bottom: 'auto',
-        transform: 'none',
-        margin: '0',
-        'max-width': 'none',
-        'max-height': 'none',
-        'z-index': '100003',
-      };
-      if (surface.id === 'bizmis-avatar-embed' || surface.classList.contains('bizmis-avatar-widget-root')) {
-        pin.width = `${Math.round(slotRect.width)}px`;
-        pin.height = `${Math.round(slotRect.height)}px`;
-        pin.overflow = 'hidden';
-      }
-      Object.entries(pin).forEach(([name, value]) => {
-        surface.style.setProperty(name, value, 'important');
-      });
-    }
-
-    unpinSurface() {
-      window.clearTimeout(this.pinTimer);
-      window.removeEventListener('resize', this.boundPin);
-      const surface = this.pinnedSurface;
-      if (!surface) return;
-      ['position', 'top', 'left', 'width', 'height', 'right', 'bottom', 'transform', 'margin', 'max-width', 'max-height', 'z-index', 'overflow'].forEach((name) => {
-        surface.style.removeProperty(name);
-      });
-      surface.classList.remove('is-promo-star-surface');
-      this.pinnedSurface = null;
-    }
-
-    armPin() {
-      let tries = 0;
-      const run = () => {
-        this.pinSurfaceToSlot();
-        tries += 1;
-        if (tries < 40) this.pinTimer = window.setTimeout(run, 150);
-      };
-      run();
-      window.addEventListener('resize', this.boundPin);
-    }
-
-    widgetIsLive() {
-      const widget = document.getElementById('bizmis-avatar-embed');
-      if (!widget) return false;
-      return !!(widget.querySelector('canvas') || widget.offsetHeight > 80);
-    }
-
-    markWidgetReady() {
-      const slot = this.root.querySelector('[data-promo-star]');
-      if (!this.widgetIsLive()) return;
-      document.documentElement.classList.add('has-promo-widget');
-      slot?.classList.add('is-live');
-    }
-
-    whenWidgetReady(timeoutMs) {
-      if (this.widgetIsLive()) {
-        this.markWidgetReady();
-        return Promise.resolve();
-      }
-
-      return new Promise((resolve) => {
-        const watch = new MutationObserver(() => {
-          if (!this.widgetIsLive()) return;
-          watch.disconnect();
-          this.markWidgetReady();
-          resolve();
+    restoreWidget() {
+      document.querySelectorAll('.is-promo-star-surface').forEach((surface) => {
+        ['position', 'top', 'left', 'width', 'height', 'right', 'bottom', 'transform', 'margin', 'max-width', 'max-height', 'z-index', 'overflow'].forEach((name) => {
+          surface.style.removeProperty(name);
         });
-        watch.observe(document.body, { childList: true, subtree: true });
-        window.setTimeout(() => {
-          watch.disconnect();
-          this.markWidgetReady();
-          resolve();
-        }, timeoutMs);
+        surface.classList.remove('is-promo-star-surface');
       });
     }
 
@@ -343,29 +250,48 @@
     async pitch() {
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
-      this.armPin();
-      this.whenWidgetReady(4000);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => this.dockLogo());
+      });
       this.playPitchLine();
     }
 
     playPitchLine() {
       const line = this.line;
+      const eyebrow = this.root.querySelector('[data-promo-eyebrow]');
+      const cta = this.root.querySelector('[data-promo-pitch-cta]');
       if (!line) {
         window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
         return;
       }
 
+      const eyebrowWords = eyebrow
+        ? [...eyebrow.querySelectorAll('.promo-opening__word')].filter((word) => !word.classList.contains('promo-opening__word--mark'))
+        : [];
+      eyebrowWords.forEach((word, index) => {
+        word.style.animationDelay = `${index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
+      });
+      eyebrow?.classList.add('is-revealing');
+
+      const eyebrowInAt = eyebrowWords.length
+        ? (eyebrowWords.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS
+        : 0;
+
       const words = line.querySelectorAll('.promo-opening__word');
       words.forEach((word, index) => {
-        word.style.animationDelay = `${index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
+        word.style.animationDelay = `${eyebrowInAt + index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
       });
       line.classList.add('is-revealing');
 
-      const wordsInAt = (words.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
+      const wordsInAt = eyebrowInAt + (words.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
       const strikeAt = wordsInAt + PROMO_PITCH_REDEFINE_HOLD_MS;
       const morphAt = strikeAt + PROMO_PITCH_STRIKE_MS + PROMO_PITCH_STRIKE_HOLD_MS;
       const from = line.querySelector('.promo-opening__from');
       const to = line.querySelector('.promo-opening__to');
+
+      window.setTimeout(() => {
+        cta?.classList.add('is-revealed');
+      }, wordsInAt);
 
       window.setTimeout(() => {
         if (from) from.style.width = `${from.scrollWidth}px`;
@@ -378,13 +304,15 @@
         line.classList.add('is-erasing', 'is-redefined');
       }, morphAt);
 
+      window.setTimeout(() => {
+        cta?.classList.add('is-underlined');
+      }, morphAt + PROMO_PITCH_MORPH_MS);
+
       window.setTimeout(() => this.depart(), morphAt + PROMO_PITCH_MORPH_MS + PROMO_PITCH_SETTLE_MS);
     }
 
     depart() {
-      this.markWidgetReady();
-      this.pinWidgetOrigin();
-      this.unpinSurface();
+      this.restoreWidget();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');
       this.root.classList.add('is-depart');
@@ -398,6 +326,7 @@
       window.history.replaceState({}, '', url.toString());
       promoStoreUnlocked = true;
 
+      this.restoreWidget();
       document.documentElement.classList.remove('is-promo-opening', 'is-promo-pitch', 'is-promo-depart');
       this.root.remove();
       this.onStoreReady?.();
