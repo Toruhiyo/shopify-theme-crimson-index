@@ -436,7 +436,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__choice-layer--hot {
   color: var(--bizmis-orange, #f9a353);
-  transition: opacity 200ms linear, color 130ms linear;
+  transition: opacity 200ms linear, color 100ms linear;
 }
 
 .promo-opening.is-agentic-white .promo-opening__choice--right .promo-opening__choice-layer--hot {
