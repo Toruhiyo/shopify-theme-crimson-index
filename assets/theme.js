@@ -573,8 +573,14 @@
       const resetText = () => {
         line?.classList.remove('is-revealing', 'is-striking', 'is-erasing', 'is-redefined', 'is-replaced');
         fromFace?.classList.remove('is-exiting');
-        if (fromFace) fromFace.style.visibility = '';
-        if (toFace) toFace.style.visibility = '';
+        if (fromFace) {
+          fromFace.style.visibility = '';
+          fromFace.style.opacity = '';
+        }
+        if (toFace) {
+          toFace.style.visibility = '';
+          toFace.style.opacity = '';
+        }
         fromWords.forEach((word) => {
           word.style.opacity = '';
           word.style.animation = 'none';
@@ -635,8 +641,14 @@
         }
         resetText();
         line?.classList.add('is-revealing');
-        if (fromFace) fromFace.style.visibility = 'visible';
-        if (toFace) toFace.style.visibility = 'hidden';
+        if (fromFace) {
+          fromFace.style.visibility = 'visible';
+          fromFace.style.opacity = '1';
+        }
+        if (toFace) {
+          toFace.style.visibility = 'hidden';
+          toFace.style.opacity = '0';
+        }
         fromWords.forEach((word, index) => {
           word.style.opacity = index < count ? '1' : '0';
         });
@@ -651,8 +663,14 @@
         }
         resetText();
         line?.classList.add('is-replaced');
-        if (fromFace) fromFace.style.visibility = 'hidden';
-        if (toFace) toFace.style.visibility = 'visible';
+        if (fromFace) {
+          fromFace.style.visibility = 'hidden';
+          fromFace.style.opacity = '0';
+        }
+        if (toFace) {
+          toFace.style.visibility = 'visible';
+          toFace.style.opacity = '1';
+        }
         toWords.forEach((word, wordIndex) => {
           word.classList.toggle('is-in', wordIndex === index);
           word.classList.toggle('is-out', wordIndex < index);

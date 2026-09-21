@@ -6,20 +6,22 @@ import os from 'node:os';
 import path from 'node:path';
 
 const OUT_DIR = process.env.PROMO_FRAMES_DIR
-  || path.join(os.homedir(), 'Projects/Bizmis/promo-opening-frames');
+  || path.join(os.homedir(), 'Projects/Bizmis/videos/promo-1');
 const BASE_URL = process.env.PROMO_FRAMES_URL
   || 'https://meridian-consumer-electronics.myshopify.com/';
 const VIEWPORT = {
   width: Number(process.env.PROMO_FRAMES_WIDTH || 1440),
   height: Number(process.env.PROMO_FRAMES_HEIGHT || 900),
 };
+const LIVE_LAYOUT_MARK = 'width: min(1100px, 100%)';
+const LIVE_LAYOUT_TIMEOUT_MS = Number(process.env.PROMO_FRAMES_SYNC_MS || 180000);
 
 const FRAMES = [
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.'],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.'],
   ['03-orange-burst', 'Orange burst from the knob. Full-field takeover.'],
-  ['04-logo-docked', 'White field. Orange Bizmis mark in the text column. Clerk in the clerk column.'],
-  ['05-logo-gone', 'Mark has left. Text column empty. Clerk stays in his column.'],
+  ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk on the right.'],
+  ['05-logo-gone', 'Mark has left. Copy seat empty. Clerk stays on the right.'],
   ['06-your', 'First word: Your.'],
   ['07-your-store', 'Your store. Single normal space.'],
   ['08-salesperson', 'Your store salesperson. salesperson is one word. Period on this token.'],
@@ -28,7 +30,7 @@ const FRAMES = [
   ['11-built', 'First line gone. Built at the same type size.'],
   ['12-to', 'Only to, same type size.'],
   ['13-sell', 'Only sell. in Bizmis orange, same type size.'],
-  ['14-sell-wave', 'sell. hold. Clerk waves once after park, still in his column.'],
+  ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.'],
 ];
 
 function openingUrl() {
@@ -38,15 +40,47 @@ function openingUrl() {
   return url.toString();
 }
 
+function emptyOutDir() {
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.rmSync(OUT_DIR, { recursive: true, force: true });
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+}
+
+async function stylesheetHasLayout(page) {
+  const hrefs = await page.$$eval('link[rel="stylesheet"]', (links) => links.map((link) => link.href));
+  for (const href of hrefs) {
+    try {
+      const response = await page.request.get(href);
+      const text = await response.text();
+      if (text.includes(LIVE_LAYOUT_MARK) && text.includes('.promo-opening__stage')) return true;
+    } catch {
+      // Keep polling. Shopify may still be swapping the asset.
+    }
+  }
+  return false;
+}
+
+async function waitForLiveLayout(page) {
+  const deadline = Date.now() + LIVE_LAYOUT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    if (await stylesheetHasLayout(page)) return;
+    process.stdout.write('waiting for Shopify theme sync...\n');
+    await page.waitForTimeout(8000);
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+  }
+  throw new Error(`Shopify theme CSS has not synced "${LIVE_LAYOUT_MARK}" yet`);
+}
+
 function writeCaptions() {
   const body = [
     '# Bizmis promo opening storyboard',
     '',
     'Forced keyframes from `?promo_video=opening`. Read the PNGs in filename order.',
     '',
-    'Layout: text column 8%–52% of the viewport, clerk column 56%–92%. Clerk is centred in his column. Columns do not overlap.',
+    'Layout: one centered 1100px two-column stage. Copy left, clerk right. Overflow hidden so the columns do not overlap.',
     '',
-    'Type size is fitted so the longest first-build line (`Your store salesperson.`) fills the text column. Built / to / sell. use that same size.',
+    'Type size is `clamp(4.4rem, 8.4vw, 7.2rem)`. Built / to / sell. are 2em of that line.',
     '',
     '## Frames',
     '',
@@ -65,11 +99,17 @@ async function waitForOpening(page) {
   await page.waitForTimeout(2500);
 }
 
+async function revealForcedFaces(page) {
+  await page.evaluate(() => {
+    const fromFace = document.querySelector('[data-promo-face-from]');
+    const toFace = document.querySelector('[data-promo-face-to]');
+    if (fromFace && getComputedStyle(fromFace).visibility === 'visible') fromFace.style.opacity = '1';
+    if (toFace && getComputedStyle(toFace).visibility === 'visible') toFace.style.opacity = '1';
+  });
+}
+
 async function main() {
-  fs.mkdirSync(OUT_DIR, { recursive: true });
-  for (const file of fs.readdirSync(OUT_DIR)) {
-    if (file.endsWith('.png')) fs.unlinkSync(path.join(OUT_DIR, file));
-  }
+  emptyOutDir();
 
   const url = openingUrl();
   const browser = await chromium.launch({ headless: true });
@@ -79,12 +119,14 @@ async function main() {
   });
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await waitForLiveLayout(page);
   await waitForOpening(page);
 
   for (const [id] of FRAMES) {
     const waitMs = await page.evaluate((frameId) => {
       return window.__promoOpeningFrames.showExportFrame(frameId);
     }, id);
+    await revealForcedFaces(page);
     await page.waitForTimeout(Math.max(120, Number(waitMs) || 180));
     await page.screenshot({
       path: path.join(OUT_DIR, `${id}.png`),
