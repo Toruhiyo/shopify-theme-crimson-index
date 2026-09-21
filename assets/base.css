@@ -576,6 +576,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: visible;
 }
 
+.promo-opening.is-see .promo-opening__stage {
+  width: min(1400px, 100%);
+  grid-template-columns: minmax(0, 1fr) 24rem;
+}
+
 .promo-opening__copy {
   display: grid;
   align-items: center;
@@ -777,7 +782,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__slide {
   position: relative;
-  flex: 0 0 min(40rem, 78vw);
+  flex: 0 0 min(36rem, 64vw);
   margin: 0;
   overflow: visible;
   background: none;
@@ -1000,7 +1005,7 @@ html.is-promo-ready .promo-opening__boot {
   z-index: 3;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   justify-self: center;
   min-width: 0;
   width: 100%;
@@ -1009,14 +1014,16 @@ html.is-promo-ready .promo-opening__boot {
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked {
-  --promo-avatar-w: 380px;
-  --promo-avatar-h: 340px;
-  --promo-avatar-scale: 1.72;
+  --promo-avatar-w: 440px;
+  --promo-avatar-h: 470px;
+  --promo-avatar-scale: 1.55;
   position: relative !important;
   top: auto !important;
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
+  flex-shrink: 0 !important;
+  max-width: none !important;
   width: calc(var(--promo-avatar-w) * var(--promo-avatar-scale)) !important;
   height: calc(var(--promo-avatar-h) * var(--promo-avatar-scale)) !important;
   transform: none !important;
