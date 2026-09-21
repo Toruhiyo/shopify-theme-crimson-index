@@ -84,7 +84,7 @@ function writeCaptions() {
     '',
     '## Frames',
     '',
-    ...FRAMES.map(([id, caption]) => `- \`${id}.png\` — ${caption}`),
+    ...FRAMES.map(([id, caption]) => `- \`${id}.png\`: ${caption}`),
     '',
   ].join('\n');
   fs.writeFileSync(path.join(OUT_DIR, 'CAPTIONS.md'), body);
