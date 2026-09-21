@@ -511,8 +511,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: block;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4vw;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
@@ -529,19 +531,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__stage {
-  position: absolute;
-  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 2rem;
+  width: min(1100px, 100%);
   overflow: hidden;
 }
 
 .promo-opening__copy {
   display: grid;
   align-items: center;
-  position: absolute;
-  top: 50%;
-  left: 8vw;
-  width: 44vw;
-  transform: translateY(-50%);
+  justify-self: stretch;
+  min-width: 0;
+  width: 100%;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -561,7 +564,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   color: #1d1d1f;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: var(--promo-pitch-size, 4rem);
+  font-size: clamp(4.4rem, 8.4vw, 7.2rem);
   line-height: var(--promo-pitch-lh);
   letter-spacing: -0.035em;
   white-space: normal;
@@ -590,7 +593,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__face--to .promo-opening__word--hero {
   grid-area: 1 / 1;
   margin-right: 0;
-  font-size: 1em;
+  font-size: 2em;
   line-height: var(--promo-pitch-lh);
   letter-spacing: -0.04em;
   white-space: nowrap;
@@ -753,11 +756,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  top: 50%;
-  left: 56vw;
-  width: 36vw;
-  transform: translateY(-50%);
+  justify-self: center;
+  min-width: 0;
+  width: 100%;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -780,7 +781,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   bottom: auto !important;
   width: calc(var(--promo-avatar-w) * var(--promo-avatar-scale)) !important;
   height: calc(var(--promo-avatar-h) * var(--promo-avatar-scale)) !important;
-  max-width: 100% !important;
   transform: none !important;
   margin: 0 !important;
   z-index: 1 !important;
@@ -890,14 +890,16 @@ html.is-promo-widget-entering .avatar-widget-container {
 }
 
 @media (max-width: 749px) {
-  .promo-opening__copy {
-    left: 8vw;
-    width: 44vw;
+  .promo-opening__pitch {
+    padding: 0 1.25rem;
   }
 
-  .promo-opening__widget {
-    left: 56vw;
-    width: 36vw;
+  .promo-opening__stage {
+    width: 100%;
+  }
+
+  .promo-opening__line {
+    font-size: 3.4rem;
   }
 }
 

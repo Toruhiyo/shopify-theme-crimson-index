@@ -137,8 +137,6 @@
   const PROMO_PITCH_REPLACE_PAUSE_MS = 920;
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
-  const PROMO_PITCH_FIT_PROBE_PX = 80;
-  const PROMO_AVATAR_BASE_W = 288;
   const PROMO_AVATAR_MAX_SCALE = 2.3;
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
   const PROMO_PITCH_HERO_IN_MS = 400;
@@ -331,46 +329,13 @@
     }
 
     fitOpeningType() {
-      const copy = this.root.querySelector('.promo-opening__copy');
-      const line = this.line;
-      const fromFace = this.root.querySelector('[data-promo-face-from]');
-      if (!copy || !line || !fromFace) return;
-
-      const words = [...fromFace.querySelectorAll('[data-promo-from-word]')];
-      const prev = words.map((word) => ({
-        opacity: word.style.opacity,
-        animation: word.style.animation,
-        transform: word.style.transform,
-      }));
-      words.forEach((word) => {
-        word.style.opacity = '1';
-        word.style.animation = 'none';
-        word.style.transform = 'none';
-      });
-
-      line.style.fontSize = `${PROMO_PITCH_FIT_PROBE_PX}px`;
-      const widest = [...fromFace.getClientRects()].reduce((max, rect) => Math.max(max, rect.width), 0);
-      const budget = copy.clientWidth;
-      const next = widest > 0 && budget > 0
-        ? Math.floor(PROMO_PITCH_FIT_PROBE_PX * (budget / widest))
-        : PROMO_PITCH_FIT_PROBE_PX;
-      line.style.fontSize = `${next}px`;
-
-      words.forEach((word, index) => {
-        word.style.opacity = prev[index].opacity;
-        word.style.animation = prev[index].animation;
-        word.style.transform = prev[index].transform;
-      });
+      if (this.line) this.line.style.fontSize = '';
     }
 
     fitClerk() {
-      const slot = this.root.querySelector('[data-promo-widget]');
       const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
-      if (!slot || !embed || !embed.classList.contains('is-promo-widget-parked')) return;
-      const budget = slot.clientWidth;
-      if (budget < 4) return;
-      const scale = Math.min(PROMO_AVATAR_MAX_SCALE, budget / PROMO_AVATAR_BASE_W);
-      embed.style.setProperty('--promo-avatar-scale', String(scale));
+      if (!embed || !embed.classList.contains('is-promo-widget-parked')) return;
+      embed.style.setProperty('--promo-avatar-scale', String(PROMO_AVATAR_MAX_SCALE));
     }
 
     fitOpeningLayout() {
