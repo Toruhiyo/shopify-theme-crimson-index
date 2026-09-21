@@ -142,7 +142,14 @@ async function main() {
 
   for (const [id, , waitMs] of FRAMES) {
     await page.evaluate((frameId) => {
-      return window.__promoOpeningFrames.showExportFrame(frameId);
+      window.__promoOpeningFrames.showExportFrame(frameId);
+      if (frameId === '02b-toggle-gone' || frameId === '03-orange-burst') {
+        const toggle = document.querySelector('.promo-opening__toggle');
+        if (toggle) {
+          toggle.style.transition = 'none';
+          toggle.style.opacity = '0';
+        }
+      }
     }, id);
     await revealForcedFaces(page);
     if (waitMs) await page.waitForTimeout(waitMs);

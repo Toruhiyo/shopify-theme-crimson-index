@@ -1083,7 +1083,10 @@
         );
         showToggle();
         const toggle = root.querySelector('.promo-opening__toggle');
-        if (toggle) toggle.style.opacity = '';
+        if (toggle) {
+          toggle.style.transition = '';
+          toggle.style.opacity = '';
+        }
         if (logo) {
           logo.style.opacity = '';
           logo.style.visibility = '';
@@ -1105,7 +1108,10 @@
           rest();
           root.classList.add('is-on', 'is-cleared');
           const toggle = root.querySelector('.promo-opening__toggle');
-          if (toggle) toggle.style.opacity = '0';
+          if (toggle) {
+            toggle.style.transition = 'none';
+            toggle.style.opacity = '0';
+          }
           return 80;
         },
         '03-orange-burst': () => {
@@ -1113,7 +1119,10 @@
           this.pinKnobOrigin();
           root.classList.add('is-on', 'is-cleared', 'is-bursting');
           const toggle = root.querySelector('.promo-opening__toggle');
-          if (toggle) toggle.style.opacity = '0';
+          if (toggle) {
+            toggle.style.transition = 'none';
+            toggle.style.opacity = '0';
+          }
           return 200;
         },
         '04-logo-docked': () => {
