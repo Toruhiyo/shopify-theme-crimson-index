@@ -2701,7 +2701,7 @@
     + HERO_REDEFINE_STRIKE_HOLD_MS
     + HERO_REDEFINE_MORPH_MS
     + HERO_REDEFINE_SETTLE_MS;
-  const HERO_LINE_UNDERLINE_MS = 250;
+  const HERO_LINE_UNDERLINE_MS = 1050;
 
   class HeroCopyReveal {
     constructor(slideshow) {
@@ -2851,10 +2851,30 @@
       if (!this.cta) return;
       this.groupCtaLines();
       this.cta.classList.add('is-underlined');
-      const lines = this.cta.querySelectorAll('.hero__title-cta-line');
-      lines.forEach((line, index) => {
-        window.setTimeout(() => line.classList.add('is-underlined'), index * HERO_LINE_UNDERLINE_MS);
-      });
+      const lines = [...this.cta.querySelectorAll('.hero__title-cta-line')];
+
+      const startLine = (index) => {
+        const line = lines[index];
+        if (!line) return;
+
+        const nextIndex = index + 1;
+        if (nextIndex < lines.length) {
+          let startedNext = false;
+          const startNext = () => {
+            if (startedNext) return;
+            startedNext = true;
+            startLine(nextIndex);
+          };
+          line.addEventListener('transitionend', (event) => {
+            if (event.propertyName === 'transform') startNext();
+          });
+          window.setTimeout(startNext, HERO_LINE_UNDERLINE_MS);
+        }
+
+        line.classList.add('is-underlined');
+      };
+
+      startLine(0);
     }
 
     playRedefine(line) {
