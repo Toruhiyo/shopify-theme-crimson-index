@@ -180,8 +180,17 @@
       </button>
     </div>
     <div class="promo-opening__logo" aria-hidden="true">
+      <img
+        class="promo-opening__logo-img"
+        src="{{ promo_logo_url }}"
+        alt=""
+        width="1948"
+        height="640"
+        data-promo-logo-img
+      >
       <span
         class="promo-opening__logo-layer promo-opening__logo-layer--white"
+        data-promo-logo-mask
         style="-webkit-mask-image: url('{{ promo_logo_url }}'); mask-image: url('{{ promo_logo_url }}');"
       ></span>
     </div>

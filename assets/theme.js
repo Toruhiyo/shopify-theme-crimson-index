@@ -166,6 +166,18 @@
   const PROMO_TYPE_CHAR_MS = 55;
   const PROMO_TYPE_FIND_MS = 15000;
 
+  function applySolidOpeningLogo(dataUrl) {
+    if (!dataUrl) return;
+    const img = document.querySelector('[data-promo-logo-img]');
+    const mask = document.querySelector('[data-promo-logo-mask]');
+    if (img) img.src = dataUrl;
+    if (mask) {
+      const value = `url("${dataUrl}")`;
+      mask.style.webkitMaskImage = value;
+      mask.style.maskImage = value;
+    }
+  }
+
   function createPromoWidgetBridge() {
     let originalInit = null;
     let originalDestroy = null;
@@ -218,11 +230,13 @@
         }
         ctx.putImageData(image, 0, 0);
         solidStampUrl = canvas.toDataURL('image/png');
+        applySolidOpeningLogo(solidStampUrl);
         stampReady = true;
         stampWaiters.splice(0).forEach((run) => run());
       };
       img.onerror = () => {
         solidStampUrl = url;
+        applySolidOpeningLogo(url);
         stampReady = true;
         stampWaiters.splice(0).forEach((run) => run());
       };
