@@ -189,15 +189,15 @@
 
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_FLIP_BURST_MS = 600;
-  const PROMO_FLIP_HOLD_MS = 420;
-  const PROMO_PITCH_WORD_STAGGER_MS = 55;
-  const PROMO_PITCH_WORD_IN_MS = 260;
-  const PROMO_PITCH_REDEFINE_HOLD_MS = 160;
-  const PROMO_PITCH_STRIKE_MS = 260;
-  const PROMO_PITCH_STRIKE_HOLD_MS = 80;
-  const PROMO_PITCH_MORPH_MS = 380;
-  const PROMO_PITCH_SETTLE_MS = 700;
-  const PROMO_DEPART_MS = 720;
+  const PROMO_FLIP_HOLD_MS = 1100;
+  const PROMO_PITCH_WORD_STAGGER_MS = 100;
+  const PROMO_PITCH_WORD_IN_MS = 420;
+  const PROMO_PITCH_REDEFINE_HOLD_MS = 480;
+  const PROMO_PITCH_STRIKE_MS = 420;
+  const PROMO_PITCH_STRIKE_HOLD_MS = 200;
+  const PROMO_PITCH_MORPH_MS = 720;
+  const PROMO_PITCH_SETTLE_MS = 1600;
+  const PROMO_DEPART_MS = 1100;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -259,11 +259,33 @@
 
     pinWidgetOrigin() {
       const widget = document.getElementById('bizmis-avatar-embed');
-      const target = widget && widget.offsetHeight > 8 ? widget : this.root.querySelector('[data-promo-star]');
+      const target = widget && widget.offsetWidth > 8 ? widget : this.root.querySelector('[data-promo-star]');
       if (!target) return;
       const rect = target.getBoundingClientRect();
       this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
       this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+    }
+
+    dockWidget() {
+      const slot = this.root.querySelector('[data-promo-star]');
+      const widget = document.getElementById('bizmis-avatar-embed');
+      if (!slot || !widget) return;
+      const rect = slot.getBoundingClientRect();
+      widget.style.setProperty('top', `${rect.top}px`, 'important');
+      widget.style.setProperty('left', `${rect.left}px`, 'important');
+      widget.style.setProperty('width', `${rect.width}px`, 'important');
+      widget.style.setProperty('height', `${rect.height}px`, 'important');
+      widget.style.setProperty('right', 'auto', 'important');
+      widget.style.setProperty('bottom', 'auto', 'important');
+      widget.style.setProperty('transform', 'none', 'important');
+    }
+
+    undockWidget() {
+      const widget = document.getElementById('bizmis-avatar-embed');
+      if (!widget) return;
+      ['top', 'left', 'width', 'height', 'right', 'bottom', 'transform'].forEach((prop) => {
+        widget.style.removeProperty(prop);
+      });
     }
 
     flip() {
@@ -298,19 +320,21 @@
 
     pitch() {
       this.markWidgetReady();
-      const watch = new MutationObserver(() => this.markWidgetReady());
+      const watch = new MutationObserver(() => {
+        this.markWidgetReady();
+        this.dockWidget();
+      });
       watch.observe(document.body, { childList: true, subtree: true });
-      window.setTimeout(() => watch.disconnect(), 4000);
+      window.setTimeout(() => watch.disconnect(), 6000);
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
+      requestAnimationFrame(() => this.dockWidget());
       this.playPitchLine();
     }
 
     markWidgetReady() {
       const widget = document.getElementById('bizmis-avatar-embed');
-      if (widget && widget.offsetHeight > 8) {
-        document.documentElement.classList.add('has-promo-widget');
-      }
+      if (widget) document.documentElement.classList.add('has-promo-widget');
     }
 
     playPitchLine() {
@@ -349,6 +373,7 @@
     depart() {
       this.markWidgetReady();
       this.pinWidgetOrigin();
+      this.undockWidget();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');
       this.root.classList.add('is-depart');

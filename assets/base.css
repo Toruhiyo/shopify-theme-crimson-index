@@ -321,8 +321,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 0;
   transform: translate(-50%, -160%) scale(0.42);
   transition:
-    opacity 200ms linear,
-    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 320ms linear,
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .promo-opening.is-red .promo-opening__logo {
@@ -490,10 +490,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 28vw);
   align-items: center;
-  justify-content: flex-start;
-  gap: 4vw;
+  column-gap: 4vw;
   padding: 0 min(8vw, 96px);
   pointer-events: none;
   opacity: 0;
@@ -505,18 +505,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-depart .promo-opening__pitch {
   opacity: 0;
-  transition: opacity 280ms linear;
+  transition: opacity 500ms linear;
 }
 
 .promo-opening__line {
   margin: 0;
-  max-width: 54vw;
   color: #fff;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(2.2rem, 5.4vw, 4.6rem);
+  font-size: clamp(2.4rem, 5.2vw, 4.4rem);
   line-height: 1.06;
   letter-spacing: -0.03em;
+  white-space: nowrap;
+  justify-self: start;
 }
 
 .promo-opening__word {
@@ -527,7 +528,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__line.is-revealing .promo-opening__word {
-  animation: promo-pitch-word 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: promo-pitch-word 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes promo-pitch-word {
@@ -554,8 +555,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__from {
   position: relative;
   transition:
-    width 380ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 280ms linear;
+    width 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 420ms linear;
 }
 
 .promo-opening__from::after {
@@ -568,7 +569,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   background: #fff;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .promo-opening__line.is-striking .promo-opening__from::after {
@@ -580,8 +581,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 0;
   white-space: pre;
   transition:
-    width 380ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 280ms linear;
+    width 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 420ms linear;
 }
 
 .promo-opening__line.is-erasing .promo-opening__from,
@@ -599,46 +600,27 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__star {
-  flex: 0 0 auto;
-  width: min(28vw, 280px);
-  height: min(28vw, 280px);
-  margin-left: auto;
+  width: min(28vw, 300px);
+  height: min(28vw, 300px);
+  justify-self: end;
+  border-radius: 28px;
+  background: transparent;
+}
+
+html:not(:has(#bizmis-avatar-embed)) .promo-opening.is-pitch .promo-opening__star {
   border-radius: 50%;
   background:
     radial-gradient(circle at 35% 30%, #fff 0%, rgba(255, 255, 255, 0.2) 18%, transparent 42%),
     radial-gradient(circle at 50% 55%, #ffd19a 0%, var(--bizmis-orange, #f9a353) 55%, #ec7709 100%);
   box-shadow: 0 18px 60px rgba(47, 54, 64, 0.18);
-  transform: scale(0.2);
-  opacity: 0;
-}
-
-.promo-opening.is-pitch .promo-opening__star {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 220ms linear,
-    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html.has-promo-widget .promo-opening__star {
-  opacity: 0 !important;
-  transform: scale(0.2);
 }
 
 html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,
 html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root {
   visibility: visible !important;
   pointer-events: none !important;
-  top: 50% !important;
-  right: max(4vw, 32px) !important;
-  bottom: auto !important;
-  left: auto !important;
-  transform: translate3d(0, -50%, 0) scale(1.28) !important;
+  overflow: hidden;
   z-index: 100001 !important;
-  transition:
-    top 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    right 320ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
