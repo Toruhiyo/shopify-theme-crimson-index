@@ -591,6 +591,229 @@
       promoWidget.remountForStore();
       this.onStoreReady?.();
     }
+
+    showExportFrame(name) {
+      const root = this.root;
+      const html = document.documentElement;
+      const center = root.querySelector('.promo-opening__center');
+      const logo = root.querySelector('.promo-opening__logo');
+      const line = this.line;
+      const fromFace = root.querySelector('[data-promo-face-from]');
+      const toFace = root.querySelector('[data-promo-face-to]');
+      const fromWords = fromFace ? [...fromFace.querySelectorAll('[data-promo-from-word]')] : [];
+      const toWords = toFace ? [...toFace.querySelectorAll('[data-promo-to-word]')] : [];
+      const from = line?.querySelector('.promo-opening__from');
+      const to = line?.querySelector('.promo-opening__to');
+
+      const resetText = () => {
+        line?.classList.remove('is-revealing', 'is-striking', 'is-erasing', 'is-redefined', 'is-replaced');
+        fromFace?.classList.remove('is-exiting');
+        if (fromFace) fromFace.style.visibility = '';
+        if (toFace) toFace.style.visibility = '';
+        fromWords.forEach((word) => {
+          word.style.opacity = '';
+          word.style.animation = 'none';
+          word.style.transform = 'none';
+        });
+        toWords.forEach((word) => {
+          word.classList.remove('is-in', 'is-out');
+          word.style.opacity = '';
+          word.style.animation = 'none';
+          word.style.transform = '';
+        });
+        if (from) {
+          from.style.width = '';
+          from.style.opacity = '';
+        }
+        if (to) {
+          to.style.width = '';
+          to.style.opacity = '';
+        }
+      };
+
+      const hideToggle = () => {
+        if (!center) return;
+        center.style.visibility = 'hidden';
+        center.style.opacity = '0';
+      };
+
+      const showToggle = () => {
+        if (!center) return;
+        center.style.visibility = '';
+        center.style.opacity = '';
+      };
+
+      const enterPitch = () => {
+        html.classList.add('is-promo-opening', 'is-promo-pitch');
+        root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch');
+        root.classList.remove('is-logo-leaving', 'is-depart');
+        hideToggle();
+        this.parkWidget();
+        this.fitOpeningLayout();
+      };
+
+      const hideCopy = () => {
+        resetText();
+        if (fromFace) fromFace.style.visibility = 'hidden';
+        if (toFace) toFace.style.visibility = 'hidden';
+        fromWords.forEach((word) => {
+          word.style.opacity = '0';
+        });
+      };
+
+      const showFromCount = (count) => {
+        enterPitch();
+        root.classList.add('is-logo-leaving');
+        if (logo) {
+          logo.style.opacity = '0';
+          logo.style.visibility = 'hidden';
+        }
+        resetText();
+        line?.classList.add('is-revealing');
+        if (fromFace) fromFace.style.visibility = 'visible';
+        if (toFace) toFace.style.visibility = 'hidden';
+        fromWords.forEach((word, index) => {
+          word.style.opacity = index < count ? '1' : '0';
+        });
+      };
+
+      const showHero = (index) => {
+        enterPitch();
+        root.classList.add('is-logo-leaving');
+        if (logo) {
+          logo.style.opacity = '0';
+          logo.style.visibility = 'hidden';
+        }
+        resetText();
+        line?.classList.add('is-replaced');
+        if (fromFace) fromFace.style.visibility = 'hidden';
+        if (toFace) toFace.style.visibility = 'visible';
+        toWords.forEach((word, wordIndex) => {
+          word.classList.toggle('is-in', wordIndex === index);
+          word.classList.toggle('is-out', wordIndex < index);
+          word.style.opacity = wordIndex === index ? '1' : '0';
+          word.style.transform = 'none';
+          word.style.animation = 'none';
+        });
+      };
+
+      const rest = () => {
+        html.classList.add('is-promo-opening');
+        html.classList.remove('is-promo-pitch', 'is-promo-depart');
+        root.classList.remove(
+          'is-on',
+          'is-bursting',
+          'is-holding',
+          'is-pitch',
+          'is-logo-docked',
+          'is-logo-leaving',
+          'is-depart'
+        );
+        showToggle();
+        if (logo) {
+          logo.style.opacity = '';
+          logo.style.visibility = '';
+        }
+        resetText();
+      };
+
+      const frames = {
+        '01-toggle-rest': () => {
+          rest();
+          return 120;
+        },
+        '02-toggle-on': () => {
+          rest();
+          root.classList.add('is-on');
+          return 120;
+        },
+        '03-orange-burst': () => {
+          rest();
+          this.pinKnobOrigin();
+          root.classList.add('is-on', 'is-bursting');
+          return 200;
+        },
+        '04-logo-docked': () => {
+          enterPitch();
+          root.classList.remove('is-logo-leaving');
+          if (logo) {
+            logo.style.opacity = '1';
+            logo.style.visibility = 'visible';
+          }
+          hideCopy();
+          this.fitOpeningLayout();
+          return 240;
+        },
+        '05-logo-gone': () => {
+          enterPitch();
+          root.classList.add('is-logo-leaving');
+          if (logo) {
+            logo.style.opacity = '0';
+            logo.style.visibility = 'hidden';
+          }
+          hideCopy();
+          return 180;
+        },
+        '06-your': () => {
+          showFromCount(1);
+          return 180;
+        },
+        '07-your-store': () => {
+          showFromCount(2);
+          return 180;
+        },
+        '08-salesperson': () => {
+          showFromCount(3);
+          return 180;
+        },
+        '09-salesperson-struck': () => {
+          showFromCount(3);
+          line?.classList.add('is-striking');
+          if (from) from.style.width = `${from.getBoundingClientRect().width}px`;
+          if (to) {
+            to.style.width = '0px';
+            to.style.opacity = '0';
+          }
+          return 180;
+        },
+        '10-sales-agent': () => {
+          showFromCount(3);
+          line?.classList.add('is-redefined');
+          if (from) {
+            from.style.width = '0px';
+            from.style.opacity = '0';
+          }
+          if (to) {
+            to.style.width = '';
+            to.style.opacity = '1';
+          }
+          return 180;
+        },
+        '11-built': () => {
+          showHero(0);
+          return 180;
+        },
+        '12-to': () => {
+          showHero(1);
+          return 180;
+        },
+        '13-sell': () => {
+          showHero(2);
+          return 180;
+        },
+        '14-sell-wave': () => {
+          showHero(2);
+          openingWavePlayed = false;
+          openingWaveStarted = false;
+          armOpeningWave();
+          return 700;
+        },
+      };
+
+      const run = frames[name];
+      if (!run) throw new Error(`Unknown promo opening frame: ${name}`);
+      return run();
+    }
   }
 
   class PromoCover {
@@ -2993,10 +3216,11 @@
     if (promoVideo === 'opening') {
       const opening = document.querySelector('[data-promo-opening]');
       if (opening) {
-        new PromoOpening(opening, () => {
+        const openingController = new PromoOpening(opening, () => {
           heroReveal?.begin();
           startPromoTypewriter();
         });
+        window.__promoOpeningFrames = openingController;
       }
     } else if (hasPromoCover()) {
       const cover = document.querySelector('[data-promo-cover]');
