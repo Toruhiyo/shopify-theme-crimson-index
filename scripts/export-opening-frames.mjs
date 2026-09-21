@@ -124,7 +124,10 @@ async function main() {
 
   const { chromium } = await loadPlaywright();
   const url = openingUrl();
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    channel: process.env.PROMO_FRAMES_CHANNEL || 'chrome',
+  });
   const page = await browser.newPage({
     viewport: VIEWPORT,
     deviceScaleFactor: 1,
