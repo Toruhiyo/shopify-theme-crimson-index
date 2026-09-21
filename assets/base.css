@@ -127,9 +127,19 @@ html.is-promo-cover .loader {
   display: none !important;
 }
 
-html.is-promo-opening body > *:not([data-promo-opening]) {
+html.is-promo-opening body > *:not([data-promo-opening]):not(#bizmis-avatar-embed):not(.bizmis-avatar-widget-root) {
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) #bizmis-avatar-embed,
+html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) .bizmis-avatar-widget-root {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+html.is-promo-opening.is-promo-depart body > * {
+  visibility: visible !important;
 }
 
 html.is-promo-cover,
@@ -164,6 +174,11 @@ html.is-promo-opening .promo-opening {
   display: block;
 }
 
+html.is-promo-opening.is-promo-depart .promo-opening {
+  background: transparent;
+  pointer-events: none;
+}
+
 .promo-opening__fill--orange {
   position: absolute;
   left: var(--promo-knob-x);
@@ -193,6 +208,19 @@ html.is-promo-opening .promo-opening {
 
 .promo-opening.is-holding .promo-opening__fill--orange {
   background: var(--bizmis-orange, #f9a353);
+}
+
+.promo-opening.is-depart .promo-opening__fill--orange,
+.promo-opening.is-depart .promo-opening__radiance,
+.promo-opening.is-depart .promo-opening__center {
+  opacity: 0;
+}
+
+.promo-opening.is-depart .promo-opening__fill--orange {
+  transform: scale(0);
+  transition:
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 480ms linear;
 }
 
 .promo-opening__radiance {
@@ -286,6 +314,15 @@ html.is-promo-opening .promo-opening {
 
 .promo-opening.is-holding .promo-opening__logo {
   opacity: 1;
+}
+
+.promo-opening.is-pitch .promo-opening__logo,
+.promo-opening.is-depart .promo-opening__logo {
+  opacity: 0;
+  transform: translate(-50%, -160%) scale(0.42);
+  transition:
+    opacity 200ms linear,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .promo-opening.is-red .promo-opening__logo {
@@ -449,6 +486,182 @@ html.is-promo-opening .promo-opening {
   opacity: 1;
 }
 
+.promo-opening__pitch {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4vw;
+  padding: 0 min(8vw, 96px);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.promo-opening.is-pitch .promo-opening__pitch {
+  opacity: 1;
+}
+
+.promo-opening.is-depart .promo-opening__pitch {
+  opacity: 0;
+  transition: opacity 280ms linear;
+}
+
+.promo-opening__line {
+  margin: 0;
+  max-width: 54vw;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 5.4vw, 4.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+
+.promo-opening__word {
+  display: inline-block;
+  margin-right: 0.28em;
+  opacity: 0;
+  transform: translate3d(-0.55em, 0.12em, 0);
+}
+
+.promo-opening__line.is-revealing .promo-opening__word {
+  animation: promo-pitch-word 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes promo-pitch-word {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.promo-opening__redefine {
+  display: inline-flex;
+  align-items: baseline;
+  position: relative;
+}
+
+.promo-opening__from,
+.promo-opening__to {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.promo-opening__from {
+  position: relative;
+  transition:
+    width 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 280ms linear;
+}
+
+.promo-opening__from::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.52em;
+  height: 0.07em;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.promo-opening__line.is-striking .promo-opening__from::after {
+  transform: scaleX(1);
+}
+
+.promo-opening__to {
+  width: 0;
+  opacity: 0;
+  white-space: pre;
+  transition:
+    width 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 280ms linear;
+}
+
+.promo-opening__line.is-erasing .promo-opening__from,
+.promo-opening__line.is-redefined .promo-opening__from {
+  opacity: 0;
+}
+
+.promo-opening__line.is-redefined .promo-opening__from {
+  width: 0;
+}
+
+.promo-opening__line.is-redefined .promo-opening__to {
+  width: auto;
+  opacity: 1;
+}
+
+.promo-opening__star {
+  flex: 0 0 auto;
+  width: min(28vw, 280px);
+  height: min(28vw, 280px);
+  margin-left: auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #fff 0%, rgba(255, 255, 255, 0.2) 18%, transparent 42%),
+    radial-gradient(circle at 50% 55%, #ffd19a 0%, var(--bizmis-orange, #f9a353) 55%, #ec7709 100%);
+  box-shadow: 0 18px 60px rgba(47, 54, 64, 0.18);
+  transform: scale(0.2);
+  opacity: 0;
+}
+
+.promo-opening.is-pitch .promo-opening__star {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 220ms linear,
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.has-promo-widget .promo-opening__star {
+  opacity: 0 !important;
+  transform: scale(0.2);
+}
+
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,
+html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root {
+  visibility: visible !important;
+  pointer-events: none !important;
+  top: 50% !important;
+  right: max(4vw, 32px) !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: translate3d(0, -50%, 0) scale(1.28) !important;
+  z-index: 100001 !important;
+  transition:
+    top 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    right 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
+html.is-promo-opening.is-promo-depart .bizmis-avatar-widget-root {
+  visibility: visible !important;
+  pointer-events: none !important;
+  z-index: 100001 !important;
+  transition:
+    top 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    right 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed textarea,
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed input,
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed .bizmis-chat-input-bar,
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed [class*='composer'] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .promo-cover {
   display: none;
   position: fixed;
@@ -485,11 +698,16 @@ html.is-promo-cover .promo-cover,
   .promo-opening__knob,
   .promo-opening__knob-on,
   .promo-opening__store-logo,
+  .promo-opening__pitch,
+  .promo-opening__star,
+  .promo-opening__from,
+  .promo-opening__to,
   .promo-cover {
     transition: none !important;
   }
 
-  .promo-opening__wave {
+  .promo-opening__wave,
+  .promo-opening__line.is-revealing .promo-opening__word {
     animation: none !important;
   }
 }

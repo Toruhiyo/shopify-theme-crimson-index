@@ -123,7 +123,7 @@
       return;
     }
 
-    if (promoVideo !== 'true') return;
+    if (promoVideo !== 'true' && promoVideo !== 'opening') return;
     if (document.querySelector('[data-hero-redefine]')) return;
 
     const hero = document.querySelector('[data-hero-slideshow]');
@@ -189,11 +189,19 @@
 
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_FLIP_BURST_MS = 600;
-  const PROMO_FLIP_HOLD_MS = 2800;
-  const PROMO_FLIP_RED_MS = 700;
+  const PROMO_FLIP_HOLD_MS = 420;
+  const PROMO_PITCH_WORD_STAGGER_MS = 55;
+  const PROMO_PITCH_WORD_IN_MS = 260;
+  const PROMO_PITCH_REDEFINE_HOLD_MS = 160;
+  const PROMO_PITCH_STRIKE_MS = 260;
+  const PROMO_PITCH_STRIKE_HOLD_MS = 80;
+  const PROMO_PITCH_MORPH_MS = 380;
+  const PROMO_PITCH_SETTLE_MS = 700;
+  const PROMO_DEPART_MS = 720;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
+  let promoStoreUnlocked = promoVideo === 'true';
   const PROMO_TYPE_QUERY = 'I want a portable laptop with long battery life for coding.';
   const PROMO_TYPE_AFTER_MS = 8000;
   const PROMO_TYPE_CHAR_MS = 55;
@@ -223,10 +231,12 @@
   }
 
   class PromoOpening {
-    constructor(root) {
+    constructor(root, onStoreReady) {
       this.root = root;
+      this.onStoreReady = onStoreReady;
       this.toggle = root.querySelector('[data-promo-opening-toggle]');
       this.knob = root.querySelector('.promo-opening__knob');
+      this.line = root.querySelector('[data-promo-pitch-line]');
       this.flipping = false;
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
@@ -247,6 +257,15 @@
       this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
     }
 
+    pinWidgetOrigin() {
+      const widget = document.getElementById('bizmis-avatar-embed');
+      const target = widget && widget.offsetHeight > 8 ? widget : this.root.querySelector('[data-promo-star]');
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
+      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+    }
+
     flip() {
       if (this.flipping) return;
       this.flipping = true;
@@ -257,8 +276,7 @@
       }
 
       if (prefersReducedMotion()) {
-        this.root.classList.add('is-on', 'is-red', 'is-reduced');
-        window.setTimeout(() => this.navigate(), PROMO_REDUCED_NAV_MS);
+        this.revealStore();
         return;
       }
 
@@ -275,19 +293,78 @@
 
     hold() {
       this.root.classList.add('is-holding');
-      window.setTimeout(() => this.shiftToRed(), PROMO_FLIP_HOLD_MS);
+      window.setTimeout(() => this.pitch(), PROMO_FLIP_HOLD_MS);
     }
 
-    shiftToRed() {
-      this.root.classList.add('is-red');
-      window.setTimeout(() => this.navigate(), PROMO_FLIP_RED_MS);
+    pitch() {
+      this.markWidgetReady();
+      const watch = new MutationObserver(() => this.markWidgetReady());
+      watch.observe(document.body, { childList: true, subtree: true });
+      window.setTimeout(() => watch.disconnect(), 4000);
+      document.documentElement.classList.add('is-promo-pitch');
+      this.root.classList.add('is-pitch');
+      this.playPitchLine();
     }
 
-    navigate() {
+    markWidgetReady() {
+      const widget = document.getElementById('bizmis-avatar-embed');
+      if (widget && widget.offsetHeight > 8) {
+        document.documentElement.classList.add('has-promo-widget');
+      }
+    }
+
+    playPitchLine() {
+      const line = this.line;
+      if (!line) {
+        window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
+        return;
+      }
+
+      const words = line.querySelectorAll('.promo-opening__word');
+      words.forEach((word, index) => {
+        word.style.animationDelay = `${index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
+      });
+      line.classList.add('is-revealing');
+
+      const wordsInAt = (words.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
+      const strikeAt = wordsInAt + PROMO_PITCH_REDEFINE_HOLD_MS;
+      const morphAt = strikeAt + PROMO_PITCH_STRIKE_MS + PROMO_PITCH_STRIKE_HOLD_MS;
+      const from = line.querySelector('.promo-opening__from');
+      const to = line.querySelector('.promo-opening__to');
+
+      window.setTimeout(() => {
+        if (from) from.style.width = `${from.scrollWidth}px`;
+        line.classList.add('is-striking');
+      }, strikeAt);
+
+      window.setTimeout(() => {
+        if (from) from.style.width = `${from.scrollWidth}px`;
+        if (to) to.style.width = `${to.scrollWidth}px`;
+        line.classList.add('is-erasing', 'is-redefined');
+      }, morphAt);
+
+      window.setTimeout(() => this.depart(), morphAt + PROMO_PITCH_MORPH_MS + PROMO_PITCH_SETTLE_MS);
+    }
+
+    depart() {
+      this.markWidgetReady();
+      this.pinWidgetOrigin();
+      document.documentElement.classList.remove('is-promo-pitch');
+      document.documentElement.classList.add('is-promo-depart');
+      this.root.classList.add('is-depart');
+      window.setTimeout(() => this.revealStore(), PROMO_DEPART_MS);
+    }
+
+    revealStore() {
       const url = new URL(window.location.href);
       url.searchParams.set(PROMO_VIDEO_PARAM, 'true');
       url.searchParams.delete('auto');
-      window.location.replace(url.toString());
+      window.history.replaceState({}, '', url.toString());
+      promoStoreUnlocked = true;
+
+      document.documentElement.classList.remove('is-promo-opening', 'is-promo-pitch', 'is-promo-depart');
+      this.root.remove();
+      this.onStoreReady?.();
     }
   }
 
@@ -2510,7 +2587,7 @@
   }
 
   function isPromoTrueHome() {
-    return promoVideo === 'true' && document.body.classList.contains('template-index');
+    return promoStoreUnlocked && document.body.classList.contains('template-index');
   }
 
   function promoTypeAfterMs() {
@@ -2686,13 +2763,17 @@
       new HeroSlideshow(el);
       heroReveal = new HeroCopyReveal(el);
     });
-    if (promoVideo === 'opening') {
-      const opening = document.querySelector('[data-promo-opening]');
-      if (opening) new PromoOpening(opening);
-    }
     const promoTypewriter = new PromoQueryTypewriter();
     const startPromoTypewriter = () => promoTypewriter.schedule();
-    if (hasPromoCover()) {
+    if (promoVideo === 'opening') {
+      const opening = document.querySelector('[data-promo-opening]');
+      if (opening) {
+        new PromoOpening(opening, () => {
+          heroReveal?.begin();
+          startPromoTypewriter();
+        });
+      }
+    } else if (hasPromoCover()) {
       const cover = document.querySelector('[data-promo-cover]');
       if (cover) new PromoCover(cover, heroReveal, startPromoTypewriter).start();
       else startPromoTypewriter();

@@ -39,7 +39,7 @@
   elsif request.query_string contains 'promo_video=unattended'
     assign unattended = true
     assign promo_video = true
-  elsif request.query_string contains 'promo_video=true'
+  elsif request.query_string contains 'promo_video=true' or request.query_string contains 'promo_video=opening'
     assign promo_video = true
   endif
 
