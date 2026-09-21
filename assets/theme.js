@@ -2701,7 +2701,7 @@
     + HERO_REDEFINE_STRIKE_HOLD_MS
     + HERO_REDEFINE_MORPH_MS
     + HERO_REDEFINE_SETTLE_MS;
-  const HERO_LINE_UNDERLINE_MS = 800;
+  const HERO_LINE_UNDERLINE_MS = 400;
 
   class HeroCopyReveal {
     constructor(slideshow) {
