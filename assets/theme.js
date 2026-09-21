@@ -142,7 +142,7 @@
   const PROMO_PITCH_REPLACE_PAUSE_MS = 920;
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
-  const PROMO_AVATAR_MAX_SCALE = 2.3;
+  const PROMO_AVATAR_MAX_SCALE = 1.72;
   const PROMO_AVATAR_CANVAS_WIDTH_PX = 720;
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
   const PROMO_PITCH_HERO_IN_MS = 400;
@@ -153,14 +153,10 @@
   const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_SEE_HOLD_MS = 700;
   const PROMO_SEE_ROW_AT_MS = 900;
-  const PROMO_SEE_ROULETTE_AT_MS = 1000;
-  const PROMO_SEE_ROULETTE_MS = 1800;
   const PROMO_SEE_LAND_HOLD_MS = 900;
-  const PROMO_SEE_TICK_CLASS_MS = 50;
-  const PROMO_SEE_TICK_MIN_MS = 700;
-  const PROMO_SEE_TICK_MAX_MS = 1100;
+  const PROMO_SEE_GLIDE_START_MS = 480;
+  const PROMO_SEE_GLIDE_END_MS = 1600;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
-  const PROMO_SEE_PASSES = 2;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
   const PROMO_BIZMIS_MESH_COLORS = {
@@ -432,72 +428,26 @@
     return meridian >= 0 ? meridian : 0;
   }
 
-  function shufflePass(count, avoidFirst) {
-    const order = [];
-    for (let i = 0; i < count; i += 1) order.push(i);
-    for (let i = count - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const hold = order[i];
-      order[i] = order[j];
-      order[j] = hold;
-    }
-    if (count > 1 && avoidFirst != null && order[0] === avoidFirst) {
-      const swap = 1 + Math.floor(Math.random() * (count - 1));
-      const hold = order[0];
-      order[0] = order[swap];
-      order[swap] = hold;
-    }
-    return order;
+  function storeInk(accent) {
+    const hex = String(accent || '').replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return accent || '#1d1d1f';
+    const red = parseInt(hex.slice(0, 2), 16);
+    const green = parseInt(hex.slice(2, 4), 16);
+    const blue = parseInt(hex.slice(4, 6), 16);
+    const luma = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+    if (luma < 0.72) return `#${hex}`;
+    const mix = 0.42;
+    const channel = (value) => Math.round(value * (1 - mix)).toString(16).padStart(2, '0');
+    return `#${channel(red)}${channel(green)}${channel(blue)}`;
   }
 
-  function rouletteWaits(storeCount) {
-    const minWaits = Math.max(storeCount * PROMO_SEE_PASSES, 1);
-    const waits = [];
-    let elapsed = 0;
-    while (waits.length < minWaits || elapsed < PROMO_SEE_ROULETTE_MS) {
-      const progress = Math.min(1, elapsed / PROMO_SEE_ROULETTE_MS);
-      const eased = 1 - (1 - progress) * (1 - progress);
-      const wait = PROMO_SEE_TICK_MIN_MS + (PROMO_SEE_TICK_MAX_MS - PROMO_SEE_TICK_MIN_MS) * eased;
-      waits.push(wait);
-      elapsed += wait;
-      if (waits.length > 48) break;
-    }
-    return waits;
-  }
-
-  function rouletteOrder(storeCount, landIndex, tickCount) {
-    if (storeCount <= 0) return [0];
-    if (storeCount === 1) return Array.from({ length: tickCount }, () => 0);
-    const order = [];
-    let last = -1;
-    while (order.length < tickCount - 1) {
-      const remaining = tickCount - 1 - order.length;
-      if (remaining >= storeCount) {
-        const pass = shufflePass(storeCount, last);
-        order.push(...pass);
-        last = pass[pass.length - 1];
-      } else {
-        let next;
-        do {
-          next = Math.floor(Math.random() * storeCount);
-        } while (next === last);
-        order.push(next);
-        last = next;
-      }
-    }
-    if (order.length > tickCount - 1) {
-      order.length = tickCount - 1;
-      last = order[order.length - 1];
-    }
-    if (last === landIndex) {
-      let next;
-      do {
-        next = Math.floor(Math.random() * storeCount);
-      } while (next === landIndex);
-      order[order.length - 1] = next;
-    }
-    order.push(landIndex);
-    return order;
+  function glideSegmentMs(index, lastIndex) {
+    if (lastIndex <= 0) return PROMO_SEE_GLIDE_END_MS;
+    const progress = index / lastIndex;
+    const eased = progress * progress;
+    return Math.round(
+      PROMO_SEE_GLIDE_START_MS + (PROMO_SEE_GLIDE_END_MS - PROMO_SEE_GLIDE_START_MS) * eased
+    );
   }
 
   function storeImageUrls(store) {
@@ -573,16 +523,28 @@
       slide.className = 'promo-opening__slide';
       slide.dataset.store = store.slug;
       slide.style.setProperty('--promo-store-accent', accent);
+      const meta = document.createElement('header');
+      meta.className = 'promo-opening__slide-meta';
+      const ink = storeInk(accent);
+      const name = document.createElement('p');
+      name.className = 'promo-opening__slide-name';
+      name.style.color = ink;
+      name.textContent = store.name || '';
+      const sector = document.createElement('p');
+      sector.className = 'promo-opening__slide-sector';
+      sector.style.color = ink;
+      sector.textContent = store.sector || '';
+      meta.append(name, sector);
+      const card = document.createElement('div');
+      card.className = 'promo-opening__slide-card';
       const glow = document.createElement('span');
       glow.className = 'promo-opening__slide-glow';
       const hero = document.createElement('img');
       hero.className = 'promo-opening__slide-hero';
       hero.alt = '';
       hero.src = store.hero || '';
-      const caption = document.createElement('span');
-      caption.className = 'promo-opening__slide-caption';
-      caption.textContent = store.name || '';
-      slide.append(glow, hero, caption);
+      card.append(glow, hero);
+      slide.append(meta, card);
       track.appendChild(slide);
     });
     if (row) {
@@ -626,6 +588,7 @@
       this.parkedNext = null;
       this.parkedStyle = null;
       this.parkTimer = 0;
+      this.glideFrame = 0;
       this.boundDock = () => this.fitOpeningLayout();
       this.toggle?.addEventListener('click', () => this.flip());
       promoWidget.preloadStoreStamps(this.stores);
@@ -914,7 +877,14 @@
       };
     }
 
+    stopGlide() {
+      if (!this.glideFrame) return;
+      window.cancelAnimationFrame(this.glideFrame);
+      this.glideFrame = 0;
+    }
+
     resetSee() {
+      this.stopGlide();
       this.root.classList.remove(
         'is-see',
         'is-see-in',
@@ -922,28 +892,35 @@
         'is-see-row',
         'is-see-landed'
       );
-      this.storesRow?.classList.remove('tick');
       this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
         slide.classList.remove('is-on');
       });
-      if (this.carouselTrack) this.carouselTrack.style.transform = '';
+      if (this.carouselTrack) {
+        this.carouselTrack.style.transition = '';
+        this.carouselTrack.style.transform = '';
+      }
+    }
+
+    carouselOffset(index) {
+      const track = this.carouselTrack;
+      const slide = track?.children[index];
+      const view = track?.parentElement;
+      if (!track || !slide || !view) return 0;
+      return slide.offsetLeft - (view.clientWidth - slide.offsetWidth) / 2;
     }
 
     placeCarousel(index, snap) {
       const track = this.carouselTrack;
-      const slide = track?.children[index];
-      const view = track?.parentElement;
-      if (!track || !slide || !view) return;
-      const offset = slide.offsetLeft - (view.clientWidth - slide.offsetWidth) / 2;
+      if (!track) return;
       if (snap) track.style.transition = 'none';
-      track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+      track.style.transform = `translate3d(${-this.carouselOffset(index)}px, 0, 0)`;
       if (snap) {
         track.getBoundingClientRect();
         track.style.transition = '';
       }
     }
 
-    highlightStore(index, landed, snap) {
+    setActiveSlide(index, landed) {
       const slides = this.carouselTrack
         ? [...this.carouselTrack.querySelectorAll('.promo-opening__slide')]
         : [];
@@ -951,6 +928,10 @@
         slide.classList.toggle('is-on', slideIndex === index);
       });
       this.root.classList.toggle('is-see-landed', Boolean(landed));
+    }
+
+    highlightStore(index, landed, snap) {
+      this.setActiveSlide(index, landed);
       if (index >= 0) this.placeCarousel(index, Boolean(snap));
     }
 
@@ -997,44 +978,66 @@
 
       window.setTimeout(() => {
         this.root.classList.add('is-see-row');
-      }, PROMO_SEE_ROW_AT_MS);
-
-      window.setTimeout(() => {
-        this.playStoreRoulette(() => {
+        this.playStoreGlide(() => {
           window.setTimeout(() => this.depart(), PROMO_SEE_LAND_HOLD_MS);
         });
-      }, PROMO_SEE_ROULETTE_AT_MS);
+      }, PROMO_SEE_ROW_AT_MS);
     }
 
-    playStoreRoulette(onDone) {
-      const waits = rouletteWaits(this.stores.length);
-      const order = rouletteOrder(this.stores.length, this.landIndex, waits.length + 1);
-      let step = 0;
+    playStoreGlide(onDone) {
+      const land = this.landIndex;
+      const track = this.carouselTrack;
+      if (!track || !track.children.length) {
+        onDone();
+        return;
+      }
+      this.stopGlide();
+      track.style.transition = 'none';
+      track.style.transform = `translate3d(${-this.carouselOffset(0)}px, 0, 0)`;
+      this.setActiveSlide(0, land <= 0);
+      const first = this.stores[0];
+      if (first) promoWidget.applyStoreLook(first);
+      if (land <= 0) {
+        onDone();
+        return;
+      }
 
-      const tick = () => {
-        const index = order[step];
-        const isLast = step === order.length - 1;
-        this.highlightStore(index, isLast);
-        const store = this.stores[index];
-        if (store) promoWidget.applyStoreLook(store);
-        if (this.storesRow) {
-          this.storesRow.classList.add('tick');
-          window.setTimeout(() => {
-            this.storesRow?.classList.remove('tick');
-          }, PROMO_SEE_TICK_CLASS_MS);
+      const segments = [];
+      for (let index = 0; index < land; index += 1) {
+        segments.push(glideSegmentMs(index, land));
+      }
+      let segment = 0;
+      let segmentStart = performance.now();
+
+      const frame = (now) => {
+        const duration = segments[segment];
+        const progress = Math.min(1, (now - segmentStart) / duration);
+        const offset = this.carouselOffset(segment)
+          + (this.carouselOffset(segment + 1) - this.carouselOffset(segment)) * progress;
+        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+        if (progress < 1) {
+          this.glideFrame = window.requestAnimationFrame(frame);
+          return;
         }
-        if (isLast) {
+        const arrived = segment + 1;
+        const done = arrived >= land;
+        this.setActiveSlide(arrived, done);
+        const store = this.stores[arrived];
+        if (store) promoWidget.applyStoreLook(store);
+        if (done) {
+          this.glideFrame = 0;
           onDone();
           return;
         }
-        const wait = waits[step];
-        step += 1;
-        window.setTimeout(tick, wait);
+        segment += 1;
+        segmentStart = now;
+        this.glideFrame = window.requestAnimationFrame(frame);
       };
-      tick();
+      this.glideFrame = window.requestAnimationFrame(frame);
     }
 
     depart() {
+      this.stopGlide();
       window.removeEventListener('resize', this.boundDock);
       promoWidget.hide();
       this.restoreWidget();
@@ -1204,7 +1207,6 @@
               ? midIndex
               : this.landIndex;
         if (highlight >= 0) this.highlightStore(highlight, phase === 'landed', true);
-        if (phase === 'roulette') this.storesRow?.classList.add('tick');
 
         if (phase === 'hero') {
           promoWidget.applyStoreLook(this.bizmisLook());
