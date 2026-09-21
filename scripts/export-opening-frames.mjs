@@ -22,7 +22,7 @@ const FRAMES = [
   ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],
   ['02c-agentic-scaled', 'Agentic sales stays centered and has scaled up in Bizmis orange. Burst has not fired.', 40],
   ['03-orange-burst', 'Orange burst from the centered Agentic sales label. Full-field takeover.', 40],
-  ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk on the right.', 80],
+  ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk on the right.', 1600],
   ['05-logo-gone', 'Mark has left. Copy seat empty. Clerk stays on the right.', 40],
   ['06-your', 'First word: Your.', 40],
   ['07-your-store', 'Your store. Single normal space.', 40],
@@ -32,11 +32,11 @@ const FRAMES = [
   ['11-built', 'First line gone. Built at the same type size.', 40],
   ['12-to', 'Only to, same type size.', 40],
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
-  ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.', 220],
+  ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.', 900],
   ['15-see-yourself', 'sell. is gone. See for yourself. in the same seat, about 60% of sell. size.', 80],
-  ['16-see-stores', 'See for yourself. docked as a small label. Homepage carousel, first store centered with its color glow. Clerk is that store avatar.', 700],
-  ['17-see-roulette', 'Carousel on a mid-list store. Clerk has morphed to that store avatar.', 700],
-  ['18-see-meridian', 'Landed on Meridian. Other heroes dim. Clerk is the Meridian avatar.', 700],
+  ['16-see-stores', 'See for yourself. docked as a small label. Homepage carousel, first store centered with its color glow. Clerk is that store avatar.', 2500],
+  ['17-see-roulette', 'Carousel on a mid-list store. Clerk has morphed to that store avatar.', 2500],
+  ['18-see-meridian', 'Landed on Meridian. Other heroes dim. Clerk is the Meridian avatar.', 2500],
 ];
 
 async function loadPlaywright() {
