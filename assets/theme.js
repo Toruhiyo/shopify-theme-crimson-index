@@ -125,9 +125,9 @@
 
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_AGENTIC_MOVE_MS = 900;
+  const PROMO_AGENTIC_SCALE_MS = 800;
   const PROMO_AGENTIC_SETTLE_MS = 180;
-  const PROMO_FLIP_CENTER_MS = PROMO_AGENTIC_MOVE_MS + PROMO_AGENTIC_SETTLE_MS;
-  const PROMO_AGENTIC_SCALE = 1.45;
+  const PROMO_AGENTIC_SCALE = 2.25;
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
@@ -665,7 +665,10 @@
         this.root.style.setProperty('--promo-center', `${PROMO_AGENTIC_MOVE_MS}ms`);
         this.root.classList.add('is-cleared');
         this.centerAgenticSales();
-        window.setTimeout(() => this.burst(), PROMO_FLIP_CENTER_MS);
+        window.setTimeout(() => {
+          this.scaleAgenticSales();
+          window.setTimeout(() => this.burst(), PROMO_AGENTIC_SCALE_MS + PROMO_AGENTIC_SETTLE_MS);
+        }, PROMO_AGENTIC_MOVE_MS);
       }, PROMO_FLIP_KNOB_MS);
     }
 
@@ -678,6 +681,18 @@
       const stageRect = stage.getBoundingClientRect();
       const dx = (stageRect.left + stageRect.width / 2) - (labelRect.left + labelRect.width / 2);
       const dy = (stageRect.top + stageRect.height / 2) - (labelRect.top + labelRect.height / 2);
+      this.agenticShift = { dx, dy };
+      label.style.transform = `translate(${dx}px, ${dy}px) scale(1)`;
+    }
+
+    scaleAgenticSales() {
+      const label = this.root.querySelector('.promo-opening__choice--right');
+      if (!label) return;
+      if (!this.agenticShift) this.centerAgenticSales();
+      const { dx, dy } = this.agenticShift;
+      if (label.style.transition !== 'none') {
+        label.style.transition = `transform ${PROMO_AGENTIC_SCALE_MS}ms cubic-bezier(0.45, 0.05, 0.2, 1)`;
+      }
       label.style.transform = `translate(${dx}px, ${dy}px) scale(${PROMO_AGENTIC_SCALE})`;
     }
 
@@ -1151,6 +1166,19 @@
             node.style.opacity = '0';
           });
           this.centerAgenticSales();
+          return 80;
+        },
+        '02c-agentic-scaled': () => {
+          rest();
+          root.classList.add('is-on', 'is-cleared');
+          const label = root.querySelector('.promo-opening__choice--right');
+          if (label) label.style.transition = 'none';
+          root.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+            node.style.transition = 'none';
+            node.style.opacity = '0';
+          });
+          this.centerAgenticSales();
+          this.scaleAgenticSales();
           return 80;
         },
         '03-orange-burst': () => {

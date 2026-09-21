@@ -19,7 +19,8 @@ const VIEWPORT = {
 const FRAMES = [
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.', 40],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
-  ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered and scaled up in Bizmis orange. Burst has not fired.', 40],
+  ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],
+  ['02c-agentic-scaled', 'Agentic sales stays centered and has scaled up in Bizmis orange. Burst has not fired.', 40],
   ['03-orange-burst', 'Orange burst from the centered Agentic sales label. Full-field takeover.', 40],
   ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk on the right.', 80],
   ['05-logo-gone', 'Mark has left. Copy seat empty. Clerk stays on the right.', 40],
@@ -143,7 +144,7 @@ async function main() {
   for (const [id, , waitMs] of FRAMES) {
     await page.evaluate((frameId) => {
       window.__promoOpeningFrames.showExportFrame(frameId);
-      if (frameId === '02b-toggle-gone') {
+      if (frameId === '02b-toggle-gone' || frameId === '02c-agentic-scaled') {
         document.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
           node.style.transition = 'none';
           node.style.opacity = '0';
