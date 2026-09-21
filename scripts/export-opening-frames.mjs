@@ -1,9 +1,20 @@
 #!/usr/bin/env node
 
-import { chromium } from 'playwright';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+
+async function loadPlaywright() {
+  if (process.env.PLAYWRIGHT_MODULE) return import(process.env.PLAYWRIGHT_MODULE);
+  try {
+    return await import('playwright');
+  } catch {
+    const require = createRequire(import.meta.url);
+    return import(pathToFileURL(require.resolve('playwright')).href);
+  }
+}
 
 const OUT_DIR = process.env.PROMO_FRAMES_DIR
   || path.join(os.homedir(), 'Projects/Bizmis/videos/promo-1');
@@ -111,6 +122,7 @@ async function revealForcedFaces(page) {
 async function main() {
   emptyOutDir();
 
+  const { chromium } = await loadPlaywright();
   const url = openingUrl();
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({
