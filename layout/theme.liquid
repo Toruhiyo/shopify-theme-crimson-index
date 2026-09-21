@@ -214,9 +214,7 @@
           <p class="promo-opening__see" data-promo-see aria-hidden="true">See for yourself.</p>
           <div class="promo-opening__stores" data-promo-stores aria-hidden="true"></div>
         </div>
-        <div class="promo-opening__widget" data-promo-widget>
-          <div class="promo-opening__avatars" data-promo-avatars aria-hidden="true"></div>
-        </div>
+        <div class="promo-opening__widget" data-promo-widget></div>
       </div>
     </div>
     <div class="promo-opening__store-logo" aria-hidden="true">
@@ -226,72 +224,90 @@
   <script type="application/json" id="promo-opening-stores">
     [
       {
-        "slug": "paper-pine-books",
-        "name": "Paper & Pine Books",
+        "slug": "paper-and-pine-books",
+        "name": "Paper and Pine Books",
         "sector": "Books & stationery",
-        "accent": "#2F5D50",
-        "hero": {{ 'promo-hero-paper-pine.svg' | asset_url | json }},
-        "avatar": {{ 'promo-avatar-paper-pine.svg' | asset_url | json }},
-        "logo": {{ 'promo-store-paper-pine.svg' | asset_url | json }},
-        "stamp": {{ 'promo-store-paper-pine.svg' | asset_url | json }},
-        "stampScale": 0.7,
-        "meshColors": { "UPPERBODY_Top": "#2F5D50", "HEAD_Hat": "#2F5D50" }
+        "accent": "#2A5C42",
+        "hero": {{ 'promo-home-paper-pine.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/amber.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0744/2894/0480/files/logo-light_7caefa0a-ac0e-4392-9409-cea52b0fb7fe.png?v=1778533386",
+        "stampScale": 1,
+        "meshColors": { "UPPERBODY_Top": "#29573F", "HEAD_Hat": "#29573F" }
       },
       {
-        "slug": "apricot-theory",
+        "slug": "the-apricot-theory",
         "name": "The Apricot Theory",
         "sector": "Beauty & skincare",
-        "accent": "#E07A5F",
-        "hero": {{ 'promo-hero-apricot-theory.svg' | asset_url | json }},
-        "avatar": {{ 'promo-avatar-apricot-theory.svg' | asset_url | json }},
-        "logo": {{ 'promo-store-apricot-theory.svg' | asset_url | json }},
-        "stamp": {{ 'promo-store-apricot-theory.svg' | asset_url | json }},
-        "stampScale": 0.7,
-        "meshColors": { "UPPERBODY_Top": "#E07A5F", "HEAD_Hat": "#E07A5F" }
+        "accent": "#F7944D",
+        "hero": {{ 'promo-home-apricot.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/will.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0798/0862/6925/files/the-apricot-theory-logo-white-4x.png?v=1785168107",
+        "stampScale": 1.3,
+        "meshColors": { "UPPERBODY_Top": "#F8924A", "HEAD_Hat": "#F8924A" }
       },
       {
-        "slug": "weather-outfitters",
+        "slug": "12-weather-outfitters",
         "name": "12 Weather Outfitters",
         "sector": "Apparel & outdoor",
-        "accent": "#1B4F72",
-        "hero": {{ 'promo-hero-weather-outfitters.svg' | asset_url | json }},
-        "avatar": {{ 'promo-avatar-weather-outfitters.svg' | asset_url | json }},
-        "logo": {{ 'promo-store-weather-outfitters.svg' | asset_url | json }},
-        "stamp": {{ 'promo-store-weather-outfitters.svg' | asset_url | json }},
-        "stampScale": 0.7,
-        "meshColors": { "UPPERBODY_Top": "#1B4F72", "HEAD_Hat": "#1B4F72" }
+        "accent": "#F2C94C",
+        "hero": {{ 'promo-home-weather.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/yusuke.glb",
+        "stamp": null,
+        "stampScale": 0.8,
+        "meshColors": { "UPPERBODY_Top": "#FAF8F3", "HEAD_Hat": "#FAF8F3" }
       },
       {
         "slug": "pulse-forge",
         "name": "Pulse Forge",
         "sector": "Gaming gear",
-        "accent": "#6C2BD9",
-        "hero": {{ 'promo-hero-pulse-forge.svg' | asset_url | json }},
-        "avatar": {{ 'promo-avatar-pulse-forge.svg' | asset_url | json }},
-        "logo": {{ 'promo-store-pulse-forge.svg' | asset_url | json }},
-        "stamp": {{ 'promo-store-pulse-forge.svg' | asset_url | json }},
-        "stampScale": 0.7,
-        "meshColors": { "UPPERBODY_Top": "#6C2BD9", "HEAD_Hat": "#6C2BD9" }
+        "accent": "#A855F7",
+        "hero": {{ 'promo-home-pulse.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/kiran.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0995/4420/3556/files/logo-transparent_1b37f004-1d85-4d11-82dc-823a2f99a82e.png?v=1790010542",
+        "stampScale": 1.4,
+        "meshColors": { "UPPERBODY_Top": "#171717", "HEAD_Hat": "#171717" }
       },
       {
-        "slug": "build-right-home",
-        "name": "Build Right Home",
+        "slug": "buildright-home",
+        "name": "BuildRight Home",
         "sector": "Home & DIY",
         "accent": "#C56A1A",
-        "hero": {{ 'promo-hero-build-right.svg' | asset_url | json }},
-        "avatar": {{ 'promo-avatar-build-right.svg' | asset_url | json }},
-        "logo": {{ 'promo-store-build-right.svg' | asset_url | json }},
-        "stamp": {{ 'promo-store-build-right.svg' | asset_url | json }},
-        "stampScale": 0.7,
+        "hero": {{ 'promo-home-buildright.png' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/will.glb",
+        "stamp": null,
+        "stampScale": 1,
         "meshColors": { "UPPERBODY_Top": "#C56A1A", "HEAD_Hat": "#C56A1A" }
+      },
+      {
+        "slug": "rolling-district",
+        "name": "Rolling District",
+        "sector": "Performance parts",
+        "accent": "#E02020",
+        "hero": {{ 'promo-home-rolling.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/teo.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0718/2034/5421/files/logo-initial-white.png?v=1783435346",
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#f53e3e", "HEAD_Hat": "#f53e3e" }
+      },
+      {
+        "slug": "viniteca-marti",
+        "name": "Viniteca Martí",
+        "sector": "Wine",
+        "accent": "#701C33",
+        "hero": {{ 'promo-home-viniteca.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/adrian.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0994/4907/8080/files/logo-initial-gold.png?v=1785233458",
+        "stampScale": 0.8,
+        "stampOffsetX": 0.04,
+        "meshColors": { "UPPERBODY_Top": "#701C33", "HEAD_Hat": "#701C33" }
       },
       {
         "slug": "meridian",
         "name": "Meridian",
         "sector": "Consumer electronics",
         "accent": {{ promo_red | json }},
-        "hero": {{ 'promo-hero-meridian.svg' | asset_url | json }},
-        "avatar": {{ 'promo-avatar-meridian.svg' | asset_url | json }},
+        "hero": {{ 'promo-home-meridian.png' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/will.glb",
         "logo": {{ 'logo-transparent.png' | asset_url | json }},
         "stamp": {{ 'logo-white.png' | asset_url | json }},
         "stampScale": 0.76,

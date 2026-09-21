@@ -155,10 +155,10 @@
   const PROMO_SEE_ROW_AT_MS = 900;
   const PROMO_SEE_ROULETTE_AT_MS = 1000;
   const PROMO_SEE_ROULETTE_MS = 1800;
-  const PROMO_SEE_LAND_HOLD_MS = 600;
+  const PROMO_SEE_LAND_HOLD_MS = 900;
   const PROMO_SEE_TICK_CLASS_MS = 50;
-  const PROMO_SEE_TICK_MIN_MS = 60;
-  const PROMO_SEE_TICK_MAX_MS = 280;
+  const PROMO_SEE_TICK_MIN_MS = 700;
+  const PROMO_SEE_TICK_MAX_MS = 1100;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_SEE_PASSES = 2;
   const PROMO_DEPART_MS = 1100;
@@ -303,9 +303,12 @@
         ? look.stampScale
         : PROMO_BIZMIS_STAMP_SCALE;
       api.setAppearance({
+        avatarModelUrl: look.model || null,
         avatarMeshColors: look.meshColors || {},
-        shirtStampUrl: whiteStampFor(look.stamp) || null,
+        shirtStampUrl: look.stamp ? (whiteStampFor(look.stamp) || null) : null,
         shirtStampScale: scale,
+        shirtStampOffsetX: typeof look.stampOffsetX === 'number' ? look.stampOffsetX : 0,
+        shirtStampOffsetY: typeof look.stampOffsetY === 'number' ? look.stampOffsetY : 0,
       });
     }
 
@@ -497,11 +500,38 @@
     return order;
   }
 
-  function storeAssetUrls(store) {
+  function storeImageUrls(store) {
     if (!store) return [];
-    const urls = [store.hero, store.avatar, store.logo, store.stamp];
-    if (Array.isArray(store.avatars)) urls.push(...store.avatars);
-    return urls.filter(Boolean);
+    return [store.hero, store.logo, store.stamp].filter(Boolean);
+  }
+
+  function storeModelUrls(stores) {
+    const urls = new Set([PROMO_BIZMIS_AVATAR_MODEL_URL]);
+    (stores || []).forEach((store) => {
+      if (store && store.model) urls.add(store.model);
+    });
+    return [...urls];
+  }
+
+  function preloadAvatarModels(urls) {
+    const started = Date.now();
+    return new Promise((resolve) => {
+      const tick = () => {
+        const api = window.AvatarVoicechat;
+        if (api && typeof api.preloadAvatars === 'function') {
+          api.preloadAvatars(urls).then(() => resolve()).catch(() => resolve());
+          return;
+        }
+        if (Date.now() - started > 20000) {
+          Promise.all(urls.map((url) => fetch(url, { mode: 'cors', cache: 'force-cache' })
+            .then((response) => response.arrayBuffer())
+            .catch(() => {}))).then(() => resolve());
+          return;
+        }
+        window.setTimeout(tick, 80);
+      };
+      tick();
+    });
   }
 
   function preloadPromoImage(url) {
@@ -521,21 +551,18 @@
   }
 
   function preloadPromoOpening(stores) {
-    const urls = new Set([PROMO_BIZMIS_AVATAR_MODEL_URL]);
+    const images = new Set();
     (stores || []).forEach((store) => {
-      storeAssetUrls(store).forEach((url) => urls.add(url));
+      storeImageUrls(store).forEach((url) => images.add(url));
     });
-    return Promise.all([...urls].map((url) => {
-      if (String(url).endsWith('.glb')) {
-        return fetch(url, { mode: 'cors', cache: 'force-cache' }).then(() => {}).catch(() => {});
-      }
-      return preloadPromoImage(url);
-    }));
+    return Promise.all([
+      ...[...images].map((url) => preloadPromoImage(url)),
+      preloadAvatarModels(storeModelUrls(stores)),
+    ]);
   }
 
-  function renderStoreCarousel(row, avatarHost, stores) {
+  function renderStoreCarousel(row, stores) {
     if (row) row.replaceChildren();
-    if (avatarHost) avatarHost.replaceChildren();
     const viewport = document.createElement('div');
     viewport.className = 'promo-opening__carousel';
     const track = document.createElement('div');
@@ -557,15 +584,6 @@
       caption.textContent = store.name || '';
       slide.append(glow, hero, caption);
       track.appendChild(slide);
-
-      if (!avatarHost) return;
-      const avatar = document.createElement('img');
-      avatar.className = 'promo-opening__avatar';
-      avatar.dataset.store = store.slug;
-      avatar.alt = '';
-      avatar.src = store.avatar || '';
-      avatar.style.setProperty('--promo-store-accent', accent);
-      avatarHost.appendChild(avatar);
     });
     if (row) {
       viewport.appendChild(track);
@@ -597,9 +615,8 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.storesRow = root.querySelector('[data-promo-stores]');
-      this.avatarHost = root.querySelector('[data-promo-avatars]');
       this.stores = loadPromoStores();
-      this.carouselTrack = renderStoreCarousel(this.storesRow, this.avatarHost, this.stores);
+      this.carouselTrack = renderStoreCarousel(this.storesRow, this.stores);
       this.landIndex = landingStoreIndex(this.stores);
       this.assetsReady = false;
       this.flipWhenReady = false;
@@ -890,6 +907,7 @@
 
     bizmisLook() {
       return {
+        model: PROMO_BIZMIS_AVATAR_MODEL_URL,
         meshColors: PROMO_BIZMIS_MESH_COLORS,
         stamp: document.documentElement.getAttribute('data-promo-bizmis-stamp'),
         stampScale: PROMO_BIZMIS_STAMP_SCALE,
@@ -907,9 +925,6 @@
       this.storesRow?.classList.remove('tick');
       this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
         slide.classList.remove('is-on');
-      });
-      this.avatarHost?.querySelectorAll('.promo-opening__avatar').forEach((avatar) => {
-        avatar.classList.remove('is-on');
       });
       if (this.carouselTrack) this.carouselTrack.style.transform = '';
     }
@@ -934,12 +949,6 @@
         : [];
       slides.forEach((slide, slideIndex) => {
         slide.classList.toggle('is-on', slideIndex === index);
-      });
-      const avatars = this.avatarHost
-        ? [...this.avatarHost.querySelectorAll('.promo-opening__avatar')]
-        : [];
-      avatars.forEach((avatar, avatarIndex) => {
-        avatar.classList.toggle('is-on', avatarIndex === index);
       });
       this.root.classList.toggle('is-see-landed', Boolean(landed));
       if (index >= 0) this.placeCarousel(index, Boolean(snap));
@@ -1051,7 +1060,6 @@
     }
 
     showExportFrame(name) {
-      this.finishBoot();
       const root = this.root;
       const html = document.documentElement;
       const center = root.querySelector('.promo-opening__center');

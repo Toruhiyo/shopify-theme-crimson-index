@@ -34,9 +34,9 @@ const FRAMES = [
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
   ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.', 220],
   ['15-see-yourself', 'sell. is gone. See for yourself. in the same seat, about 60% of sell. size.', 80],
-  ['16-see-stores', 'See for yourself. docked as a small label. Hero carousel, first store centered and glowing.', 80],
-  ['17-see-roulette', 'Carousel on a mid-list store, that accent glow. Clerk morphed to that store avatar.', 80],
-  ['18-see-meridian', 'Landed on Meridian. Other heroes dim. Clerk morphed to the Meridian avatar.', 220],
+  ['16-see-stores', 'See for yourself. docked as a small label. Homepage carousel, first store centered with its color glow. Clerk is that store avatar.', 700],
+  ['17-see-roulette', 'Carousel on a mid-list store. Clerk has morphed to that store avatar.', 700],
+  ['18-see-meridian', 'Landed on Meridian. Other heroes dim. Clerk is the Meridian avatar.', 700],
 ];
 
 async function loadPlaywright() {
@@ -140,9 +140,11 @@ async function main() {
   }
   await waitForOpening(page);
   await injectLocalOpeningCss(page);
-  await page.evaluate(() => {
-    document.documentElement.classList.add('is-promo-ready');
-  });
+  await page.waitForFunction(
+    () => document.documentElement.classList.contains('is-promo-ready'),
+    null,
+    { timeout: 60000 },
+  );
 
   for (const [id, , waitMs] of FRAMES) {
     await page.evaluate((frameId) => {

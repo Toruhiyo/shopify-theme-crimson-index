@@ -773,7 +773,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-items: center;
   gap: 1.1rem;
   will-change: transform;
-  transition: transform 90ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .promo-opening__slide {
@@ -834,42 +834,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
-}
-
-.promo-opening__avatars {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.promo-opening.is-see-row .promo-opening__avatars {
-  opacity: 1;
-}
-
-.promo-opening.is-see-row #bizmis-avatar-embed.is-promo-widget-parked {
-  opacity: 0;
-}
-
-.promo-opening__avatar {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: 72%;
-  height: 86%;
-  object-fit: contain;
-  opacity: 0;
-  filter: drop-shadow(0 0 28px var(--promo-store-accent, transparent));
-  transform: translate(-50%, -50%) scale(0.94);
-  transition:
-    opacity 160ms linear,
-    transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.promo-opening__avatar.is-on {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
 }
 
 @keyframes promo-pitch-word {
@@ -1206,7 +1170,6 @@ html.is-promo-cover .promo-cover,
   .promo-opening__stores,
   .promo-opening__carousel-track,
   .promo-opening__slide,
-  .promo-opening__avatar,
   .promo-cover {
     transition: none !important;
   }
