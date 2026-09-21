@@ -171,6 +171,7 @@ html.is-promo-cover body > *:not(.promo-cover) {
   position: fixed;
   inset: 0;
   z-index: 100000;
+  overflow: visible;
   background: #fff;
   color: #2f3640;
   visibility: visible !important;
@@ -514,6 +515,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-items: center;
   justify-content: center;
   padding: 0 4vw;
+  overflow: visible;
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.2s cubic-bezier(0.32, 0.72, 0, 1);
@@ -535,6 +537,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-items: center;
   column-gap: 2rem;
   width: min(1100px, 100%);
+  overflow: visible;
 }
 
 .promo-opening__copy {
@@ -745,7 +748,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__line.is-redefined .promo-opening__from {
+  position: absolute;
   width: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .promo-opening__line.is-redefined .promo-opening__to {
@@ -761,7 +767,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-self: center;
   min-width: 0;
   width: 100%;
-  padding-inline: var(--promo-col-inset);
+  padding-left: var(--promo-col-inset);
+  padding-right: clamp(2.75rem, 7vw, 5rem);
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -778,16 +786,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   );
   position: relative !important;
   top: auto !important;
-  left: auto !important;
+  left: clamp(-4.5rem, -6vw, -1.75rem) !important;
   right: auto !important;
   bottom: auto !important;
-  inset: auto !important;
   width: calc(var(--promo-avatar-w) * var(--promo-avatar-scale)) !important;
   height: calc(var(--promo-avatar-h) * var(--promo-avatar-scale)) !important;
   transform: none !important;
   margin: 0 !important;
   z-index: 1 !important;
   transition: none !important;
+  overflow: visible !important;
   -webkit-mask-image: var(--promo-avatar-fade);
   mask-image: var(--promo-avatar-fade);
   -webkit-mask-size: 100% 100%;
@@ -803,10 +811,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked > .avatar-widget-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
   width: var(--promo-avatar-w) !important;
   height: var(--promo-avatar-h) !important;
-  transform: scale(var(--promo-avatar-scale)) !important;
-  transform-origin: top left !important;
+  transform: translateX(-50%) scale(var(--promo-avatar-scale)) !important;
+  transform-origin: top center !important;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > * {

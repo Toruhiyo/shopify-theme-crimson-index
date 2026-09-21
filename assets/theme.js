@@ -154,6 +154,7 @@
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
+  const PROMO_OPENING_WAVE_AFTER_PARK_MS = 180;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -246,7 +247,9 @@
     if (openingWavePlayed) return true;
     const embed = document.getElementById('bizmis-avatar-embed');
     if (!embed) return false;
-    const target = embed.querySelector('.bizmis-desktop-lite-chat [role="button"]');
+    const target = embed.querySelector('.bizmis-desktop-lite-chat [role="button"]')
+      || embed.querySelector('.bizmis-desktop-lite-chat')
+      || embed.querySelector('canvas');
     if (!target) return false;
     openingWavePlayed = true;
     target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
@@ -352,6 +355,7 @@
       embed.removeAttribute('style');
       embed.classList.add('is-promo-widget-parked');
       slot.appendChild(embed);
+      window.setTimeout(() => armOpeningWave(), PROMO_OPENING_WAVE_AFTER_PARK_MS);
     }
 
     restoreWidget() {
@@ -436,7 +440,6 @@
         word.classList.add('is-in');
         const isLast = index === words.length - 1;
         if (isLast) {
-          armOpeningWave();
           window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_SELL_HOLD_MS);
           return;
         }
@@ -493,7 +496,7 @@
 
       window.setTimeout(() => {
         line.classList.remove('is-striking', 'is-erasing');
-        if (from) from.style.width = '';
+        if (from) from.style.width = '0px';
         if (to) to.style.width = '';
       }, morphDoneAt);
 
