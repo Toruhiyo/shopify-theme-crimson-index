@@ -3328,7 +3328,7 @@ body.is-promo-greyscale .hero__media video {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 1.05s linear;
+  transition: transform 0.8s linear;
   pointer-events: none;
 }
 
