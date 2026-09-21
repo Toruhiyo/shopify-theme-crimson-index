@@ -152,6 +152,7 @@
     HEAD_Hat: BIZMIS_ORANGE,
   };
   const PROMO_BIZMIS_STAMP_SCALE = 0.7;
+  const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
   const PROMO_COVER_HOLD_MS = 600;
@@ -177,6 +178,7 @@
       if (!isOpening()) return config;
       const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp');
       return Object.assign({}, config, {
+        avatarModelUrl: PROMO_BIZMIS_AVATAR_MODEL_URL,
         avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
         shirtStampUrl: stamp || config.shirtStampUrl,
         shirtStampScale: PROMO_BIZMIS_STAMP_SCALE,
