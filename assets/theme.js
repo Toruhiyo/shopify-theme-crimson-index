@@ -139,7 +139,11 @@
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
   const PROMO_PITCH_REPLACE_IN_MS = 240;
-  const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 360, 740];
+  const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 360];
+  const PROMO_PITCH_LEAD_HOLD_MS = 780;
+  const PROMO_PITCH_LEAD_OUT_MS = 400;
+  const PROMO_PITCH_SELL_GAP_MS = 160;
+  const PROMO_PITCH_SELL_IN_MS = 240;
   const PROMO_PITCH_SETTLE_MS = 1400;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -414,8 +418,10 @@
       const from = line.querySelector('.promo-opening__from');
       const to = line.querySelector('.promo-opening__to');
       const outSpan = Math.max(...PROMO_PITCH_WORD_OUT_STAGGER_MS);
-      const inSpan = Math.max(...PROMO_PITCH_WORD_IN_STAGGER_MS);
+      const leadInSpan = Math.max(...PROMO_PITCH_WORD_IN_STAGGER_MS);
       const toInAt = replaceAt + PROMO_PITCH_WORD_OUT_MS + outSpan + PROMO_PITCH_REPLACE_GAP_MS;
+      const leadOutAt = toInAt + PROMO_PITCH_REPLACE_IN_MS + leadInSpan + PROMO_PITCH_LEAD_HOLD_MS;
+      const sellInAt = leadOutAt + PROMO_PITCH_LEAD_OUT_MS + PROMO_PITCH_SELL_GAP_MS;
 
       window.setTimeout(() => {
         if (from) from.style.width = `${from.getBoundingClientRect().width}px`;
@@ -452,9 +458,17 @@
         line.classList.add('is-replaced');
       }, toInAt);
 
+      window.setTimeout(() => {
+        toFace?.classList.add('is-lead-leaving');
+      }, leadOutAt);
+
+      window.setTimeout(() => {
+        toFace?.classList.add('is-selling');
+      }, sellInAt);
+
       window.setTimeout(
         () => this.depart(),
-        toInAt + PROMO_PITCH_REPLACE_IN_MS + inSpan + PROMO_PITCH_SETTLE_MS
+        sellInAt + PROMO_PITCH_SELL_IN_MS + PROMO_PITCH_SETTLE_MS
       );
     }
 
