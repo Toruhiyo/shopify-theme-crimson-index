@@ -33,7 +33,7 @@ const FRAMES = [
   ['12-to', 'Only to, same type size.', 40],
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
   ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.', 900],
-  ['15-see-yourself', 'sell. is gone. See for yourself. in the same seat, about 60% of sell. size.', 80],
+  ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 80],
   ['16-see-stores', 'See for yourself. docked as a small label. Homepage carousel, first store centered with its color glow. Clerk is that store avatar.', 2500],
   ['17-see-roulette', 'Carousel on a mid-list store. Clerk has morphed to that store avatar.', 2500],
   ['18-see-meridian', 'Landed on Meridian. Other heroes dim. Clerk is the Meridian avatar.', 2500],

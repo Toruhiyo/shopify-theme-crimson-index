@@ -154,8 +154,8 @@
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_PITCH_SETTLE_MS = 700;
-  const PROMO_SEE_HOLD_MS = 700;
-  const PROMO_SEE_ROW_AT_MS = 900;
+  const PROMO_SEE_HOLD_MS = 2400;
+  const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_SEE_LAND_HOLD_MS = 900;
   const PROMO_SEE_GLIDE_START_MS = 480;
   const PROMO_SEE_GLIDE_END_MS = 1600;
@@ -1229,6 +1229,12 @@
           word.style.opacity = '0';
         });
         root.classList.add('is-see', 'is-see-in');
+        root.querySelectorAll('.promo-opening__see-word').forEach((word) => {
+          word.style.animation = 'none';
+          word.style.opacity = '1';
+          word.style.filter = 'none';
+          word.style.transform = 'none';
+        });
         if (phase !== 'hero') root.classList.add('is-see-docked', 'is-see-row');
         if (phase === 'landed') root.classList.add('is-see-landed');
 
