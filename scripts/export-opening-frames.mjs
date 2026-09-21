@@ -90,7 +90,10 @@ async function unlockStorefront(page) {
   await input.waitFor({ timeout: 5000 });
   await input.fill(password);
   await Promise.all([
-    page.waitForURL((url) => !url.pathname.includes('/password'), { timeout: 10000 }),
+    page.waitForURL((url) => !url.pathname.includes('/password'), {
+      timeout: 10000,
+      waitUntil: 'domcontentloaded',
+    }),
     input.press('Enter'),
   ]);
 }
