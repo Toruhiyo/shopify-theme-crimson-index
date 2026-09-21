@@ -127,13 +127,15 @@ html.is-promo-cover .loader {
   display: none !important;
 }
 
-html.is-promo-opening body > *:not([data-promo-opening]):not(#bizmis-avatar-embed):not(.bizmis-avatar-widget-root) {
+html.is-promo-opening body > *:not([data-promo-opening]):not(#bizmis-avatar-embed):not(.bizmis-avatar-widget-root):not(.bizmis-viewport-portal-root):not(.bizmis-subtitles-portal-root):not(.avatar-widget-container) {
   visibility: hidden !important;
   pointer-events: none !important;
 }
 
 html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) #bizmis-avatar-embed,
-html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) .bizmis-avatar-widget-root {
+html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) .bizmis-avatar-widget-root,
+html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) .bizmis-viewport-portal-root,
+html.is-promo-opening:not(.is-promo-pitch):not(.is-promo-depart) .avatar-widget-container {
   visibility: hidden !important;
   pointer-events: none !important;
 }
@@ -491,9 +493,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   inset: 0;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 28vw);
+  grid-template-columns: minmax(8em, 1fr) minmax(280px, 42vw);
   align-items: center;
-  column-gap: 4vw;
+  column-gap: 5vw;
   padding: 0 min(8vw, 96px);
   pointer-events: none;
   opacity: 0;
@@ -510,13 +512,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__line {
   margin: 0;
+  max-width: 7em;
   color: #fff;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(2.4rem, 5.2vw, 4.4rem);
-  line-height: 1.06;
+  font-size: clamp(3.2rem, 6.4vw, 5.1rem);
+  line-height: 1.08;
   letter-spacing: -0.03em;
-  white-space: nowrap;
+  white-space: normal;
   justify-self: start;
 }
 
@@ -600,14 +603,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__star {
-  width: min(28vw, 300px);
-  height: min(28vw, 300px);
+  width: min(42vw, 440px);
+  height: min(42vw, 440px);
   justify-self: end;
-  border-radius: 28px;
+  border-radius: 36px;
   background: transparent;
 }
 
-html:not(:has(#bizmis-avatar-embed)) .promo-opening.is-pitch .promo-opening__star {
+.promo-opening.is-pitch .promo-opening__star:not(.is-live) {
   border-radius: 50%;
   background:
     radial-gradient(circle at 35% 30%, #fff 0%, rgba(255, 255, 255, 0.2) 18%, transparent 42%),
@@ -616,18 +619,33 @@ html:not(:has(#bizmis-avatar-embed)) .promo-opening.is-pitch .promo-opening__sta
 }
 
 html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,
-html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root {
+html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root,
+html.is-promo-opening.is-promo-pitch .bizmis-viewport-portal-root,
+html.is-promo-opening.is-promo-pitch .avatar-widget-container {
   visibility: visible !important;
   pointer-events: none !important;
-  overflow: hidden;
-  z-index: 100001 !important;
+  z-index: 100002 !important;
+}
+
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,
+html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root {
+  top: 50% !important;
+  right: max(5vw, 40px) !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: min(42vw, 440px) !important;
+  height: min(42vw, 440px) !important;
+  transform: translate3d(0, -50%, 0) !important;
+  overflow: visible !important;
 }
 
 html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
-html.is-promo-opening.is-promo-depart .bizmis-avatar-widget-root {
+html.is-promo-opening.is-promo-depart .bizmis-avatar-widget-root,
+html.is-promo-opening.is-promo-depart .bizmis-viewport-portal-root,
+html.is-promo-opening.is-promo-depart .avatar-widget-container {
   visibility: visible !important;
   pointer-events: none !important;
-  z-index: 100001 !important;
+  z-index: 100002 !important;
   transition:
     top 720ms cubic-bezier(0.22, 1, 0.36, 1),
     right 720ms cubic-bezier(0.22, 1, 0.36, 1),

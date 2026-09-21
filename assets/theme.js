@@ -202,25 +202,38 @@
       this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
     }
 
-    dockWidget() {
-      const slot = this.root.querySelector('[data-promo-star]');
+    widgetIsLive() {
       const widget = document.getElementById('bizmis-avatar-embed');
-      if (!slot || !widget) return;
-      const rect = slot.getBoundingClientRect();
-      widget.style.setProperty('top', `${rect.top}px`, 'important');
-      widget.style.setProperty('left', `${rect.left}px`, 'important');
-      widget.style.setProperty('width', `${rect.width}px`, 'important');
-      widget.style.setProperty('height', `${rect.height}px`, 'important');
-      widget.style.setProperty('right', 'auto', 'important');
-      widget.style.setProperty('bottom', 'auto', 'important');
-      widget.style.setProperty('transform', 'none', 'important');
+      if (!widget) return false;
+      return !!(widget.querySelector('canvas') || widget.offsetHeight > 80);
     }
 
-    undockWidget() {
-      const widget = document.getElementById('bizmis-avatar-embed');
-      if (!widget) return;
-      ['top', 'left', 'width', 'height', 'right', 'bottom', 'transform'].forEach((prop) => {
-        widget.style.removeProperty(prop);
+    markWidgetReady() {
+      const slot = this.root.querySelector('[data-promo-star]');
+      if (!this.widgetIsLive()) return;
+      document.documentElement.classList.add('has-promo-widget');
+      slot?.classList.add('is-live');
+    }
+
+    whenWidgetReady(timeoutMs) {
+      if (this.widgetIsLive()) {
+        this.markWidgetReady();
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve) => {
+        const watch = new MutationObserver(() => {
+          if (!this.widgetIsLive()) return;
+          watch.disconnect();
+          this.markWidgetReady();
+          resolve();
+        });
+        watch.observe(document.body, { childList: true, subtree: true });
+        window.setTimeout(() => {
+          watch.disconnect();
+          this.markWidgetReady();
+          resolve();
+        }, timeoutMs);
       });
     }
 
@@ -254,23 +267,11 @@
       window.setTimeout(() => this.pitch(), PROMO_FLIP_HOLD_MS);
     }
 
-    pitch() {
-      this.markWidgetReady();
-      const watch = new MutationObserver(() => {
-        this.markWidgetReady();
-        this.dockWidget();
-      });
-      watch.observe(document.body, { childList: true, subtree: true });
-      window.setTimeout(() => watch.disconnect(), 6000);
+    async pitch() {
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
-      requestAnimationFrame(() => this.dockWidget());
+      await this.whenWidgetReady(2500);
       this.playPitchLine();
-    }
-
-    markWidgetReady() {
-      const widget = document.getElementById('bizmis-avatar-embed');
-      if (widget) document.documentElement.classList.add('has-promo-widget');
     }
 
     playPitchLine() {
@@ -309,7 +310,6 @@
     depart() {
       this.markWidgetReady();
       this.pinWidgetOrigin();
-      this.undockWidget();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');
       this.root.classList.add('is-depart');
