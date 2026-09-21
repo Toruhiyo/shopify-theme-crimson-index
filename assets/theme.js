@@ -120,71 +120,7 @@
         'Nobody sells.'
       );
       applyUnattendedLandingCopy();
-      return;
     }
-
-    if (promoVideo !== 'true' && promoVideo !== 'opening') return;
-    if (document.querySelector('[data-hero-redefine]')) return;
-
-    const hero = document.querySelector('[data-hero-slideshow]');
-    const subtitle = document.querySelector('.hero__subtitle');
-    const titleLine = document.querySelector('.hero__title-line');
-    const cta = document.querySelector('.hero__title-cta');
-    if (!hero || !subtitle || !titleLine || !cta) return;
-
-    const markUrl = hero.getAttribute('data-bizmis-mark-url');
-    subtitle.classList.add('hero__subtitle--mark');
-    subtitle.setAttribute('aria-label', 'AGENTIC SALES, WITH BIZMIS');
-    subtitle.replaceChildren();
-    ['AGENTIC', 'SALES,', 'WITH'].forEach((word) => {
-      const span = document.createElement('span');
-      span.className = 'hero__word';
-      span.textContent = word;
-      subtitle.appendChild(span);
-    });
-    const markWord = document.createElement('span');
-    markWord.className = 'hero__word';
-    const mark = document.createElement('span');
-    mark.className = 'hero__bizmis-mark';
-    mark.setAttribute('aria-hidden', 'true');
-    if (markUrl) {
-      mark.style.webkitMaskImage = `url('${markUrl}')`;
-      mark.style.maskImage = `url('${markUrl}')`;
-    }
-    markWord.appendChild(mark);
-    subtitle.appendChild(markWord);
-
-    titleLine.setAttribute('data-hero-redefine', '');
-    titleLine.setAttribute('aria-label', 'Your store sales agent.');
-    titleLine.replaceChildren();
-    const your = document.createElement('span');
-    your.className = 'hero__word';
-    your.textContent = 'Your';
-    const store = document.createElement('span');
-    store.className = 'hero__word';
-    store.textContent = 'store';
-    const sales = document.createElement('span');
-    sales.className = 'hero__word';
-    const stem = document.createElement('span');
-    stem.className = 'hero__redefine-stem';
-    stem.textContent = 'sales';
-    const redefine = document.createElement('span');
-    redefine.className = 'hero__redefine';
-    redefine.setAttribute('aria-hidden', 'true');
-    const from = document.createElement('span');
-    from.className = 'hero__redefine-from';
-    from.textContent = 'person';
-    const to = document.createElement('span');
-    to.className = 'hero__redefine-to';
-    to.textContent = ' agent';
-    const dot = document.createElement('span');
-    dot.className = 'hero__redefine-dot';
-    dot.textContent = '.';
-    redefine.append(from, to);
-    sales.append(stem, redefine, dot);
-    titleLine.append(your, document.createTextNode(' '), store, document.createTextNode(' '), sales);
-
-    cta.textContent = 'Built to sell.';
   }
 
   const PROMO_FLIP_KNOB_MS = 200;
@@ -216,8 +152,8 @@
   }
 
   function hasPromoCover() {
-    return promoVideo === 'true'
-      && document.body.classList.contains('template-index')
+    return document.body.classList.contains('template-index')
+      && promoVideo !== 'opening'
       && promoSearchParams().get('nocover') !== '1';
   }
 

@@ -23,7 +23,7 @@
       root.className = root.className.replace('no-js', 'js');
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
       root.classList.toggle('is-promo-opening', promoVideo === 'opening');
-      root.classList.toggle('is-promo-cover', promoVideo === 'true' && params.get('nocover') !== '1' && isHome);
+      root.classList.toggle('is-promo-cover', isHome && promoVideo !== 'opening' && params.get('nocover') !== '1');
       if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '28px');
     })();
   </script>
@@ -40,7 +40,7 @@
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
       if (promoVideo === 'opening') meta.content = '#ffffff';
-      else if (promoVideo === 'true' && params.get('nocover') !== '1' && isHome) meta.content = {{ promo_red | json }};
+      else if (isHome && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
     })();
   </script>
 
