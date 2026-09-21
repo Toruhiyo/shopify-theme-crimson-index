@@ -756,15 +756,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   --promo-avatar-w: 288px;
   --promo-avatar-h: 230px;
   --promo-avatar-scale: 1.65;
-  zoom: var(--promo-avatar-scale);
   position: relative !important;
   top: auto !important;
   left: auto !important;
   right: auto !important;
   bottom: auto !important;
   inset: auto !important;
-  width: var(--promo-avatar-w) !important;
-  height: var(--promo-avatar-h) !important;
+  width: calc(var(--promo-avatar-w) * var(--promo-avatar-scale)) !important;
+  height: calc(var(--promo-avatar-h) * var(--promo-avatar-scale)) !important;
   transform: none !important;
   margin: 0 !important;
   z-index: 1 !important;
@@ -774,17 +773,25 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > * {
   position: relative !important;
-  width: 100% !important;
-  height: 100% !important;
   overflow: visible !important;
 }
 
+#bizmis-avatar-embed.is-promo-widget-parked > .avatar-widget-container {
+  width: var(--promo-avatar-w) !important;
+  height: var(--promo-avatar-h) !important;
+  transform: scale(var(--promo-avatar-scale)) !important;
+  transform-origin: top left !important;
+}
+
+#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > * {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 #bizmis-avatar-embed.is-promo-widget-parked,
-#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > *,
 #bizmis-avatar-embed.is-promo-widget-parked .bizmis-desktop-lite-chat,
 #bizmis-avatar-embed.is-promo-widget-parked .theme-bg-glassy {
-  transform: none !important;
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
@@ -793,6 +800,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > *,
+#bizmis-avatar-embed.is-promo-widget-parked .bizmis-desktop-lite-chat,
+#bizmis-avatar-embed.is-promo-widget-parked .theme-bg-glassy {
+  transform: none !important;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked button,
