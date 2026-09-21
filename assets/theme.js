@@ -166,63 +166,6 @@
   const PROMO_TYPE_CHAR_MS = 55;
   const PROMO_TYPE_FIND_MS = 15000;
 
-  let solidOpeningLogoUrl = null;
-
-  function applySolidOpeningLogo(dataUrl) {
-    solidOpeningLogoUrl = dataUrl || solidOpeningLogoUrl;
-    paintSolidOpeningLogo();
-  }
-
-  function paintSolidOpeningLogo() {
-    const sourceUrl = solidOpeningLogoUrl
-      || document.documentElement.getAttribute('data-promo-bizmis-stamp');
-    const logo = document.querySelector('.promo-opening__logo');
-    const mask = document.querySelector('[data-promo-logo-mask]');
-    if (!sourceUrl || !logo || !mask) return;
-
-    const cssW = Math.max(1, logo.clientWidth);
-    const cssH = Math.max(1, logo.clientHeight);
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const width = Math.round(cssW * dpr);
-    const height = Math.round(cssH * dpr);
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      ctx.imageSmoothingEnabled = false;
-      ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      const image = ctx.getImageData(0, 0, width, height);
-      const px = image.data;
-      for (let i = 0; i < px.length; i += 4) {
-        if (px[i + 3] < 128) {
-          px[i] = 0;
-          px[i + 1] = 0;
-          px[i + 2] = 0;
-          px[i + 3] = 0;
-          continue;
-        }
-        px[i] = 255;
-        px[i + 1] = 255;
-        px[i + 2] = 255;
-        px[i + 3] = 255;
-      }
-      ctx.putImageData(image, 0, 0);
-      try {
-        const value = `url("${canvas.toDataURL('image/png')}")`;
-        mask.style.webkitMaskImage = value;
-        mask.style.maskImage = value;
-      } catch {
-        mask.style.webkitMaskImage = `url("${sourceUrl}")`;
-        mask.style.maskImage = `url("${sourceUrl}")`;
-      }
-    };
-    img.src = sourceUrl;
-  }
-
   function createPromoWidgetBridge() {
     let originalInit = null;
     let originalDestroy = null;
@@ -275,13 +218,11 @@
         }
         ctx.putImageData(image, 0, 0);
         solidStampUrl = canvas.toDataURL('image/png');
-        applySolidOpeningLogo(solidStampUrl);
         stampReady = true;
         stampWaiters.splice(0).forEach((run) => run());
       };
       img.onerror = () => {
         solidStampUrl = url;
-        applySolidOpeningLogo(url);
         stampReady = true;
         stampWaiters.splice(0).forEach((run) => run());
       };
@@ -536,7 +477,6 @@
 
     hold() {
       this.root.classList.add('is-holding');
-      paintSolidOpeningLogo();
       window.setTimeout(() => this.pitch(), PROMO_FLIP_HOLD_MS);
     }
 
