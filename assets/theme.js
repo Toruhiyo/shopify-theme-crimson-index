@@ -174,6 +174,9 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.flipping = false;
+      this.pinnedSurface = null;
+      this.pinTimer = 0;
+      this.boundPin = () => this.pinSurfaceToSlot();
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
     }
@@ -194,12 +197,74 @@
     }
 
     pinWidgetOrigin() {
-      const widget = document.getElementById('bizmis-avatar-embed');
-      const target = widget && widget.offsetWidth > 8 ? widget : this.root.querySelector('[data-promo-star]');
+      const target = this.pinnedSurface || this.root.querySelector('[data-promo-star]');
       if (!target) return;
       const rect = target.getBoundingClientRect();
       this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
       this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+    }
+
+    findWidgetSurface() {
+      const named = document.querySelector('.bizmis-desktop-lite-chat, .bizmis-closed-bubble');
+      if (named && named.getBoundingClientRect().height > 40) return named;
+
+      const canvas = document.querySelector('#bizmis-avatar-embed canvas, .bizmis-viewport-portal-root canvas');
+      const card = canvas?.closest('.bizmis-desktop-lite-chat, [class*="rounded-xl"], [class*="theme-bg-glassy"]');
+      if (card && card.getBoundingClientRect().height > 40) return card;
+
+      return canvas || document.getElementById('bizmis-avatar-embed');
+    }
+
+    pinSurfaceToSlot() {
+      const slot = this.root.querySelector('[data-promo-star]');
+      const surface = this.findWidgetSurface();
+      if (!slot || !surface) return;
+
+      const slotRect = slot.getBoundingClientRect();
+      if (slotRect.width < 8 || slotRect.height < 8) return;
+
+      this.pinnedSurface = surface;
+      surface.classList.add('is-promo-star-surface');
+      const pin = {
+        position: 'fixed',
+        top: `${Math.round(slotRect.top)}px`,
+        left: `${Math.round(slotRect.left)}px`,
+        width: `${Math.round(slotRect.width)}px`,
+        height: `${Math.round(slotRect.height)}px`,
+        right: 'auto',
+        bottom: 'auto',
+        transform: 'none',
+        margin: '0',
+        'max-width': 'none',
+        'max-height': 'none',
+        'z-index': '100003',
+      };
+      Object.entries(pin).forEach(([name, value]) => {
+        surface.style.setProperty(name, value, 'important');
+      });
+    }
+
+    unpinSurface() {
+      window.clearTimeout(this.pinTimer);
+      window.removeEventListener('resize', this.boundPin);
+      const surface = this.pinnedSurface;
+      if (!surface) return;
+      ['position', 'top', 'left', 'width', 'height', 'right', 'bottom', 'transform', 'margin', 'max-width', 'max-height', 'z-index'].forEach((name) => {
+        surface.style.removeProperty(name);
+      });
+      surface.classList.remove('is-promo-star-surface');
+      this.pinnedSurface = null;
+    }
+
+    armPin() {
+      let tries = 0;
+      const run = () => {
+        this.pinSurfaceToSlot();
+        tries += 1;
+        if (tries < 24) this.pinTimer = window.setTimeout(run, 120);
+      };
+      run();
+      window.addEventListener('resize', this.boundPin);
     }
 
     widgetIsLive() {
@@ -271,6 +336,7 @@
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
       await this.whenWidgetReady(2500);
+      this.armPin();
       this.playPitchLine();
     }
 
@@ -310,6 +376,7 @@
     depart() {
       this.markWidgetReady();
       this.pinWidgetOrigin();
+      this.unpinSurface();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');
       this.root.classList.add('is-depart');

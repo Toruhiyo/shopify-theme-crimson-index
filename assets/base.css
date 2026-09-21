@@ -627,16 +627,9 @@ html.is-promo-opening.is-promo-pitch .avatar-widget-container {
   z-index: 100002 !important;
 }
 
-html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,
-html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root {
-  top: 50% !important;
-  right: max(5vw, 40px) !important;
-  bottom: auto !important;
-  left: auto !important;
-  width: min(42vw, 440px) !important;
-  height: min(42vw, 440px) !important;
-  transform: translate3d(0, -50%, 0) !important;
-  overflow: visible !important;
+.is-promo-star-surface {
+  position: fixed !important;
+  z-index: 100003 !important;
 }
 
 html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
