@@ -19,6 +19,7 @@ const VIEWPORT = {
 const FRAMES = [
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.', 40],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
+  ['02b-agentic-charge', 'Agentic sales stays Bizmis orange and charges: a shine sweeps the word and a glow builds on the label and knob. Burst has not fired.', 80],
   ['03-orange-burst', 'Orange burst from the knob. Full-field takeover.', 40],
   ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk on the right.', 80],
   ['05-logo-gone', 'Mark has left. Copy seat empty. Clerk stays on the right.', 40],

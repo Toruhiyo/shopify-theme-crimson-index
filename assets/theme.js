@@ -124,6 +124,7 @@
   }
 
   const PROMO_FLIP_KNOB_MS = 200;
+  const PROMO_FLIP_CHARGE_MS = 360;
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
@@ -656,8 +657,10 @@
       }
 
       this.pinKnobOrigin();
-      this.root.classList.add('is-on');
-      window.setTimeout(() => this.burst(), PROMO_FLIP_KNOB_MS);
+      const chargeMs = PROMO_FLIP_KNOB_MS + PROMO_FLIP_CHARGE_MS;
+      this.root.style.setProperty('--promo-charge', `${chargeMs}ms`);
+      this.root.classList.add('is-on', 'is-charging');
+      window.setTimeout(() => this.burst(), chargeMs);
     }
 
     burst() {
@@ -1069,6 +1072,8 @@
         html.classList.remove('is-promo-pitch', 'is-promo-depart');
         root.classList.remove(
           'is-on',
+          'is-charging',
+          'is-charge-peak',
           'is-bursting',
           'is-holding',
           'is-pitch',
@@ -1092,6 +1097,11 @@
         '02-toggle-on': () => {
           rest();
           root.classList.add('is-on');
+          return 120;
+        },
+        '02b-agentic-charge': () => {
+          rest();
+          root.classList.add('is-on', 'is-charging', 'is-charge-peak');
           return 120;
         },
         '03-orange-burst': () => {
