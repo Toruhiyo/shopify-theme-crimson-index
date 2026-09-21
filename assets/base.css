@@ -295,6 +295,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-bursting .promo-opening__toggle {
   opacity: 0;
+  transition: opacity 220ms linear;
 }
 
 .promo-mark {
@@ -494,9 +495,18 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 1;
 }
 
-.promo-opening.is-cleared .promo-opening__toggle {
+.promo-opening__choice--left,
+.promo-opening__switch {
+  transition: opacity 160ms linear;
+}
+
+.promo-opening__choice--right {
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.promo-opening.is-cleared .promo-opening__choice--left,
+.promo-opening.is-cleared .promo-opening__switch {
   opacity: 0;
-  transition: opacity 180ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 .promo-opening.is-reduced .promo-opening__fill--orange,
