@@ -174,6 +174,7 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.flipping = false;
+      this.boundDock = () => this.dockLogo();
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
     }
@@ -253,6 +254,7 @@
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => this.dockLogo());
       });
+      window.addEventListener('resize', this.boundDock);
       this.playPitchLine();
     }
 
@@ -294,24 +296,32 @@
       }, wordsInAt);
 
       window.setTimeout(() => {
-        if (from) from.style.width = `${from.scrollWidth}px`;
+        if (from) from.style.width = `${from.getBoundingClientRect().width}px`;
+        if (to) to.style.width = '0px';
         line.classList.add('is-striking');
       }, strikeAt);
 
       window.setTimeout(() => {
-        if (from) from.style.width = `${from.scrollWidth}px`;
-        if (to) to.style.width = `${to.scrollWidth}px`;
+        const nextWidth = to ? to.scrollWidth : 0;
         line.classList.add('is-erasing', 'is-redefined');
+        if (from) from.style.width = '0px';
+        if (to) to.style.width = `${nextWidth}px`;
+        window.requestAnimationFrame(() => this.dockLogo());
       }, morphAt);
 
       window.setTimeout(() => {
+        line.classList.remove('is-striking', 'is-erasing');
+        if (from) from.style.width = '';
+        if (to) to.style.width = '';
         cta?.classList.add('is-underlined');
+        this.dockLogo();
       }, morphAt + PROMO_PITCH_MORPH_MS);
 
       window.setTimeout(() => this.depart(), morphAt + PROMO_PITCH_MORPH_MS + PROMO_PITCH_SETTLE_MS);
     }
 
     depart() {
+      window.removeEventListener('resize', this.boundDock);
       this.restoreWidget();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');

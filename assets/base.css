@@ -521,8 +521,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   inset: 0;
   z-index: 2;
   display: flex;
-  align-items: center;
-  padding: 0 2.5rem;
+  align-items: flex-start;
+  padding: 22vh 2.5rem 0;
   pointer-events: none;
   opacity: 0;
 }
@@ -575,7 +575,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__line {
   margin: 0;
-  max-width: 7em;
+  max-width: 8em;
   color: #1d1d1f;
   font-family: var(--font-heading);
   font-weight: 700;
@@ -583,6 +583,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   line-height: 1.08;
   letter-spacing: -0.03em;
   white-space: normal;
+}
+
+.promo-opening__word--phrase {
+  white-space: nowrap;
 }
 
 .promo-opening__word {
@@ -734,8 +738,7 @@ html.is-promo-opening.is-promo-depart .avatar-widget-container {
 
 @media (max-width: 749px) {
   .promo-opening__pitch {
-    align-items: flex-end;
-    padding: 0 1.5rem 28vh;
+    padding: 18vh 1.5rem 0;
   }
 
   .promo-opening__line,
