@@ -136,7 +136,10 @@
   const PROMO_PITCH_MORPH_MS = 720;
   const PROMO_PITCH_REPLACE_PAUSE_MS = 920;
   const PROMO_PITCH_WORD_OUT_MS = 400;
-  const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70, 100];
+  const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
+  const PROMO_PITCH_FIT_PROBE_PX = 80;
+  const PROMO_AVATAR_BASE_W = 288;
+  const PROMO_AVATAR_MAX_SCALE = 2.3;
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
   const PROMO_PITCH_HERO_IN_MS = 400;
   const PROMO_PITCH_HERO_HOLD_MS = 240;
@@ -307,7 +310,7 @@
       this.parkedNext = null;
       this.parkedStyle = null;
       this.parkTimer = 0;
-      this.boundDock = () => this.dockLogo();
+      this.boundDock = () => this.fitOpeningLayout();
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
     }
@@ -325,6 +328,55 @@
       const rect = this.knob.getBoundingClientRect();
       this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
       this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+    }
+
+    fitOpeningType() {
+      const copy = this.root.querySelector('.promo-opening__copy');
+      const line = this.line;
+      const fromFace = this.root.querySelector('[data-promo-face-from]');
+      if (!copy || !line || !fromFace) return;
+
+      const words = [...fromFace.querySelectorAll('[data-promo-from-word]')];
+      const prev = words.map((word) => ({
+        opacity: word.style.opacity,
+        animation: word.style.animation,
+        transform: word.style.transform,
+      }));
+      words.forEach((word) => {
+        word.style.opacity = '1';
+        word.style.animation = 'none';
+        word.style.transform = 'none';
+      });
+
+      line.style.fontSize = `${PROMO_PITCH_FIT_PROBE_PX}px`;
+      const widest = [...fromFace.getClientRects()].reduce((max, rect) => Math.max(max, rect.width), 0);
+      const budget = copy.clientWidth;
+      const next = widest > 0 && budget > 0
+        ? Math.floor(PROMO_PITCH_FIT_PROBE_PX * (budget / widest))
+        : PROMO_PITCH_FIT_PROBE_PX;
+      line.style.fontSize = `${next}px`;
+
+      words.forEach((word, index) => {
+        word.style.opacity = prev[index].opacity;
+        word.style.animation = prev[index].animation;
+        word.style.transform = prev[index].transform;
+      });
+    }
+
+    fitClerk() {
+      const slot = this.root.querySelector('[data-promo-widget]');
+      const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
+      if (!slot || !embed || !embed.classList.contains('is-promo-widget-parked')) return;
+      const budget = slot.clientWidth;
+      if (budget < 4) return;
+      const scale = Math.min(PROMO_AVATAR_MAX_SCALE, budget / PROMO_AVATAR_BASE_W);
+      embed.style.setProperty('--promo-avatar-scale', String(scale));
+    }
+
+    fitOpeningLayout() {
+      this.fitOpeningType();
+      this.fitClerk();
+      this.dockLogo();
     }
 
     dockLogo() {
@@ -355,6 +407,7 @@
       embed.removeAttribute('style');
       embed.classList.add('is-promo-widget-parked');
       slot.appendChild(embed);
+      this.fitClerk();
       window.setTimeout(() => armOpeningWave(), PROMO_OPENING_WAVE_AFTER_PARK_MS);
     }
 
@@ -417,7 +470,7 @@
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
       window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => this.dockLogo());
+        window.requestAnimationFrame(() => this.fitOpeningLayout());
       });
       window.addEventListener('resize', this.boundDock);
       this.armPark();

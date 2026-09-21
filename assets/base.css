@@ -511,11 +511,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4vw;
-  overflow: visible;
+  display: block;
+  padding: 0;
+  overflow: hidden;
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.2s cubic-bezier(0.32, 0.72, 0, 1);
@@ -531,32 +529,26 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__stage {
-  --promo-col-inset: clamp(1.25rem, 3vw, 2.5rem);
-  --promo-clerk-center: 69vw;
-  --promo-clerk-from: 75vw;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  column-gap: 2rem;
-  width: min(1100px, 100%);
-  overflow: visible;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 .promo-opening__copy {
   display: grid;
   align-items: center;
-  justify-self: stretch;
-  align-self: center;
-  min-width: 0;
-  width: 100%;
-  max-width: calc(34rem + 2 * var(--promo-col-inset));
-  padding-inline: var(--promo-col-inset);
+  position: absolute;
+  top: 50%;
+  left: 8vw;
+  width: 44vw;
+  transform: translateY(-50%);
+  overflow: hidden;
   box-sizing: border-box;
 }
 
 .promo-opening__logo-slot {
   grid-area: 1 / 1;
-  width: min(28rem, 100%);
+  width: 100%;
   aspect-ratio: 1948 / 640;
 }
 
@@ -564,12 +556,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   --promo-pitch-lh: 1.02;
   grid-area: 1 / 1;
   margin: 0;
-  max-width: 7.2em;
-  overflow: visible;
+  max-width: 100%;
+  overflow: hidden;
   color: #1d1d1f;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(4.4rem, 8.4vw, 7.2rem);
+  font-size: var(--promo-pitch-size, 4rem);
   line-height: var(--promo-pitch-lh);
   letter-spacing: -0.035em;
   white-space: normal;
@@ -598,17 +590,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__face--to .promo-opening__word--hero {
   grid-area: 1 / 1;
   margin-right: 0;
-  font-size: 2em;
+  font-size: 1em;
   line-height: var(--promo-pitch-lh);
   letter-spacing: -0.04em;
   white-space: nowrap;
 }
 
-.promo-opening__tail {
-  white-space: nowrap;
-}
-
-.promo-opening__word--person {
+.promo-opening__word--salesperson {
   white-space: nowrap;
 }
 
@@ -621,7 +609,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__dot {
   display: inline-block;
-  margin-left: 0.16em;
+  margin-left: 0.02em;
 }
 
 .promo-opening__line.is-revealing .promo-opening__face--from .promo-opening__word {
@@ -765,14 +753,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: center;
   justify-content: center;
-  justify-self: center;
-  align-self: center;
-  position: relative;
-  left: calc(var(--promo-clerk-center) - var(--promo-clerk-from));
-  min-width: 0;
-  width: 100%;
-  padding-inline: var(--promo-col-inset);
-  overflow: visible;
+  position: absolute;
+  top: 50%;
+  left: 56vw;
+  width: 36vw;
+  transform: translateY(-50%);
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -794,11 +780,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   bottom: auto !important;
   width: calc(var(--promo-avatar-w) * var(--promo-avatar-scale)) !important;
   height: calc(var(--promo-avatar-h) * var(--promo-avatar-scale)) !important;
+  max-width: 100% !important;
   transform: none !important;
   margin: 0 !important;
   z-index: 1 !important;
   transition: none !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   -webkit-mask-image: var(--promo-avatar-fade);
   mask-image: var(--promo-avatar-fade);
   -webkit-mask-size: 100% 100%;
@@ -810,7 +797,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > * {
   position: relative !important;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked > .avatar-widget-container {
@@ -870,9 +857,13 @@ html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root:not(.is-promo-wi
 
 html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed.is-promo-widget-parked,
 html.is-promo-opening.is-promo-pitch .bizmis-avatar-widget-root.is-promo-widget-parked,
-html.is-promo-opening.is-promo-pitch .bizmis-viewport-portal-root,
-html.is-promo-opening.is-promo-pitch .avatar-widget-container {
+html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container {
   visibility: visible !important;
+  pointer-events: none !important;
+}
+
+html.is-promo-opening.is-promo-pitch .bizmis-viewport-portal-root {
+  visibility: hidden !important;
   pointer-events: none !important;
 }
 
@@ -899,23 +890,14 @@ html.is-promo-widget-entering .avatar-widget-container {
 }
 
 @media (max-width: 749px) {
-  .promo-opening__pitch {
-    padding: 0 1.25rem;
-  }
-
-  .promo-opening__stage {
-    grid-template-columns: 1fr;
-    row-gap: 1.35rem;
-    justify-items: center;
-  }
-
-  .promo-opening__line {
-    font-size: 3.4rem;
+  .promo-opening__copy {
+    left: 8vw;
+    width: 44vw;
   }
 
   .promo-opening__widget {
-    width: auto;
-    height: auto;
+    left: 56vw;
+    width: 36vw;
   }
 }
 
