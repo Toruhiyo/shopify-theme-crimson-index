@@ -532,6 +532,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__stage {
   --promo-col-inset: clamp(1.25rem, 3vw, 2.5rem);
+  --promo-clerk-center: 69vw;
+  --promo-clerk-from: 75vw;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
@@ -765,10 +767,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   justify-content: center;
   justify-self: center;
   align-self: center;
+  position: relative;
+  left: calc(var(--promo-clerk-center) - var(--promo-clerk-from));
   min-width: 0;
   width: 100%;
-  padding-left: var(--promo-col-inset);
-  padding-right: clamp(2.75rem, 7vw, 5rem);
+  padding-inline: var(--promo-col-inset);
   overflow: visible;
   box-sizing: border-box;
 }
@@ -786,7 +789,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   );
   position: relative !important;
   top: auto !important;
-  left: clamp(-4.5rem, -6vw, -1.75rem) !important;
+  left: auto !important;
   right: auto !important;
   bottom: auto !important;
   width: calc(var(--promo-avatar-w) * var(--promo-avatar-scale)) !important;
