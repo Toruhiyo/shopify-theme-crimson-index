@@ -191,7 +191,9 @@
       originalDestroy = typeof api.destroy === 'function' ? api.destroy.bind(api) : null;
       api.init = function (config) {
         storeConfig = config;
-        return originalInit(lookForPromo(config));
+        const result = originalInit(lookForPromo(config));
+        if (isOpening()) armOpeningWave();
+        return result;
       };
       wrapped = true;
       return true;
@@ -235,6 +237,25 @@
     }
 
     return { arm, hide, remountForStore };
+  }
+
+  function waveOpeningAvatar() {
+    const embed = document.getElementById('bizmis-avatar-embed');
+    if (!embed) return false;
+    const target = embed.querySelector('.bizmis-desktop-lite-chat [role="button"]');
+    if (!target) return false;
+    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    return true;
+  }
+
+  function armOpeningWave() {
+    let tries = 0;
+    const run = () => {
+      if (waveOpeningAvatar()) return;
+      tries += 1;
+      if (tries < 50) window.setTimeout(run, 100);
+    };
+    run();
   }
 
   const promoWidget = createPromoWidgetBridge();
@@ -324,6 +345,7 @@
       embed.removeAttribute('style');
       embed.classList.add('is-promo-widget-parked');
       slot.appendChild(embed);
+      waveOpeningAvatar();
     }
 
     restoreWidget() {
