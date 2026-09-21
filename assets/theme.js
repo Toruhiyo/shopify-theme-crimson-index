@@ -155,6 +155,7 @@
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
+  const PROMO_OPENING_WAVE_DELAY_MS = 1000;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -242,23 +243,32 @@
     return { arm, hide, remountForStore };
   }
 
+  let openingWaveStarted = false;
+  let openingWavePlayed = false;
+
   function waveOpeningAvatar() {
+    if (openingWavePlayed) return true;
     const embed = document.getElementById('bizmis-avatar-embed');
     if (!embed) return false;
     const target = embed.querySelector('.bizmis-desktop-lite-chat [role="button"]');
     if (!target) return false;
+    openingWavePlayed = true;
     target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     return true;
   }
 
   function armOpeningWave() {
-    let tries = 0;
-    const run = () => {
-      if (waveOpeningAvatar()) return;
-      tries += 1;
-      if (tries < 50) window.setTimeout(run, 100);
-    };
-    run();
+    if (openingWaveStarted) return;
+    openingWaveStarted = true;
+    window.setTimeout(() => {
+      let tries = 0;
+      const run = () => {
+        if (waveOpeningAvatar()) return;
+        tries += 1;
+        if (tries < 50) window.setTimeout(run, 100);
+      };
+      run();
+    }, PROMO_OPENING_WAVE_DELAY_MS);
   }
 
   const promoWidget = createPromoWidgetBridge();
@@ -348,7 +358,6 @@
       embed.removeAttribute('style');
       embed.classList.add('is-promo-widget-parked');
       slot.appendChild(embed);
-      waveOpeningAvatar();
     }
 
     restoreWidget() {

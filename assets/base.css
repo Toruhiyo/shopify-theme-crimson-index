@@ -755,6 +755,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 #bizmis-avatar-embed.is-promo-widget-parked {
   --promo-avatar-w: 288px;
   --promo-avatar-h: 230px;
+  --promo-avatar-scale: 1.65;
+  zoom: var(--promo-avatar-scale);
   position: relative !important;
   top: auto !important;
   left: auto !important;
