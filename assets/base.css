@@ -630,15 +630,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__face--to .promo-opening__word {
   opacity: 0;
-  transform: translateY(0.22em);
+  transform: translateY(0.1em) scale(0.96);
 }
 
 .promo-opening__face--to .promo-opening__word--hero.is-in {
-  animation: promo-pitch-word-snap 240ms cubic-bezier(0.2, 0, 0, 1) forwards;
+  animation: promo-pitch-hero-in 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .promo-opening__face--to .promo-opening__word--hero.is-out {
-  animation: promo-pitch-word-out 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: promo-pitch-hero-out 340ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .promo-opening__word--sell {
@@ -656,6 +656,28 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes promo-pitch-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.1em) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes promo-pitch-hero-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.06em) scale(1.03);
   }
 }
 

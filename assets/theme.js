@@ -138,11 +138,12 @@
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
-  const PROMO_PITCH_HERO_IN_MS = 240;
-  const PROMO_PITCH_HERO_HOLD_MS = 720;
-  const PROMO_PITCH_HERO_OUT_MS = 280;
-  const PROMO_PITCH_HERO_GAP_MS = 120;
-  const PROMO_PITCH_SETTLE_MS = 1400;
+  const PROMO_PITCH_HERO_IN_MS = 400;
+  const PROMO_PITCH_HERO_HOLD_MS = 240;
+  const PROMO_PITCH_HERO_OUT_MS = 340;
+  const PROMO_PITCH_HERO_OVERLAP_MS = 160;
+  const PROMO_PITCH_SELL_HOLD_MS = 2000;
+  const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
   const PROMO_BIZMIS_MESH_COLORS = {
@@ -440,14 +441,17 @@
         word.classList.add('is-in');
         const isLast = index === words.length - 1;
         if (isLast) {
-          window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_HERO_HOLD_MS);
+          window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_SELL_HOLD_MS);
           return;
         }
         window.setTimeout(() => {
           word.classList.remove('is-in');
           word.classList.add('is-out');
           index += 1;
-          window.setTimeout(showWord, PROMO_PITCH_HERO_OUT_MS + PROMO_PITCH_HERO_GAP_MS);
+          window.setTimeout(
+            showWord,
+            Math.max(0, PROMO_PITCH_HERO_OUT_MS - PROMO_PITCH_HERO_OVERLAP_MS)
+          );
         }, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_HERO_HOLD_MS);
       };
       showWord();
