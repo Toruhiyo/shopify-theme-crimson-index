@@ -3328,7 +3328,12 @@ body.is-promo-greyscale .hero__media video {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left center;
+  transition: transform 1.05s linear;
   pointer-events: none;
+}
+
+.hero__title-cta-line.is-underlined .hero__title-cta-rule {
+  transform: scaleX(1);
 }
 
 .hero__title-cta.is-underlined:hover .hero__title-cta-rule {
@@ -3498,6 +3503,7 @@ body.is-promo-greyscale .hero__media video {
 
   .hero__title-cta-line.is-underlined .hero__title-cta-rule {
     transform: scaleX(1);
+    transition: none;
   }
 
   .hero__title-line[data-hero-redefine] .hero__redefine-from,

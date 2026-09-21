@@ -2856,34 +2856,9 @@
       this.groupCtaLines();
       this.cta.classList.add('is-underlined');
       const lines = [...this.cta.querySelectorAll('.hero__title-cta-line')];
-
-      const startLine = (index) => {
-        const line = lines[index];
-        if (!line) return;
-
-        line.classList.add('is-underlined');
-        const rule = line.querySelector('.hero__title-cta-rule');
-        const playNext = () => startLine(index + 1);
-        if (index + 1 >= lines.length) return;
-
-        if (rule?.animate) {
-          const animation = rule.animate(
-            [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
-            {
-              duration: HERO_LINE_UNDERLINE_MS,
-              easing: 'linear',
-              fill: 'forwards'
-            }
-          );
-          animation.finished.then(playNext).catch(playNext);
-          return;
-        }
-
-        if (rule) rule.style.transform = 'scaleX(1)';
-        window.setTimeout(playNext, HERO_LINE_UNDERLINE_MS);
-      };
-
-      startLine(0);
+      lines.forEach((line, index) => {
+        window.setTimeout(() => line.classList.add('is-underlined'), index * HERO_LINE_UNDERLINE_MS);
+      });
     }
 
     playRedefine(line) {
