@@ -125,7 +125,7 @@
 
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_FLIP_BURST_MS = 600;
-  const PROMO_FLIP_HOLD_MS = 1100;
+  const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
   const PROMO_PITCH_LOGO_OUT_MS = 420;
   const PROMO_PITCH_WORD_STAGGER_MS = 100;
@@ -136,7 +136,7 @@
   const PROMO_PITCH_MORPH_MS = 720;
   const PROMO_PITCH_REPLACE_PAUSE_MS = 920;
   const PROMO_PITCH_WORD_OUT_MS = 400;
-  const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
+  const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70, 100];
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
   const PROMO_PITCH_HERO_IN_MS = 400;
   const PROMO_PITCH_HERO_HOLD_MS = 240;
@@ -154,7 +154,6 @@
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
-  const PROMO_OPENING_WAVE_DELAY_MS = 1000;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -194,9 +193,7 @@
       originalDestroy = typeof api.destroy === 'function' ? api.destroy.bind(api) : null;
       api.init = function (config) {
         storeConfig = config;
-        const result = originalInit(lookForPromo(config));
-        if (isOpening()) armOpeningWave();
-        return result;
+        return originalInit(lookForPromo(config));
       };
       wrapped = true;
       return true;
@@ -259,15 +256,13 @@
   function armOpeningWave() {
     if (openingWaveStarted) return;
     openingWaveStarted = true;
-    window.setTimeout(() => {
-      let tries = 0;
-      const run = () => {
-        if (waveOpeningAvatar()) return;
-        tries += 1;
-        if (tries < 50) window.setTimeout(run, 100);
-      };
-      run();
-    }, PROMO_OPENING_WAVE_DELAY_MS);
+    let tries = 0;
+    const run = () => {
+      if (waveOpeningAvatar()) return;
+      tries += 1;
+      if (tries < 50) window.setTimeout(run, 100);
+    };
+    run();
   }
 
   const promoWidget = createPromoWidgetBridge();
@@ -441,6 +436,7 @@
         word.classList.add('is-in');
         const isLast = index === words.length - 1;
         if (isLast) {
+          armOpeningWave();
           window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_SELL_HOLD_MS);
           return;
         }

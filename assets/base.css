@@ -196,35 +196,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: -140vmax 0 0 -140vmax;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(
-    circle,
-    #ffd19a 0%,
-    #ffb56a 12%,
-    var(--bizmis-orange, #f9a353) 28%,
-    var(--bizmis-orange, #f9a353) 52%,
-    rgba(249, 163, 83, 0.55) 70%,
-    rgba(249, 163, 83, 0) 80%
-  );
+  background: var(--bizmis-orange, #f9a353);
   transform: scale(0);
   transform-origin: center;
-  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 1.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .promo-opening.is-bursting .promo-opening__fill--orange {
   transform: scale(1);
 }
 
-.promo-opening.is-holding .promo-opening__fill--orange {
-  background: var(--bizmis-orange, #f9a353);
-}
-
-.promo-opening.is-pitch {
-  background: #f5f5f7;
-}
-
 .promo-opening.is-pitch .promo-opening__fill--orange {
   opacity: 0;
-  transition: opacity 1.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .promo-opening.is-depart .promo-opening__fill--orange,
@@ -531,6 +516,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   padding: 0 4vw;
   pointer-events: none;
   opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .promo-opening.is-pitch .promo-opening__pitch {
@@ -543,8 +529,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__stage {
+  --promo-col-inset: clamp(1.25rem, 3vw, 2.5rem);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   column-gap: 2rem;
   width: min(1100px, 100%);
@@ -553,10 +540,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__copy {
   display: grid;
   align-items: center;
-  justify-self: start;
+  justify-self: stretch;
   align-self: center;
+  min-width: 0;
   width: 100%;
-  max-width: 34rem;
+  max-width: calc(34rem + 2 * var(--promo-col-inset));
+  padding-inline: var(--promo-col-inset);
+  box-sizing: border-box;
 }
 
 .promo-opening__logo-slot {
@@ -588,6 +578,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   grid-area: 1 / 1;
 }
 
+.promo-opening__face--from {
+  display: block;
+}
+
 .promo-opening__face--to {
   display: grid;
   justify-items: start;
@@ -605,15 +599,24 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   white-space: nowrap;
 }
 
-.promo-opening__word--phrase {
+.promo-opening__tail {
+  white-space: nowrap;
+}
+
+.promo-opening__word--person {
   white-space: nowrap;
 }
 
 .promo-opening__word {
   display: inline-block;
-  margin-right: 0.28em;
+  margin-right: 0;
   opacity: 0;
   transform: translateY(0.28em);
+}
+
+.promo-opening__dot {
+  display: inline-block;
+  margin-left: 0.16em;
 }
 
 .promo-opening__line.is-revealing .promo-opening__face--from .promo-opening__word {
@@ -713,12 +716,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   content: '';
   position: absolute;
   left: 0;
-  right: 0;
-  top: 0.52em;
-  height: 0.07em;
+  width: 100%;
+  top: 0.42em;
+  height: 0.08em;
   background: var(--bizmis-orange, #f9a353);
   transform: scaleX(0);
   transform-origin: left center;
+  pointer-events: none;
   transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -755,13 +759,23 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   justify-content: center;
   justify-self: center;
   align-self: center;
+  min-width: 0;
   width: 100%;
+  padding-inline: var(--promo-col-inset);
+  box-sizing: border-box;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked {
   --promo-avatar-w: 288px;
   --promo-avatar-h: 230px;
-  --promo-avatar-scale: 1.65;
+  --promo-avatar-scale: 2.3;
+  --promo-avatar-fade: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 58%,
+    rgba(0, 0, 0, 0.7) 74%,
+    transparent 100%
+  );
   position: relative !important;
   top: auto !important;
   left: auto !important;
@@ -774,6 +788,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: 0 !important;
   z-index: 1 !important;
   transition: none !important;
+  -webkit-mask-image: var(--promo-avatar-fade);
+  mask-image: var(--promo-avatar-fade);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
