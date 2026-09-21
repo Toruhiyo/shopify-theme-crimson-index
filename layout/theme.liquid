@@ -11,7 +11,7 @@
 {%- if promo_bar_class contains 'has-promo-bar' -%}
   {%- assign has_promo_bar = true -%}
 {%- endif -%}
-<html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize>
+<html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize data-promo-bizmis-stamp="{{ 'bizmis-logo-white-transparent.png' | asset_url }}">
 <head>
   <meta charset="utf-8">
   <script>

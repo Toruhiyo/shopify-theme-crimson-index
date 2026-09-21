@@ -139,6 +139,13 @@
   const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 120, 210];
   const PROMO_PITCH_SETTLE_MS = 1400;
   const PROMO_DEPART_MS = 1100;
+  const BIZMIS_ORANGE = '#f9a353';
+  const PROMO_BIZMIS_MESH_COLORS = {
+    UPPERBODY_Top: BIZMIS_ORANGE,
+    HEAD_Hat: BIZMIS_ORANGE,
+  };
+  const PROMO_WIDGET_REMOUNT_MS = 280;
+  const PROMO_WIDGET_FADE_MS = 480;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -147,6 +154,82 @@
   const PROMO_TYPE_AFTER_MS = 8000;
   const PROMO_TYPE_CHAR_MS = 55;
   const PROMO_TYPE_FIND_MS = 15000;
+
+  function createPromoWidgetBridge() {
+    let originalInit = null;
+    let originalDestroy = null;
+    let storeConfig = null;
+    let wrapped = false;
+
+    function isOpening() {
+      return promoSearchParams().get(PROMO_VIDEO_PARAM) === 'opening';
+    }
+
+    function lookForPromo(config) {
+      if (!isOpening()) return config;
+      const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp');
+      return Object.assign({}, config, {
+        avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
+        shirtStampUrl: stamp || config.shirtStampUrl,
+        shirtStampScale: 0.9,
+      });
+    }
+
+    function wrap() {
+      const api = window.AvatarVoicechat;
+      if (!api || wrapped || typeof api.init !== 'function') return false;
+      originalInit = api.init.bind(api);
+      originalDestroy = typeof api.destroy === 'function' ? api.destroy.bind(api) : null;
+      api.init = function (config) {
+        storeConfig = config;
+        return originalInit(lookForPromo(config));
+      };
+      wrapped = true;
+      return true;
+    }
+
+    function hide() {
+      document.documentElement.classList.add('is-promo-widget-hidden');
+      document.documentElement.classList.remove('is-promo-widget-entering');
+    }
+
+    function show() {
+      document.documentElement.classList.add('is-promo-widget-entering');
+      document.documentElement.classList.remove('is-promo-widget-hidden');
+      window.setTimeout(() => {
+        document.documentElement.classList.remove('is-promo-widget-entering');
+      }, PROMO_WIDGET_FADE_MS);
+    }
+
+    function remountForStore() {
+      hide();
+      if (!originalInit || !storeConfig) {
+        window.setTimeout(show, PROMO_WIDGET_REMOUNT_MS);
+        return;
+      }
+      if (originalDestroy) originalDestroy('bizmis-avatar-embed');
+      window.setTimeout(() => {
+        originalInit(storeConfig);
+        show();
+      }, PROMO_WIDGET_REMOUNT_MS);
+    }
+
+    function arm() {
+      if (wrap()) return;
+      let tries = 0;
+      const tick = () => {
+        if (wrap() || tries > 80) return;
+        tries += 1;
+        window.setTimeout(tick, 80);
+      };
+      tick();
+    }
+
+    return { arm, hide, remountForStore };
+  }
+
+  const promoWidget = createPromoWidgetBridge();
+  promoWidget.arm();
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -417,6 +500,7 @@
     depart() {
       window.removeEventListener('resize', this.boundDock);
       this.restoreWidget();
+      promoWidget.hide();
       document.documentElement.classList.remove('is-promo-pitch');
       document.documentElement.classList.add('is-promo-depart');
       this.root.classList.add('is-depart');
@@ -433,6 +517,7 @@
       this.restoreWidget();
       document.documentElement.classList.remove('is-promo-opening', 'is-promo-pitch', 'is-promo-depart');
       this.root.remove();
+      promoWidget.remountForStore();
       this.onStoreReady?.();
     }
   }
