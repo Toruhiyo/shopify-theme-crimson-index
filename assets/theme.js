@@ -1116,6 +1116,10 @@
           label.style.transition = '';
           label.style.transform = '';
         }
+        root.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+          node.style.transition = '';
+          node.style.opacity = '';
+        });
         if (logo) {
           logo.style.opacity = '';
           logo.style.visibility = '';
@@ -1138,6 +1142,10 @@
           root.classList.add('is-on', 'is-cleared');
           const label = root.querySelector('.promo-opening__choice--right');
           if (label) label.style.transition = 'none';
+          root.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+            node.style.transition = 'none';
+            node.style.opacity = '0';
+          });
           this.centerAgenticSales();
           return 80;
         },

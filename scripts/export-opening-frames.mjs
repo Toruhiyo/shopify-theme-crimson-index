@@ -143,6 +143,12 @@ async function main() {
   for (const [id, , waitMs] of FRAMES) {
     await page.evaluate((frameId) => {
       window.__promoOpeningFrames.showExportFrame(frameId);
+      if (frameId === '02b-toggle-gone') {
+        document.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+          node.style.transition = 'none';
+          node.style.opacity = '0';
+        });
+      }
       if (frameId === '03-orange-burst') {
         const toggle = document.querySelector('.promo-opening__toggle');
         if (toggle) {
