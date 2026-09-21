@@ -136,7 +136,8 @@
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
-  const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 120, 210];
+  const PROMO_PITCH_REPLACE_IN_MS = 240;
+  const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 360, 740];
   const PROMO_PITCH_SETTLE_MS = 1400;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -495,7 +496,7 @@
 
       window.setTimeout(
         () => this.depart(),
-        toInAt + PROMO_PITCH_WORD_IN_MS + inSpan + PROMO_PITCH_SETTLE_MS
+        toInAt + PROMO_PITCH_REPLACE_IN_MS + inSpan + PROMO_PITCH_SETTLE_MS
       );
     }
 
