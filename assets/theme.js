@@ -2844,6 +2844,10 @@
         line.className = 'hero__title-cta-line';
         bucket.nodes[0].parentNode.insertBefore(line, bucket.nodes[0]);
         bucket.nodes.forEach((node) => line.appendChild(node));
+        const rule = document.createElement('span');
+        rule.className = 'hero__title-cta-rule';
+        rule.setAttribute('aria-hidden', 'true');
+        line.appendChild(rule);
       });
     }
 
@@ -2857,21 +2861,26 @@
         const line = lines[index];
         if (!line) return;
 
-        const nextIndex = index + 1;
-        if (nextIndex < lines.length) {
-          let startedNext = false;
-          const startNext = () => {
-            if (startedNext) return;
-            startedNext = true;
-            startLine(nextIndex);
-          };
-          line.addEventListener('transitionend', (event) => {
-            if (event.propertyName === 'transform') startNext();
-          });
-          window.setTimeout(startNext, HERO_LINE_UNDERLINE_MS);
+        line.classList.add('is-underlined');
+        const rule = line.querySelector('.hero__title-cta-rule');
+        const playNext = () => startLine(index + 1);
+        if (index + 1 >= lines.length) return;
+
+        if (rule?.animate) {
+          const animation = rule.animate(
+            [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+            {
+              duration: HERO_LINE_UNDERLINE_MS,
+              easing: 'linear',
+              fill: 'forwards'
+            }
+          );
+          animation.finished.then(playNext).catch(playNext);
+          return;
         }
 
-        line.classList.add('is-underlined');
+        if (rule) rule.style.transform = 'scaleX(1)';
+        window.setTimeout(playNext, HERO_LINE_UNDERLINE_MS);
       };
 
       startLine(0);
