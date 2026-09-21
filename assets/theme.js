@@ -497,27 +497,81 @@
     return order;
   }
 
-  function renderStoreCards(row, stores) {
-    if (!row) return;
-    row.replaceChildren();
-    stores.forEach((store) => {
-      const card = document.createElement('article');
-      card.className = 'promo-opening__store';
-      card.dataset.store = store.slug;
-      card.style.setProperty('--promo-store-accent', store.accent || '#1d1d1f');
-      const mark = document.createElement('img');
-      mark.className = 'promo-opening__card-mark';
-      mark.src = store.logo || store.stamp || '';
-      mark.alt = '';
-      const name = document.createElement('span');
-      name.className = 'promo-opening__store-name';
-      name.textContent = store.name || '';
-      const sector = document.createElement('span');
-      sector.className = 'promo-opening__store-sector';
-      sector.textContent = store.sector || '';
-      card.append(mark, name, sector);
-      row.appendChild(card);
+  function storeAssetUrls(store) {
+    if (!store) return [];
+    const urls = [store.hero, store.avatar, store.logo, store.stamp];
+    if (Array.isArray(store.avatars)) urls.push(...store.avatars);
+    return urls.filter(Boolean);
+  }
+
+  function preloadPromoImage(url) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const done = () => resolve();
+      img.onload = () => {
+        if (typeof img.decode === 'function') {
+          img.decode().then(done).catch(done);
+          return;
+        }
+        done();
+      };
+      img.onerror = done;
+      img.src = url;
     });
+  }
+
+  function preloadPromoOpening(stores) {
+    const urls = new Set([PROMO_BIZMIS_AVATAR_MODEL_URL]);
+    (stores || []).forEach((store) => {
+      storeAssetUrls(store).forEach((url) => urls.add(url));
+    });
+    return Promise.all([...urls].map((url) => {
+      if (String(url).endsWith('.glb')) {
+        return fetch(url, { mode: 'cors', cache: 'force-cache' }).then(() => {}).catch(() => {});
+      }
+      return preloadPromoImage(url);
+    }));
+  }
+
+  function renderStoreCarousel(row, avatarHost, stores) {
+    if (row) row.replaceChildren();
+    if (avatarHost) avatarHost.replaceChildren();
+    const viewport = document.createElement('div');
+    viewport.className = 'promo-opening__carousel';
+    const track = document.createElement('div');
+    track.className = 'promo-opening__carousel-track';
+    (stores || []).forEach((store) => {
+      const accent = store.accent || '#1d1d1f';
+      const slide = document.createElement('article');
+      slide.className = 'promo-opening__slide';
+      slide.dataset.store = store.slug;
+      slide.style.setProperty('--promo-store-accent', accent);
+      const glow = document.createElement('span');
+      glow.className = 'promo-opening__slide-glow';
+      const hero = document.createElement('img');
+      hero.className = 'promo-opening__slide-hero';
+      hero.alt = '';
+      hero.src = store.hero || '';
+      const caption = document.createElement('span');
+      caption.className = 'promo-opening__slide-caption';
+      caption.textContent = store.name || '';
+      slide.append(glow, hero, caption);
+      track.appendChild(slide);
+
+      if (!avatarHost) return;
+      const avatar = document.createElement('img');
+      avatar.className = 'promo-opening__avatar';
+      avatar.dataset.store = store.slug;
+      avatar.alt = '';
+      avatar.src = store.avatar || '';
+      avatar.style.setProperty('--promo-store-accent', accent);
+      avatarHost.appendChild(avatar);
+    });
+    if (row) {
+      viewport.appendChild(track);
+      row.appendChild(viewport);
+    }
+    return track;
   }
 
   function hasPromoCover() {
@@ -543,8 +597,12 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.storesRow = root.querySelector('[data-promo-stores]');
+      this.avatarHost = root.querySelector('[data-promo-avatars]');
       this.stores = loadPromoStores();
+      this.carouselTrack = renderStoreCarousel(this.storesRow, this.avatarHost, this.stores);
       this.landIndex = landingStoreIndex(this.stores);
+      this.assetsReady = false;
+      this.flipWhenReady = false;
       this.flipping = false;
       this.parkedEmbed = null;
       this.parkedParent = null;
@@ -553,9 +611,16 @@
       this.parkTimer = 0;
       this.boundDock = () => this.fitOpeningLayout();
       this.toggle?.addEventListener('click', () => this.flip());
-      renderStoreCards(this.storesRow, this.stores);
       promoWidget.preloadStoreStamps(this.stores);
+      preloadPromoOpening(this.stores).then(() => this.finishBoot());
       this.armAutoFlip();
+    }
+
+    finishBoot() {
+      if (this.assetsReady) return;
+      this.assetsReady = true;
+      document.documentElement.classList.add('is-promo-ready');
+      if (this.flipWhenReady) this.flip();
     }
 
     armAutoFlip() {
@@ -648,6 +713,10 @@
 
     flip() {
       if (this.flipping) return;
+      if (!this.assetsReady) {
+        this.flipWhenReady = true;
+        return;
+      }
       this.flipping = true;
       window.clearTimeout(this.autoTimer);
       if (this.toggle) {
@@ -836,26 +905,49 @@
         'is-see-landed'
       );
       this.storesRow?.classList.remove('tick');
-      this.storesRow?.querySelectorAll('.promo-opening__store').forEach((card) => {
-        card.classList.remove('is-on', 'is-land');
+      this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
+        slide.classList.remove('is-on');
       });
+      this.avatarHost?.querySelectorAll('.promo-opening__avatar').forEach((avatar) => {
+        avatar.classList.remove('is-on');
+      });
+      if (this.carouselTrack) this.carouselTrack.style.transform = '';
     }
 
-    highlightStore(index, landed) {
-      const cards = this.storesRow
-        ? [...this.storesRow.querySelectorAll('.promo-opening__store')]
+    placeCarousel(index, snap) {
+      const track = this.carouselTrack;
+      const slide = track?.children[index];
+      const view = track?.parentElement;
+      if (!track || !slide || !view) return;
+      const offset = slide.offsetLeft - (view.clientWidth - slide.offsetWidth) / 2;
+      if (snap) track.style.transition = 'none';
+      track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+      if (snap) {
+        track.getBoundingClientRect();
+        track.style.transition = '';
+      }
+    }
+
+    highlightStore(index, landed, snap) {
+      const slides = this.carouselTrack
+        ? [...this.carouselTrack.querySelectorAll('.promo-opening__slide')]
         : [];
-      cards.forEach((card, cardIndex) => {
-        const on = cardIndex === index;
-        card.classList.toggle('is-on', on);
-        card.classList.toggle('is-land', Boolean(landed && on));
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle('is-on', slideIndex === index);
+      });
+      const avatars = this.avatarHost
+        ? [...this.avatarHost.querySelectorAll('.promo-opening__avatar')]
+        : [];
+      avatars.forEach((avatar, avatarIndex) => {
+        avatar.classList.toggle('is-on', avatarIndex === index);
       });
       this.root.classList.toggle('is-see-landed', Boolean(landed));
+      if (index >= 0) this.placeCarousel(index, Boolean(snap));
     }
 
     snapSeeLanded() {
       this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed');
-      this.highlightStore(this.landIndex, true);
+      this.highlightStore(this.landIndex, true, true);
       const store = this.stores[this.landIndex];
       if (store) promoWidget.applyStoreLook(store);
     }
@@ -959,6 +1051,7 @@
     }
 
     showExportFrame(name) {
+      this.finishBoot();
       const root = this.root;
       const html = document.documentElement;
       const center = root.querySelector('.promo-opening__center');
@@ -1102,7 +1195,7 @@
             : phase === 'roulette'
               ? midIndex
               : this.landIndex;
-        if (highlight >= 0) this.highlightStore(highlight, phase === 'landed');
+        if (highlight >= 0) this.highlightStore(highlight, phase === 'landed', true);
         if (phase === 'roulette') this.storesRow?.classList.add('tick');
 
         if (phase === 'hero') {

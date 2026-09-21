@@ -34,9 +34,9 @@ const FRAMES = [
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
   ['14-sell-wave', 'sell. hold. Clerk waves once after park, still on the right.', 220],
   ['15-see-yourself', 'sell. is gone. See for yourself. in the same seat, about 60% of sell. size.', 80],
-  ['16-see-stores', 'See for yourself. docked as a small label. Six store cards in a row, first card highlighted.', 80],
-  ['17-see-roulette', 'Highlight on a mid-row store. Clerk in that store uniform. Row has a tick pulse.', 80],
-  ['18-see-meridian', 'Landed on Meridian. Other cards dim to 40%. Clerk in Meridian red.', 220],
+  ['16-see-stores', 'See for yourself. docked as a small label. Hero carousel, first store centered and glowing.', 80],
+  ['17-see-roulette', 'Carousel on a mid-list store, that accent glow. Clerk morphed to that store avatar.', 80],
+  ['18-see-meridian', 'Landed on Meridian. Other heroes dim. Clerk morphed to the Meridian avatar.', 220],
 ];
 
 async function loadPlaywright() {
@@ -140,6 +140,9 @@ async function main() {
   }
   await waitForOpening(page);
   await injectLocalOpeningCss(page);
+  await page.evaluate(() => {
+    document.documentElement.classList.add('is-promo-ready');
+  });
 
   for (const [id, , waitMs] of FRAMES) {
     await page.evaluate((frameId) => {

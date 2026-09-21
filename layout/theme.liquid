@@ -153,6 +153,9 @@
 
   {%- assign promo_logo_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
   <div class="promo-opening" id="promo-opening" data-promo-opening role="dialog" aria-modal="true" aria-label="Bizmis intro">
+    <div class="promo-opening__boot" data-promo-loader>
+      <p class="promo-opening__boot-label">Loading</p>
+    </div>
     <div class="promo-opening__fill promo-opening__fill--orange" aria-hidden="true"></div>
     <div class="promo-opening__radiance" aria-hidden="true">
       <div class="promo-opening__waves">
@@ -211,7 +214,9 @@
           <p class="promo-opening__see" data-promo-see aria-hidden="true">See for yourself.</p>
           <div class="promo-opening__stores" data-promo-stores aria-hidden="true"></div>
         </div>
-        <div class="promo-opening__widget" data-promo-widget></div>
+        <div class="promo-opening__widget" data-promo-widget>
+          <div class="promo-opening__avatars" data-promo-avatars aria-hidden="true"></div>
+        </div>
       </div>
     </div>
     <div class="promo-opening__store-logo" aria-hidden="true">
@@ -225,6 +230,8 @@
         "name": "Paper & Pine Books",
         "sector": "Books & stationery",
         "accent": "#2F5D50",
+        "hero": {{ 'promo-hero-paper-pine.svg' | asset_url | json }},
+        "avatar": {{ 'promo-avatar-paper-pine.svg' | asset_url | json }},
         "logo": {{ 'promo-store-paper-pine.svg' | asset_url | json }},
         "stamp": {{ 'promo-store-paper-pine.svg' | asset_url | json }},
         "stampScale": 0.7,
@@ -235,6 +242,8 @@
         "name": "The Apricot Theory",
         "sector": "Beauty & skincare",
         "accent": "#E07A5F",
+        "hero": {{ 'promo-hero-apricot-theory.svg' | asset_url | json }},
+        "avatar": {{ 'promo-avatar-apricot-theory.svg' | asset_url | json }},
         "logo": {{ 'promo-store-apricot-theory.svg' | asset_url | json }},
         "stamp": {{ 'promo-store-apricot-theory.svg' | asset_url | json }},
         "stampScale": 0.7,
@@ -245,6 +254,8 @@
         "name": "12 Weather Outfitters",
         "sector": "Apparel & outdoor",
         "accent": "#1B4F72",
+        "hero": {{ 'promo-hero-weather-outfitters.svg' | asset_url | json }},
+        "avatar": {{ 'promo-avatar-weather-outfitters.svg' | asset_url | json }},
         "logo": {{ 'promo-store-weather-outfitters.svg' | asset_url | json }},
         "stamp": {{ 'promo-store-weather-outfitters.svg' | asset_url | json }},
         "stampScale": 0.7,
@@ -255,6 +266,8 @@
         "name": "Pulse Forge",
         "sector": "Gaming gear",
         "accent": "#6C2BD9",
+        "hero": {{ 'promo-hero-pulse-forge.svg' | asset_url | json }},
+        "avatar": {{ 'promo-avatar-pulse-forge.svg' | asset_url | json }},
         "logo": {{ 'promo-store-pulse-forge.svg' | asset_url | json }},
         "stamp": {{ 'promo-store-pulse-forge.svg' | asset_url | json }},
         "stampScale": 0.7,
@@ -265,6 +278,8 @@
         "name": "Build Right Home",
         "sector": "Home & DIY",
         "accent": "#C56A1A",
+        "hero": {{ 'promo-hero-build-right.svg' | asset_url | json }},
+        "avatar": {{ 'promo-avatar-build-right.svg' | asset_url | json }},
         "logo": {{ 'promo-store-build-right.svg' | asset_url | json }},
         "stamp": {{ 'promo-store-build-right.svg' | asset_url | json }},
         "stampScale": 0.7,
@@ -275,6 +290,8 @@
         "name": "Meridian",
         "sector": "Consumer electronics",
         "accent": {{ promo_red | json }},
+        "hero": {{ 'promo-hero-meridian.svg' | asset_url | json }},
+        "avatar": {{ 'promo-avatar-meridian.svg' | asset_url | json }},
         "logo": {{ 'logo-transparent.png' | asset_url | json }},
         "stamp": {{ 'logo-white.png' | asset_url | json }},
         "stampScale": 0.76,
