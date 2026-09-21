@@ -570,6 +570,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   grid-area: 1 / 1;
   margin: 0;
   max-width: 7.2em;
+  overflow: visible;
   color: #1d1d1f;
   font-family: var(--font-heading);
   font-weight: 700;
@@ -591,22 +592,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   justify-items: start;
   align-items: start;
+  overflow: visible;
   pointer-events: none;
 }
 
-.promo-opening__lead,
-.promo-opening__face--to .promo-opening__word--sell {
+.promo-opening__face--to .promo-opening__word--hero {
   grid-area: 1 / 1;
-}
-
-.promo-opening__lead {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.promo-opening__lead .promo-opening__word {
   margin-right: 0;
+  font-size: 2em;
+  line-height: var(--promo-pitch-lh);
+  letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
 .promo-opening__word--phrase {
@@ -637,28 +633,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translateY(0.22em);
 }
 
-.promo-opening__face--to.is-entering .promo-opening__lead .promo-opening__word {
+.promo-opening__face--to .promo-opening__word--hero.is-in {
   animation: promo-pitch-word-snap 240ms cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
-.promo-opening__face--to.is-lead-leaving .promo-opening__lead .promo-opening__word {
-  animation: promo-pitch-word-out 400ms cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-
-.promo-opening__face--to.is-selling .promo-opening__lead {
-  visibility: hidden;
-}
-
-.promo-opening__face--to.is-selling .promo-opening__word--sell {
-  animation: promo-pitch-word-snap 240ms cubic-bezier(0.2, 0, 0, 1) forwards;
+.promo-opening__face--to .promo-opening__word--hero.is-out {
+  animation: promo-pitch-word-out 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .promo-opening__word--sell {
   color: var(--bizmis-orange, #f9a353);
-  font-size: 2em;
-  line-height: var(--promo-pitch-lh);
-  letter-spacing: -0.04em;
-  white-space: nowrap;
 }
 
 @keyframes promo-pitch-word {

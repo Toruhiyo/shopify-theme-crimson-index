@@ -138,12 +138,10 @@
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
-  const PROMO_PITCH_REPLACE_IN_MS = 240;
-  const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 360];
-  const PROMO_PITCH_LEAD_HOLD_MS = 780;
-  const PROMO_PITCH_LEAD_OUT_MS = 400;
-  const PROMO_PITCH_SELL_GAP_MS = 160;
-  const PROMO_PITCH_SELL_IN_MS = 240;
+  const PROMO_PITCH_HERO_IN_MS = 240;
+  const PROMO_PITCH_HERO_HOLD_MS = 720;
+  const PROMO_PITCH_HERO_OUT_MS = 280;
+  const PROMO_PITCH_HERO_GAP_MS = 120;
   const PROMO_PITCH_SETTLE_MS = 1400;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -429,6 +427,32 @@
       }, PROMO_PITCH_LOGO_HOLD_MS);
     }
 
+    playHeroWords(toFace, onDone) {
+      const words = toFace ? [...toFace.querySelectorAll('[data-promo-to-word]')] : [];
+      if (!words.length) {
+        onDone();
+        return;
+      }
+
+      let index = 0;
+      const showWord = () => {
+        const word = words[index];
+        word.classList.add('is-in');
+        const isLast = index === words.length - 1;
+        if (isLast) {
+          window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_HERO_HOLD_MS);
+          return;
+        }
+        window.setTimeout(() => {
+          word.classList.remove('is-in');
+          word.classList.add('is-out');
+          index += 1;
+          window.setTimeout(showWord, PROMO_PITCH_HERO_OUT_MS + PROMO_PITCH_HERO_GAP_MS);
+        }, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_HERO_HOLD_MS);
+      };
+      showWord();
+    }
+
     playPitchLine() {
       const line = this.line;
       const fromFace = this.root.querySelector('[data-promo-face-from]');
@@ -452,10 +476,7 @@
       const from = line.querySelector('.promo-opening__from');
       const to = line.querySelector('.promo-opening__to');
       const outSpan = Math.max(...PROMO_PITCH_WORD_OUT_STAGGER_MS);
-      const leadInSpan = Math.max(...PROMO_PITCH_WORD_IN_STAGGER_MS);
       const toInAt = replaceAt + PROMO_PITCH_WORD_OUT_MS + outSpan + PROMO_PITCH_REPLACE_GAP_MS;
-      const leadOutAt = toInAt + PROMO_PITCH_REPLACE_IN_MS + leadInSpan + PROMO_PITCH_LEAD_HOLD_MS;
-      const sellInAt = leadOutAt + PROMO_PITCH_LEAD_OUT_MS + PROMO_PITCH_SELL_GAP_MS;
 
       window.setTimeout(() => {
         if (from) from.style.width = `${from.getBoundingClientRect().width}px`;
@@ -484,26 +505,11 @@
       }, replaceAt);
 
       window.setTimeout(() => {
-        const toWords = toFace ? [...toFace.querySelectorAll('[data-promo-to-word]')] : [];
-        toWords.forEach((word, index) => {
-          word.style.animationDelay = `${PROMO_PITCH_WORD_IN_STAGGER_MS[index] || 0}ms`;
-        });
-        toFace?.classList.add('is-entering');
         line.classList.add('is-replaced');
+        this.playHeroWords(toFace, () => {
+          window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
+        });
       }, toInAt);
-
-      window.setTimeout(() => {
-        toFace?.classList.add('is-lead-leaving');
-      }, leadOutAt);
-
-      window.setTimeout(() => {
-        toFace?.classList.add('is-selling');
-      }, sellInAt);
-
-      window.setTimeout(
-        () => this.depart(),
-        sellInAt + PROMO_PITCH_SELL_IN_MS + PROMO_PITCH_SETTLE_MS
-      );
     }
 
     depart() {
