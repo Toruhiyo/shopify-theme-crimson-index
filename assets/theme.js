@@ -172,6 +172,8 @@
         avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
         shirtStampUrl: stamp || config.shirtStampUrl,
         shirtStampScale: 1.35,
+        themeColor: BIZMIS_ORANGE,
+        secondaryColor: BIZMIS_ORANGE,
       });
     }
 
