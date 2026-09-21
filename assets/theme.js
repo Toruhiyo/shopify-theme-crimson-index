@@ -132,7 +132,12 @@
   const PROMO_PITCH_STRIKE_MS = 420;
   const PROMO_PITCH_STRIKE_HOLD_MS = 200;
   const PROMO_PITCH_MORPH_MS = 720;
-  const PROMO_PITCH_SETTLE_MS = 1600;
+  const PROMO_PITCH_REPLACE_PAUSE_MS = 920;
+  const PROMO_PITCH_WORD_OUT_MS = 400;
+  const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
+  const PROMO_PITCH_REPLACE_GAP_MS = 180;
+  const PROMO_PITCH_WORD_IN_STAGGER_MS = [0, 120, 210];
+  const PROMO_PITCH_SETTLE_MS = 1400;
   const PROMO_DEPART_MS = 1100;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
@@ -174,7 +179,12 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.flipping = false;
+      this.placedSurface = null;
+      this.placedStyle = null;
+      this.placedSize = null;
+      this.placeTimer = 0;
       this.boundDock = () => this.dockLogo();
+      this.boundPlace = () => this.placeWidget();
       this.toggle?.addEventListener('click', () => this.flip());
       this.armAutoFlip();
     }
@@ -209,13 +219,76 @@
       this.root.classList.add('is-logo-docked');
     }
 
+    findWidgetSurface() {
+      const named = document.querySelector('.bizmis-desktop-lite-chat, .bizmis-closed-bubble');
+      if (named && named.getBoundingClientRect().height > 40) return named;
+
+      const canvas = document.querySelector('#bizmis-avatar-embed canvas, .bizmis-viewport-portal-root canvas');
+      const card = canvas?.closest('.bizmis-desktop-lite-chat, [class*="rounded-xl"], [class*="theme-bg-glassy"]');
+      if (card && card.getBoundingClientRect().height > 40) return card;
+
+      const embed = document.getElementById('bizmis-avatar-embed');
+      if (embed && embed.getBoundingClientRect().height > 40) return embed;
+      return embed;
+    }
+
+    placeWidget() {
+      const slot = this.root.querySelector('[data-promo-widget]');
+      const surface = this.placedSurface || this.findWidgetSurface();
+      if (!slot || !surface) return;
+
+      const slotRect = slot.getBoundingClientRect();
+      if (slotRect.width < 8 || slotRect.height < 8) return;
+
+      if (!this.placedSurface) {
+        const natural = surface.getBoundingClientRect();
+        if (natural.height <= 40) return;
+        this.placedSurface = surface;
+        this.placedStyle = surface.getAttribute('style');
+        this.placedSize = natural;
+        surface.classList.add('is-promo-widget-placed');
+      }
+
+      const height = this.placedSize.height;
+      const width = this.placedSize.width;
+      const top = slotRect.top + (slotRect.height - height) / 2;
+      const left = slotRect.left + (slotRect.width - width) / 2;
+      surface.style.setProperty('position', 'fixed', 'important');
+      surface.style.setProperty('top', `${Math.round(top)}px`, 'important');
+      surface.style.setProperty('left', `${Math.round(left)}px`, 'important');
+      surface.style.setProperty('right', 'auto', 'important');
+      surface.style.setProperty('bottom', 'auto', 'important');
+      surface.style.setProperty('transform', 'none', 'important');
+      surface.style.setProperty('margin', '0', 'important');
+      surface.style.setProperty('z-index', '100003', 'important');
+    }
+
     restoreWidget() {
-      document.querySelectorAll('.is-promo-star-surface').forEach((surface) => {
-        ['position', 'top', 'left', 'width', 'height', 'right', 'bottom', 'transform', 'margin', 'max-width', 'max-height', 'z-index', 'overflow'].forEach((name) => {
-          surface.style.removeProperty(name);
-        });
-        surface.classList.remove('is-promo-star-surface');
+      window.clearTimeout(this.placeTimer);
+      window.removeEventListener('resize', this.boundPlace);
+      const surface = this.placedSurface;
+      if (surface) {
+        if (this.placedStyle != null) surface.setAttribute('style', this.placedStyle);
+        else surface.removeAttribute('style');
+        surface.classList.remove('is-promo-widget-placed');
+      }
+      document.querySelectorAll('.is-promo-star-surface, .is-promo-widget-placed').forEach((node) => {
+        node.classList.remove('is-promo-star-surface', 'is-promo-widget-placed');
       });
+      this.placedSurface = null;
+      this.placedStyle = null;
+      this.placedSize = null;
+    }
+
+    armPlace() {
+      let tries = 0;
+      const run = () => {
+        this.placeWidget();
+        tries += 1;
+        if (tries < 24) this.placeTimer = window.setTimeout(run, 160);
+      };
+      run();
+      window.addEventListener('resize', this.boundPlace);
     }
 
     flip() {
@@ -255,14 +328,16 @@
         window.requestAnimationFrame(() => this.dockLogo());
       });
       window.addEventListener('resize', this.boundDock);
+      this.armPlace();
       this.playPitchLine();
     }
 
     playPitchLine() {
       const line = this.line;
       const eyebrow = this.root.querySelector('[data-promo-eyebrow]');
-      const cta = this.root.querySelector('[data-promo-pitch-cta]');
-      if (!line) {
+      const fromFace = this.root.querySelector('[data-promo-face-from]');
+      const toFace = this.root.querySelector('[data-promo-face-to]');
+      if (!line || !fromFace) {
         window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
         return;
       }
@@ -279,21 +354,22 @@
         ? (eyebrowWords.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS
         : 0;
 
-      const words = line.querySelectorAll('.promo-opening__word');
-      words.forEach((word, index) => {
+      const fromWords = [...fromFace.querySelectorAll('[data-promo-from-word]')];
+      fromWords.forEach((word, index) => {
         word.style.animationDelay = `${eyebrowInAt + index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
       });
       line.classList.add('is-revealing');
 
-      const wordsInAt = eyebrowInAt + (words.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
+      const wordsInAt = eyebrowInAt + (fromWords.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
       const strikeAt = wordsInAt + PROMO_PITCH_REDEFINE_HOLD_MS;
       const morphAt = strikeAt + PROMO_PITCH_STRIKE_MS + PROMO_PITCH_STRIKE_HOLD_MS;
+      const morphDoneAt = morphAt + PROMO_PITCH_MORPH_MS;
+      const replaceAt = morphDoneAt + PROMO_PITCH_REPLACE_PAUSE_MS;
       const from = line.querySelector('.promo-opening__from');
       const to = line.querySelector('.promo-opening__to');
-
-      window.setTimeout(() => {
-        cta?.classList.add('is-revealed');
-      }, wordsInAt);
+      const outSpan = Math.max(...PROMO_PITCH_WORD_OUT_STAGGER_MS);
+      const inSpan = Math.max(...PROMO_PITCH_WORD_IN_STAGGER_MS);
+      const toInAt = replaceAt + PROMO_PITCH_WORD_OUT_MS + outSpan + PROMO_PITCH_REPLACE_GAP_MS;
 
       window.setTimeout(() => {
         if (from) from.style.width = `${from.getBoundingClientRect().width}px`;
@@ -313,11 +389,29 @@
         line.classList.remove('is-striking', 'is-erasing');
         if (from) from.style.width = '';
         if (to) to.style.width = '';
-        cta?.classList.add('is-underlined');
         this.dockLogo();
-      }, morphAt + PROMO_PITCH_MORPH_MS);
+      }, morphDoneAt);
 
-      window.setTimeout(() => this.depart(), morphAt + PROMO_PITCH_MORPH_MS + PROMO_PITCH_SETTLE_MS);
+      window.setTimeout(() => {
+        fromWords.forEach((word, index) => {
+          word.style.animationDelay = `${PROMO_PITCH_WORD_OUT_STAGGER_MS[index] || 0}ms`;
+        });
+        fromFace.classList.add('is-exiting');
+      }, replaceAt);
+
+      window.setTimeout(() => {
+        const toWords = toFace ? [...toFace.querySelectorAll('[data-promo-to-word]')] : [];
+        toWords.forEach((word, index) => {
+          word.style.animationDelay = `${PROMO_PITCH_WORD_IN_STAGGER_MS[index] || 0}ms`;
+        });
+        toFace?.classList.add('is-entering');
+        line.classList.add('is-replaced');
+      }, toInAt);
+
+      window.setTimeout(
+        () => this.depart(),
+        toInAt + PROMO_PITCH_WORD_IN_MS + inSpan + PROMO_PITCH_SETTLE_MS
+      );
     }
 
     depart() {
