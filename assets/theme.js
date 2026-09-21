@@ -156,6 +156,8 @@
   const PROMO_SEE_LAND_HOLD_MS = 900;
   const PROMO_SEE_GLIDE_START_MS = 480;
   const PROMO_SEE_GLIDE_END_MS = 1600;
+  const PROMO_SEE_STAIN_MS = 920;
+  const PROMO_SEE_STAIN_COUNT = 5;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -996,7 +998,7 @@
       track.style.transform = `translate3d(${-this.carouselOffset(0)}px, 0, 0)`;
       this.setActiveSlide(0, land <= 0);
       const first = this.stores[0];
-      if (first) promoWidget.applyStoreLook(first);
+      if (first) this.arriveStore(first);
       if (land <= 0) {
         onDone();
         return;
@@ -1023,7 +1025,7 @@
         const done = arrived >= land;
         this.setActiveSlide(arrived, done);
         const store = this.stores[arrived];
-        if (store) promoWidget.applyStoreLook(store);
+        if (store) this.arriveStore(store);
         if (done) {
           this.glideFrame = 0;
           onDone();
@@ -1034,6 +1036,26 @@
         this.glideFrame = window.requestAnimationFrame(frame);
       };
       this.glideFrame = window.requestAnimationFrame(frame);
+    }
+
+    arriveStore(store) {
+      this.stainClerk(store.accent);
+      promoWidget.applyStoreLook(store);
+    }
+
+    stainClerk(accent) {
+      const host = this.root.querySelector('[data-promo-stains]');
+      if (!host || prefersReducedMotion()) return;
+      const burst = document.createElement('div');
+      burst.className = 'promo-opening__stain-burst';
+      burst.style.setProperty('--promo-stain', accent || BIZMIS_ORANGE);
+      for (let index = 0; index < PROMO_SEE_STAIN_COUNT; index += 1) {
+        const stain = document.createElement('span');
+        stain.className = 'promo-opening__stain';
+        burst.appendChild(stain);
+      }
+      host.appendChild(burst);
+      window.setTimeout(() => burst.remove(), PROMO_SEE_STAIN_MS + 80);
     }
 
     depart() {
