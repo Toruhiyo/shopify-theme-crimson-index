@@ -126,6 +126,8 @@
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1100;
+  const PROMO_PITCH_LOGO_HOLD_MS = 900;
+  const PROMO_PITCH_LOGO_OUT_MS = 420;
   const PROMO_PITCH_WORD_STAGGER_MS = 100;
   const PROMO_PITCH_WORD_IN_MS = 420;
   const PROMO_PITCH_REDEFINE_HOLD_MS = 480;
@@ -415,12 +417,14 @@
       });
       window.addEventListener('resize', this.boundDock);
       this.armPlace();
-      this.playPitchLine();
+      window.setTimeout(() => {
+        this.root.classList.add('is-logo-leaving');
+        window.setTimeout(() => this.playPitchLine(), PROMO_PITCH_LOGO_OUT_MS);
+      }, PROMO_PITCH_LOGO_HOLD_MS);
     }
 
     playPitchLine() {
       const line = this.line;
-      const eyebrow = this.root.querySelector('[data-promo-eyebrow]');
       const fromFace = this.root.querySelector('[data-promo-face-from]');
       const toFace = this.root.querySelector('[data-promo-face-to]');
       if (!line || !fromFace) {
@@ -428,25 +432,13 @@
         return;
       }
 
-      const eyebrowWords = eyebrow
-        ? [...eyebrow.querySelectorAll('.promo-opening__word')].filter((word) => !word.classList.contains('promo-opening__word--mark'))
-        : [];
-      eyebrowWords.forEach((word, index) => {
-        word.style.animationDelay = `${index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
-      });
-      eyebrow?.classList.add('is-revealing');
-
-      const eyebrowInAt = eyebrowWords.length
-        ? (eyebrowWords.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS
-        : 0;
-
       const fromWords = [...fromFace.querySelectorAll('[data-promo-from-word]')];
       fromWords.forEach((word, index) => {
-        word.style.animationDelay = `${eyebrowInAt + index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
+        word.style.animationDelay = `${index * PROMO_PITCH_WORD_STAGGER_MS}ms`;
       });
       line.classList.add('is-revealing');
 
-      const wordsInAt = eyebrowInAt + (fromWords.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
+      const wordsInAt = (fromWords.length - 1) * PROMO_PITCH_WORD_STAGGER_MS + PROMO_PITCH_WORD_IN_MS;
       const strikeAt = wordsInAt + PROMO_PITCH_REDEFINE_HOLD_MS;
       const morphAt = strikeAt + PROMO_PITCH_STRIKE_MS + PROMO_PITCH_STRIKE_HOLD_MS;
       const morphDoneAt = morphAt + PROMO_PITCH_MORPH_MS;
@@ -468,14 +460,12 @@
         line.classList.add('is-erasing', 'is-redefined');
         if (from) from.style.width = '0px';
         if (to) to.style.width = `${nextWidth}px`;
-        window.requestAnimationFrame(() => this.dockLogo());
       }, morphAt);
 
       window.setTimeout(() => {
         line.classList.remove('is-striking', 'is-erasing');
         if (from) from.style.width = '';
         if (to) to.style.width = '';
-        this.dockLogo();
       }, morphDoneAt);
 
       window.setTimeout(() => {

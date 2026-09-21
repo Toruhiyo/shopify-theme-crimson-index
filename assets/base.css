@@ -350,6 +350,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: var(--promo-logo-h, calc(min(420px, 72vw) * 640 / 1948));
 }
 
+.promo-opening.is-logo-leaving .promo-opening__logo {
+  opacity: 0;
+  transition: opacity 420ms cubic-bezier(0.4, 0, 1, 1);
+}
+
 .promo-opening.is-depart .promo-opening__logo {
   opacity: 0;
   transition: opacity 420ms linear;
@@ -546,43 +551,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.85rem;
+  display: grid;
+  align-items: center;
   flex: 0 1 auto;
+  width: min(34rem, 46vw);
 }
 
-.promo-opening__eyebrow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  column-gap: 0.4em;
-  row-gap: 0.2em;
-  margin: 0;
-  color: #6b6560;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.promo-opening__word--mark {
-  display: flex;
-  align-items: center;
-  line-height: 0;
-  margin-right: 0;
-  opacity: 1;
-  transform: none;
-}
-
-.promo-opening__logo-target {
-  display: block;
-  height: 2.68rem;
-  width: calc(2.68rem * 1948 / 640);
+.promo-opening__logo-slot {
+  grid-area: 1 / 1;
+  width: 100%;
+  aspect-ratio: 1948 / 640;
 }
 
 .promo-opening__line {
+  grid-area: 1 / 1;
   margin: 0;
   max-width: 7.2em;
   color: #1d1d1f;
@@ -617,11 +599,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translateY(0.28em);
 }
 
-.promo-opening__eyebrow .promo-opening__word {
-  margin-right: 0;
-}
-
-.promo-opening__eyebrow.is-revealing .promo-opening__word,
 .promo-opening__line.is-revealing .promo-opening__face--from .promo-opening__word {
   animation: promo-pitch-word 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
