@@ -180,18 +180,45 @@
     }
 
     function lookForPromo(config) {
-      if (!isOpening()) return config;
+      const next = applyPromoLighting(config);
+      if (!isOpening()) return next;
       const stamp = solidStampUrl
         || document.documentElement.getAttribute('data-promo-bizmis-stamp');
-      return Object.assign({}, config, {
+      return Object.assign({}, next, {
         avatarModelUrl: PROMO_BIZMIS_AVATAR_MODEL_URL,
-        avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
-        shirtStampUrl: stamp || config.shirtStampUrl,
+        avatarMeshColors: Object.assign({}, next.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
+        shirtStampUrl: stamp || next.shirtStampUrl,
         shirtStampScale: PROMO_BIZMIS_STAMP_SCALE,
         canvasWidth: PROMO_AVATAR_CANVAS_WIDTH_PX,
         themeColor: BIZMIS_ORANGE,
         secondaryColor: BIZMIS_ORANGE,
       });
+    }
+
+    function parseLightingQuery(raw) {
+      if (raw == null || raw === '') return null;
+      if (raw === 'default' || raw === 'studio') return raw;
+      if (raw.charAt(0) === '{') {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    function applyPromoLighting(config) {
+      const fromQuery = parseLightingQuery(promoSearchParams().get('lighting'));
+      if (fromQuery != null) {
+        return Object.assign({}, config, { lighting: fromQuery });
+      }
+      if (config && config.lighting != null) return config;
+      const mode = promoSearchParams().get(PROMO_VIDEO_PARAM);
+      if (mode === 'opening' || mode === 'true') {
+        return Object.assign({}, config, { lighting: 'studio' });
+      }
+      return config;
     }
 
     function hardenStamp(url) {
@@ -271,7 +298,7 @@
       }
       if (originalDestroy) originalDestroy('bizmis-avatar-embed');
       window.setTimeout(() => {
-        originalInit(storeConfig);
+        originalInit(applyPromoLighting(storeConfig));
         show();
       }, PROMO_WIDGET_REMOUNT_MS);
     }
