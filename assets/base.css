@@ -1015,7 +1015,7 @@ html.is-promo-ready .promo-opening__boot {
 
 #bizmis-avatar-embed.is-promo-widget-parked {
   --promo-avatar-w: 440px;
-  --promo-avatar-h: 470px;
+  --promo-avatar-h: 520px;
   --promo-avatar-scale: 1.55;
   position: relative !important;
   top: auto !important;
