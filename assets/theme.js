@@ -124,6 +124,7 @@
   }
 
   const PROMO_FLIP_KNOB_MS = 200;
+  const PROMO_OPENING_REVEAL_STORE = false;
   const PROMO_AGENTIC_MOVE_MS = 900;
   const PROMO_AGENTIC_SCALE_MS = 800;
   const PROMO_AGENTIC_SETTLE_MS = 180;
@@ -943,6 +944,7 @@
     }
 
     revealStore() {
+      if (!PROMO_OPENING_REVEAL_STORE) return;
       const url = new URL(window.location.href);
       url.searchParams.set(PROMO_VIDEO_PARAM, 'true');
       url.searchParams.delete('auto');
