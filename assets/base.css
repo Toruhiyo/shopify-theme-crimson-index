@@ -536,7 +536,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-items: center;
   column-gap: 2rem;
   width: min(1100px, 100%);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .promo-opening__copy {
@@ -545,7 +545,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   justify-self: stretch;
   min-width: 0;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -559,8 +559,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   --promo-pitch-lh: 1.02;
   grid-area: 1 / 1;
   margin: 0;
-  max-width: 100%;
-  overflow: hidden;
+  max-width: none;
+  overflow: visible;
   color: #1d1d1f;
   font-family: var(--font-heading);
   font-weight: 700;
