@@ -1384,12 +1384,16 @@
         '10-sales-agent': () => {
           showFromCount(3);
           line?.classList.add('is-redefined');
+          const word = line?.querySelector('.promo-opening__word--salesperson');
+          [word, from, to].forEach((node) => {
+            if (node) node.style.transition = 'none';
+          });
           if (from) {
             from.style.width = '0px';
             from.style.opacity = '0';
           }
           if (to) {
-            to.style.width = '';
+            to.style.width = 'auto';
             to.style.opacity = '1';
           }
           return 180;

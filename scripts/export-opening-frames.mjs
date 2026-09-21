@@ -155,6 +155,22 @@ async function main() {
           node.style.opacity = '0';
         });
       }
+      if (frameId === '10-sales-agent') {
+        const word = document.querySelector('.promo-opening__word--salesperson');
+        const from = document.querySelector('.promo-opening__from');
+        const to = document.querySelector('.promo-opening__to');
+        [word, from, to].forEach((node) => {
+          if (node) node.style.transition = 'none';
+        });
+        if (from) {
+          from.style.width = '0px';
+          from.style.opacity = '0';
+        }
+        if (to) {
+          to.style.width = 'auto';
+          to.style.opacity = '1';
+        }
+      }
     }, id);
     await revealForcedFaces(page);
     if (waitMs) await page.waitForTimeout(waitMs);
