@@ -626,8 +626,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-pitch-word 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.promo-opening__face--from.is-exiting .promo-opening__word {
+.promo-opening__line.is-revealing .promo-opening__face--from.is-exiting .promo-opening__word {
   animation: promo-pitch-word-out 400ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.promo-opening__line.is-replaced .promo-opening__face--from {
+  visibility: hidden;
 }
 
 .promo-opening__face--to .promo-opening__word {
@@ -829,7 +833,7 @@ html.is-promo-cover .promo-cover,
 
   .promo-opening__wave,
   .promo-opening__line.is-revealing .promo-opening__word,
-  .promo-opening__face--from.is-exiting .promo-opening__word,
+  .promo-opening__line.is-revealing .promo-opening__face--from.is-exiting .promo-opening__word,
   .promo-opening__face--to.is-entering .promo-opening__word {
     animation: none !important;
   }
