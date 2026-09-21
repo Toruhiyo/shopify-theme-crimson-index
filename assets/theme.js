@@ -138,6 +138,7 @@
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
   const PROMO_AVATAR_MAX_SCALE = 2.3;
+  const PROMO_AVATAR_CANVAS_WIDTH_PX = 720;
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
   const PROMO_PITCH_HERO_IN_MS = 400;
   const PROMO_PITCH_HERO_HOLD_MS = 240;
@@ -187,6 +188,7 @@
         avatarMeshColors: Object.assign({}, config.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
         shirtStampUrl: stamp || config.shirtStampUrl,
         shirtStampScale: PROMO_BIZMIS_STAMP_SCALE,
+        canvasWidth: PROMO_AVATAR_CANVAS_WIDTH_PX,
         themeColor: BIZMIS_ORANGE,
         secondaryColor: BIZMIS_ORANGE,
       });
