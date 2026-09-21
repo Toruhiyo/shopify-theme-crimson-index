@@ -124,7 +124,7 @@
   }
 
   const PROMO_FLIP_KNOB_MS = 200;
-  const PROMO_FLIP_CHARGE_MS = 360;
+  const PROMO_FLIP_CLEAR_MS = 200;
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
@@ -657,10 +657,11 @@
       }
 
       this.pinKnobOrigin();
-      const chargeMs = PROMO_FLIP_KNOB_MS + PROMO_FLIP_CHARGE_MS;
-      this.root.style.setProperty('--promo-charge', `${chargeMs}ms`);
-      this.root.classList.add('is-on', 'is-charging');
-      window.setTimeout(() => this.burst(), chargeMs);
+      this.root.classList.add('is-on');
+      window.setTimeout(() => {
+        this.root.classList.add('is-cleared');
+        window.setTimeout(() => this.burst(), PROMO_FLIP_CLEAR_MS);
+      }, PROMO_FLIP_KNOB_MS);
     }
 
     burst() {
@@ -1072,8 +1073,7 @@
         html.classList.remove('is-promo-pitch', 'is-promo-depart');
         root.classList.remove(
           'is-on',
-          'is-charging',
-          'is-charge-peak',
+          'is-cleared',
           'is-bursting',
           'is-holding',
           'is-pitch',
@@ -1082,6 +1082,8 @@
           'is-depart'
         );
         showToggle();
+        const toggle = root.querySelector('.promo-opening__toggle');
+        if (toggle) toggle.style.opacity = '';
         if (logo) {
           logo.style.opacity = '';
           logo.style.visibility = '';
@@ -1099,15 +1101,19 @@
           root.classList.add('is-on');
           return 120;
         },
-        '02b-agentic-charge': () => {
+        '02b-toggle-gone': () => {
           rest();
-          root.classList.add('is-on', 'is-charging', 'is-charge-peak');
-          return 120;
+          root.classList.add('is-on', 'is-cleared');
+          const toggle = root.querySelector('.promo-opening__toggle');
+          if (toggle) toggle.style.opacity = '0';
+          return 80;
         },
         '03-orange-burst': () => {
           rest();
           this.pinKnobOrigin();
-          root.classList.add('is-on', 'is-bursting');
+          root.classList.add('is-on', 'is-cleared', 'is-bursting');
+          const toggle = root.querySelector('.promo-opening__toggle');
+          if (toggle) toggle.style.opacity = '0';
           return 200;
         },
         '04-logo-docked': () => {
