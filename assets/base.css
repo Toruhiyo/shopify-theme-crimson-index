@@ -293,11 +293,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate(-50%, -50%);
 }
 
-.promo-opening.is-bursting .promo-opening__toggle {
-  opacity: 0;
-  transition: opacity 220ms linear;
-}
-
 .promo-mark {
   width: min(420px, 72vw);
   height: auto;
@@ -441,6 +436,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__choice-layer--hot {
   color: var(--bizmis-orange, #f9a353);
+  transition: opacity 200ms linear, color 130ms linear;
+}
+
+.promo-opening.is-agentic-white .promo-opening__choice--right .promo-opening__choice-layer--hot {
+  color: #fff;
 }
 
 .promo-opening.is-on .promo-opening__choice--left .promo-opening__choice-layer--dark,

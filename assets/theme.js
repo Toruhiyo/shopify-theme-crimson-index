@@ -126,9 +126,12 @@
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_OPENING_REVEAL_STORE = false;
   const PROMO_AGENTIC_MOVE_MS = 900;
-  const PROMO_AGENTIC_SCALE_MS = 800;
-  const PROMO_AGENTIC_SETTLE_MS = 180;
-  const PROMO_AGENTIC_SCALE = 2.25;
+  const PROMO_AGENTIC_GROW_MS = 1800;
+  const PROMO_AGENTIC_SCALE = 10;
+  const PROMO_AGENTIC_BURST_AT_MS = 680;
+  const PROMO_AGENTIC_WHITE_AT_MS = 80;
+  const PROMO_AGENTIC_FADE_AT_MS = 170;
+  const PROMO_AGENTIC_FADE_MS = 380;
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
@@ -719,7 +722,7 @@
         this.centerAgenticSales();
         window.setTimeout(() => {
           this.scaleAgenticSales();
-          window.setTimeout(() => this.burst(), PROMO_AGENTIC_SCALE_MS + PROMO_AGENTIC_SETTLE_MS);
+          window.setTimeout(() => this.burst(), PROMO_AGENTIC_BURST_AT_MS);
         }, PROMO_AGENTIC_MOVE_MS);
       }, PROMO_FLIP_KNOB_MS);
     }
@@ -737,15 +740,15 @@
       label.style.transform = `translate(${dx}px, ${dy}px) scale(1)`;
     }
 
-    scaleAgenticSales() {
+    scaleAgenticSales(scale = PROMO_AGENTIC_SCALE) {
       const label = this.root.querySelector('.promo-opening__choice--right');
       if (!label) return;
       if (!this.agenticShift) this.centerAgenticSales();
       const { dx, dy } = this.agenticShift;
       if (label.style.transition !== 'none') {
-        label.style.transition = `transform ${PROMO_AGENTIC_SCALE_MS}ms cubic-bezier(0.45, 0.05, 0.2, 1)`;
+        label.style.transition = `transform ${PROMO_AGENTIC_GROW_MS}ms linear, opacity ${PROMO_AGENTIC_FADE_MS}ms linear`;
       }
-      label.style.transform = `translate(${dx}px, ${dy}px) scale(${PROMO_AGENTIC_SCALE})`;
+      label.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
     }
 
     pinLabelOrigin() {
@@ -762,7 +765,17 @@
     burst() {
       this.pinLabelOrigin();
       this.root.classList.add('is-bursting');
+      window.setTimeout(() => {
+        this.root.classList.add('is-agentic-white');
+      }, PROMO_AGENTIC_WHITE_AT_MS);
+      window.setTimeout(() => this.fadeAgenticSales(), PROMO_AGENTIC_FADE_AT_MS);
       window.setTimeout(() => this.hold(), PROMO_FLIP_BURST_MS);
+    }
+
+    fadeAgenticSales() {
+      const label = this.root.querySelector('.promo-opening__choice--right');
+      if (!label) return;
+      label.style.opacity = '0';
     }
 
     hold() {
@@ -1305,21 +1318,24 @@
             node.style.opacity = '0';
           });
           this.centerAgenticSales();
-          this.scaleAgenticSales();
+          this.scaleAgenticSales(2.25);
           return 80;
         },
         '03-orange-burst': () => {
           rest();
-          root.classList.add('is-on', 'is-cleared', 'is-bursting');
+          root.classList.add('is-on', 'is-cleared', 'is-bursting', 'is-agentic-white');
           const label = root.querySelector('.promo-opening__choice--right');
           if (label) label.style.transition = 'none';
+          root.querySelectorAll('.promo-opening__choice-layer--hot').forEach((node) => {
+            node.style.transition = 'none';
+          });
+          root.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+            node.style.transition = 'none';
+            node.style.opacity = '0';
+          });
           this.centerAgenticSales();
+          this.scaleAgenticSales(4.6);
           this.pinLabelOrigin();
-          const toggle = root.querySelector('.promo-opening__toggle');
-          if (toggle) {
-            toggle.style.transition = 'none';
-            toggle.style.opacity = '0';
-          }
           return 200;
         },
         '04-logo-docked': () => {

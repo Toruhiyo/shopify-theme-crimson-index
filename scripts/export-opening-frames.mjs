@@ -21,7 +21,7 @@ const FRAMES = [
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
   ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],
   ['02c-agentic-scaled', 'Agentic sales stays centered and has scaled up in Bizmis orange. Burst has not fired.', 40],
-  ['03-orange-burst', 'Orange burst from the centered Agentic sales label. Full-field takeover.', 40],
+  ['03-orange-burst', 'Orange field just after the burst. Agentic sales is still expanding, now white.', 40],
   ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk on the right.', 1600],
   ['05-logo-gone', 'Mark has left. Copy seat empty. Clerk stays on the right.', 40],
   ['06-your', 'First word: Your.', 40],
@@ -154,13 +154,6 @@ async function main() {
           node.style.transition = 'none';
           node.style.opacity = '0';
         });
-      }
-      if (frameId === '03-orange-burst') {
-        const toggle = document.querySelector('.promo-opening__toggle');
-        if (toggle) {
-          toggle.style.transition = 'none';
-          toggle.style.opacity = '0';
-        }
       }
     }, id);
     await revealForcedFaces(page);
