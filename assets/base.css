@@ -118,6 +118,11 @@ html.is-promo-opening body {
   overscroll-behavior: none;
 }
 
+html.is-promo-opening.is-promo-pitch,
+html.is-promo-opening.is-promo-pitch body {
+  background: #f5f5f7 !important;
+}
+
 html.is-promo-opening .os-viewport {
   overflow: hidden !important;
 }
@@ -170,6 +175,7 @@ html.is-promo-cover body > *:not(.promo-cover) {
   color: #2f3640;
   visibility: visible !important;
   pointer-events: auto !important;
+  transition: background 1.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 html.is-promo-opening .promo-opening {
@@ -210,6 +216,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-holding .promo-opening__fill--orange {
   background: var(--bizmis-orange, #f9a353);
+}
+
+.promo-opening.is-pitch {
+  background: #f5f5f7;
+}
+
+.promo-opening.is-pitch .promo-opening__fill--orange {
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .promo-opening.is-depart .promo-opening__fill--orange,
@@ -521,6 +536,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   letter-spacing: -0.03em;
   white-space: normal;
   justify-self: start;
+  transition: color 0.9s cubic-bezier(0.32, 0.72, 0, 1) 0.2s;
+}
+
+.promo-opening.is-pitch .promo-opening__line {
+  color: #1d1d1f;
 }
 
 .promo-opening__word {
@@ -572,7 +592,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   background: #fff;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.9s cubic-bezier(0.32, 0.72, 0, 1) 0.2s;
+}
+
+.promo-opening.is-pitch .promo-opening__from::after {
+  background: #1d1d1f;
 }
 
 .promo-opening__line.is-striking .promo-opening__from::after {
@@ -606,16 +632,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: min(42vw, 440px);
   height: min(42vw, 440px);
   justify-self: end;
-  border-radius: 36px;
   background: transparent;
-}
-
-.promo-opening.is-pitch .promo-opening__star:not(.is-live) {
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 30%, #fff 0%, rgba(255, 255, 255, 0.2) 18%, transparent 42%),
-    radial-gradient(circle at 50% 55%, #ffd19a 0%, var(--bizmis-orange, #f9a353) 55%, #ec7709 100%);
-  box-shadow: 0 18px 60px rgba(47, 54, 64, 0.18);
 }
 
 html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed,

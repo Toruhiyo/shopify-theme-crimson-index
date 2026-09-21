@@ -225,12 +225,15 @@
 
       this.pinnedSurface = surface;
       surface.classList.add('is-promo-star-surface');
+      const natural = surface.getBoundingClientRect();
+      const width = natural.width > 40 ? Math.min(natural.width, slotRect.width) : slotRect.width;
+      const height = natural.height > 40 ? Math.min(natural.height, slotRect.height) : slotRect.height;
+      const top = slotRect.top + (slotRect.height - height) / 2;
+      const left = slotRect.left + (slotRect.width - width) / 2;
       const pin = {
         position: 'fixed',
-        top: `${Math.round(slotRect.top)}px`,
-        left: `${Math.round(slotRect.left)}px`,
-        width: `${Math.round(slotRect.width)}px`,
-        height: `${Math.round(slotRect.height)}px`,
+        top: `${Math.round(top)}px`,
+        left: `${Math.round(left)}px`,
         right: 'auto',
         bottom: 'auto',
         transform: 'none',
@@ -239,6 +242,11 @@
         'max-height': 'none',
         'z-index': '100003',
       };
+      if (surface.id === 'bizmis-avatar-embed' || surface.classList.contains('bizmis-avatar-widget-root')) {
+        pin.width = `${Math.round(slotRect.width)}px`;
+        pin.height = `${Math.round(slotRect.height)}px`;
+        pin.overflow = 'hidden';
+      }
       Object.entries(pin).forEach(([name, value]) => {
         surface.style.setProperty(name, value, 'important');
       });
@@ -249,7 +257,7 @@
       window.removeEventListener('resize', this.boundPin);
       const surface = this.pinnedSurface;
       if (!surface) return;
-      ['position', 'top', 'left', 'width', 'height', 'right', 'bottom', 'transform', 'margin', 'max-width', 'max-height', 'z-index'].forEach((name) => {
+      ['position', 'top', 'left', 'width', 'height', 'right', 'bottom', 'transform', 'margin', 'max-width', 'max-height', 'z-index', 'overflow'].forEach((name) => {
         surface.style.removeProperty(name);
       });
       surface.classList.remove('is-promo-star-surface');
@@ -261,7 +269,7 @@
       const run = () => {
         this.pinSurfaceToSlot();
         tries += 1;
-        if (tries < 24) this.pinTimer = window.setTimeout(run, 120);
+        if (tries < 40) this.pinTimer = window.setTimeout(run, 150);
       };
       run();
       window.addEventListener('resize', this.boundPin);
@@ -335,8 +343,8 @@
     async pitch() {
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
-      await this.whenWidgetReady(2500);
       this.armPin();
+      this.whenWidgetReady(4000);
       this.playPitchLine();
     }
 
