@@ -83,6 +83,18 @@ async function injectLocalOpeningCss(page) {
   await page.addStyleTag({ path: path.join(THEME_ROOT, 'assets/base.css') });
 }
 
+async function unlockStorefront(page) {
+  if (!page.url().includes('/password')) return;
+  const password = process.env.PROMO_STORE_PASSWORD || 'bizmis';
+  const input = page.locator('input[name="password"]');
+  await input.waitFor({ timeout: 5000 });
+  await input.fill(password);
+  await Promise.all([
+    page.waitForURL((url) => !url.pathname.includes('/password'), { timeout: 10000 }),
+    input.press('Enter'),
+  ]);
+}
+
 async function waitForOpening(page) {
   await page.waitForFunction(() => {
     const api = window.__promoOpeningFrames;
@@ -113,6 +125,10 @@ async function main() {
   });
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto(openingUrl(), { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await unlockStorefront(page);
+  if (!page.url().includes('promo_video=opening')) {
+    await page.goto(openingUrl(), { waitUntil: 'domcontentloaded', timeout: 20000 });
+  }
   await waitForOpening(page);
   await injectLocalOpeningCss(page);
 
