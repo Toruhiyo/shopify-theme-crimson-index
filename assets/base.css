@@ -543,23 +543,25 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__stage {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: center;
-  gap: 2.25rem;
-  width: min(1080px, 100%);
+  column-gap: 2rem;
+  width: min(1100px, 100%);
 }
 
 .promo-opening__copy {
   display: grid;
   align-items: center;
-  flex: 0 1 auto;
-  width: min(34rem, 46vw);
+  justify-self: start;
+  align-self: center;
+  width: 100%;
+  max-width: 34rem;
 }
 
 .promo-opening__logo-slot {
   grid-area: 1 / 1;
-  width: 100%;
+  width: min(28rem, 100%);
   aspect-ratio: 1948 / 640;
 }
 
@@ -710,7 +712,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  justify-self: center;
+  align-self: center;
+  width: 100%;
 }
 
 #bizmis-avatar-embed.is-promo-widget-parked {
@@ -720,10 +724,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   right: auto !important;
   bottom: auto !important;
   inset: auto !important;
+  width: 288px !important;
+  height: 294px !important;
   transform: none !important;
   margin: 0 !important;
   z-index: 1 !important;
   transition: none !important;
+}
+
+#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
+#bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container > * {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
 }
 
 html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed:not(.is-promo-widget-parked),
@@ -769,8 +783,9 @@ html.is-promo-widget-entering .avatar-widget-container {
   }
 
   .promo-opening__stage {
-    flex-direction: column;
-    gap: 1.35rem;
+    grid-template-columns: 1fr;
+    row-gap: 1.35rem;
+    justify-items: center;
   }
 
   .promo-opening__line {
