@@ -645,6 +645,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__word--salesperson {
   white-space: nowrap;
+  transition: color 220ms linear;
+}
+
+.promo-opening__line.is-redefined .promo-opening__word--salesperson {
+  color: var(--bizmis-orange, #f9a353);
 }
 
 .promo-opening__word {

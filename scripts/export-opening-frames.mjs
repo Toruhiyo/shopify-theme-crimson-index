@@ -28,7 +28,7 @@ const FRAMES = [
   ['07-your-store', 'Your store. Single normal space.', 40],
   ['08-salesperson', 'Your store salesperson. salesperson is one word. Period on this token.', 40],
   ['09-salesperson-struck', 'Orange strike through person only. Period is not struck.', 40],
-  ['10-sales-agent', 'person rewritten as agent. Period stays.', 40],
+  ['10-sales-agent', 'person rewritten as agent. salesagent, including the period, is Bizmis orange.', 40],
   ['11-built', 'First line gone. Built at the same type size.', 40],
   ['12-to', 'Only to, same type size.', 40],
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
