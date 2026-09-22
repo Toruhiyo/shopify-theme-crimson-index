@@ -173,6 +173,7 @@
   const PROMO_MOMENTS_CLOSE_AT = 0.62;
   const PROMO_MOMENTS_BUNDLE_AT = 0.46;
   const PROMO_MOMENTS_SPEECH_WAIT_MS = 8000;
+  const PROMO_MOMENTS_AUDIO_QUIET_MS = 2000;
   const PROMO_MOMENTS_TAIL_MS = 400;
   const PROMO_MOMENTS_EVENT = 'bizmis:agent-delivery';
   const PROMO_SEE_HOLD_MS = 2400;
@@ -500,11 +501,13 @@
       let heard = false;
       let fallback = 0;
       let stall = 0;
+      let quiet = 0;
       const finish = () => {
         if (settled) return;
         settled = true;
         window.clearTimeout(fallback);
         window.clearTimeout(stall);
+        window.clearTimeout(quiet);
         window.removeEventListener(PROMO_MOMENTS_EVENT, onDelivery);
         resolve();
       };
@@ -523,9 +526,13 @@
           heard = true;
           window.clearTimeout(fallback);
           window.clearTimeout(stall);
+          window.clearTimeout(quiet);
           begin();
         }
-        if (phase === 'playback-ended' && heard) finish();
+        if (phase === 'playback-ended' && heard) {
+          window.clearTimeout(quiet);
+          quiet = window.setTimeout(finish, PROMO_MOMENTS_AUDIO_QUIET_MS);
+        }
       };
       window.addEventListener(PROMO_MOMENTS_EVENT, onDelivery);
       if (!sent) {
