@@ -595,14 +595,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-see-row .promo-opening__widget {
-  top: 44%;
+  top: 50%;
   right: max(0.35rem, 0.6vw);
   z-index: 6;
-  transform: translateY(-72%);
-}
-
-.promo-opening.is-see-row #bizmis-avatar-embed.is-promo-widget-parked {
-  --promo-avatar-scale: 1.7 !important;
+  transform: translateY(-50%);
 }
 
 .promo-opening__copy {
@@ -853,9 +849,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transition: opacity 180ms linear;
 }
 
-.promo-opening.is-see-landed .promo-opening__slide:not(.is-on) {
-  opacity: 0.4;
-}
 
 .promo-opening__slide-meta {
   display: flex;
@@ -1164,8 +1157,9 @@ html.is-promo-ready .promo-opening__boot {
 
 #bizmis-avatar-embed.is-promo-widget-parked {
   --promo-avatar-w: 440px;
-  --promo-avatar-h: 520px;
-  --promo-avatar-scale: 1.55;
+  --promo-avatar-h: 340px;
+  --promo-avatar-scale: 2.15 !important;
+  --promo-avatar-lift: -120px;
   position: relative !important;
   top: auto !important;
   left: auto !important;
@@ -1194,7 +1188,7 @@ html.is-promo-ready .promo-opening__boot {
   left: 50% !important;
   width: var(--promo-avatar-w) !important;
   height: var(--promo-avatar-h) !important;
-  transform: translateX(-50%) scale(var(--promo-avatar-scale)) !important;
+  transform: translateX(-50%) translateY(var(--promo-avatar-lift)) scale(var(--promo-avatar-scale)) !important;
   transform-origin: top center !important;
 }
 
