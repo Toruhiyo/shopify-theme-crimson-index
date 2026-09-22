@@ -24,6 +24,10 @@
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
       root.classList.toggle('is-promo-opening', promoVideo === 'opening');
       root.classList.toggle('is-promo-cover', isHome && promoVideo !== 'opening' && params.get('nocover') !== '1');
+      if (promoVideo) {
+        try { sessionStorage.removeItem('bizmis-session'); } catch (e) {}
+        try { localStorage.removeItem('bizmis-session'); } catch (e) {}
+      }
       if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '28px');
     })();
   </script>
