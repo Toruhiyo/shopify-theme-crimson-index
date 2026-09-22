@@ -915,9 +915,21 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   background: rgba(0, 0, 0, 0.08);
 }
 
-.promo-moments__spec:nth-child(1) .promo-moments__bar { width: 78%; }
-.promo-moments__spec:nth-child(2) .promo-moments__bar { width: 56%; }
-.promo-moments__spec:nth-child(3) .promo-moments__bar { width: 68%; }
+.promo-moments__spec:nth-child(1) .promo-moments__bar { width: 70%; }
+.promo-moments__spec:nth-child(2) .promo-moments__bar { width: 54%; }
+.promo-moments__spec:nth-child(3) .promo-moments__bar { width: 64%; }
+
+.promo-moments__card.is-pick .promo-moments__spec:nth-child(1) .promo-moments__bar { width: 86%; }
+.promo-moments__card.is-pick .promo-moments__spec:nth-child(2) .promo-moments__bar { width: 74%; }
+.promo-moments__card.is-pick .promo-moments__spec:nth-child(3) .promo-moments__bar { width: 92%; }
+
+.promo-moments__card.is-go .promo-moments__spec:nth-child(1) .promo-moments__bar { width: 58%; }
+.promo-moments__card.is-go .promo-moments__spec:nth-child(2) .promo-moments__bar { width: 70%; }
+.promo-moments__card.is-go .promo-moments__spec:nth-child(3) .promo-moments__bar { width: 36%; }
+
+.promo-moments__card.is-other .promo-moments__spec:nth-child(1) .promo-moments__bar { width: 64%; }
+.promo-moments__card.is-other .promo-moments__spec:nth-child(2) .promo-moments__bar { width: 32%; }
+.promo-moments__card.is-other .promo-moments__spec:nth-child(3) .promo-moments__bar { width: 78%; }
 
 .promo-moments__mark {
   display: grid;
@@ -954,21 +966,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(var(--gx), var(--gy), 0) scale(0.12);
 }
 
-.is-pose-row .promo-moments__card.is-pick { transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
-.is-pose-row .promo-moments__card.is-other { transform: translate3d(0, 0, 0) scale(1.28); }
-.is-pose-row .promo-moments__card.is-go { transform: translate3d(10.8rem, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-go { transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-pick { transform: translate3d(0, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-other { transform: translate3d(10.8rem, 0, 0) scale(1.28); }
 
-.is-pose-choice .promo-moments__card.is-go,
 .is-pose-doubt .promo-moments__card.is-go,
 .is-pose-close .promo-moments__card.is-go,
 .is-pose-extra .promo-moments__card.is-go,
 .is-pose-bundle .promo-moments__card.is-go {
   opacity: 0;
-  transform: translate3d(16rem, -0.4rem, 0) scale(0.4);
+  transform: translate3d(-16rem, -0.4rem, 0) scale(0.4);
 }
 
 .is-pose-choice .promo-moments__card.is-pick {
-  transform: translate3d(-9.15rem, -0.5rem, 0) scale(2.154);
+  transform: translate3d(0, -0.35rem, 0) scale(1.48);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -1px 0 rgba(0, 0, 0, 0.04),
@@ -977,10 +988,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     0 28px 70px rgba(0, 0, 0, 0.09);
 }
 
+.is-pose-choice .promo-moments__card.is-go {
+  transform: translate3d(-10.6rem, 0, 0) scale(1.22);
+}
+
 .is-pose-choice .promo-moments__card.is-other {
-  opacity: 0.45;
-  filter: blur(3px);
-  transform: translate3d(9.15rem, 0.2rem, 0) scale(2.025);
+  transform: translate3d(10.6rem, 0, 0) scale(1.22);
 }
 
 .is-pose-choice .promo-moments__card.is-pick::after,
@@ -990,14 +1003,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-choice .promo-moments__card.is-go .promo-moments__glyph,
+.is-pose-choice .promo-moments__card.is-other .promo-moments__glyph,
 .is-pose-doubt .promo-moments__card.is-pick .promo-moments__glyph,
 .is-pose-close .promo-moments__card.is-pick .promo-moments__glyph {
   top: 14%;
-  opacity: 1;
 }
 
-.is-pose-choice .promo-moments__card.is-other .promo-moments__glyph {
-  top: 14%;
+.is-pose-choice .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__glyph {
   opacity: 1;
 }
 
@@ -1367,8 +1382,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-go {
-  0% { opacity: 1; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
-  16%, 100% { opacity: 0; transform: translate3d(16rem, -0.4rem, 0) scale(0.4); }
+  0% { opacity: 1; filter: none; transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
+  100% { opacity: 1; filter: none; transform: translate3d(-10.6rem, 0, 0) scale(1.22); }
 }
 
 @keyframes promo-moments-sheen {
@@ -1377,15 +1392,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-pick {
-  0% { transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
-  22%, 74% { transform: translate3d(-9.15rem, 0, 0) scale(2.154); }
-  100% { transform: translate3d(-9.15rem, -0.5rem, 0) scale(2.154); }
+  0% { transform: translate3d(0, 0, 0) scale(1.28); }
+  100% { transform: translate3d(0, -0.35rem, 0) scale(1.48); }
 }
 
 @keyframes promo-moments-other {
-  0% { opacity: 1; filter: none; transform: translate3d(0, 0, 0) scale(1.28); }
-  22%, 74% { opacity: 1; filter: none; transform: translate3d(9.15rem, 0, 0) scale(2.154); }
-  100% { opacity: 0.45; filter: blur(3px); transform: translate3d(9.15rem, 0.2rem, 0) scale(2.025); }
+  0% { opacity: 1; filter: none; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
+  100% { opacity: 1; filter: none; transform: translate3d(10.6rem, 0, 0) scale(1.22); }
 }
 
 @keyframes promo-moments-ring {

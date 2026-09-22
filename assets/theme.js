@@ -549,13 +549,13 @@
   const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_CARD_KINDS = [
     'triangle', 'pill', 'diamond', 'ring',
-    'star', 'square', 'pill', 'diamond',
-    'ring', 'star', 'pill', 'circle',
+    'star', 'circle', 'pill', 'diamond',
+    'ring', 'star', 'pill', 'square',
   ];
-  const PROMO_MOMENT_SPEC_KINDS = ['spec-circle', 'spec-square', 'spec-triangle'];
-  const PROMO_MOMENT_PICK_INDEX = 0;
-  const PROMO_MOMENT_OTHER_INDEX = 5;
-  const PROMO_MOMENT_GO_INDEX = 11;
+  const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
+  const PROMO_MOMENT_PICK_INDEX = 5;
+  const PROMO_MOMENT_GO_INDEX = 0;
+  const PROMO_MOMENT_OTHER_INDEX = 11;
   const PROMO_MOMENT_GRID_PITCH = 8.55;
   const PROMO_MOMENT_ICONS = {
     circle: '<circle cx="12" cy="12" r="7.2"/>',
@@ -566,9 +566,9 @@
     diamond: '<path d="M12 4.2 19.8 12 12 19.8 4.2 12z"/>',
     ring: '<circle cx="12" cy="12" r="7.2"/><circle cx="12" cy="12" r="3.4"/>',
     star: '<path d="M12 3.4 14.3 9.2 20.5 9.5 16 13.4 17.6 19.4 12 16.2 6.4 19.4 8 13.4 3.5 9.5 9.7 9.2z"/>',
-    'spec-circle': '<circle cx="12" cy="12" r="6.2"/>',
-    'spec-square': '<rect x="6" y="6" width="12" height="12" rx="1.4"/>',
-    'spec-triangle': '<path d="M12 5.2 18.6 17.4H5.4z"/>',
+    'spec-bolt': '<path d="M13 3.2 6.2 13h4.6l-.8 7.8L17.8 11H13.2z"/>',
+    'spec-gauge': '<path d="M4.8 16.2a7.2 7.2 0 1 1 14.4 0"/><path d="M12 16.2 15.4 9.6"/>',
+    'spec-shield': '<path d="M12 3.4 18.8 6.1v5.2c0 3.8-2.6 6.6-6.8 8.6-4.2-2-6.8-4.8-6.8-8.6V6.1z"/>',
   };
 
   function momentShapeRole(index) {
@@ -606,7 +606,8 @@
       icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${PROMO_MOMENT_ICONS[kind]}</svg>`;
       const bar = document.createElement('i');
       bar.className = 'promo-moments__bar';
-      const verdict = role === 'other' && index === 2 ? 'no' : 'yes';
+      const failAt = role === 'go' ? 2 : role === 'other' ? 1 : -1;
+      const verdict = index === failAt ? 'no' : 'yes';
       row.append(icon, bar, momentMark(verdict));
       specs.appendChild(row);
     });
@@ -631,7 +632,7 @@
       card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.appendChild(momentGlyph(kind));
-      if (role === 'pick' || role === 'other') card.appendChild(momentSpecs(role));
+      if (role === 'pick' || role === 'other' || role === 'go') card.appendChild(momentSpecs(role));
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
