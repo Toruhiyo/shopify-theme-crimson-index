@@ -171,6 +171,8 @@
   const PROMO_WHEEL_SCALE_STEP = 0.07;
   const PROMO_WHEEL_MIN_SCALE = 0.88;
   const PROMO_WHEEL_CLERK_LANE_PX = 120;
+  const PROMO_WHEEL_GAP_PX = 32;
+  const PROMO_WHEEL_GAP_PASSES = 3;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -1050,6 +1052,110 @@
         if (abs > 1.15) fade = Math.max(0, 1 - (abs - 1.15) / 0.7);
         slide.style.setProperty('--promo-wheel-fade', String(fade));
       });
+      this.evenWheelGaps(activeIndex);
+    }
+
+    evenWheelGaps(activeIndex) {
+      const track = this.carouselTrack;
+      if (!track) return;
+      const slides = [...track.children];
+      const count = slides.length;
+      if (count < 2) return;
+      const widget = this.root.querySelector('[data-promo-widget]');
+      track.style.pointerEvents = 'auto';
+      if (widget) widget.style.visibility = 'hidden';
+      try {
+        for (let pass = 0; pass < PROMO_WHEEL_GAP_PASSES; pass += 1) {
+          if (!this.nudgeWheelGaps(activeIndex, slides, count)) break;
+        }
+      } finally {
+        track.style.pointerEvents = '';
+        if (widget) widget.style.visibility = '';
+      }
+    }
+
+    nudgeWheelGaps(activeIndex, slides, count) {
+      let anchorSlide = slides[0];
+      let anchorDistance = Infinity;
+      slides.forEach((slide, index) => {
+        const distance = loopDistance(index, activeIndex, count);
+        if (Math.abs(distance) < Math.abs(anchorDistance)) {
+          anchorSlide = slide;
+          anchorDistance = distance;
+        }
+      });
+      const card = anchorSlide.querySelector('.promo-opening__slide-card') || anchorSlide;
+      const cardRect = card.getBoundingClientRect();
+      const y = cardRect.top + cardRect.height / 2;
+      const placed = [];
+      slides.forEach((slide, index) => {
+        const distance = loopDistance(index, activeIndex, count);
+        if (Math.abs(distance) > 2.4) return;
+        const span = this.slideSpanAt(slide, y);
+        if (!span) return;
+        placed.push({ slide, distance, span });
+      });
+      if (placed.length < 2) return false;
+      placed.sort((a, b) => a.span.left - b.span.left);
+      const anchor = placed.reduce((best, item) => (
+        Math.abs(item.distance) < Math.abs(best.distance) ? item : best
+      ));
+      const anchorAt = placed.indexOf(anchor);
+      let nudged = false;
+      let edge = anchor.span.right;
+      for (let index = anchorAt + 1; index < placed.length; index += 1) {
+        const item = placed[index];
+        const delta = edge + PROMO_WHEEL_GAP_PX - item.span.left;
+        if (Math.abs(delta) > 1 && item.slide.style.transform !== 'none') {
+          item.slide.style.transform = `translateX(${delta}px) ${item.slide.style.transform}`;
+          nudged = true;
+        }
+        edge = item.span.right + delta;
+      }
+      edge = anchor.span.left;
+      for (let index = anchorAt - 1; index >= 0; index -= 1) {
+        const item = placed[index];
+        const delta = edge - PROMO_WHEEL_GAP_PX - item.span.right;
+        if (Math.abs(delta) > 1 && item.slide.style.transform !== 'none') {
+          item.slide.style.transform = `translateX(${delta}px) ${item.slide.style.transform}`;
+          nudged = true;
+        }
+        edge = item.span.left + delta;
+      }
+      return nudged;
+    }
+
+    slideSpanAt(slide, y) {
+      const rect = slide.getBoundingClientRect();
+      if (rect.width < 2 || y < rect.top || y > rect.bottom) return null;
+      const owns = (x) => document.elementFromPoint(x, y)?.closest?.('.promo-opening__slide') === slide;
+      const leftBound = Math.max(0, rect.left);
+      const rightBound = Math.min(window.innerWidth - 1, rect.right);
+      let seed = null;
+      for (let step = 0; step <= 6; step += 1) {
+        const x = leftBound + ((rightBound - leftBound) * step) / 6;
+        if (owns(x)) {
+          seed = x;
+          break;
+        }
+      }
+      if (seed == null) return null;
+      let low = leftBound;
+      let high = seed;
+      while (high - low > 1) {
+        const mid = (low + high) / 2;
+        if (owns(mid)) high = mid;
+        else low = mid;
+      }
+      const left = high;
+      low = seed;
+      high = rightBound;
+      while (high - low > 1) {
+        const mid = (low + high) / 2;
+        if (owns(mid)) low = mid;
+        else high = mid;
+      }
+      return { left, right: low };
     }
 
     placeCarousel(index, snap) {
