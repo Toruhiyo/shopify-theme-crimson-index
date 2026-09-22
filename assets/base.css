@@ -611,19 +611,24 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments {
-  grid-column: 1 / -1;
-  justify-content: flex-end;
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
-  width: min(78rem, 84vw);
+  flex: 0 0 auto;
+  width: min(66rem, 74vw);
   height: min(40rem, 72vh);
   max-height: none;
   aspect-ratio: auto;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  transform: translate(calc(-50% - 19rem), -50%) scale(0.92);
+  transform: translate(calc(-50% - 11rem), -50%) scale(0.92);
 }
 
 .promo-opening.is-see-row #bizmis-avatar-embed div {
@@ -1902,7 +1907,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__count {
   font-family: var(--font-heading);
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1;
   opacity: 0;
 }

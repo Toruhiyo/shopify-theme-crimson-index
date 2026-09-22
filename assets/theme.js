@@ -155,12 +155,12 @@
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_PITCH_SETTLE_MS = 700;
-  const PROMO_MOMENTS_VO_MS = 900;
+  const PROMO_MOMENTS_VO_MS = 180;
   const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
-  const PROMO_MOMENTS_CATALOG_MS = 1800;
-  const PROMO_MOMENTS_CHOICE_MS = 2400;
-  const PROMO_MOMENTS_DOUBT_MS = 2400;
-  const PROMO_MOMENTS_EXTRA_MS = 2600;
+  const PROMO_MOMENTS_CATALOG_MS = 1400;
+  const PROMO_MOMENTS_CHOICE_MS = 1400;
+  const PROMO_MOMENTS_DOUBT_MS = 1800;
+  const PROMO_MOMENTS_EXTRA_MS = 1900;
   const PROMO_MOMENTS_SALESPERSON_MS = 800;
   const PROMO_MOMENTS_HOLD_MS = 700;
   const PROMO_MOMENTS_VAPOR_MS = 250;
@@ -173,10 +173,7 @@
   const PROMO_MOMENTS_PAYOFF_RATIO = 0.6;
   const PROMO_MOMENTS_CLOSE_AT = 0.62;
   const PROMO_MOMENTS_BUNDLE_AT = 0.46;
-  const PROMO_MOMENTS_SPEECH_WAIT_MS = 8000;
-  const PROMO_MOMENTS_AUDIO_QUIET_MS = 5500;
-  const PROMO_MOMENTS_TAIL_MS = 400;
-  const PROMO_MOMENTS_EVENT = 'bizmis:agent-delivery';
+  const PROMO_MOMENTS_TAIL_MS = 160;
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1800;
@@ -496,56 +493,9 @@
   }
 
   function playClerkLine(line, speakMs, onStart) {
-    const sent = sayClerkLine(line);
-    return new Promise((resolve) => {
-      let settled = false;
-      let started = false;
-      let heard = false;
-      let fallback = 0;
-      let stall = 0;
-      let quiet = 0;
-      const finish = () => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(fallback);
-        window.clearTimeout(stall);
-        window.clearTimeout(quiet);
-        window.removeEventListener(PROMO_MOMENTS_EVENT, onDelivery);
-        resolve();
-      };
-      const begin = () => {
-        if (started) return;
-        started = true;
-        onStart();
-      };
-      const armClock = () => {
-        begin();
-        stall = window.setTimeout(finish, speakMs);
-      };
-      const onDelivery = (event) => {
-        const phase = event.detail && event.detail.phase;
-        if (phase === 'playback-started') {
-          heard = true;
-          window.clearTimeout(fallback);
-          window.clearTimeout(stall);
-          window.clearTimeout(quiet);
-          begin();
-        }
-        if (phase === 'playback-ended' && heard) {
-          window.clearTimeout(quiet);
-          quiet = window.setTimeout(finish, PROMO_MOMENTS_AUDIO_QUIET_MS);
-        }
-      };
-      window.addEventListener(PROMO_MOMENTS_EVENT, onDelivery);
-      if (!sent) {
-        armClock();
-        return;
-      }
-      fallback = window.setTimeout(() => {
-        if (heard) return;
-        armClock();
-      }, PROMO_MOMENTS_SPEECH_WAIT_MS);
-    });
+    sayClerkLine(line);
+    onStart();
+    return waitMs(speakMs);
   }
 
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
@@ -1269,12 +1219,15 @@
       window.addEventListener('resize', this.boundDock);
       this.armPark();
       window.setTimeout(() => {
+        document.documentElement.classList.add('is-promo-clerk');
+        armOpeningWave();
+      }, PROMO_LOGO_DOCK_MS);
+      window.setTimeout(() => {
         this.root.classList.add('is-logo-leaving');
-        window.setTimeout(() => {
-          document.documentElement.classList.add('is-promo-clerk');
-          this.playPitchLine();
-        }, PROMO_PITCH_LOGO_OUT_MS);
-      }, PROMO_PITCH_LOGO_HOLD_MS);
+      }, PROMO_LOGO_DOCK_MS + PROMO_PITCH_LOGO_HOLD_MS);
+      window.setTimeout(() => {
+        this.playPitchLine();
+      }, PROMO_LOGO_DOCK_MS + PROMO_PITCH_LOGO_HOLD_MS + PROMO_PITCH_LOGO_OUT_MS);
     }
 
     playHeroWords(toFace, onDone) {
@@ -1290,7 +1243,6 @@
         word.classList.add('is-in');
         const isLast = index === words.length - 1;
         if (isLast) {
-          armOpeningWave();
           window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_SELL_HOLD_MS);
           return;
         }
@@ -2187,7 +2139,6 @@
         },
         '04-logo-docked': () => {
           enterPitch();
-          html.classList.remove('is-promo-clerk');
           root.classList.remove('is-logo-leaving');
           if (logo) {
             logo.style.opacity = '1';
@@ -2260,10 +2211,7 @@
         },
         '14-sell-wave': () => {
           showHero(2);
-          openingWavePlayed = false;
-          openingWaveStarted = false;
-          armOpeningWave();
-          return 700;
+          return 180;
         },
         '14b-moments-catalog': () => {
           showHero(2);
