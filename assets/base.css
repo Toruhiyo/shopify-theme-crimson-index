@@ -1201,15 +1201,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice .promo-moments__mark { opacity: 1; transform: scale(1); }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go {
-  animation: promo-moments-go var(--promo-moments-choice, 2400ms) var(--promo-spring) forwards;
+  animation: promo-moments-go 1400ms var(--promo-spring) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
-  animation: promo-moments-pick var(--promo-moments-choice, 2400ms) var(--promo-spring) forwards;
+  animation: promo-moments-pick 1400ms var(--promo-spring) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
-  animation: promo-moments-other var(--promo-moments-choice, 2400ms) var(--promo-spring) forwards;
+  animation: promo-moments-other 1400ms var(--promo-spring) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
@@ -2253,7 +2253,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__logo-slot {
   grid-area: 1 / 1;
   justify-self: start;
-  width: min(420px, 72vw);
+  width: min(600px, 72vw);
   aspect-ratio: 1948 / 640;
 }
 
