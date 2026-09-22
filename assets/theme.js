@@ -442,6 +442,26 @@
     return meridian >= 0 ? meridian : 0;
   }
 
+  function loopLandingOrder(stores) {
+    const count = stores.length;
+    if (count < 2) return { stores, landIndex: 0 };
+    const selected = landingStoreIndex(stores);
+    const landIndex = count - 2;
+    const shift = (selected - landIndex + count) % count;
+    return {
+      stores: stores.map((_, index) => stores[(index + shift) % count]),
+      landIndex,
+    };
+  }
+
+  function loopDistance(index, active, count) {
+    if (count < 2) return index - active;
+    let distance = index - active;
+    distance = ((distance % count) + count) % count;
+    if (distance > count / 2) distance -= count;
+    return distance;
+  }
+
   function storeInk(accent) {
     const hex = String(accent || '').replace('#', '');
     if (!/^[0-9a-fA-F]{6}$/.test(hex)) return accent || '#1d1d1f';
@@ -591,9 +611,10 @@
       this.knob = root.querySelector('.promo-opening__knob');
       this.line = root.querySelector('[data-promo-pitch-line]');
       this.storesRow = root.querySelector('[data-promo-stores]');
-      this.stores = loadPromoStores();
+      const loop = loopLandingOrder(loadPromoStores());
+      this.stores = loop.stores;
       this.carouselTrack = renderStoreCarousel(this.storesRow, this.stores);
-      this.landIndex = landingStoreIndex(this.stores);
+      this.landIndex = loop.landIndex;
       this.assetsReady = false;
       this.flipWhenReady = false;
       this.flipping = false;
@@ -939,24 +960,29 @@
       return slide.offsetLeft - (lane - slide.offsetWidth) / 2;
     }
 
-    wheelTransform(distance) {
+    wheelTransform(distance, shift) {
       const abs = Math.abs(distance);
-      if (abs < 0.001) return 'none';
-      const sign = Math.sign(distance);
+      if (abs < 0.001 && Math.abs(shift) < 0.5) return 'none';
+      const sign = Math.sign(distance) || 1;
       const yaw = sign * Math.min(abs * PROMO_WHEEL_YAW_DEG, PROMO_WHEEL_MAX_YAW_DEG);
       const depth = Math.min(abs * PROMO_WHEEL_DEPTH_PX, PROMO_WHEEL_MAX_DEPTH_PX);
       const tuck = -sign * Math.min(abs, PROMO_WHEEL_MAX_TUCK_STEPS) * PROMO_WHEEL_TUCK_PX;
       const scale = Math.max(PROMO_WHEEL_MIN_SCALE, 1 - abs * PROMO_WHEEL_SCALE_STEP);
-      return `translate3d(${tuck}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
+      return `translate3d(${shift + tuck}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
       const track = this.carouselTrack;
       if (!track) return;
-      [...track.children].forEach((slide, index) => {
-        const distance = index - activeIndex;
+      const slides = [...track.children];
+      const count = slides.length;
+      const stride = count > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : 0;
+      slides.forEach((slide, index) => {
+        const layout = index - activeIndex;
+        const distance = loopDistance(index, activeIndex, count);
+        const shift = stride * (distance - layout);
         const abs = Math.abs(distance);
-        slide.style.transform = this.wheelTransform(distance);
+        slide.style.transform = this.wheelTransform(distance, shift);
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(30 - Math.round(abs * 5));
         let fade = 1;
