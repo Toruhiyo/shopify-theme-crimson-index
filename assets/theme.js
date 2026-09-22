@@ -439,6 +439,15 @@
     });
   }
 
+  function muteOpeningAgent() {
+    const api = window.AvatarVoicechat;
+    if (api && typeof api.muteAgent === 'function') {
+      api.muteAgent();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent('bizmis:agent-audio-mute'));
+  }
+
   function sayClerkLine(line) {
     const embed = document.getElementById('bizmis-avatar-embed');
     const input = embed?.querySelector('input[type="text"]:not([disabled])');
@@ -1543,6 +1552,7 @@
     }
 
     playSeeForYourself() {
+      muteOpeningAgent();
       if (!this.stores.length) {
         window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
         return;
