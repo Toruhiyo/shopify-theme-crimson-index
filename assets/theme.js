@@ -592,7 +592,7 @@
     const path = kind === 'no'
       ? 'M4.2 4.2 11.8 11.8M11.8 4.2 4.2 11.8'
       : 'M3.2 8.2 6.3 11.4 12.8 4.6';
-    mark.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    mark.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     return mark;
   }
 
@@ -1573,7 +1573,7 @@
         const field = document.createElement('div');
         field.className = 'promo-opening__moments-field';
         field.setAttribute('aria-hidden', 'true');
-        ['is-warm', 'is-orange', 'is-grey'].forEach((name) => {
+        ['is-rose', 'is-orange', 'is-blue'].forEach((name) => {
           const blob = document.createElement('span');
           blob.className = `promo-opening__moments-blob ${name}`;
           field.appendChild(blob);
