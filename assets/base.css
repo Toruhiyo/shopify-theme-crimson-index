@@ -640,6 +640,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__swap {
   display: grid;
+  align-items: center;
 }
 
 .promo-opening__face {
@@ -648,12 +649,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__face--from {
   display: block;
+  align-self: center;
 }
 
 .promo-opening__face--to {
   display: grid;
   justify-items: start;
-  align-items: start;
+  align-items: center;
+  align-self: stretch;
   overflow: visible;
   pointer-events: none;
 }
