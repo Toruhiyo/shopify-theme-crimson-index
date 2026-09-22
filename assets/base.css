@@ -901,7 +901,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: hidden;
   background: #f6f4f1;
   box-shadow: 0 0 42px color-mix(in srgb, var(--promo-store-accent, #1d1d1f) 55%, transparent);
-  transition: box-shadow 140ms linear;
+  transition: box-shadow 480ms ease;
 }
 
 .promo-opening__slide.is-on .promo-opening__slide-card {

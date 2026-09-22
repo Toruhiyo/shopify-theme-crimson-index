@@ -158,8 +158,7 @@
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1800;
   const PROMO_SEE_LAND_HOLD_MS = 900;
-  const PROMO_SEE_GLIDE_START_MS = 480;
-  const PROMO_SEE_GLIDE_END_MS = 1600;
+  const PROMO_SEE_GLIDE_MS = 7800;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 5;
   const PROMO_WHEEL_YAW_DEG = 46;
@@ -478,13 +477,9 @@
     return `#${channel(red)}${channel(green)}${channel(blue)}`;
   }
 
-  function glideSegmentMs(index, lastIndex) {
-    if (lastIndex <= 0) return PROMO_SEE_GLIDE_END_MS;
-    const progress = index / lastIndex;
-    const eased = progress * progress;
-    return Math.round(
-      PROMO_SEE_GLIDE_START_MS + (PROMO_SEE_GLIDE_END_MS - PROMO_SEE_GLIDE_START_MS) * eased
-    );
+  function glideEase(linear) {
+    const t = Math.min(1, Math.max(0, linear));
+    return 1 - (1 - t) * (1 - t);
   }
 
   function storeImageUrls(store) {
@@ -1259,37 +1254,37 @@
         return;
       }
 
-      const segments = [];
-      for (let index = 0; index < land; index += 1) {
-        segments.push(glideSegmentMs(index, land));
-      }
-      let segment = 0;
-      let segmentStart = performance.now();
+      const started = performance.now();
+      let arrived = 0;
 
       const frame = (now) => {
-        const duration = segments[segment];
-        const linear = Math.min(1, (now - segmentStart) / duration);
-        const progress = linear * linear * (3 - 2 * linear);
-        const offset = this.carouselOffset(segment)
-          + (this.carouselOffset(segment + 1) - this.carouselOffset(segment)) * progress;
-        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
-        this.applyWheel(segment + progress);
-        if (progress < 1) {
-          this.glideFrame = window.requestAnimationFrame(frame);
-          return;
-        }
-        const arrived = segment + 1;
-        const done = arrived >= land;
-        this.setActiveSlide(arrived, done);
-        const store = this.stores[arrived];
-        if (store) this.arriveStore(store);
-        if (done) {
+        const linear = (now - started) / PROMO_SEE_GLIDE_MS;
+        if (linear >= 1) {
+          this.placeCarousel(land, true);
+          this.setActiveSlide(land, true);
+          if (arrived < land) {
+            const store = this.stores[land];
+            if (store) this.arriveStore(store);
+          }
           this.glideFrame = 0;
           onDone();
           return;
         }
-        segment += 1;
-        segmentStart = now;
+        const index = land * glideEase(linear);
+        const base = Math.min(land - 1, Math.floor(index));
+        const next = base + 1;
+        const frac = index - base;
+        const offset = this.carouselOffset(base)
+          + (this.carouselOffset(next) - this.carouselOffset(base)) * frac;
+        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+        this.applyWheel(index);
+        const centered = Math.floor(index + 0.0001);
+        if (centered > arrived) {
+          arrived = centered;
+          this.setActiveSlide(arrived, false);
+          const store = this.stores[arrived];
+          if (store) this.arriveStore(store);
+        }
         this.glideFrame = window.requestAnimationFrame(frame);
       };
       this.glideFrame = window.requestAnimationFrame(frame);
