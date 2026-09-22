@@ -171,6 +171,8 @@
   const PROMO_WHEEL_CLERK_LANE_PX = 120;
   const PROMO_WHEEL_SEPARATION_SLOPE = 24;
   const PROMO_WHEEL_SEPARATION_PULL = 248;
+  const PROMO_WHEEL_SELECT_AT = 0.5;
+  const PROMO_WHEEL_SELECT_SPAN = 0.2;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -522,8 +524,11 @@
   }
 
   function wheelFocus(abs) {
-    if (abs >= 1) return 0;
-    return 1 - smoothstep(abs);
+    const start = PROMO_WHEEL_SELECT_AT - PROMO_WHEEL_SELECT_SPAN / 2;
+    const end = PROMO_WHEEL_SELECT_AT + PROMO_WHEEL_SELECT_SPAN / 2;
+    if (abs <= start) return 1;
+    if (abs >= end) return 0;
+    return 1 - smoothstep((abs - start) / (end - start));
   }
 
   function wheelSeparation(abs) {
@@ -1224,7 +1229,7 @@
           + (this.carouselOffset(next) - this.carouselOffset(base)) * frac;
         track.style.transform = `translate3d(${-offset}px, 0, 0)`;
         this.applyWheel(index);
-        const centered = Math.floor(index + 0.0001);
+        const centered = Math.round(index);
         if (centered > arrived) {
           arrived = centered;
           this.setActiveSlide(arrived, false);
