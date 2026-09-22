@@ -1625,8 +1625,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__cart-piece {
-  width: 13px;
-  height: 13px;
+  width: 18px;
+  height: 18px;
   color: #f9a353;
   opacity: 0;
   transform: scale(0.4);
