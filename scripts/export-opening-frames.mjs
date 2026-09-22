@@ -37,7 +37,7 @@ const FRAMES = [
   ['14c-moments-choice', 'Moments. The choice. Recommended laptop lifted, the other dimmed to 40%. Clerk idle.', 500],
   ['14d-moments-doubt', 'Moments. The doubt. Question chips orbit the selected laptop. Clerk idle.', 500],
   ['14e-moments-extra', 'Moments. The extra. Mouse has arrived beside the laptop. Cart badge 2. Clerk idle.', 500],
-  ['14f-moments-salesperson', 'Moments. The salesperson. Cards gone. Label is the largest. Clerk waves once.', 1100],
+  ['14f-moments-salesperson', 'Moments. The salesperson. Cards gone. Label is the largest. Clerk waves once.', 1600],
   ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 80],
   ['16-see-stores', 'See for yourself. has left. Homepage carousel, first store centered with its color glow. Clerk is that store avatar.', 2500],
   ['17-see-roulette', 'Carousel on a mid-list store. Clerk has morphed to that store avatar.', 2500],

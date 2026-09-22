@@ -1621,11 +1621,7 @@
       if (!stage) return;
       stage.classList.add('is-play');
       this.syncMomentBoard(stage);
-      if (beat.wave) {
-        openingWavePlayed = false;
-        openingWaveStarted = false;
-        waveOpeningAvatar();
-      }
+      if (beat.wave) setOpeningAvatarAction('waving');
       if (typeof beat.collapseMs === 'number') {
         this.momentTimers.push(window.setTimeout(() => {
           stage.classList.add('is-collapsed');
@@ -2181,9 +2177,7 @@
           showHero(2);
           root.classList.add('is-moments');
           this.showMoment(PROMO_MOMENT_BEATS[4], true);
-          openingWavePlayed = false;
-          openingWaveStarted = false;
-          waveOpeningAvatar();
+          setOpeningAvatarAction('waving');
           return 180;
         },
         '15-see-yourself': () => {
