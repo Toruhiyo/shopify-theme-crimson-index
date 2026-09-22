@@ -156,12 +156,12 @@
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_PITCH_SETTLE_MS = 700;
-  const PROMO_MOMENTS_VO_MS = 400;
+  const PROMO_MOMENTS_VO_MS = 600;
   const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
-  const PROMO_MOMENTS_CATALOG_MS = 2200;
-  const PROMO_MOMENTS_CHOICE_MS = 3000;
-  const PROMO_MOMENTS_DOUBT_MS = 3600;
-  const PROMO_MOMENTS_EXTRA_MS = 3200;
+  const PROMO_MOMENTS_CATALOG_MS = 3000;
+  const PROMO_MOMENTS_CHOICE_MS = 4000;
+  const PROMO_MOMENTS_DOUBT_MS = 5200;
+  const PROMO_MOMENTS_EXTRA_MS = 5000;
   const PROMO_MOMENTS_SALESPERSON_MS = 800;
   const PROMO_MOMENTS_HOLD_MS = 700;
   const PROMO_MOMENTS_VAPOR_MS = 250;
@@ -172,9 +172,9 @@
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
   const PROMO_MOMENTS_LABEL_RATIO = 0.4;
   const PROMO_MOMENTS_PAYOFF_RATIO = 0.6;
-  const PROMO_MOMENTS_CLOSE_AT = 0.44;
-  const PROMO_MOMENTS_BUNDLE_AT = 0.47;
-  const PROMO_MOMENTS_TAIL_MS = 280;
+  const PROMO_MOMENTS_CLOSE_AT = 0.42;
+  const PROMO_MOMENTS_BUNDLE_AT = 0.4;
+  const PROMO_MOMENTS_TAIL_MS = 450;
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1800;
@@ -521,7 +521,7 @@
     circle: '<circle cx="12" cy="12" r="7.2"/>',
     square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
     triangle: '<path d="M12 4.6 19.4 18.2H4.6z"/>',
-    hexagon: '<path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/>',
+    pentagon: '<path d="M12 4.2 19.3 9.6 16.5 18.3 7.5 18.3 4.7 9.6z"/>',
     pill: '<rect x="4.2" y="7.2" width="15.6" height="9.6" rx="4.8"/>',
     diamond: '<path d="M12 4.2 19.8 12 12 19.8 4.2 12z"/>',
     ring: '<path fill-rule="evenodd" d="M12 4.8a7.2 7.2 0 1 0 .01 0zM12 8.6a3.4 3.4 0 1 1-.01 0z"/>',
@@ -604,8 +604,8 @@
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
-    accessory.className = 'promo-moments__card is-hexagon is-extra';
-    accessory.appendChild(momentGlyph('hexagon'));
+    accessory.className = 'promo-moments__card is-pentagon is-extra';
+    accessory.appendChild(momentGlyph('pentagon'));
     accessory.appendChild(momentKept());
     board.appendChild(accessory);
     const orbits = [

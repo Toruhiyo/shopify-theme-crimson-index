@@ -36,7 +36,7 @@ const FRAMES = [
   ['14b-moments-catalog', 'Moments. Catalog end. Triangle, circle, and square in a row. Circle is in the middle. No title. Clerk idle.', 800],
   ['14c-moments-choice', 'Moments. Choice. All three stay. Middle circle is selected, with attribute rows and an orange ring. Triangle and square sit beside it. Clerk idle.', 500],
   ['14d-moments-doubt', 'Moments. Questions. Four large ? bubbles around the chosen circle, inside a wide browser window. Clerk idle.', 500],
-  ['14e-moments-extra', 'Moments. Extra. Circle and a hexagon add-on side by side inside the browser. Header cart shows 2. Clerk idle.', 500],
+  ['14e-moments-extra', 'Moments. Extra. Circle and a pentagon add-on side by side inside the browser. Header cart shows 2. Clerk idle.', 500],
   ['14f-moments-salesperson', 'Moments. Wrap-up. Browser has faded. No spoken line. Clerk nods once.', 1600],
   ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 80],
   ['16-see-stores', 'See for yourself. has left. Homepage carousel, first store centered with its color glow. Clerk is that store avatar.', 2500],
