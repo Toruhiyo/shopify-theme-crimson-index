@@ -1074,21 +1074,21 @@ html.is-promo-ready .promo-opening__boot {
 
 .promo-opening__clerk-glow {
   position: absolute;
-  z-index: 0;
-  left: 56%;
+  z-index: 1;
   top: 46%;
-  width: 78rem;
-  height: 78rem;
-  transform: translate(-50%, -50%);
+  right: -16rem;
+  width: 96rem;
+  height: 96rem;
+  transform: translateY(-50%);
   border-radius: 50%;
   pointer-events: none;
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 26%, transparent) 0%,
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 10%, transparent) 48%,
-    transparent 78%
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 14%, transparent) 0%,
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 5%, transparent) 56%,
+    transparent 82%
   );
-  filter: blur(88px);
+  filter: blur(120px);
   opacity: 0;
 }
 

@@ -1125,14 +1125,16 @@
 
     ensureClerkGlow() {
       const widget = this.root.querySelector('[data-promo-widget]');
-      if (!widget) return null;
-      const existing = widget.querySelector('[data-promo-clerk-glow]');
-      if (existing) return existing;
-      const glow = document.createElement('div');
-      glow.className = 'promo-opening__clerk-glow';
-      glow.setAttribute('data-promo-clerk-glow', '');
-      glow.setAttribute('aria-hidden', 'true');
-      widget.prepend(glow);
+      const host = widget?.parentElement;
+      if (!host) return null;
+      let glow = this.root.querySelector('[data-promo-clerk-glow]');
+      if (!glow) {
+        glow = document.createElement('div');
+        glow.className = 'promo-opening__clerk-glow';
+        glow.setAttribute('data-promo-clerk-glow', '');
+        glow.setAttribute('aria-hidden', 'true');
+      }
+      if (glow.parentElement !== host) host.appendChild(glow);
       return glow;
     }
 
