@@ -205,6 +205,7 @@
     HEAD_Hat: BIZMIS_ORANGE,
   };
   const PROMO_BIZMIS_STAMP_SCALE = 0.9;
+  const PROMO_BIZMIS_STAMP_OFFSET_X = -0.055;
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
@@ -240,6 +241,7 @@
         avatarMeshColors: Object.assign({}, next.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
         shirtStampUrl: stamp || next.shirtStampUrl,
         shirtStampScale: PROMO_BIZMIS_STAMP_SCALE,
+        shirtStampOffsetX: PROMO_BIZMIS_STAMP_OFFSET_X,
         canvasWidth: PROMO_AVATAR_CANVAS_WIDTH_PX,
         themeColor: BIZMIS_ORANGE,
         secondaryColor: BIZMIS_ORANGE,
@@ -565,7 +567,7 @@
     hexagon: '<path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/>',
     pill: '<rect x="4.2" y="7.2" width="15.6" height="9.6" rx="4.8"/>',
     diamond: '<path d="M12 4.2 19.8 12 12 19.8 4.2 12z"/>',
-    ring: '<circle cx="12" cy="12" r="7.2"/><circle cx="12" cy="12" r="3.4"/>',
+    ring: '<path fill-rule="evenodd" d="M12 4.8a7.2 7.2 0 1 0 .01 0zM12 8.6a3.4 3.4 0 1 1-.01 0z"/>',
     star: '<path d="M12 3.4 14.3 9.2 20.5 9.5 16 13.4 17.6 19.4 12 16.2 6.4 19.4 8 13.4 3.5 9.5 9.7 9.2z"/>',
     'spec-bolt': '<path d="M13 3.2 6.2 13h4.6l-.8 7.8L17.8 11H13.2z"/>',
     'spec-gauge': '<path d="M4.8 16.2a7.2 7.2 0 1 1 14.4 0"/><path d="M12 16.2 15.4 9.6"/>',
@@ -640,17 +642,19 @@
     accessory.className = 'promo-moments__card is-hexagon is-extra';
     accessory.appendChild(momentGlyph('hexagon'));
     board.appendChild(accessory);
-    const bubbles = [
-      ['1', '-13.4rem', '-11.2rem'],
-      ['2', '13.6rem', '-10.6rem'],
-      ['3', '12.8rem', '11rem'],
-      ['4', '-12.6rem', '11.2rem'],
+    const orbits = [
+      ['1', '11.2rem', '-0.4s'],
+      ['2', '13.4rem', '-4.1s'],
+      ['3', '10.3rem', '-7.6s'],
+      ['4', '12.5rem', '-10.8s'],
     ];
-    bubbles.forEach(([slot, x, y]) => {
+    orbits.forEach(([slot, radius, delay]) => {
+      const orbit = document.createElement('span');
+      orbit.className = `promo-moments__orbit is-bubble-${slot}`;
+      orbit.style.setProperty('--orbit', radius);
+      orbit.style.setProperty('--orbit-delay', delay);
       const bubble = document.createElement('span');
-      bubble.className = `promo-moments__bubble is-bubble-${slot}`;
-      bubble.style.setProperty('--bx', x);
-      bubble.style.setProperty('--by', y);
+      bubble.className = 'promo-moments__bubble';
       const ask = document.createElement('span');
       ask.className = 'promo-moments__ask';
       ask.textContent = '?';
@@ -658,7 +662,8 @@
       yes.className = 'promo-moments__yes';
       yes.appendChild(momentMark('yes'));
       bubble.append(ask, yes);
-      board.appendChild(bubble);
+      orbit.appendChild(bubble);
+      board.appendChild(orbit);
     });
     const added = document.createElement('span');
     added.className = 'promo-moments__added';
@@ -1256,7 +1261,7 @@
       this.armPark();
       window.setTimeout(() => {
         document.documentElement.classList.add('is-promo-clerk');
-      }, PROMO_LOGO_DOCK_MS);
+      }, PROMO_PITCH_LOGO_HOLD_MS);
       window.setTimeout(() => {
         this.root.classList.add('is-logo-leaving');
         window.setTimeout(() => this.playPitchLine(), PROMO_PITCH_LOGO_OUT_MS);
@@ -1358,6 +1363,7 @@
         meshColors: PROMO_BIZMIS_MESH_COLORS,
         stamp: document.documentElement.getAttribute('data-promo-bizmis-stamp'),
         stampScale: PROMO_BIZMIS_STAMP_SCALE,
+        stampOffsetX: PROMO_BIZMIS_STAMP_OFFSET_X,
       };
     }
 
@@ -1611,10 +1617,11 @@
         const mark = document.createElement('span');
         mark.className = 'promo-opening__store-mark';
         mark.setAttribute('aria-hidden', 'true');
+        mark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M3.2 9.6 5.6 4.2h12.8l2.4 5.4H3.2zm1.2 1.5h15.2V20H4.4V11.1zm5.7 8.9v-5h3.8v5H10.1z"/></svg>';
         const cart = document.createElement('div');
         cart.className = 'promo-moments__cart';
         cart.setAttribute('aria-hidden', 'true');
-        cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
+        cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
         bar.append(mark, cart);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
@@ -1628,6 +1635,37 @@
         browser.className = 'promo-opening__browser';
         browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
         host.querySelector('.promo-opening__store')?.prepend(browser);
+      }
+      if (!host.querySelector('.promo-moments__fest')) {
+        const fest = document.createElement('div');
+        fest.className = 'promo-moments__fest';
+        fest.setAttribute('aria-hidden', 'true');
+        const wash = document.createElement('span');
+        wash.className = 'promo-moments__wash';
+        fest.appendChild(wash);
+        for (let index = 1; index <= 4; index += 1) {
+          const ring = document.createElement('span');
+          ring.className = `promo-moments__fest-ring is-fr-${index}`;
+          fest.appendChild(ring);
+        }
+        const orb = document.createElement('span');
+        orb.className = 'promo-moments__to-cart';
+        const festCheck = document.createElement('span');
+        festCheck.className = 'promo-moments__fest-check';
+        festCheck.appendChild(momentMark('yes'));
+        fest.append(orb, festCheck);
+        host.querySelector('.promo-opening__store')?.appendChild(fest);
+      }
+      const storeMark = host.querySelector('.promo-opening__store-mark');
+      if (storeMark && !storeMark.querySelector('svg')) {
+        storeMark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M3.2 9.6 5.6 4.2h12.8l2.4 5.4H3.2zm1.2 1.5h15.2V20H4.4V11.1zm5.7 8.9v-5h3.8v5H10.1z"/></svg>';
+      }
+      const headerCart = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
+      if (headerCart && !headerCart.querySelector('.promo-moments__cart-burst')) {
+        const burst = document.createElement('span');
+        burst.className = 'promo-moments__cart-burst';
+        burst.setAttribute('aria-hidden', 'true');
+        headerCart.prepend(burst);
       }
       if (!host.querySelector('.promo-moments__fly')) {
         const fly = document.createElement('span');
@@ -2113,6 +2151,7 @@
         },
         '04-logo-docked': () => {
           enterPitch();
+          html.classList.remove('is-promo-clerk');
           root.classList.remove('is-logo-leaving');
           if (logo) {
             logo.style.opacity = '1';

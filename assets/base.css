@@ -715,11 +715,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__store-mark {
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  border: 1.25px solid #7c8593;
-  opacity: 0.7;
+  display: block;
+  width: 22px;
+  height: 22px;
+  color: #8b93a0;
+  opacity: 0.8;
+}
+
+.promo-opening__store-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .promo-opening__moments-field {
@@ -904,7 +910,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 38%;
   display: grid;
   place-items: center;
-  color: #7c8593;
+  color: #c5ccd6;
   opacity: 0.7;
   transition:
     transform 380ms var(--promo-spring),
@@ -912,7 +918,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     top 380ms var(--promo-spring);
 }
 
-.promo-moments__glyph svg,
+.promo-moments__glyph svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  stroke: none;
+}
+
 .promo-moments__spec-icon svg,
 .promo-moments__mark svg,
 .promo-moments__yes svg {
@@ -1059,9 +1071,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(var(--gx), var(--gy), 0) scale(0.12);
 }
 
-.is-pose-row .promo-moments__card.is-go { transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
-.is-pose-row .promo-moments__card.is-pick { transform: translate3d(0, 0, 0) scale(1.28); }
-.is-pose-row .promo-moments__card.is-other { transform: translate3d(10.8rem, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-go { --tx: -10.8rem; --ts: 1.28; transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-pick { --tx: 0rem; --ts: 1.28; transform: translate3d(0, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-other { --tx: 10.8rem; --ts: 1.28; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
+
+.is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-drop {
+  animation: promo-moments-catalog-out 900ms var(--promo-spring) both;
+}
+
+.is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go,
+.is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick,
+.is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
+  animation: promo-moments-select 1080ms var(--promo-spring) 180ms both;
+}
 
 .is-pose-doubt .promo-moments__card.is-go,
 .is-pose-close .promo-moments__card.is-go,
@@ -1214,6 +1236,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 1;
 }
 
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
+  animation: promo-moments-addon-in 820ms var(--promo-spring) both;
+}
+
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
   animation: promo-moments-celebrate-soft 520ms var(--promo-spring);
 }
@@ -1340,6 +1366,39 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(0, 0, 0) scale(0.04);
 }
 
+.promo-moments__orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 6;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.promo-moments__board.is-reduced .promo-moments__orbit {
+  animation: none;
+}
+
+.is-pose-doubt .promo-moments__orbit,
+.is-pose-close .promo-moments__orbit {
+  opacity: 1;
+  animation: promo-moments-orbit 14s linear infinite;
+  animation-delay: var(--orbit-delay, 0s);
+}
+
+.is-pose-close .promo-moments__orbit {
+  animation-play-state: paused;
+}
+
+.is-pose-extra .promo-moments__orbit,
+.is-pose-bundle .promo-moments__orbit,
+.is-pose-fly .promo-moments__orbit,
+.is-pose-gone .promo-moments__orbit {
+  opacity: 0;
+}
+
 .promo-moments__bubble {
   z-index: 6;
   display: grid;
@@ -1363,7 +1422,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   font-size: 1.45rem;
   font-weight: 500;
   opacity: 0;
-  transform: translate3d(var(--bx), var(--by), 0) scale(0.96);
+  transform: scale(0.96);
 }
 
 .promo-moments__ask,
@@ -1390,17 +1449,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-doubt .promo-moments__bubble {
   opacity: 1;
-  transform: translate3d(var(--bx), var(--by), 0) scale(1);
+  transform: scale(1);
 }
 
 .is-pose-doubt:not(.is-settled):not(.is-reduced) .promo-moments__bubble {
-  animation: promo-moments-pop 380ms var(--promo-spring) both;
+  animation: promo-moments-pop 420ms var(--promo-spring) both;
 }
 
-.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-1 { animation-delay: 80ms; }
-.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-2 { animation-delay: 160ms; }
-.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-3 { animation-delay: 240ms; }
-.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-4 { animation-delay: 320ms; }
+.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-1 .promo-moments__bubble { animation-delay: 60ms; }
+.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-2 .promo-moments__bubble { animation-delay: 140ms; }
+.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-3 .promo-moments__bubble { animation-delay: 220ms; }
+.is-pose-doubt:not(.is-settled):not(.is-reduced) .is-bubble-4 .promo-moments__bubble { animation-delay: 300ms; }
 
 .is-pose-close .promo-moments__bubble,
 .is-pose-extra .promo-moments__bubble,
@@ -1408,12 +1467,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-fly .promo-moments__bubble,
 .is-pose-gone .promo-moments__bubble {
   opacity: 0;
-  filter: blur(12px);
-  transform: translate3d(var(--bx), var(--by), 0) scale(1.45);
+  filter: blur(14px);
+  transform: scale(1.8);
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__bubble {
-  animation: promo-moments-vapor 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-moments-vapor 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
@@ -1480,8 +1539,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-extra .promo-moments__plus {
+  color: #f9a353;
+  font-size: 2.6rem;
   opacity: 1;
   transform: translate3d(calc(-50% + 1.1rem), -50%, 0) scale(1);
+}
+
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__plus {
+  animation: promo-moments-plus-in 460ms var(--promo-spring) 360ms both;
 }
 
 .is-pose-bundle .promo-moments__plus {
@@ -1532,6 +1597,147 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__store-bar .promo-moments__cart svg {
   width: 18px;
   height: 18px;
+}
+
+.promo-moments__cart-burst {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: rgba(249, 163, 83, 0.55);
+  box-shadow: 0 0 18px rgba(249, 163, 83, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__cart-burst {
+  animation: promo-moments-cart-burst 780ms cubic-bezier(0.22, 1, 0.36, 1) 180ms forwards;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__cart-burst {
+  animation: promo-moments-cart-burst-soft 640ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+}
+
+.promo-moments__fest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 88px;
+  bottom: 0;
+  z-index: 6;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest,
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest {
+  opacity: 1;
+}
+
+.promo-moments__wash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 54%, rgba(249, 163, 83, 0.62), rgba(249, 163, 83, 0.08) 46%, transparent 72%);
+  opacity: 0;
+}
+
+.promo-moments__fest-ring {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid rgba(249, 163, 83, 0.95);
+  box-shadow: 0 0 28px rgba(249, 163, 83, 0.55);
+  opacity: 0;
+}
+
+.promo-moments__to-cart {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin: -0.8rem 0 0 -0.8rem;
+  border-radius: 50%;
+  background: #f9a353;
+  box-shadow: 0 0 28px #f9a353, 0 0 64px rgba(249, 163, 83, 0.8);
+  opacity: 0;
+}
+
+.promo-moments__fest-check {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 8.5rem;
+  height: 8.5rem;
+  margin: -4.25rem 0 0 -4.25rem;
+  color: #f9a353;
+  filter: drop-shadow(0 0 22px rgba(249, 163, 83, 0.95));
+  opacity: 0;
+}
+
+.promo-moments__fest-check .promo-moments__mark {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transform: none;
+}
+
+.promo-moments__fest-check svg {
+  stroke-width: 2.4;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__wash {
+  animation: promo-moments-wash 980ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring {
+  animation: promo-moments-fest-ring 920ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .is-fr-2 { animation-delay: 90ms; }
+.is-pose-close:not(.is-settled):not(.is-reduced) .is-fr-3 { animation-delay: 180ms; }
+.is-pose-close:not(.is-settled):not(.is-reduced) .is-fr-4 { animation-delay: 270ms; }
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__to-cart {
+  animation: promo-moments-to-cart 720ms var(--promo-spring) 160ms forwards;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-check {
+  animation: promo-moments-fest-check 860ms var(--promo-spring) 80ms forwards;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__wash {
+  animation: promo-moments-wash-soft 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring {
+  animation: promo-moments-fest-ring-soft 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest {
+  transform-origin: 64% 58%;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .is-fr-3,
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .is-fr-4 {
+  animation: none;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .is-fr-2 { animation-delay: 80ms; }
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__to-cart {
+  animation: promo-moments-to-cart-soft 640ms var(--promo-spring) 80ms forwards;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-check {
+  animation: promo-moments-fest-check-soft 700ms var(--promo-spring) forwards;
 }
 
 .promo-moments__count {
@@ -1652,13 +1858,38 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-pop {
-  0% { opacity: 0; transform: translate3d(var(--bx), var(--by), 0) scale(0.96); }
-  100% { opacity: 1; transform: translate3d(var(--bx), var(--by), 0) scale(1); }
+  0% { opacity: 0; transform: scale(0.7); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes promo-moments-vapor {
-  0% { opacity: 1; filter: blur(0); transform: translate3d(var(--bx), var(--by), 0) scale(1); }
-  100% { opacity: 0; filter: blur(12px); transform: translate3d(var(--bx), var(--by), 0) scale(1.45); }
+  0% { opacity: 1; filter: blur(0); transform: scale(1); }
+  100% { opacity: 0; filter: blur(16px); transform: scale(1.85); }
+}
+
+@keyframes promo-moments-orbit {
+  from { transform: rotate(0deg) translate3d(var(--orbit), 0, 0) rotate(0deg); }
+  to { transform: rotate(360deg) translate3d(var(--orbit), 0, 0) rotate(-360deg); }
+}
+
+@keyframes promo-moments-catalog-out {
+  0% { opacity: 1; filter: none; transform: translate3d(var(--gx), var(--gy), 0) scale(1); }
+  100% { opacity: 0; filter: blur(8px); transform: translate3d(var(--gx), calc(var(--gy) + 0.35rem), 0) scale(0.5); }
+}
+
+@keyframes promo-moments-select {
+  0% { opacity: 1; filter: none; transform: translate3d(var(--gx), var(--gy), 0) scale(1); }
+  100% { opacity: 1; filter: none; transform: translate3d(var(--tx), 0, 0) scale(var(--ts)); }
+}
+
+@keyframes promo-moments-addon-in {
+  0% { opacity: 0; transform: translate3d(20rem, 1.4rem, 0) scale(0.35); }
+  100% { opacity: 1; transform: translate3d(8.6rem, 0, 0) scale(1.55); }
+}
+
+@keyframes promo-moments-plus-in {
+  0% { opacity: 0; transform: translate3d(calc(-50% + 1.1rem), -50%, 0) scale(0.2); }
+  100% { opacity: 1; transform: translate3d(calc(-50% + 1.1rem), -50%, 0) scale(1); }
 }
 
 @keyframes promo-moments-celebrate {
@@ -1684,16 +1915,70 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   100% { opacity: 1; transform: scale(1); }
 }
 
+@keyframes promo-moments-cart-burst {
+  0% { opacity: 1; transform: scale(0.3); }
+  100% { opacity: 0; transform: scale(24); }
+}
+
+@keyframes promo-moments-cart-burst-soft {
+  0% { opacity: 0.95; transform: scale(0.35); }
+  100% { opacity: 0; transform: scale(14); }
+}
+
+@keyframes promo-moments-wash {
+  0% { opacity: 0; }
+  16% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes promo-moments-wash-soft {
+  0% { opacity: 0; }
+  22% { opacity: 0.72; }
+  100% { opacity: 0; }
+}
+
+@keyframes promo-moments-fest-ring {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(4.6); }
+}
+
+@keyframes promo-moments-fest-ring-soft {
+  0% { opacity: 0.95; transform: translate(-50%, -50%) scale(0.25); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.7); }
+}
+
+@keyframes promo-moments-to-cart {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.5); }
+  100% { opacity: 0; transform: translate3d(16rem, -11rem, 0) scale(0.15); }
+}
+
+@keyframes promo-moments-to-cart-soft {
+  0% { opacity: 1; transform: translate3d(6rem, 0, 0) scale(1.1); }
+  100% { opacity: 0; transform: translate3d(16rem, -11rem, 0) scale(0.18); }
+}
+
+@keyframes promo-moments-fest-check {
+  0% { opacity: 0; transform: scale(0.15) rotate(-16deg); }
+  40% { opacity: 1; transform: scale(1.2) rotate(0deg); }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+@keyframes promo-moments-fest-check-soft {
+  0% { opacity: 0; transform: translate3d(7rem, 0, 0) scale(0.2); }
+  42% { opacity: 1; transform: translate3d(7rem, 0, 0) scale(0.72); }
+  100% { opacity: 0; transform: translate3d(7rem, 0, 0) scale(0.6); }
+}
+
 @keyframes promo-moments-cart-celebrate {
   0% { transform: scale(1); color: #7c8593; filter: none; }
-  28% { transform: scale(1.72); color: #f9a353; filter: drop-shadow(0 0 14px rgba(249, 163, 83, 0.95)); }
-  58% { transform: scale(1.28); color: #f9a353; filter: drop-shadow(0 0 8px rgba(249, 163, 83, 0.55)); }
+  26% { transform: scale(2.45); color: #f9a353; filter: drop-shadow(0 0 28px rgba(249, 163, 83, 1)); }
+  55% { transform: scale(1.55); color: #f9a353; filter: drop-shadow(0 0 16px rgba(249, 163, 83, 0.7)); }
   100% { transform: scale(1); color: #7c8593; filter: none; }
 }
 
 @keyframes promo-moments-cart-celebrate-soft {
   0% { transform: scale(1); color: #7c8593; filter: none; }
-  40% { transform: scale(1.38); color: #f9a353; filter: drop-shadow(0 0 10px rgba(249, 163, 83, 0.75)); }
+  36% { transform: scale(1.85); color: #f9a353; filter: drop-shadow(0 0 18px rgba(249, 163, 83, 0.9)); }
   100% { transform: scale(1); color: #7c8593; filter: none; }
 }
 
@@ -1722,8 +2007,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-count-in {
-  0% { opacity: 0; transform: scale(0.35); }
-  50% { opacity: 1; transform: scale(1.7); color: #f9a353; }
+  0% { opacity: 0; transform: scale(0.2); }
+  46% { opacity: 1; transform: scale(2.35); color: #f9a353; }
   100% { opacity: 1; transform: scale(1); color: inherit; }
 }
 
@@ -2503,7 +2788,7 @@ html.is-promo-opening.is-promo-pitch.is-promo-clerk #bizmis-avatar-embed.is-prom
 html.is-promo-opening.is-promo-pitch.is-promo-clerk #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container {
   opacity: 1 !important;
   visibility: visible !important;
-  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
