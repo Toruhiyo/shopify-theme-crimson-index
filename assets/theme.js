@@ -169,6 +169,8 @@
   const PROMO_WHEEL_SCALE_STEP = 0.07;
   const PROMO_WHEEL_MIN_SCALE = 0.88;
   const PROMO_WHEEL_CLERK_LANE_PX = 120;
+  const PROMO_WHEEL_SEPARATION_SLOPE = 24;
+  const PROMO_WHEEL_SEPARATION_PULL = 248;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -517,6 +519,12 @@
     if (abs <= start) return 1;
     if (abs >= end) return 0;
     return 1 - smoothstep((abs - start) / (end - start));
+  }
+
+  function wheelSeparation(abs) {
+    if (abs <= 1) return -PROMO_WHEEL_SEPARATION_SLOPE * abs * (1 - abs);
+    const along = abs - 1;
+    return PROMO_WHEEL_SEPARATION_SLOPE * along + PROMO_WHEEL_SEPARATION_PULL * along * along;
   }
 
   function storeImageUrls(store) {
@@ -1061,8 +1069,9 @@
       const yaw = sign * wheelYaw(abs);
       const depth = wheelDepth(abs);
       const tuck = -sign * wheelTuck(abs);
+      const separation = -sign * wheelSeparation(abs);
       const scale = wheelScale(abs);
-      return `translate3d(${shift + tuck}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
+      return `translate3d(${shift + tuck + separation}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
