@@ -666,12 +666,9 @@
     plus.textContent = '+';
     const outline = document.createElement('div');
     outline.className = 'promo-moments__outline';
-    const cart = document.createElement('div');
-    cart.className = 'promo-moments__cart';
-    cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
-    const fly = document.createElement('span');
-    fly.className = 'promo-moments__fly';
-    board.append(added, plus, outline, cart, fly);
+    board.append(added, plus, outline);
+    board.querySelector('.promo-moments__cart')?.remove();
+    board.querySelector('.promo-moments__fly')?.remove();
     stage.replaceChildren(board);
     return board;
   }
@@ -693,10 +690,19 @@
     }
     host?.classList.remove('is-title');
     host?.classList.toggle('is-vignette-gone', pose === 'fly' || pose === 'gone');
+    if (host) {
+      host.classList.toggle('is-instant', board.classList.contains('is-instant'));
+      host.classList.toggle('is-settled', board.classList.contains('is-settled'));
+      host.classList.toggle('is-reduced', board.classList.contains('is-reduced'));
+      PROMO_MOMENT_POSES.forEach((name) => {
+        host.classList.toggle(`is-pose-${name}`, name === pose);
+      });
+    }
     if (label) label.textContent = '';
     if (options.instant) {
       void board.offsetWidth;
       board.classList.remove('is-instant');
+      host?.classList.remove('is-instant');
     }
   }
 
@@ -742,7 +748,7 @@
       holdPose: 'bundle',
       playPose: 'fly',
       endPose: 'gone',
-      wave: true,
+      nod: true,
       holdMs: PROMO_MOMENTS_HOLD_MS,
     },
   ];
@@ -1569,6 +1575,32 @@
         const stores = copy.querySelector('[data-promo-stores]');
         copy.insertBefore(host, stores);
       }
+      if (!host.querySelector('.promo-opening__store')) {
+        const store = document.createElement('div');
+        store.className = 'promo-opening__store';
+        const bar = document.createElement('div');
+        bar.className = 'promo-opening__store-bar';
+        const mark = document.createElement('span');
+        mark.className = 'promo-opening__store-mark';
+        mark.setAttribute('aria-hidden', 'true');
+        const cart = document.createElement('div');
+        cart.className = 'promo-moments__cart';
+        cart.setAttribute('aria-hidden', 'true');
+        cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
+        bar.append(mark, cart);
+        const field = host.querySelector('.promo-opening__moments-field');
+        const stage = host.querySelector('[data-promo-moments-stage]');
+        if (field) store.appendChild(field);
+        store.appendChild(bar);
+        if (stage) store.appendChild(stage);
+        host.insertBefore(store, host.firstChild);
+      }
+      if (!host.querySelector('.promo-moments__fly')) {
+        const fly = document.createElement('span');
+        fly.className = 'promo-moments__fly';
+        fly.setAttribute('aria-hidden', 'true');
+        host.appendChild(fly);
+      }
       if (!host.querySelector('.promo-opening__moments-field')) {
         const field = document.createElement('div');
         field.className = 'promo-opening__moments-field';
@@ -1578,7 +1610,7 @@
           blob.className = `promo-opening__moments-blob ${name}`;
           field.appendChild(blob);
         });
-        host.prepend(field);
+        host.querySelector('.promo-opening__store')?.appendChild(field);
       }
       this.root.style.setProperty('--promo-moments-label', String(PROMO_MOMENTS_LABEL_RATIO));
       this.root.style.setProperty('--promo-moments-payoff', String(PROMO_MOMENTS_PAYOFF_RATIO));
@@ -1611,7 +1643,8 @@
       const stage = this.momentStage();
       if (!stage) return;
       applyMomentPose(stage, beat.playPose);
-      if (beat.wave) setOpeningAvatarAction('waving');
+      if (beat.nod) setOpeningAvatarAction('nod');
+      else if (beat.wave) setOpeningAvatarAction('waving');
       if (typeof beat.closeAt === 'number' || typeof beat.bundleAt === 'number') {
         const at = beat.closeAt ?? beat.bundleAt;
         this.momentTimers.push(window.setTimeout(() => {
@@ -1625,6 +1658,7 @@
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
       this.glideClerkIntoRow('is-moments');
+      setOpeningAvatarAction('waving');
       if (!prefersReducedMotion()) await waitMs(PROMO_CLERK_ROW_MS);
 
       const reduced = prefersReducedMotion();
@@ -2149,7 +2183,7 @@
           showHero(2);
           root.classList.add('is-moments');
           this.showMoment(PROMO_MOMENT_BEATS[4], true);
-          setOpeningAvatarAction('waving');
+          setOpeningAvatarAction('nod');
           return 180;
         },
         '15-see-yourself': () => {
