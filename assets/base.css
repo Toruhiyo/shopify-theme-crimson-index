@@ -815,7 +815,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 1.28rem;
   height: 0.78rem;
   border-radius: 0.12rem 0.22rem 0.22rem 0.12rem;
-  background: linear-gradient(180deg, #f4f5f7, #d5d8df);
+  background: linear-gradient(180deg, #e6e8ed, #b4b9c2);
   box-shadow: 0 1px 2px rgba(40, 44, 52, 0.12);
   transform: rotate(-10deg);
 }
@@ -908,7 +908,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice .promo-moments__shape.is-other {
   opacity: 0.5;
   filter: blur(2px);
-  transform: translate3d(6.6rem, 0.4rem, 0) scale(1.95);
+  transform: translate3d(13.2rem, 0.55rem, 0) scale(1.95);
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__shape.is-go {
@@ -1204,7 +1204,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   0% { opacity: 1; filter: none; transform: translate3d(-3.95rem, 0, 0) scale(1); }
   16% { opacity: 1; filter: none; transform: translate3d(0, -6.8rem, 0) scale(2.167); }
   36%, 56% { opacity: 1; filter: none; transform: translate3d(0, -0.9rem, 0) scale(2.167, 2.52); }
-  100% { opacity: 0.5; filter: blur(2px); transform: translate3d(6.6rem, 0.4rem, 0) scale(1.95); }
+  100% { opacity: 0.5; filter: blur(2px); transform: translate3d(13.2rem, 0.55rem, 0) scale(1.95); }
 }
 
 @keyframes promo-moments-snap {
