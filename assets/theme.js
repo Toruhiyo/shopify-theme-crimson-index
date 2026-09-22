@@ -165,6 +165,7 @@
   const PROMO_MOMENTS_VAPOR_MS = 250;
   const PROMO_MOMENTS_ACCESSORY_MS = 350;
   const PROMO_MOMENTS_COLLAPSE_MS = 720;
+  const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
   const PROMO_MOMENTS_LABEL_RATIO = 0.4;
@@ -455,6 +456,8 @@
     });
   }
 
+  let openingAgentEnded = false;
+
   function muteOpeningAgent() {
     const api = window.AvatarVoicechat;
     if (api && typeof api.muteAgent === 'function') {
@@ -462,6 +465,18 @@
       return;
     }
     window.dispatchEvent(new CustomEvent('bizmis:agent-audio-mute'));
+  }
+
+  function endOpeningAgent() {
+    if (openingAgentEnded) return;
+    openingAgentEnded = true;
+    const api = window.AvatarVoicechat;
+    if (api && typeof api.endSession === 'function') {
+      api.endSession();
+      return;
+    }
+    muteOpeningAgent();
+    window.dispatchEvent(new CustomEvent('bizmis:agent-session-end'));
   }
 
   function sayClerkLine(line) {
@@ -512,29 +527,27 @@
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
   const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_CARD_KINDS = [
-    'laptop', 'headphones', 'phone', 'watch',
-    'camera', 'laptop', 'speaker', 'backpack',
-    'shoe', 'bottle', 'lamp', 'laptop',
+    'hexagon', 'circle', 'square', 'triangle',
+    'pill', 'hexagon', 'diamond', 'ring',
+    'star', 'square', 'circle', 'hexagon',
   ];
+  const PROMO_MOMENT_SPEC_KINDS = ['spec-circle', 'spec-square', 'spec-triangle'];
   const PROMO_MOMENT_PICK_INDEX = 0;
   const PROMO_MOMENT_OTHER_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 11;
   const PROMO_MOMENT_GRID_PITCH = 8.55;
   const PROMO_MOMENT_ICONS = {
-    laptop: '<rect x="3.2" y="4.6" width="17.6" height="11.2" rx="1.6"/><path d="M2.2 18.2h19.6"/><path d="M9 18.2h6"/>',
-    headphones: '<path d="M5.2 13.2V12a6.8 6.8 0 0 1 13.6 0v1.2"/><rect x="3.2" y="12.4" width="3.8" height="6.6" rx="1.4"/><rect x="17" y="12.4" width="3.8" height="6.6" rx="1.4"/>',
-    phone: '<rect x="7.2" y="2.6" width="9.6" height="18.8" rx="2"/><path d="M11 18.4h2"/>',
-    watch: '<path d="M9.2 7.2 10 2.8h4l.8 4.4"/><path d="M9.2 16.8 10 21.2h4l.8-4.4"/><circle cx="12" cy="12" r="4.1"/>',
-    camera: '<path d="M8.2 7.6h1.8l1.1-1.7h1.8l1.1 1.7h1.8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8.2a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/><circle cx="12" cy="12.4" r="2.5"/>',
-    speaker: '<rect x="4.2" y="3.4" width="15.6" height="17.2" rx="2"/><circle cx="12" cy="8.6" r="1.3"/><circle cx="12" cy="14.8" r="2.5"/>',
-    backpack: '<path d="M8.2 8.4V7.2a3.8 3.8 0 0 1 7.6 0v1.2"/><rect x="6.2" y="8.4" width="11.6" height="12" rx="2"/><path d="M9 13.6h6"/>',
-    shoe: '<path d="M3.6 15.6c2.4-3.8 4.4-5 7.2-5 2.2 0 3.3.8 4.3 2.2l4.4.5c.7.1 1.3.7 1.3 1.5v1.1H3.6v-.3z"/>',
-    bottle: '<path d="M10 3.2h4"/><path d="M11 3.2v3"/><path d="M13 3.2v3"/><path d="M8.4 8h7.2l.9 2.1v8.1a1.8 1.8 0 0 1-1.8 1.8H9.3a1.8 1.8 0 0 1-1.8-1.8v-8.1L8.4 8z"/>',
-    lamp: '<path d="M7.4 10.2h9.2L15.2 13H8.8l-1.4-2.8z"/><path d="M12 13v4.4"/><path d="M8.4 20.2h7.2"/><path d="M9.2 10.2 10.2 4.4h3.6l1 5.8"/>',
-    mouse: '<rect x="8" y="3.2" width="8" height="15.2" rx="4"/><path d="M12 3.4v4.2"/>',
-    battery: '<rect x="2.8" y="7" width="16.2" height="10" rx="1.6"/><path d="M19 10h1.6v4H19"/>',
-    weight: '<circle cx="7" cy="8" r="2.3"/><circle cx="17" cy="8" r="2.3"/><path d="M7 8h10"/><path d="M12 8v9"/><path d="M8.5 17h7"/>',
-    screen: '<rect x="3" y="4.5" width="18" height="12" rx="1.6"/><path d="M8 19.5h8"/><path d="M12 16.5v3"/>',
+    circle: '<circle cx="12" cy="12" r="7.2"/>',
+    square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
+    triangle: '<path d="M12 4.6 19.4 18.2H4.6z"/>',
+    hexagon: '<path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/>',
+    pill: '<rect x="4.2" y="7.2" width="15.6" height="9.6" rx="4.8"/>',
+    diamond: '<path d="M12 4.2 19.8 12 12 19.8 4.2 12z"/>',
+    ring: '<circle cx="12" cy="12" r="7.2"/><circle cx="12" cy="12" r="3.4"/>',
+    star: '<path d="M12 3.4 14.3 9.2 20.5 9.5 16 13.4 17.6 19.4 12 16.2 6.4 19.4 8 13.4 3.5 9.5 9.7 9.2z"/>',
+    'spec-circle': '<circle cx="12" cy="12" r="6.2"/>',
+    'spec-square': '<rect x="6" y="6" width="12" height="12" rx="1.4"/>',
+    'spec-triangle': '<path d="M12 5.2 18.6 17.4H5.4z"/>',
   };
 
   function momentShapeRole(index) {
@@ -564,7 +577,7 @@
   function momentSpecs(role) {
     const specs = document.createElement('span');
     specs.className = 'promo-moments__specs';
-    ['battery', 'weight', 'screen'].forEach((kind, index) => {
+    PROMO_MOMENT_SPEC_KINDS.forEach((kind, index) => {
       const row = document.createElement('span');
       row.className = 'promo-moments__spec';
       const icon = document.createElement('span');
@@ -600,10 +613,10 @@
       if (role === 'pick' || role === 'other') card.appendChild(momentSpecs(role));
       board.appendChild(card);
     }
-    const mouse = document.createElement('div');
-    mouse.className = 'promo-moments__card is-mouse is-extra';
-    mouse.appendChild(momentGlyph('mouse'));
-    board.appendChild(mouse);
+    const accessory = document.createElement('div');
+    accessory.className = 'promo-moments__card is-circle is-extra';
+    accessory.appendChild(momentGlyph('circle'));
+    board.appendChild(accessory);
     const bubbles = [
       ['1', '-8.4rem', '-9.2rem'],
       ['2', '9.4rem', '-0.2rem'],
@@ -656,9 +669,8 @@
       });
       board.dataset.pose = pose;
     }
-    const titled = Boolean(options.title);
-    host?.classList.toggle('is-title', titled);
-    if (label) label.textContent = titled ? 'The salesperson.' : '';
+    host?.classList.remove('is-title');
+    if (label) label.textContent = '';
     if (options.instant) {
       void board.offsetWidth;
       board.classList.remove('is-instant');
@@ -701,9 +713,7 @@
       bundleAt: PROMO_MOMENTS_BUNDLE_AT,
     },
     {
-      label: 'The salesperson.',
       line: "[proud, electric, a huge smile] That's me.",
-      payoff: true,
       voMs: PROMO_MOMENTS_SALESPERSON_VO_MS,
       speakMs: PROMO_MOMENTS_SALESPERSON_MS,
       holdPose: 'bundle',
@@ -1536,12 +1546,24 @@
         const stores = copy.querySelector('[data-promo-stores]');
         copy.insertBefore(host, stores);
       }
+      if (!host.querySelector('.promo-opening__moments-field')) {
+        const field = document.createElement('div');
+        field.className = 'promo-opening__moments-field';
+        field.setAttribute('aria-hidden', 'true');
+        ['is-warm', 'is-orange', 'is-grey'].forEach((name) => {
+          const blob = document.createElement('span');
+          blob.className = `promo-opening__moments-blob ${name}`;
+          field.appendChild(blob);
+        });
+        host.prepend(field);
+      }
       this.root.style.setProperty('--promo-moments-label', String(PROMO_MOMENTS_LABEL_RATIO));
       this.root.style.setProperty('--promo-moments-payoff', String(PROMO_MOMENTS_PAYOFF_RATIO));
       this.root.style.setProperty('--promo-moments-accessory', `${PROMO_MOMENTS_ACCESSORY_MS}ms`);
       this.root.style.setProperty('--promo-moments-orbit', `${PROMO_MOMENTS_ORBIT_MS}ms`);
       this.root.style.setProperty('--promo-moments-vapor', `${PROMO_MOMENTS_VAPOR_MS}ms`);
       this.root.style.setProperty('--promo-moments-collapse', `${PROMO_MOMENTS_COLLAPSE_MS}ms`);
+      this.root.style.setProperty('--promo-moments-fly', `${PROMO_MOMENTS_FLY_MS}ms`);
       this.root.style.setProperty('--promo-moments-tick', `${PROMO_MOMENTS_BADGE_TICK_MS}ms`);
       this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
       return host;
@@ -1558,7 +1580,6 @@
       if (!stage) return;
       this.clearMomentTimers();
       applyMomentPose(stage, settled ? beat.endPose : beat.holdPose, {
-        title: Boolean(beat.payoff && settled),
         instant: settled,
       });
     }
@@ -1566,12 +1587,15 @@
     playMoment(beat) {
       const stage = this.momentStage();
       if (!stage) return;
-      applyMomentPose(stage, beat.playPose, { title: Boolean(beat.payoff) });
+      applyMomentPose(stage, beat.playPose);
       if (beat.wave) setOpeningAvatarAction('waving');
+      if (beat.playPose === 'fly') {
+        this.momentTimers.push(window.setTimeout(() => endOpeningAgent(), PROMO_MOMENTS_FLY_MS));
+      }
       if (typeof beat.closeAt === 'number' || typeof beat.bundleAt === 'number') {
         const at = beat.closeAt ?? beat.bundleAt;
         this.momentTimers.push(window.setTimeout(() => {
-          applyMomentPose(stage, beat.endPose, { title: Boolean(beat.payoff) });
+          applyMomentPose(stage, beat.endPose);
         }, beat.speakMs * at));
       }
     }
@@ -1589,11 +1613,11 @@
         if (!reduced) setOpeningAvatarAction('idle_neutral');
         await waitMs(beat.voMs);
         if (reduced) {
+          if (beat.endPose === 'gone') endOpeningAgent();
           await waitMs(beat.speakMs);
         } else {
           await playClerkLine(beat.line, beat.speakMs, () => this.playMoment(beat));
           applyMomentPose(this.momentStage(), beat.endPose, {
-            title: Boolean(beat.payoff),
             instant: true,
           });
           await waitMs(beat.holdMs || PROMO_MOMENTS_TAIL_MS);
@@ -1604,7 +1628,7 @@
     }
 
     playSeeForYourself() {
-      muteOpeningAgent();
+      endOpeningAgent();
       if (!this.stores.length) {
         window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
         return;
