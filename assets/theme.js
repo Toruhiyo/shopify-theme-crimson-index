@@ -161,10 +161,15 @@
   const PROMO_SEE_GLIDE_END_MS = 1600;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 5;
-  const PROMO_WHEEL_YAW_DEG = 46;
-  const PROMO_WHEEL_MAX_YAW_DEG = 76;
-  const PROMO_WHEEL_DEPTH_PX = 420;
-  const PROMO_WHEEL_TUCK_PX = 168;
+  const PROMO_WHEEL_YAW_DEG = 42;
+  const PROMO_WHEEL_YAW_STEP_DEG = 8;
+  const PROMO_WHEEL_MAX_YAW_DEG = 56;
+  const PROMO_WHEEL_DEPTH_PX = 260;
+  const PROMO_WHEEL_DEPTH_STEP_PX = 190;
+  const PROMO_WHEEL_MAX_DEPTH_PX = 680;
+  const PROMO_WHEEL_TUCK_PX = 150;
+  const PROMO_WHEEL_TUCK_RIGHT_BIAS = 1.45;
+  const PROMO_WHEEL_MAX_TUCK_STEPS = 2.4;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -918,6 +923,9 @@
         this.carouselTrack.style.transform = '';
         [...this.carouselTrack.children].forEach((slide) => {
           slide.style.transform = '';
+          slide.style.transformOrigin = '';
+          slide.style.zIndex = '';
+          slide.style.removeProperty('--promo-wheel-fade');
         });
       }
     }
@@ -934,9 +942,17 @@
       const abs = Math.abs(distance);
       if (abs < 0.001) return 'none';
       const sign = Math.sign(distance);
-      const yaw = sign * Math.min(abs * PROMO_WHEEL_YAW_DEG, PROMO_WHEEL_MAX_YAW_DEG);
-      const depth = Math.min(abs * PROMO_WHEEL_DEPTH_PX, 1100);
-      const tuck = -sign * Math.min(abs, 2.6) * PROMO_WHEEL_TUCK_PX;
+      const stepsPastNeighbor = Math.max(0, abs - 1);
+      const yaw = sign * Math.min(
+        PROMO_WHEEL_YAW_DEG + stepsPastNeighbor * PROMO_WHEEL_YAW_STEP_DEG,
+        PROMO_WHEEL_MAX_YAW_DEG
+      );
+      const depth = Math.min(
+        PROMO_WHEEL_DEPTH_PX + stepsPastNeighbor * PROMO_WHEEL_DEPTH_STEP_PX,
+        PROMO_WHEEL_MAX_DEPTH_PX
+      );
+      const tuckBias = sign > 0 ? PROMO_WHEEL_TUCK_RIGHT_BIAS : 1;
+      const tuck = -sign * Math.min(abs, PROMO_WHEEL_MAX_TUCK_STEPS) * PROMO_WHEEL_TUCK_PX * tuckBias;
       return `translate3d(${tuck}px, 0, ${-depth}px) rotateY(${yaw}deg)`;
     }
 
@@ -944,7 +960,16 @@
       const track = this.carouselTrack;
       if (!track) return;
       [...track.children].forEach((slide, index) => {
-        slide.style.transform = this.wheelTransform(index - activeIndex);
+        const distance = index - activeIndex;
+        const abs = Math.abs(distance);
+        slide.style.transform = this.wheelTransform(distance);
+        if (distance > 0.001) slide.style.transformOrigin = 'left center';
+        else if (distance < -0.001) slide.style.transformOrigin = 'right center';
+        else slide.style.transformOrigin = 'center center';
+        slide.style.zIndex = String(30 - Math.round(abs * 5));
+        let fade = abs < 0.05 ? 1 : Math.max(0.72, 1 - Math.max(0, abs - 1) * 0.14);
+        if (abs > 2) fade *= Math.max(0, 1 - (abs - 2) / 0.85);
+        slide.style.setProperty('--promo-wheel-fade', String(fade));
       });
     }
 
