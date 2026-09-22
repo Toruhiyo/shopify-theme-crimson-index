@@ -135,6 +135,7 @@
   const PROMO_FLIP_BURST_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
+  const PROMO_LOGO_DOCK_MS = 720;
   const PROMO_PITCH_LOGO_OUT_MS = 420;
   const PROMO_PITCH_WORD_STAGGER_MS = 100;
   const PROMO_PITCH_WORD_IN_MS = 420;
@@ -667,7 +668,39 @@
     plus.textContent = '+';
     const outline = document.createElement('div');
     outline.className = 'promo-moments__outline';
-    board.append(added, plus, outline);
+    const celebrate = document.createElement('div');
+    celebrate.className = 'promo-moments__celebrate';
+    celebrate.setAttribute('aria-hidden', 'true');
+    const bloom = document.createElement('span');
+    bloom.className = 'promo-moments__bloom';
+    celebrate.appendChild(bloom);
+    for (let halo = 1; halo <= 3; halo += 1) {
+      const ring = document.createElement('span');
+      ring.className = `promo-moments__halo is-halo-${halo}`;
+      celebrate.appendChild(ring);
+    }
+    [
+      ['-1', '-0.12'],
+      ['1', '-0.18'],
+      ['0.15', '-1'],
+      ['-0.2', '1'],
+      ['0.82', '0.62'],
+      ['-0.88', '0.5'],
+      ['0.68', '-0.82'],
+      ['-0.62', '-0.78'],
+    ].forEach(([x, y], index) => {
+      const spark = document.createElement('span');
+      spark.className = 'promo-moments__spark';
+      spark.style.setProperty('--sx', x);
+      spark.style.setProperty('--sy', y);
+      spark.style.setProperty('--sd', `${index * 24}ms`);
+      celebrate.appendChild(spark);
+    });
+    const burstCheck = document.createElement('span');
+    burstCheck.className = 'promo-moments__burst-check';
+    burstCheck.appendChild(momentMark('yes'));
+    celebrate.appendChild(burstCheck);
+    board.append(added, plus, outline, celebrate);
     board.querySelector('.promo-moments__cart')?.remove();
     board.querySelector('.promo-moments__fly')?.remove();
     stage.replaceChildren(board);
@@ -1222,6 +1255,9 @@
       window.addEventListener('resize', this.boundDock);
       this.armPark();
       window.setTimeout(() => {
+        document.documentElement.classList.add('is-promo-clerk');
+      }, PROMO_LOGO_DOCK_MS);
+      window.setTimeout(() => {
         this.root.classList.add('is-logo-leaving');
         window.setTimeout(() => this.playPitchLine(), PROMO_PITCH_LOGO_OUT_MS);
       }, PROMO_PITCH_LOGO_HOLD_MS);
@@ -1538,6 +1574,7 @@
       this.root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch', 'is-logo-leaving');
       window.requestAnimationFrame(() => this.fitOpeningLayout());
       this.armPark();
+      document.documentElement.classList.add('is-promo-clerk');
       this.snapSeeLanded();
       window.setTimeout(() => this.revealStore(), PROMO_SEE_REDUCED_HOLD_MS);
     }
@@ -1883,7 +1920,7 @@
       };
 
       const enterPitch = () => {
-        html.classList.add('is-promo-opening', 'is-promo-pitch');
+        html.classList.add('is-promo-opening', 'is-promo-pitch', 'is-promo-clerk');
         root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch');
         root.classList.remove('is-logo-leaving', 'is-depart', 'is-moments');
         hideToggle();
