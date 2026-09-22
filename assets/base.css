@@ -859,7 +859,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: var(--promo-wheel-fade, 1);
   transform-origin: center center;
   transform-style: preserve-3d;
-  transition: opacity 180ms linear;
 }
 
 
