@@ -1623,15 +1623,21 @@
         store.className = 'promo-opening__store';
         const bar = document.createElement('div');
         bar.className = 'promo-opening__store-bar';
+        const brand = document.createElement('span');
+        brand.className = 'promo-opening__store-brand';
         const mark = document.createElement('span');
         mark.className = 'promo-opening__store-mark';
         mark.setAttribute('aria-hidden', 'true');
         mark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
+        const name = document.createElement('span');
+        name.className = 'promo-opening__store-name';
+        name.textContent = 'Your store';
+        brand.append(mark, name);
         const cart = document.createElement('div');
         cart.className = 'promo-moments__cart';
         cart.setAttribute('aria-hidden', 'true');
         cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
-        bar.append(mark, cart);
+        bar.append(brand, cart);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
         if (field) store.appendChild(field);
@@ -1674,6 +1680,20 @@
       const storeMark = host.querySelector('.promo-opening__store-mark');
       if (storeMark) {
         storeMark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
+        const bar = storeMark.closest('.promo-opening__store-bar');
+        let brand = storeMark.closest('.promo-opening__store-brand');
+        if (bar && !brand) {
+          brand = document.createElement('span');
+          brand.className = 'promo-opening__store-brand';
+          bar.insertBefore(brand, storeMark);
+          brand.appendChild(storeMark);
+        }
+        if (brand && !brand.querySelector('.promo-opening__store-name')) {
+          const name = document.createElement('span');
+          name.className = 'promo-opening__store-name';
+          name.textContent = 'Your store';
+          brand.appendChild(name);
+        }
       }
       host.querySelectorAll('.promo-moments__cart-piece').forEach((piece) => piece.remove());
       const headerCart = host.querySelector('.promo-opening__store-bar .promo-moments__cart');

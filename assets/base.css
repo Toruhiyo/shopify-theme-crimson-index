@@ -607,25 +607,23 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__stage {
-  width: min(1480px, 100%);
+  width: min(1400px, 100%);
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments {
   grid-column: 1 / -1;
+  justify-content: flex-end;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
-  width: min(96vw, 90rem);
-  max-height: 84vh;
-  aspect-ratio: 16 / 9;
-}
-
-.promo-opening.is-moments:not(.is-see) .promo-opening__widget {
-  right: 5.5rem;
+  width: min(78rem, 84vw);
+  height: min(40rem, 72vh);
+  max-height: none;
+  aspect-ratio: auto;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  transform: translate(calc(-50% - 15rem), -50%) scale(0.92);
+  transform: translate(calc(-50% - 22rem), -50%) scale(0.92);
 }
 
 .promo-opening.is-see-row #bizmis-avatar-embed div {
@@ -697,29 +695,29 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  flex: 0 0 40px;
-  height: 40px;
-  padding: 0 16px;
+  flex: 0 0 56px;
+  height: 56px;
+  padding: 0 22px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .promo-opening__browser-dots {
   display: flex;
-  gap: 6px;
+  gap: 9px;
   grid-column: 1;
 }
 
 .promo-opening__browser-dots i {
-  width: 8px;
-  height: 8px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: rgba(140, 148, 160, 0.55);
 }
 
 .promo-opening__browser-pill {
   grid-column: 2;
-  width: min(16rem, 34%);
-  height: 16px;
+  width: min(18rem, 36%);
+  height: 22px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -732,15 +730,31 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex: 0 0 48px;
-  height: 48px;
-  padding: 0 18px;
+  flex: 0 0 64px;
+  height: 64px;
+  padding: 0 22px;
+}
+
+.promo-opening__store-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.promo-opening__store-name {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  color: #8d877f;
 }
 
 .promo-opening__store-mark {
   display: block;
-  width: 22px;
-  height: 22px;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
   color: #8b93a0;
   opacity: 0.8;
 }
@@ -1655,17 +1669,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__store-bar .promo-moments__cart svg {
-  width: 18px;
-  height: 18px;
+  width: 28px;
+  height: 28px;
 }
 
 .promo-moments__cart-burst {
   position: absolute;
   left: 0;
   top: 50%;
-  width: 18px;
-  height: 18px;
-  margin-top: -9px;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
   border-radius: 50%;
   background: rgba(249, 163, 83, 0.55);
   box-shadow: 0 0 18px rgba(249, 163, 83, 0.8);
@@ -1761,9 +1775,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   left: 0;
   top: 50%;
-  width: 18px;
-  height: 18px;
-  margin-top: -9px;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
   z-index: 6;
   overflow: visible;
   pointer-events: none;
@@ -1887,7 +1901,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__count {
   font-family: var(--font-heading);
-  font-size: 0.72rem;
+  font-size: 1.05rem;
   font-weight: 500;
   line-height: 1;
   opacity: 0;
