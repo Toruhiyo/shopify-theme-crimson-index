@@ -161,6 +161,10 @@
   const PROMO_SEE_GLIDE_END_MS = 1600;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 5;
+  const PROMO_WHEEL_YAW_DEG = 46;
+  const PROMO_WHEEL_MAX_YAW_DEG = 76;
+  const PROMO_WHEEL_DEPTH_PX = 420;
+  const PROMO_WHEEL_TUCK_PX = 168;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -912,6 +916,9 @@
       if (this.carouselTrack) {
         this.carouselTrack.style.transition = '';
         this.carouselTrack.style.transform = '';
+        [...this.carouselTrack.children].forEach((slide) => {
+          slide.style.transform = '';
+        });
       }
     }
 
@@ -923,11 +930,30 @@
       return slide.offsetLeft - (view.clientWidth - slide.offsetWidth) / 2;
     }
 
+    wheelTransform(distance) {
+      const abs = Math.abs(distance);
+      if (abs < 0.001) return 'none';
+      const sign = Math.sign(distance);
+      const yaw = sign * Math.min(abs * PROMO_WHEEL_YAW_DEG, PROMO_WHEEL_MAX_YAW_DEG);
+      const depth = Math.min(abs * PROMO_WHEEL_DEPTH_PX, 1100);
+      const tuck = -sign * Math.min(abs, 2.6) * PROMO_WHEEL_TUCK_PX;
+      return `translate3d(${tuck}px, 0, ${-depth}px) rotateY(${yaw}deg)`;
+    }
+
+    applyWheel(activeIndex) {
+      const track = this.carouselTrack;
+      if (!track) return;
+      [...track.children].forEach((slide, index) => {
+        slide.style.transform = this.wheelTransform(index - activeIndex);
+      });
+    }
+
     placeCarousel(index, snap) {
       const track = this.carouselTrack;
       if (!track) return;
       if (snap) track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(index)}px, 0, 0)`;
+      this.applyWheel(index);
       if (snap) {
         track.getBoundingClientRect();
         track.style.transition = '';
@@ -1008,6 +1034,7 @@
       this.stopGlide();
       track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(0)}px, 0, 0)`;
+      this.applyWheel(0);
       this.setActiveSlide(0, land <= 0);
       const first = this.stores[0];
       if (first) this.arriveStore(first);
@@ -1029,6 +1056,7 @@
         const offset = this.carouselOffset(segment)
           + (this.carouselOffset(segment + 1) - this.carouselOffset(segment)) * progress;
         track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+        this.applyWheel(segment + progress);
         if (progress < 1) {
           this.glideFrame = window.requestAnimationFrame(frame);
           return;

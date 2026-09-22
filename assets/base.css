@@ -581,6 +581,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   grid-template-columns: minmax(0, 1fr) 24rem;
 }
 
+.promo-opening.is-see .promo-opening__widget {
+  position: absolute;
+  top: 50%;
+  right: calc(4vw + max(0px, (100% - 8vw - 1100px) / 2));
+  z-index: 5;
+  width: max-content;
+  transform: translateY(-50%);
+}
+
 .promo-opening__copy {
   display: grid;
   align-items: center;
@@ -811,12 +820,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__carousel {
   width: 100%;
   overflow: visible;
+  perspective: 1280px;
+  perspective-origin: center center;
 }
 
 .promo-opening__carousel-track {
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
@@ -827,6 +839,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: visible;
   background: none;
   opacity: 1;
+  transform-origin: center center;
+  transform-style: preserve-3d;
   transition: opacity 180ms linear;
 }
 
