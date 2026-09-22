@@ -173,7 +173,7 @@
   const PROMO_MOMENTS_CLOSE_AT = 0.62;
   const PROMO_MOMENTS_BUNDLE_AT = 0.46;
   const PROMO_MOMENTS_SPEECH_WAIT_MS = 8000;
-  const PROMO_MOMENTS_AUDIO_QUIET_MS = 2000;
+  const PROMO_MOMENTS_AUDIO_QUIET_MS = 5500;
   const PROMO_MOMENTS_TAIL_MS = 400;
   const PROMO_MOMENTS_EVENT = 'bizmis:agent-delivery';
   const PROMO_SEE_HOLD_MS = 2400;
@@ -207,7 +207,6 @@
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
-  const PROMO_OPENING_WAVE_AFTER_PARK_MS = 180;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -549,9 +548,9 @@
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
   const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_CARD_KINDS = [
-    'hexagon', 'circle', 'square', 'triangle',
-    'pill', 'hexagon', 'diamond', 'ring',
-    'star', 'square', 'circle', 'hexagon',
+    'triangle', 'pill', 'diamond', 'ring',
+    'star', 'square', 'pill', 'diamond',
+    'ring', 'star', 'pill', 'circle',
   ];
   const PROMO_MOMENT_SPEC_KINDS = ['spec-circle', 'spec-square', 'spec-triangle'];
   const PROMO_MOMENT_PICK_INDEX = 0;
@@ -636,8 +635,8 @@
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
-    accessory.className = 'promo-moments__card is-circle is-extra';
-    accessory.appendChild(momentGlyph('circle'));
+    accessory.className = 'promo-moments__card is-hexagon is-extra';
+    accessory.appendChild(momentGlyph('hexagon'));
     board.appendChild(accessory);
     const bubbles = [
       ['1', '-8.4rem', '-9.2rem'],
@@ -702,7 +701,7 @@
 
   const PROMO_MOMENT_BEATS = [
     {
-      line: '[fast pace] [bright, excited, a big smile] I narrow it to the right few.',
+      line: '[fast pace] [bursting with energy, huge smile, thrilled] I narrow it to the right few.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CATALOG_MS,
       holdPose: 'grid',
@@ -710,7 +709,7 @@
       endPose: 'row',
     },
     {
-      line: '[fast pace] [upbeat, energized, sure] I recommend the one that fits, and say why.',
+      line: '[fast pace] [fired up, confident, beaming] I recommend the one that fits, and say why.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CHOICE_MS,
       holdPose: 'row',
@@ -718,7 +717,7 @@
       endPose: 'choice',
     },
     {
-      line: '[fast pace] [bright, easy, upbeat] I clear it like an expert. [fast pace] [punchy, grinning] Then I close.',
+      line: '[fast pace] [bright, delighted, on a roll] I clear it like an expert. [fast pace] [punchy, grinning, triumphant] Then I close.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_DOUBT_MS,
       holdPose: 'choice',
@@ -727,7 +726,7 @@
       closeAt: PROMO_MOMENTS_CLOSE_AT,
     },
     {
-      line: '[fast pace] [cheerful, quick, excited] I add what goes with it, at the right moment.',
+      line: '[fast pace] [cheerful, quick, excited, cannot wait] I add what goes with it, at the right moment.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_EXTRA_MS,
       holdPose: 'close',
@@ -736,7 +735,7 @@
       bundleAt: PROMO_MOMENTS_BUNDLE_AT,
     },
     {
-      line: "[fast pace] [proud, electric, a huge smile] That's me.",
+      line: "[fast pace] [proud, electric, a huge smile, over the moon] That's me.",
       voMs: PROMO_MOMENTS_SALESPERSON_VO_MS,
       speakMs: PROMO_MOMENTS_SALESPERSON_MS,
       holdPose: 'bundle',
@@ -1102,7 +1101,6 @@
       embed.classList.add('is-promo-widget-parked');
       slot.appendChild(embed);
       this.fitClerk();
-      window.setTimeout(() => armOpeningWave(), PROMO_OPENING_WAVE_AFTER_PARK_MS);
     }
 
     restoreWidget() {
@@ -1244,6 +1242,7 @@
         word.classList.add('is-in');
         const isLast = index === words.length - 1;
         if (isLast) {
+          armOpeningWave();
           window.setTimeout(onDone, PROMO_PITCH_HERO_IN_MS + PROMO_PITCH_SELL_HOLD_MS);
           return;
         }
@@ -1630,7 +1629,6 @@
       const reduced = prefersReducedMotion();
       for (const beat of PROMO_MOMENT_BEATS) {
         this.showMoment(beat, reduced);
-        if (!reduced) setOpeningAvatarAction('idle_neutral');
         await waitMs(beat.voMs);
         if (reduced) {
           if (beat.endPose === 'gone') endOpeningAgent();

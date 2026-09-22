@@ -757,7 +757,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__board.is-instant *,
 .promo-moments__board.is-instant .promo-moments__card::before {
   transition: none !important;
-  animation: none !important;
 }
 
 .promo-moments__card,
@@ -798,11 +797,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     filter 380ms var(--promo-spring),
     box-shadow 380ms var(--promo-spring);
   will-change: transform, opacity, filter;
-  animation: promo-moments-arrive 380ms var(--promo-spring);
-}
-
-.promo-moments__card.is-extra {
-  animation: none;
 }
 
 .promo-moments__card::before {
@@ -1375,11 +1369,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 @keyframes promo-moments-go {
   0% { opacity: 1; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
   16%, 100% { opacity: 0; transform: translate3d(16rem, -0.4rem, 0) scale(0.4); }
-}
-
-@keyframes promo-moments-arrive {
-  from { opacity: 0; transform: translate3d(var(--gx, 0rem), var(--gy, 0rem), 0) scale(0.96); }
-  to { opacity: 1; transform: translate3d(var(--gx, 0rem), var(--gy, 0rem), 0) scale(1); }
 }
 
 @keyframes promo-moments-sheen {
