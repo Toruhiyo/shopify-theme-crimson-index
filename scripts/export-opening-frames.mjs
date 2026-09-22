@@ -22,7 +22,7 @@ const FRAMES = [
   ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],
   ['02c-agentic-scaled', 'Agentic sales stays centered and has scaled up in Bizmis orange. Burst has not fired.', 40],
   ['03-orange-burst', 'Orange field just after the burst. Agentic sales is still expanding, now white.', 160],
-  ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk already on the right.', 1600],
+  ['04-logo-docked', 'White field. Orange Bizmis mark in the copy seat. Clerk stays hidden until the mark has left.', 1600],
   ['05-logo-gone', 'Mark has left. Copy seat empty. Clerk is fully in on the right.', 1200],
   ['06-your', 'First word: Your.', 40],
   ['07-your-store', 'Your store. Single normal space.', 40],

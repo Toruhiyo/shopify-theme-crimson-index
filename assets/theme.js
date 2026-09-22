@@ -205,7 +205,7 @@
     HEAD_Hat: BIZMIS_ORANGE,
   };
   const PROMO_BIZMIS_STAMP_SCALE = 0.9;
-  const PROMO_BIZMIS_STAMP_OFFSET_X = -0.055;
+  const PROMO_BIZMIS_STAMP_OFFSET_X = -0.022;
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
@@ -1270,7 +1270,10 @@
       this.armPark();
       window.setTimeout(() => {
         this.root.classList.add('is-logo-leaving');
-        window.setTimeout(() => this.playPitchLine(), PROMO_PITCH_LOGO_OUT_MS);
+        window.setTimeout(() => {
+          document.documentElement.classList.add('is-promo-clerk');
+          this.playPitchLine();
+        }, PROMO_PITCH_LOGO_OUT_MS);
       }, PROMO_PITCH_LOGO_HOLD_MS);
     }
 
@@ -1623,11 +1626,11 @@
         const mark = document.createElement('span');
         mark.className = 'promo-opening__store-mark';
         mark.setAttribute('aria-hidden', 'true');
-        mark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M3.2 9.6 5.6 4.2h12.8l2.4 5.4H3.2zm1.2 1.5h15.2V20H4.4V11.1zm5.7 8.9v-5h3.8v5H10.1z"/></svg>';
+        mark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
         const cart = document.createElement('div');
         cart.className = 'promo-moments__cart';
         cart.setAttribute('aria-hidden', 'true');
-        cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__cart-piece is-main" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2"/></svg></span><span class="promo-moments__cart-piece is-addon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/></svg></span><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
+        cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
         bar.append(mark, cart);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
@@ -1668,13 +1671,11 @@
       if (headerCartForFest && festNode && festNode.parentElement !== headerCartForFest) {
         headerCartForFest.appendChild(festNode);
       }
-      if (headerCartForFest && !headerCartForFest.querySelector('.promo-moments__cart-piece')) {
-        headerCartForFest.insertAdjacentHTML('beforeend', '<span class="promo-moments__cart-piece is-main" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2"/></svg></span><span class="promo-moments__cart-piece is-addon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/></svg></span>');
-      }
       const storeMark = host.querySelector('.promo-opening__store-mark');
-      if (storeMark && !storeMark.querySelector('svg')) {
-        storeMark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M3.2 9.6 5.6 4.2h12.8l2.4 5.4H3.2zm1.2 1.5h15.2V20H4.4V11.1zm5.7 8.9v-5h3.8v5H10.1z"/></svg>';
+      if (storeMark) {
+        storeMark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
       }
+      host.querySelectorAll('.promo-moments__cart-piece').forEach((piece) => piece.remove());
       const headerCart = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
       if (headerCart && !headerCart.querySelector('.promo-moments__cart-burst')) {
         const burst = document.createElement('span');
@@ -2166,6 +2167,7 @@
         },
         '04-logo-docked': () => {
           enterPitch();
+          html.classList.remove('is-promo-clerk');
           root.classList.remove('is-logo-leaving');
           if (logo) {
             logo.style.opacity = '1';

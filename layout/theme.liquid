@@ -228,12 +228,10 @@
                 <span class="promo-opening__moments-blob is-blue"></span>
               </div>
               <div class="promo-opening__store-bar">
-                <span class="promo-opening__store-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M3.2 9.6 5.6 4.2h12.8l2.4 5.4H3.2zm1.2 1.5h15.2V20H4.4V11.1zm5.7 8.9v-5h3.8v5H10.1z"/></svg></span>
+                <span class="promo-opening__store-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg></span>
                 <div class="promo-moments__cart" aria-hidden="true">
                   <span class="promo-moments__cart-burst" aria-hidden="true"></span>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg>
-                  <span class="promo-moments__cart-piece is-main" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2"/></svg></span>
-                  <span class="promo-moments__cart-piece is-addon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/></svg></span>
                   <span class="promo-moments__count is-one">1</span>
                   <span class="promo-moments__count is-two">2</span>
                 </div>
@@ -258,15 +256,15 @@
   <script type="application/json" id="promo-opening-stores">
     [
       {
-        "slug": "pulse-forge",
-        "name": "Pulse Forge",
-        "sector": "Gaming gear",
-        "accent": "#A855F7",
-        "hero": {{ 'promo-home-pulse.jpg' | asset_url | json }},
-        "model": "https://cdn.bizmis.ai/common/avatars/models/kiran.glb",
-        "stamp": "https://cdn.shopify.com/s/files/1/0995/4420/3556/files/logo-transparent_1b37f004-1d85-4d11-82dc-823a2f99a82e.png?v=1790010542",
-        "stampScale": 1.4,
-        "meshColors": { "UPPERBODY_Top": "#171717", "HEAD_Hat": "#171717" }
+        "slug": "12-weather-outfitters",
+        "name": "12 Weather Outfitters",
+        "sector": "Apparel & outdoor",
+        "accent": "#FFD51B",
+        "hero": {{ 'promo-home-weather.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/yusuke.glb",
+        "stamp": null,
+        "stampScale": 0.8,
+        "meshColors": { "UPPERBODY_Top": "#FAF8F3", "HEAD_Hat": "#FAF8F3" }
       },
       {
         "slug": "buildright-home",
@@ -280,17 +278,6 @@
         "meshColors": { "UPPERBODY_Top": "#f53e3e", "HEAD_Hat": "#f53e3e" }
       },
       {
-        "slug": "rolling-district",
-        "name": "Rolling District",
-        "sector": "Performance parts",
-        "accent": "#E02020",
-        "hero": {{ 'promo-home-rolling.jpg' | asset_url | json }},
-        "model": "https://cdn.bizmis.ai/common/avatars/models/teo.glb",
-        "stamp": "https://cdn.shopify.com/s/files/1/0718/2034/5421/files/logo-initial-white.png?v=1783435346",
-        "stampScale": 0.7,
-        "meshColors": { "UPPERBODY_Top": "#f53e3e", "HEAD_Hat": "#f53e3e" }
-      },
-      {
         "slug": "viniteca-marti",
         "name": "Viniteca Martí",
         "sector": "Wine",
@@ -301,6 +288,17 @@
         "stampScale": 0.8,
         "stampOffsetX": 0.04,
         "meshColors": { "UPPERBODY_Top": "#701C33", "HEAD_Hat": "#701C33" }
+      },
+      {
+        "slug": "rolling-district",
+        "name": "Rolling District",
+        "sector": "Performance parts",
+        "accent": "#E02020",
+        "hero": {{ 'promo-home-rolling.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/teo.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0718/2034/5421/files/logo-initial-white.png?v=1783435346",
+        "stampScale": 0.7,
+        "meshColors": { "UPPERBODY_Top": "#f53e3e", "HEAD_Hat": "#f53e3e" }
       },
       {
         "slug": "the-apricot-theory",
@@ -337,15 +335,15 @@
         "meshColors": { "UPPERBODY_Top": {{ promo_red | json }}, "HEAD_Hat": {{ promo_red | json }} }
       },
       {
-        "slug": "12-weather-outfitters",
-        "name": "12 Weather Outfitters",
-        "sector": "Apparel & outdoor",
-        "accent": "#FFD51B",
-        "hero": {{ 'promo-home-weather.jpg' | asset_url | json }},
-        "model": "https://cdn.bizmis.ai/common/avatars/models/yusuke.glb",
-        "stamp": null,
-        "stampScale": 0.8,
-        "meshColors": { "UPPERBODY_Top": "#FAF8F3", "HEAD_Hat": "#FAF8F3" }
+        "slug": "pulse-forge",
+        "name": "Pulse Forge",
+        "sector": "Gaming gear",
+        "accent": "#A855F7",
+        "hero": {{ 'promo-home-pulse.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/kiran.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0995/4420/3556/files/logo-transparent_1b37f004-1d85-4d11-82dc-823a2f99a82e.png?v=1790010542",
+        "stampScale": 1.4,
+        "meshColors": { "UPPERBODY_Top": "#171717", "HEAD_Hat": "#171717" }
       }
     ]
   </script>
