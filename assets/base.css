@@ -661,10 +661,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: 36%;
 }
 
-.promo-opening.is-moments:not(.is-see) .promo-opening__store-bar .promo-moments__cart {
-  margin-right: 18rem;
-}
-
 .promo-opening.is-see-row #bizmis-avatar-embed div {
   transition: none !important;
 }
@@ -2525,7 +2521,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__slide {
   position: relative;
-  flex: 0 0 min(22rem, 40vw);
+  flex: 0 0 min(36rem, 62vw);
   margin: 0 -2.5rem 0 0;
   overflow: visible;
   background: none;
