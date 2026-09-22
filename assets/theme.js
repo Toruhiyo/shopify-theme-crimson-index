@@ -161,15 +161,18 @@
   const PROMO_SEE_GLIDE_END_MS = 1600;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 5;
-  const PROMO_WHEEL_YAW_DEG = 42;
+  const PROMO_WHEEL_YAW_DEG = 40;
   const PROMO_WHEEL_YAW_STEP_DEG = 8;
   const PROMO_WHEEL_MAX_YAW_DEG = 56;
-  const PROMO_WHEEL_DEPTH_PX = 260;
-  const PROMO_WHEEL_DEPTH_STEP_PX = 190;
-  const PROMO_WHEEL_MAX_DEPTH_PX = 680;
-  const PROMO_WHEEL_TUCK_PX = 150;
-  const PROMO_WHEEL_TUCK_RIGHT_BIAS = 1.45;
-  const PROMO_WHEEL_MAX_TUCK_STEPS = 2.4;
+  const PROMO_WHEEL_DEPTH_PX = 200;
+  const PROMO_WHEEL_DEPTH_STEP_PX = 120;
+  const PROMO_WHEEL_MAX_DEPTH_PX = 480;
+  const PROMO_WHEEL_TUCK_PX = 96;
+  const PROMO_WHEEL_TUCK_RIGHT_BIAS = 1.1;
+  const PROMO_WHEEL_MAX_TUCK_STEPS = 2;
+  const PROMO_WHEEL_SCALE_STEP = 0.08;
+  const PROMO_WHEEL_MIN_SCALE = 0.78;
+  const PROMO_WHEEL_ARC_PX = 22;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -953,7 +956,9 @@
       );
       const tuckBias = sign > 0 ? PROMO_WHEEL_TUCK_RIGHT_BIAS : 1;
       const tuck = -sign * Math.min(abs, PROMO_WHEEL_MAX_TUCK_STEPS) * PROMO_WHEEL_TUCK_PX * tuckBias;
-      return `translate3d(${tuck}px, 0, ${-depth}px) rotateY(${yaw}deg)`;
+      const scale = Math.max(PROMO_WHEEL_MIN_SCALE, 1 - abs * PROMO_WHEEL_SCALE_STEP);
+      const arc = Math.min(abs * PROMO_WHEEL_ARC_PX, 64);
+      return `translate3d(${tuck}px, ${arc}px, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
@@ -963,9 +968,7 @@
         const distance = index - activeIndex;
         const abs = Math.abs(distance);
         slide.style.transform = this.wheelTransform(distance);
-        if (distance > 0.001) slide.style.transformOrigin = 'left center';
-        else if (distance < -0.001) slide.style.transformOrigin = 'right center';
-        else slide.style.transformOrigin = 'center center';
+        slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(30 - Math.round(abs * 5));
         let fade = abs < 0.05 ? 1 : Math.max(0.72, 1 - Math.max(0, abs - 1) * 0.14);
         if (abs > 2) fade *= Math.max(0, 1 - (abs - 2) / 0.85);
