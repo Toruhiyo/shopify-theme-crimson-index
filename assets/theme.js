@@ -183,14 +183,14 @@
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 9;
   const PROMO_SEE_STAIN_BODY_COUNT = 5;
-  const PROMO_WHEEL_YAW_DEG = 46;
-  const PROMO_WHEEL_MAX_YAW_DEG = 52;
-  const PROMO_WHEEL_DEPTH_PX = 340;
-  const PROMO_WHEEL_MAX_DEPTH_PX = 480;
+  const PROMO_WHEEL_YAW_DEG = 24;
+  const PROMO_WHEEL_MAX_YAW_DEG = 36;
+  const PROMO_WHEEL_DEPTH_PX = 90;
+  const PROMO_WHEEL_MAX_DEPTH_PX = 220;
   const PROMO_WHEEL_TUCK_PX = 28;
-  const PROMO_WHEEL_SCALE_STEP = 0.07;
-  const PROMO_WHEEL_MIN_SCALE = 0.88;
-  const PROMO_WHEEL_CLERK_LANE_PX = 120;
+  const PROMO_WHEEL_NEIGHBOR_SCALE = 0.6;
+  const PROMO_WHEEL_NEIGHBOR_PULL = 0.08;
+  const PROMO_WHEEL_FAR_SCALE = 0.72;
   const PROMO_WHEEL_SEPARATION_SLOPE = 24;
   const PROMO_WHEEL_SEPARATION_PULL = 248;
   const PROMO_WHEEL_SELECT_AT = 0.5;
@@ -857,9 +857,16 @@
   }
 
   function wheelScale(abs) {
-    const drop = abs * PROMO_WHEEL_SCALE_STEP;
-    const maxDrop = 1 - PROMO_WHEEL_MIN_SCALE;
-    return 1 - easeCap(drop, maxDrop, 0.04);
+    const drop = 1 - PROMO_WHEEL_NEIGHBOR_SCALE;
+    if (abs <= 1) return 1 - drop * smoothstep(abs);
+    const far = smoothstep(Math.min(1, abs - 1));
+    return PROMO_WHEEL_NEIGHBOR_SCALE * (1 - (1 - PROMO_WHEEL_FAR_SCALE) * far);
+  }
+
+  function wheelNeighborPull(abs, width) {
+    const amount = width * PROMO_WHEEL_NEIGHBOR_PULL;
+    if (abs <= 1) return amount * smoothstep(abs);
+    return amount;
   }
 
   function wheelTuck(abs) {
@@ -1450,21 +1457,20 @@
       const slide = track?.children[index];
       const view = track?.parentElement;
       if (!track || !slide || !view) return 0;
-      const carouselLeft = view.getBoundingClientRect().left;
-      const lane = Math.max(slide.offsetWidth, window.innerWidth - PROMO_WHEEL_CLERK_LANE_PX);
-      const targetLeft = (lane - slide.offsetWidth) / 2;
-      return slide.offsetLeft - (targetLeft - carouselLeft);
+      const targetLeft = (view.clientWidth - slide.offsetWidth) / 2;
+      return slide.offsetLeft - targetLeft;
     }
 
-    wheelTransform(distance, shift) {
+    wheelTransform(distance, shift, width) {
       const abs = Math.abs(distance);
       const sign = Math.sign(distance) || 1;
       const yaw = sign * wheelYaw(abs);
       const depth = wheelDepth(abs);
       const tuck = -sign * wheelTuck(abs);
       const separation = -sign * wheelSeparation(abs);
+      const pull = -sign * wheelNeighborPull(abs, width);
       const scale = wheelScale(abs);
-      return `translate3d(${shift + tuck + separation}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
+      return `translate3d(${shift + tuck + separation + pull}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
@@ -1478,7 +1484,7 @@
         const distance = loopDistance(index, activeIndex, count);
         const shift = stride * (distance - layout);
         const abs = Math.abs(distance);
-        slide.style.transform = this.wheelTransform(distance, shift);
+        slide.style.transform = this.wheelTransform(distance, shift, slide.offsetWidth);
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(1000 - Math.round(abs * 100));
         slide.style.setProperty('--promo-wheel-fade', String(wheelFade(abs)));
