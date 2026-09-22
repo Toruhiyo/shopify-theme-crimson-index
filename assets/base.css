@@ -623,6 +623,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 1;
 }
 
+.promo-opening.is-see .promo-opening__moments {
+  display: none;
+}
+
 .promo-opening.is-moments:not(.is-see) .promo-opening__line {
   opacity: 0;
 }
