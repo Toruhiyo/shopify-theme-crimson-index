@@ -2253,7 +2253,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__logo-slot {
   grid-area: 1 / 1;
   justify-self: start;
-  width: min(600px, 72vw);
+  width: min(590px, 72vw);
   aspect-ratio: 1948 / 640;
 }
 
