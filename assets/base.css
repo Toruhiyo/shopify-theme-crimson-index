@@ -735,10 +735,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   line-height: 1.02;
   letter-spacing: -0.04em;
   transition:
-    font-size 640ms cubic-bezier(0.16, 1, 0.3, 1),
-    letter-spacing 640ms cubic-bezier(0.16, 1, 0.3, 1),
-    max-width 640ms cubic-bezier(0.16, 1, 0.3, 1),
-    margin 640ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 520ms cubic-bezier(0.4, 0, 1, 1),
+    filter 520ms cubic-bezier(0.4, 0, 1, 1),
+    transform 520ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 .promo-opening__see-mask {
@@ -784,17 +783,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   }
 }
 
-.promo-opening.is-see-docked .promo-opening__copy {
-  justify-content: flex-start;
-}
-
 .promo-opening.is-see-docked .promo-opening__see {
-  max-width: none;
-  margin-top: 0;
-  font-size: 1.15rem;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  transform: none;
+  position: absolute;
+  opacity: 0;
+  filter: blur(14px);
+  transform: translateY(-0.28em);
+  pointer-events: none;
 }
 
 .promo-opening.is-see .promo-opening__stores {
