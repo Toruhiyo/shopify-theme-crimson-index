@@ -154,6 +154,21 @@
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_PITCH_SETTLE_MS = 700;
+  const PROMO_MOMENTS_VO_MS = 900;
+  const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
+  const PROMO_MOMENTS_CATALOG_MS = 1800;
+  const PROMO_MOMENTS_CHOICE_MS = 2400;
+  const PROMO_MOMENTS_DOUBT_MS = 2400;
+  const PROMO_MOMENTS_EXTRA_MS = 2600;
+  const PROMO_MOMENTS_SALESPERSON_MS = 800;
+  const PROMO_MOMENTS_HOLD_MS = 700;
+  const PROMO_MOMENTS_VAPOR_MS = 250;
+  const PROMO_MOMENTS_CLOSE_AT = 0.62;
+  const PROMO_MOMENTS_BUNDLE_AT = 0.46;
+  const PROMO_MOMENTS_SPEECH_GRACE_MS = 500;
+  const PROMO_MOMENTS_TILE_COUNT = 20;
+  const PROMO_MOMENTS_TILE_KEEP = [6, 7, 8];
+  const PROMO_MOMENTS_EVENT = 'bizmis:agent-delivery';
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1800;
@@ -413,6 +428,206 @@
     };
     run();
   }
+
+  function momentsEnabled() {
+    return promoSearchParams().get('moments') !== '0';
+  }
+
+  function waitMs(ms) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function sayClerkLine(line) {
+    const embed = document.getElementById('bizmis-avatar-embed');
+    const input = embed?.querySelector('input[type="text"]:not([disabled])');
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    if (!input || !setter) return false;
+    setter.call(input, `Say this: "${line}"`);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const form = input.form || input.closest('form');
+    if (!form || typeof form.requestSubmit !== 'function') return false;
+    form.requestSubmit();
+    return true;
+  }
+
+  function playClerkLine(line, speakMs, onStart) {
+    const sent = sayClerkLine(line);
+    return new Promise((resolve) => {
+      let settled = false;
+      let started = false;
+      let grace = 0;
+      let safety = 0;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(grace);
+        window.clearTimeout(safety);
+        window.removeEventListener(PROMO_MOMENTS_EVENT, onDelivery);
+        resolve();
+      };
+      const begin = () => {
+        if (started) return;
+        started = true;
+        window.clearTimeout(grace);
+        onStart();
+        safety = window.setTimeout(done, speakMs);
+      };
+      const onDelivery = (event) => {
+        const phase = event.detail && event.detail.phase;
+        if (phase === 'playback-started') begin();
+        if (phase === 'playback-ended' && started) done();
+      };
+      window.addEventListener(PROMO_MOMENTS_EVENT, onDelivery);
+      grace = window.setTimeout(begin, sent ? PROMO_MOMENTS_SPEECH_GRACE_MS : 0);
+    });
+  }
+
+  function momentGlass() {
+    const tile = document.createElement('div');
+    tile.className = 'promo-moments__swatch';
+    return tile;
+  }
+
+  function renderCatalog(stage) {
+    const grid = document.createElement('div');
+    grid.className = 'promo-moments__catalog';
+    for (let index = 0; index < PROMO_MOMENTS_TILE_COUNT; index += 1) {
+      const tile = document.createElement('div');
+      tile.className = PROMO_MOMENTS_TILE_KEEP.includes(index)
+        ? 'promo-moments__tile is-keep'
+        : 'promo-moments__tile is-drop';
+      tile.appendChild(momentGlass());
+      grid.appendChild(tile);
+    }
+    stage.replaceChildren(grid);
+  }
+
+  function renderChoice(stage) {
+    const row = document.createElement('div');
+    row.className = 'promo-moments__choice';
+    const specs = [
+      ['18 hr', '1.2 kg'],
+      ['11 hr', '1.6 kg'],
+      ['14 hr', '1.4 kg'],
+    ];
+    specs.forEach((pair, index) => {
+      const card = document.createElement('article');
+      card.className = index === 0
+        ? 'promo-moments__card is-pick'
+        : index === 2
+          ? 'promo-moments__card is-go'
+          : 'promo-moments__card is-other';
+      card.appendChild(momentGlass());
+      pair.forEach((text) => {
+        const spec = document.createElement('p');
+        spec.className = 'promo-moments__spec';
+        spec.textContent = text;
+        card.appendChild(spec);
+      });
+      if (index === 0) {
+        const pill = document.createElement('span');
+        pill.className = 'promo-moments__pill';
+        pill.textContent = 'Recommended';
+        card.appendChild(pill);
+      }
+      row.appendChild(card);
+    });
+    stage.replaceChildren(row);
+  }
+
+  function renderDoubt(stage) {
+    const board = document.createElement('div');
+    board.className = 'promo-moments__doubt';
+    const card = document.createElement('article');
+    card.className = 'promo-moments__card is-pick is-chosen';
+    card.appendChild(momentGlass());
+    const mark = document.createElement('p');
+    mark.className = 'promo-moments__added';
+    mark.textContent = 'Added';
+    card.appendChild(mark);
+    board.appendChild(card);
+    ['Returns?', 'Battery?', 'Will it fit?', '16 GB enough?'].forEach((text, index) => {
+      const chip = document.createElement('span');
+      chip.className = `promo-moments__chip is-orbit-${index + 1}`;
+      chip.textContent = text;
+      board.appendChild(chip);
+    });
+    const badge = document.createElement('span');
+    badge.className = 'promo-moments__badge';
+    badge.textContent = '1';
+    board.appendChild(badge);
+    stage.replaceChildren(board);
+  }
+
+  function renderExtra(stage) {
+    const board = document.createElement('div');
+    board.className = 'promo-moments__extra';
+    const bundle = document.createElement('div');
+    bundle.className = 'promo-moments__bundle';
+    const card = document.createElement('article');
+    card.className = 'promo-moments__card is-pick is-chosen';
+    card.appendChild(momentGlass());
+    const plus = document.createElement('span');
+    plus.className = 'promo-moments__plus';
+    plus.textContent = '+';
+    const accessory = document.createElement('article');
+    accessory.className = 'promo-moments__card is-accessory';
+    accessory.appendChild(momentGlass());
+    bundle.append(card, plus, accessory);
+    const badge = document.createElement('span');
+    badge.className = 'promo-moments__badge';
+    badge.textContent = '1';
+    board.append(bundle, badge);
+    stage.replaceChildren(board);
+  }
+
+  function renderSalesperson(stage) {
+    stage.replaceChildren();
+  }
+
+  const PROMO_MOMENT_BEATS = [
+    {
+      label: 'The catalog.',
+      line: '[warm, confident] I narrow it to the right few.',
+      voMs: PROMO_MOMENTS_VO_MS,
+      speakMs: PROMO_MOMENTS_CATALOG_MS,
+      render: renderCatalog,
+    },
+    {
+      label: 'The choice.',
+      line: '[assured, friendly] I recommend the one that fits, and say why.',
+      voMs: PROMO_MOMENTS_VO_MS,
+      speakMs: PROMO_MOMENTS_CHOICE_MS,
+      render: renderChoice,
+    },
+    {
+      label: 'The doubt.',
+      line: '[calm, reassuring] I clear it like an expert. [confident] Then I close.',
+      voMs: PROMO_MOMENTS_VO_MS,
+      speakMs: PROMO_MOMENTS_DOUBT_MS,
+      render: renderDoubt,
+      closeAt: PROMO_MOMENTS_CLOSE_AT,
+    },
+    {
+      label: 'The extra.',
+      line: '[helpful, upbeat] I add what goes with it, at the right moment.',
+      voMs: PROMO_MOMENTS_VO_MS,
+      speakMs: PROMO_MOMENTS_EXTRA_MS,
+      render: renderExtra,
+      bundleAt: PROMO_MOMENTS_BUNDLE_AT,
+    },
+    {
+      label: 'The salesperson.',
+      line: "[proud, warm, a smile] That's me.",
+      voMs: PROMO_MOMENTS_SALESPERSON_VO_MS,
+      speakMs: PROMO_MOMENTS_SALESPERSON_MS,
+      render: renderSalesperson,
+      wave: true,
+      holdMs: PROMO_MOMENTS_HOLD_MS,
+    },
+  ];
 
   const promoWidget = createPromoWidgetBridge();
   promoWidget.arm();
@@ -979,7 +1194,10 @@
 
       window.setTimeout(() => {
         line.classList.add('is-replaced');
-        this.playHeroWords(toFace, () => this.playSeeForYourself());
+        this.playHeroWords(toFace, () => {
+          if (momentsEnabled()) this.playMoments(() => this.playSeeForYourself());
+          else this.playSeeForYourself();
+        });
       }, toInAt);
     }
 
@@ -1010,16 +1228,20 @@
       if (animation) animation.cancel();
     }
 
-    glideClerkIntoRow() {
+    glideClerkIntoRow(positionClass = 'is-see-row') {
       const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
       const widget = this.root.querySelector('[data-promo-widget]');
+      const park = () => {
+        this.root.classList.add(positionClass);
+        if (positionClass === 'is-see-row') this.root.classList.remove('is-moments');
+      };
       if (!embed || !widget || prefersReducedMotion()) {
-        this.root.classList.add('is-see-row');
+        park();
         return;
       }
 
       const first = embed.getBoundingClientRect();
-      this.root.classList.add('is-see-row');
+      park();
       const last = embed.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
@@ -1063,7 +1285,8 @@
         'is-see-in',
         'is-see-docked',
         'is-see-row',
-        'is-see-landed'
+        'is-see-landed',
+        'is-moments'
       );
       this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
         slide.classList.remove('is-on');
@@ -1207,6 +1430,116 @@
       this.armPark();
       this.snapSeeLanded();
       window.setTimeout(() => this.revealStore(), PROMO_SEE_REDUCED_HOLD_MS);
+    }
+
+    clearMomentTimers() {
+      (this.momentTimers || []).forEach((timer) => window.clearTimeout(timer));
+      this.momentTimers = [];
+    }
+
+    ensureMoments() {
+      const copy = this.root.querySelector('.promo-opening__copy');
+      if (!copy) return null;
+      let host = copy.querySelector('[data-promo-moments]');
+      if (!host) {
+        host = document.createElement('div');
+        host.className = 'promo-opening__moments';
+        host.setAttribute('data-promo-moments', '');
+        host.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('p');
+        label.className = 'promo-opening__moments-label';
+        label.setAttribute('data-promo-moments-label', '');
+        const stage = document.createElement('div');
+        stage.className = 'promo-opening__moments-stage';
+        stage.setAttribute('data-promo-moments-stage', '');
+        host.append(label, stage);
+        const stores = copy.querySelector('[data-promo-stores]');
+        copy.insertBefore(host, stores);
+      }
+      return host;
+    }
+
+    momentStage() {
+      return this.ensureMoments()?.querySelector('[data-promo-moments-stage]') || null;
+    }
+
+    syncMomentBoard(stage) {
+      const board = stage?.firstElementChild;
+      if (!board) return;
+      ['is-play', 'is-end', 'is-vapor', 'is-bundled'].forEach((name) => {
+        board.classList.toggle(name, stage.classList.contains(name));
+      });
+    }
+
+    showMoment(beat, settled) {
+      const stage = this.momentStage();
+      const label = this.root.querySelector('[data-promo-moments-label]');
+      const host = this.root.querySelector('[data-promo-moments]');
+      if (label) label.textContent = beat.label;
+      if (host) host.setAttribute('aria-hidden', 'false');
+      if (!stage) return;
+      this.clearMomentTimers();
+      beat.render(stage);
+      stage.classList.toggle('is-end', settled);
+      stage.classList.remove('is-play', 'is-vapor', 'is-bundled');
+      if (settled && typeof beat.bundleAt === 'number') {
+        stage.classList.add('is-bundled');
+        const badge = stage.querySelector('.promo-moments__badge');
+        if (badge) badge.textContent = '2';
+      }
+      this.syncMomentBoard(stage);
+    }
+
+    playMoment(beat) {
+      const stage = this.momentStage();
+      if (!stage) return;
+      stage.classList.add('is-play');
+      this.syncMomentBoard(stage);
+      if (beat.wave) {
+        openingWavePlayed = false;
+        openingWaveStarted = false;
+        waveOpeningAvatar();
+      }
+      if (typeof beat.closeAt === 'number') {
+        this.momentTimers.push(window.setTimeout(() => {
+          stage.classList.add('is-vapor');
+          this.syncMomentBoard(stage);
+        }, beat.speakMs * beat.closeAt));
+      }
+      if (typeof beat.bundleAt === 'number') {
+        this.momentTimers.push(window.setTimeout(() => {
+          stage.classList.add('is-bundled', 'is-end');
+          const badge = stage.querySelector('.promo-moments__badge');
+          if (badge) badge.textContent = '2';
+          this.syncMomentBoard(stage);
+        }, beat.speakMs * beat.bundleAt));
+      }
+    }
+
+    async playMoments(onDone) {
+      const sell = this.root.querySelector('.promo-opening__word--sell');
+      sell?.classList.remove('is-in');
+      sell?.classList.add('is-out');
+      this.root.classList.add('is-moments');
+      this.glideClerkIntoRow('is-moments');
+      if (!prefersReducedMotion()) await waitMs(PROMO_CLERK_ROW_MS);
+
+      const reduced = prefersReducedMotion();
+      for (const beat of PROMO_MOMENT_BEATS) {
+        this.showMoment(beat, reduced);
+        await waitMs(beat.voMs);
+        if (reduced) {
+          await waitMs(beat.speakMs);
+        } else {
+          await playClerkLine(beat.line, beat.speakMs, () => this.playMoment(beat));
+          const stage = this.momentStage();
+          stage?.classList.add('is-end');
+          this.syncMomentBoard(stage);
+        }
+        if (beat.holdMs) await waitMs(beat.holdMs);
+      }
+      this.clearMomentTimers();
+      onDone();
     }
 
     playSeeForYourself() {
@@ -1407,7 +1740,7 @@
       const enterPitch = () => {
         html.classList.add('is-promo-opening', 'is-promo-pitch');
         root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch');
-        root.classList.remove('is-logo-leaving', 'is-depart');
+        root.classList.remove('is-logo-leaving', 'is-depart', 'is-moments');
         hideToggle();
         this.parkWidget();
         this.fitOpeningLayout();
@@ -1499,8 +1832,10 @@
         if (highlight >= 0) this.highlightStore(highlight, phase === 'landed', true);
 
         if (phase === 'hero') {
+          root.classList.add('is-moments');
           promoWidget.applyStoreLook(this.bizmisLook());
         } else {
+          root.classList.remove('is-moments');
           const store = this.stores[highlight];
           if (store) promoWidget.applyStoreLook(store);
         }
@@ -1517,7 +1852,8 @@
           'is-pitch',
           'is-logo-docked',
           'is-logo-leaving',
-          'is-depart'
+          'is-depart',
+          'is-moments'
         );
         showToggle();
         const toggle = root.querySelector('.promo-opening__toggle');
@@ -1671,6 +2007,42 @@
           openingWaveStarted = false;
           armOpeningWave();
           return 700;
+        },
+        '14b-moments-catalog': () => {
+          showHero(2);
+          root.classList.add('is-moments');
+          this.showMoment(PROMO_MOMENT_BEATS[0], true);
+          return 180;
+        },
+        '14c-moments-choice': () => {
+          showHero(2);
+          root.classList.add('is-moments');
+          this.showMoment(PROMO_MOMENT_BEATS[1], true);
+          return 180;
+        },
+        '14d-moments-doubt': () => {
+          showHero(2);
+          root.classList.add('is-moments');
+          this.showMoment(PROMO_MOMENT_BEATS[2], true);
+          const stage = this.momentStage();
+          stage?.classList.add('is-vapor');
+          this.syncMomentBoard(stage);
+          return 180;
+        },
+        '14e-moments-extra': () => {
+          showHero(2);
+          root.classList.add('is-moments');
+          this.showMoment(PROMO_MOMENT_BEATS[3], true);
+          this.momentStage()?.classList.add('is-bundled');
+          const badge = this.momentStage()?.querySelector('.promo-moments__badge');
+          if (badge) badge.textContent = '2';
+          return 180;
+        },
+        '14f-moments-salesperson': () => {
+          showHero(2);
+          root.classList.add('is-moments');
+          this.showMoment(PROMO_MOMENT_BEATS[4], true);
+          return 180;
         },
         '15-see-yourself': () => {
           showSee('hero');
