@@ -161,17 +161,15 @@
   const PROMO_SEE_GLIDE_END_MS = 1600;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 5;
-  const PROMO_WHEEL_YAW_DEG = 46;
-  const PROMO_WHEEL_YAW_STEP_DEG = 7;
-  const PROMO_WHEEL_MAX_YAW_DEG = 58;
-  const PROMO_WHEEL_DEPTH_PX = 240;
-  const PROMO_WHEEL_DEPTH_STEP_PX = 110;
-  const PROMO_WHEEL_MAX_DEPTH_PX = 460;
-  const PROMO_WHEEL_TUCK_PX = 120;
-  const PROMO_WHEEL_TUCK_RIGHT_BIAS = 1.65;
-  const PROMO_WHEEL_MAX_TUCK_STEPS = 1.6;
-  const PROMO_WHEEL_SCALE_STEP = 0.12;
-  const PROMO_WHEEL_MIN_SCALE = 0.72;
+  const PROMO_WHEEL_YAW_DEG = 50;
+  const PROMO_WHEEL_MAX_YAW_DEG = 56;
+  const PROMO_WHEEL_DEPTH_PX = 80;
+  const PROMO_WHEEL_MAX_DEPTH_PX = 120;
+  const PROMO_WHEEL_TUCK_PX = 150;
+  const PROMO_WHEEL_MAX_TUCK_STEPS = 1.15;
+  const PROMO_WHEEL_SCALE_STEP = 0.07;
+  const PROMO_WHEEL_MIN_SCALE = 0.88;
+  const PROMO_WHEEL_CLERK_LANE_PX = 120;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
   const BIZMIS_ORANGE = '#f9a353';
@@ -937,24 +935,17 @@
       const slide = track?.children[index];
       const view = track?.parentElement;
       if (!track || !slide || !view) return 0;
-      return slide.offsetLeft - (view.clientWidth - slide.offsetWidth) / 2;
+      const lane = Math.max(slide.offsetWidth, view.clientWidth - PROMO_WHEEL_CLERK_LANE_PX);
+      return slide.offsetLeft - (lane - slide.offsetWidth) / 2;
     }
 
     wheelTransform(distance) {
       const abs = Math.abs(distance);
       if (abs < 0.001) return 'none';
       const sign = Math.sign(distance);
-      const stepsPastNeighbor = Math.max(0, abs - 1);
-      const yaw = sign * Math.min(
-        PROMO_WHEEL_YAW_DEG + stepsPastNeighbor * PROMO_WHEEL_YAW_STEP_DEG,
-        PROMO_WHEEL_MAX_YAW_DEG
-      );
-      const depth = Math.min(
-        PROMO_WHEEL_DEPTH_PX + stepsPastNeighbor * PROMO_WHEEL_DEPTH_STEP_PX,
-        PROMO_WHEEL_MAX_DEPTH_PX
-      );
-      const tuckBias = sign > 0 ? PROMO_WHEEL_TUCK_RIGHT_BIAS : 1;
-      const tuck = -sign * Math.min(abs, PROMO_WHEEL_MAX_TUCK_STEPS) * PROMO_WHEEL_TUCK_PX * tuckBias;
+      const yaw = sign * Math.min(abs * PROMO_WHEEL_YAW_DEG, PROMO_WHEEL_MAX_YAW_DEG);
+      const depth = Math.min(abs * PROMO_WHEEL_DEPTH_PX, PROMO_WHEEL_MAX_DEPTH_PX);
+      const tuck = -sign * Math.min(abs, PROMO_WHEEL_MAX_TUCK_STEPS) * PROMO_WHEEL_TUCK_PX;
       const scale = Math.max(PROMO_WHEEL_MIN_SCALE, 1 - abs * PROMO_WHEEL_SCALE_STEP);
       return `translate3d(${tuck}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
@@ -979,6 +970,12 @@
       if (!track) return;
       if (snap) track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(index)}px, 0, 0)`;
+      const view = track.parentElement;
+      const focus = track.children[Math.round(index)] || track.children[0];
+      if (view && focus) {
+        const originX = focus.offsetLeft - this.carouselOffset(index) + focus.offsetWidth / 2;
+        view.style.perspectiveOrigin = `${originX}px 46%`;
+      }
       this.applyWheel(index);
       if (snap) {
         track.getBoundingClientRect();
