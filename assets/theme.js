@@ -156,6 +156,7 @@
   const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
+  const PROMO_CLERK_ROW_MS = 1100;
   const PROMO_SEE_LAND_HOLD_MS = 900;
   const PROMO_SEE_GLIDE_START_MS = 480;
   const PROMO_SEE_GLIDE_END_MS = 1600;
@@ -927,8 +928,49 @@
       this.glideFrame = 0;
     }
 
+    settleClerkRow() {
+      const widget = this.root.querySelector('[data-promo-widget]');
+      if (!widget) return;
+      widget.style.transition = '';
+      widget.style.transform = '';
+      widget.style.transformOrigin = '';
+    }
+
+    glideClerkIntoRow() {
+      const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
+      const widget = this.root.querySelector('[data-promo-widget]');
+      if (!embed || !widget || prefersReducedMotion()) {
+        this.root.classList.add('is-see-row');
+        return;
+      }
+
+      const first = embed.getBoundingClientRect();
+      this.root.classList.add('is-see-row');
+      const last = embed.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      const sx = last.width > 1 ? first.width / last.width : 1;
+      const sy = last.height > 1 ? first.height / last.height : 1;
+      const still = Math.abs(dx) < 0.5
+        && Math.abs(dy) < 0.5
+        && Math.abs(sx - 1) < 0.01
+        && Math.abs(sy - 1) < 0.01;
+      if (still) return;
+
+      widget.style.transition = 'none';
+      widget.style.transformOrigin = '0 50%';
+      widget.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy}) translateY(-50%)`;
+      widget.getBoundingClientRect();
+      window.requestAnimationFrame(() => {
+        widget.style.transition = `transform ${PROMO_CLERK_ROW_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`;
+        widget.style.transform = 'translate(0px, 0px) scale(1, 1) translateY(-50%)';
+      });
+      window.setTimeout(() => this.settleClerkRow(), PROMO_CLERK_ROW_MS + 80);
+    }
+
     resetSee() {
       this.stopGlide();
+      this.settleClerkRow();
       this.root.classList.remove(
         'is-see',
         'is-see-in',
@@ -1066,7 +1108,7 @@
       }, PROMO_SEE_HOLD_MS);
 
       window.setTimeout(() => {
-        this.root.classList.add('is-see-row');
+        this.glideClerkIntoRow();
         this.playStoreGlide(() => {
           window.setTimeout(() => this.depart(), PROMO_SEE_LAND_HOLD_MS);
         });
@@ -1150,6 +1192,7 @@
 
     depart() {
       this.stopGlide();
+      this.settleClerkRow();
       window.removeEventListener('resize', this.boundDock);
       promoWidget.hide();
       this.restoreWidget();
