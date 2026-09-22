@@ -899,14 +899,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   border-radius: 1.15rem;
   overflow: hidden;
   background: #f6f4f1;
-  box-shadow: 0 0 42px color-mix(in srgb, var(--promo-store-accent, #1d1d1f) 55%, transparent);
-  transition: box-shadow 480ms ease;
-}
-
-.promo-opening__slide.is-on .promo-opening__slide-card {
   box-shadow:
-    0 0 0 3px var(--promo-store-accent, var(--bizmis-orange, #f9a353)),
-    0 0 64px color-mix(in srgb, var(--promo-store-accent, #f9a353) 80%, transparent);
+    0 0 0 calc(3px * var(--promo-wheel-focus, 0)) var(--promo-store-accent, #1d1d1f),
+    0 0 calc(42px + 22px * var(--promo-wheel-focus, 0))
+      color-mix(in srgb, var(--promo-store-accent, #1d1d1f) calc((55 + 25 * var(--promo-wheel-focus, 0)) * 1%), transparent);
 }
 
 .promo-opening__slide-glow {
@@ -914,12 +910,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   inset: -18%;
   z-index: 0;
   background: radial-gradient(circle at 50% 58%, var(--promo-store-accent, #1d1d1f), transparent 68%);
-  opacity: 0.5;
+  opacity: calc(0.5 + 0.4 * var(--promo-wheel-focus, 0));
   pointer-events: none;
-}
-
-.promo-opening__slide.is-on .promo-opening__slide-glow {
-  opacity: 0.9;
 }
 
 .promo-opening__slide-hero {

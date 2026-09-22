@@ -521,6 +521,11 @@
     return 1 - smoothstep((abs - start) / (end - start));
   }
 
+  function wheelFocus(abs) {
+    if (abs >= 1) return 0;
+    return 1 - smoothstep(abs);
+  }
+
   function wheelSeparation(abs) {
     if (abs <= 1) return -PROMO_WHEEL_SEPARATION_SLOPE * abs * (1 - abs);
     const along = abs - 1;
@@ -1048,6 +1053,7 @@
           slide.style.transformOrigin = '';
           slide.style.zIndex = '';
           slide.style.removeProperty('--promo-wheel-fade');
+          slide.style.removeProperty('--promo-wheel-focus');
         });
       }
     }
@@ -1089,6 +1095,7 @@
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(1000 - Math.round(abs * 100));
         slide.style.setProperty('--promo-wheel-fade', String(wheelFade(abs)));
+        slide.style.setProperty('--promo-wheel-focus', wheelFocus(abs).toFixed(4));
       });
     }
 
