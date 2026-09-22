@@ -172,8 +172,6 @@
   const PROMO_MOMENTS_CLOSE_AT = 0.62;
   const PROMO_MOMENTS_BUNDLE_AT = 0.46;
   const PROMO_MOMENTS_SPEECH_GRACE_MS = 500;
-  const PROMO_MOMENTS_TILE_COUNT = 20;
-  const PROMO_MOMENTS_TILE_KEEP = [6, 7, 8];
   const PROMO_MOMENTS_EVENT = 'bizmis:agent-delivery';
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
@@ -510,29 +508,31 @@
   }
 
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
-  const PROMO_MOMENT_GRID_COLS = 5;
+  const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_ORBIT_COUNT = 4;
   const PROMO_MOMENT_BIT_COUNT = 14;
-  const PROMO_MOMENT_PICK_INDEX = 6;
-  const PROMO_MOMENT_OTHER_INDEX = 7;
-  const PROMO_MOMENT_GO_INDEX = 8;
+  const PROMO_MOMENT_SHAPE_KINDS = [
+    'sphere', 'cone', 'cube', 'cylinder',
+    'pill', 'cube', 'sphere', 'prism',
+    'cone', 'cube', 'cylinder', 'pill',
+    'prism', 'sphere',
+  ];
+  const PROMO_MOMENT_PICK_INDEX = 5;
+  const PROMO_MOMENT_OTHER_INDEX = 9;
+  const PROMO_MOMENT_GO_INDEX = 2;
 
-  function momentSquircleRole(index) {
+  function momentShapeRole(index) {
     if (index === PROMO_MOMENT_PICK_INDEX) return 'pick';
     if (index === PROMO_MOMENT_OTHER_INDEX) return 'other';
     if (index === PROMO_MOMENT_GO_INDEX) return 'go';
     return 'drop';
   }
 
-  function momentBars(differ) {
-    const bars = document.createElement('span');
-    bars.className = 'promo-moments__bars';
-    for (let slot = 0; slot < 3; slot += 1) {
-      const bar = document.createElement('i');
-      bar.className = differ && slot !== 1 ? 'promo-moments__bar is-diff' : 'promo-moments__bar';
-      bars.appendChild(bar);
-    }
-    return bars;
+  function momentTag() {
+    const tag = document.createElement('span');
+    tag.className = 'promo-moments__tag';
+    tag.setAttribute('aria-hidden', 'true');
+    return tag;
   }
 
   function momentCheck() {
@@ -550,30 +550,41 @@
     board.className = 'promo-moments__board is-pose-grid';
     board.dataset.pose = 'grid';
     if (prefersReducedMotion()) board.classList.add('is-reduced');
-    for (let index = 0; index < PROMO_MOMENTS_TILE_COUNT; index += 1) {
+    for (let index = 0; index < PROMO_MOMENT_SHAPE_KINDS.length; index += 1) {
       const column = index % PROMO_MOMENT_GRID_COLS;
       const row = Math.floor(index / PROMO_MOMENT_GRID_COLS);
-      const role = momentSquircleRole(index);
-      const squircle = document.createElement('div');
-      squircle.className = `promo-moments__squircle is-${role}`;
-      squircle.style.setProperty('--gx', `${(column - 2) * 5.6}rem`);
-      squircle.style.setProperty('--gy', `${(row - 1.5) * 4.8}rem`);
-      const face = document.createElement('span');
-      face.className = 'promo-moments__face';
-      squircle.appendChild(face);
-      if (role === 'pick' || role === 'other') squircle.appendChild(momentBars(role === 'pick'));
-      if (role === 'pick') squircle.appendChild(momentCheck());
-      board.appendChild(squircle);
+      const role = momentShapeRole(index);
+      const shape = document.createElement('div');
+      shape.className = `promo-moments__shape is-${PROMO_MOMENT_SHAPE_KINDS[index]} is-${role}`;
+      const jitterX = ((index * 17) % 5) - 2;
+      const jitterY = ((index * 13) % 5) - 2;
+      shape.style.setProperty('--gx', `${((column - 1.5) * 5.2 + jitterX * 0.16).toFixed(2)}rem`);
+      shape.style.setProperty('--gy', `${((row - 1.5) * 4.55 + jitterY * 0.14).toFixed(2)}rem`);
+      if (role === 'drop') shape.style.setProperty('--spin', `${((index * 11) % 17) - 8}deg`);
+      const body = document.createElement('span');
+      body.className = 'promo-moments__body';
+      shape.append(body, momentTag());
+      if (role === 'pick') shape.appendChild(momentCheck());
+      board.appendChild(shape);
     }
     const accessory = document.createElement('div');
-    accessory.className = 'promo-moments__squircle is-extra';
-    const accessoryFace = document.createElement('span');
-    accessoryFace.className = 'promo-moments__face';
-    accessory.appendChild(accessoryFace);
+    accessory.className = 'promo-moments__shape is-sphere is-extra';
+    const accessoryBody = document.createElement('span');
+    accessoryBody.className = 'promo-moments__body';
+    accessory.append(accessoryBody, momentTag());
     board.appendChild(accessory);
+    const slot = document.createElement('div');
+    slot.className = 'promo-moments__slot';
+    const dash = document.createElement('span');
+    dash.className = 'promo-moments__slot-dash';
+    const solid = document.createElement('span');
+    solid.className = 'promo-moments__slot-solid';
+    slot.append(dash, solid);
+    board.appendChild(slot);
     for (let index = 0; index < PROMO_MOMENT_ORBIT_COUNT; index += 1) {
       const disc = document.createElement('span');
       disc.className = `promo-moments__disc is-orbit-${index + 1}`;
+      disc.style.setProperty('--spin', `${index * 90}deg`);
       disc.textContent = '?';
       board.appendChild(disc);
     }
@@ -583,7 +594,7 @@
       const bit = document.createElement('span');
       bit.className = 'promo-moments__bit';
       const angle = (index / PROMO_MOMENT_BIT_COUNT) * Math.PI * 2;
-      const distance = 4.1 + (index % 3) * 0.85;
+      const distance = 11.2 + (index % 3) * 1.15;
       bit.style.setProperty('--bx', `${Math.cos(angle) * distance}rem`);
       bit.style.setProperty('--by', `${Math.sin(angle) * distance}rem`);
       burst.appendChild(bit);
@@ -592,14 +603,12 @@
     const plus = document.createElement('span');
     plus.className = 'promo-moments__plus';
     plus.textContent = '+';
-    const outline = document.createElement('div');
-    outline.className = 'promo-moments__outline';
     const cart = document.createElement('div');
     cart.className = 'promo-moments__cart';
     cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count">2</span>';
     const fly = document.createElement('span');
     fly.className = 'promo-moments__fly';
-    board.append(plus, outline, cart, fly);
+    board.append(plus, cart, fly);
     stage.replaceChildren(board);
     return board;
   }
@@ -610,6 +619,7 @@
     const host = stage.closest('[data-promo-moments]');
     const label = host?.querySelector('[data-promo-moments-label]');
     if (options.instant) board.classList.add('is-instant');
+    board.classList.toggle('is-settled', Boolean(options.instant));
     if (board.dataset.pose !== pose) {
       PROMO_MOMENT_POSES.forEach((name) => {
         board.classList.toggle(`is-pose-${name}`, name === pose);
@@ -1290,28 +1300,23 @@
       const last = embed.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
-      const sx = last.width > 1 ? first.width / last.width : 1;
-      const sy = last.height > 1 ? first.height / last.height : 1;
-      const still = Math.abs(dx) < 0.5
-        && Math.abs(dy) < 0.5
-        && Math.abs(sx - 1) < 0.01
-        && Math.abs(sy - 1) < 0.01;
+      const still = Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5;
       if (still) return;
 
-      const from = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy}) translateY(-50%)`;
-      const to = 'translate(0px, 0px) scale(1, 1) translateY(-50%)';
+      const from = `translate(${dx}px, ${dy}px) translateY(-50%)`;
+      const to = 'translate(0px, 0px) translateY(-50%)';
       widget.style.transition = 'none';
-      widget.style.transformOrigin = '0 50%';
+      widget.style.transformOrigin = 'center center';
       widget.style.transform = from;
       this.clerkMove?.cancel();
       const animation = widget.animate(
         [
-          { transform: from, transformOrigin: '0 50%' },
-          { transform: to, transformOrigin: '0 50%' },
+          { transform: from },
+          { transform: to },
         ],
         {
           duration: PROMO_CLERK_ROW_MS,
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
           fill: 'both',
         },
       );
@@ -1508,6 +1513,7 @@
       this.root.style.setProperty('--promo-moments-vapor', `${PROMO_MOMENTS_VAPOR_MS}ms`);
       this.root.style.setProperty('--promo-moments-collapse', `${PROMO_MOMENTS_COLLAPSE_MS}ms`);
       this.root.style.setProperty('--promo-moments-tick', `${PROMO_MOMENTS_BADGE_TICK_MS}ms`);
+      this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
       return host;
     }
 
@@ -1544,7 +1550,6 @@
       const sell = this.root.querySelector('.promo-opening__word--sell');
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
-      this.root.classList.add('is-moments');
       this.glideClerkIntoRow('is-moments');
       if (!prefersReducedMotion()) await waitMs(PROMO_CLERK_ROW_MS);
 
