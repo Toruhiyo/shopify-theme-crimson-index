@@ -640,9 +640,10 @@
     accessory.appendChild(momentGlyph('hexagon'));
     board.appendChild(accessory);
     const bubbles = [
-      ['1', '-8.4rem', '-9.2rem'],
-      ['2', '9.4rem', '-0.2rem'],
-      ['3', '-0.6rem', '9.6rem'],
+      ['1', '-13.4rem', '-11.2rem'],
+      ['2', '13.6rem', '-10.6rem'],
+      ['3', '12.8rem', '11rem'],
+      ['4', '-12.6rem', '11.2rem'],
     ];
     bubbles.forEach(([slot, x, y]) => {
       const bubble = document.createElement('span');
@@ -740,16 +741,6 @@
       playPose: 'extra',
       endPose: 'bundle',
       bundleAt: PROMO_MOMENTS_BUNDLE_AT,
-    },
-    {
-      line: "[fast pace] [proud, electric, a huge smile, over the moon] That's me.",
-      voMs: PROMO_MOMENTS_SALESPERSON_VO_MS,
-      speakMs: PROMO_MOMENTS_SALESPERSON_MS,
-      holdPose: 'bundle',
-      playPose: 'fly',
-      endPose: 'gone',
-      nod: true,
-      holdMs: PROMO_MOMENTS_HOLD_MS,
     },
   ];
 
@@ -1595,6 +1586,12 @@
         if (stage) store.appendChild(stage);
         host.insertBefore(store, host.firstChild);
       }
+      if (!host.querySelector('.promo-opening__browser')) {
+        const browser = document.createElement('div');
+        browser.className = 'promo-opening__browser';
+        browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
+        host.querySelector('.promo-opening__store')?.prepend(browser);
+      }
       if (!host.querySelector('.promo-moments__fly')) {
         const fly = document.createElement('span');
         fly.className = 'promo-moments__fly';
@@ -1666,18 +1663,24 @@
         this.showMoment(beat, reduced);
         await waitMs(beat.voMs);
         if (reduced) {
-          if (beat.endPose === 'gone') endOpeningAgent();
           await waitMs(beat.speakMs);
         } else {
           await playClerkLine(beat.line, beat.speakMs, () => this.playMoment(beat));
           applyMomentPose(this.momentStage(), beat.endPose, {
             instant: true,
           });
-          if (beat.endPose === 'gone') endOpeningAgent();
           await waitMs(beat.holdMs || PROMO_MOMENTS_TAIL_MS);
         }
       }
       this.clearMomentTimers();
+      endOpeningAgent();
+      setOpeningAvatarAction('nod');
+      if (reduced) {
+        applyMomentPose(this.momentStage(), 'gone', { instant: true });
+      } else {
+        applyMomentPose(this.momentStage(), 'fly');
+        await waitMs(PROMO_MOMENTS_FLY_MS + 220);
+      }
       onDone();
     }
 
@@ -2182,7 +2185,7 @@
         '14f-moments-salesperson': () => {
           showHero(2);
           root.classList.add('is-moments');
-          this.showMoment(PROMO_MOMENT_BEATS[4], true);
+          applyMomentPose(this.momentStage(), 'gone', { instant: true });
           setOpeningAvatarAction('nod');
           return 180;
         },

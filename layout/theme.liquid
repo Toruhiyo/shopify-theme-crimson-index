@@ -218,6 +218,10 @@
           <p class="promo-opening__see" data-promo-see aria-hidden="true"><span class="promo-opening__see-mask"><span class="promo-opening__see-word">See</span></span> <span class="promo-opening__see-mask"><span class="promo-opening__see-word">for</span></span> <span class="promo-opening__see-mask"><span class="promo-opening__see-word">yourself.</span></span></p>
           <div class="promo-opening__moments" data-promo-moments aria-hidden="true">
             <div class="promo-opening__store">
+              <div class="promo-opening__browser">
+                <span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="promo-opening__browser-pill" aria-hidden="true"></span>
+              </div>
               <div class="promo-opening__moments-field" aria-hidden="true">
                 <span class="promo-opening__moments-blob is-rose"></span>
                 <span class="promo-opening__moments-blob is-orange"></span>
@@ -250,39 +254,6 @@
   </div>
   <script type="application/json" id="promo-opening-stores">
     [
-      {
-        "slug": "paper-and-pine-books",
-        "name": "Paper and Pine Books",
-        "sector": "Books & stationery",
-        "accent": "#29573F",
-        "hero": {{ 'promo-home-paper-pine.jpg' | asset_url | json }},
-        "model": "https://cdn.bizmis.ai/common/avatars/models/amber.glb",
-        "stamp": "https://cdn.shopify.com/s/files/1/0744/2894/0480/files/logo-light_7caefa0a-ac0e-4392-9409-cea52b0fb7fe.png?v=1778533386",
-        "stampScale": 1,
-        "meshColors": { "UPPERBODY_Top": "#29573F", "HEAD_Hat": "#29573F" }
-      },
-      {
-        "slug": "the-apricot-theory",
-        "name": "The Apricot Theory",
-        "sector": "Beauty & skincare",
-        "accent": "#F8924A",
-        "hero": {{ 'promo-home-apricot.jpg' | asset_url | json }},
-        "model": "https://cdn.bizmis.ai/common/avatars/models/will.glb",
-        "stamp": "https://cdn.shopify.com/s/files/1/0798/0862/6925/files/the-apricot-theory-logo-white-4x.png?v=1785168107",
-        "stampScale": 1.3,
-        "meshColors": { "UPPERBODY_Top": "#F8924A", "HEAD_Hat": "#F8924A" }
-      },
-      {
-        "slug": "12-weather-outfitters",
-        "name": "12 Weather Outfitters",
-        "sector": "Apparel & outdoor",
-        "accent": "#FFD51B",
-        "hero": {{ 'promo-home-weather.jpg' | asset_url | json }},
-        "model": "https://cdn.bizmis.ai/common/avatars/models/yusuke.glb",
-        "stamp": null,
-        "stampScale": 0.8,
-        "meshColors": { "UPPERBODY_Top": "#FAF8F3", "HEAD_Hat": "#FAF8F3" }
-      },
       {
         "slug": "pulse-forge",
         "name": "Pulse Forge",
@@ -329,6 +300,28 @@
         "meshColors": { "UPPERBODY_Top": "#701C33", "HEAD_Hat": "#701C33" }
       },
       {
+        "slug": "the-apricot-theory",
+        "name": "The Apricot Theory",
+        "sector": "Beauty & skincare",
+        "accent": "#F8924A",
+        "hero": {{ 'promo-home-apricot.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/will.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0798/0862/6925/files/the-apricot-theory-logo-white-4x.png?v=1785168107",
+        "stampScale": 1.3,
+        "meshColors": { "UPPERBODY_Top": "#F8924A", "HEAD_Hat": "#F8924A" }
+      },
+      {
+        "slug": "paper-and-pine-books",
+        "name": "Paper and Pine Books",
+        "sector": "Books & stationery",
+        "accent": "#29573F",
+        "hero": {{ 'promo-home-paper-pine.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/amber.glb",
+        "stamp": "https://cdn.shopify.com/s/files/1/0744/2894/0480/files/logo-light_7caefa0a-ac0e-4392-9409-cea52b0fb7fe.png?v=1778533386",
+        "stampScale": 1,
+        "meshColors": { "UPPERBODY_Top": "#29573F", "HEAD_Hat": "#29573F" }
+      },
+      {
         "slug": "meridian",
         "name": "Meridian",
         "sector": "Consumer electronics",
@@ -339,6 +332,17 @@
         "stamp": {{ 'logo-white.png' | asset_url | json }},
         "stampScale": 0.76,
         "meshColors": { "UPPERBODY_Top": {{ promo_red | json }}, "HEAD_Hat": {{ promo_red | json }} }
+      },
+      {
+        "slug": "12-weather-outfitters",
+        "name": "12 Weather Outfitters",
+        "sector": "Apparel & outdoor",
+        "accent": "#FFD51B",
+        "hero": {{ 'promo-home-weather.jpg' | asset_url | json }},
+        "model": "https://cdn.bizmis.ai/common/avatars/models/yusuke.glb",
+        "stamp": null,
+        "stampScale": 0.8,
+        "meshColors": { "UPPERBODY_Top": "#FAF8F3", "HEAD_Hat": "#FAF8F3" }
       }
     ]
   </script>
