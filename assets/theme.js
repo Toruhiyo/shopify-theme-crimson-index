@@ -679,7 +679,7 @@
     added.append(momentMark('yes'), document.createTextNode('Added'));
     const plus = document.createElement('span');
     plus.className = 'promo-moments__plus';
-    plus.textContent = '+';
+    plus.append(document.createElement('i'), document.createElement('i'));
     const outline = document.createElement('div');
     outline.className = 'promo-moments__outline';
     const celebrate = document.createElement('div');
@@ -756,7 +756,7 @@
 
   const PROMO_MOMENT_BEATS = [
     {
-      line: '[fast pace] [bursting with energy, huge smile, thrilled] I narrow it to the right few.',
+      line: '[fast pace] [bursting with energy, huge smile, thrilled] I narrow it down to the best few.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CATALOG_MS,
       holdPose: 'grid',
@@ -764,7 +764,7 @@
       endPose: 'row',
     },
     {
-      line: '[fast pace] [fired up, confident, beaming] I recommend the one that fits, and say why.',
+      line: '[fast pace] [fired up, confident, beaming] I recommend the one that fits them best.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CHOICE_MS,
       holdPose: 'row',
@@ -772,7 +772,7 @@
       endPose: 'choice',
     },
     {
-      line: '[fast pace] [bright, delighted, on a roll] I clear it like an expert. [fast pace] [punchy, grinning, triumphant] Then I close.',
+      line: '[fast pace] [bright, delighted, on a roll] I clear them like an expert. [fast pace] [punchy, grinning, triumphant] And close the deal.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_DOUBT_MS,
       holdPose: 'choice',
@@ -781,7 +781,7 @@
       closeAt: PROMO_MOMENTS_CLOSE_AT,
     },
     {
-      line: '[fast pace] [cheerful, quick, excited, cannot wait] I add what goes with it, at the right moment.',
+      line: '[fast pace] [cheerful, quick, excited, cannot wait] I suggest what goes best with it.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_EXTRA_MS,
       holdPose: 'close',

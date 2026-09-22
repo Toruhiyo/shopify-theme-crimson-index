@@ -1236,6 +1236,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(8.6rem, 0, 0) scale(1.55);
 }
 
+.is-pose-extra .promo-moments__card.is-extra::after {
+  opacity: 1;
+}
+
+.is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph {
+  color: #c4b8aa;
+}
+
 .is-pose-bundle .promo-moments__card.is-extra::after {
   opacity: 1;
 }
@@ -1529,24 +1537,41 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__plus {
   z-index: 5;
-  margin: 0;
-  color: #7c8593;
-  font-family: var(--font-heading);
-  font-size: 1.35rem;
-  font-weight: 500;
-  line-height: 1;
+  width: 4.8rem;
+  height: 4.8rem;
+  margin: -2.4rem 0 0 -2.4rem;
+  color: #f9a353;
   opacity: 0;
-  transform: translate3d(-50%, -50%, 0) scale(0.96);
+  filter: drop-shadow(0 0 16px rgba(249, 163, 83, 0.7));
+  transform: translate3d(2.2rem, 0, 0) scale(0.96);
   transition:
     transform 380ms var(--promo-spring),
     opacity 380ms var(--promo-spring);
 }
 
+.promo-moments__plus i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: currentColor;
+  border-radius: 999px;
+}
+
+.promo-moments__plus i:first-child {
+  width: 4.8rem;
+  height: 0.72rem;
+  margin: -0.36rem 0 0 -2.4rem;
+}
+
+.promo-moments__plus i:last-child {
+  width: 0.72rem;
+  height: 4.8rem;
+  margin: -2.4rem 0 0 -0.36rem;
+}
+
 .is-pose-extra .promo-moments__plus {
-  color: #f9a353;
-  font-size: 2.6rem;
   opacity: 1;
-  transform: translate3d(calc(-50% + 1.1rem), -50%, 0) scale(1);
+  transform: translate3d(2.2rem, 0, 0) scale(1);
 }
 
 .is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__plus {
@@ -1978,8 +2003,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-plus-in {
-  0% { opacity: 0; transform: translate3d(calc(-50% + 1.1rem), -50%, 0) scale(0.2); }
-  100% { opacity: 1; transform: translate3d(calc(-50% + 1.1rem), -50%, 0) scale(1); }
+  0% { opacity: 0; transform: translate3d(2.2rem, 0, 0) scale(0.15); }
+  100% { opacity: 1; transform: translate3d(2.2rem, 0, 0) scale(1); }
 }
 
 @keyframes promo-moments-celebrate {
