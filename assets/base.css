@@ -625,7 +625,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  transform: translate(calc(-50% - 7rem), -50%) scale(0.92);
+  transform: translate(calc(-50% - 15rem), -50%) scale(0.92);
 }
 
 .promo-opening.is-see-row #bizmis-avatar-embed div {
