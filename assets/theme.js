@@ -556,8 +556,8 @@
       const role = momentSquircleRole(index);
       const squircle = document.createElement('div');
       squircle.className = `promo-moments__squircle is-${role}`;
-      squircle.style.setProperty('--gx', `${(column - 2) * 4.15}rem`);
-      squircle.style.setProperty('--gy', `${(row - 1.5) * 3.65}rem`);
+      squircle.style.setProperty('--gx', `${(column - 2) * 5.6}rem`);
+      squircle.style.setProperty('--gy', `${(row - 1.5) * 4.8}rem`);
       const face = document.createElement('span');
       face.className = 'promo-moments__face';
       squircle.appendChild(face);

@@ -699,10 +699,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__squircle {
-  width: 3.15rem;
-  height: 3.15rem;
-  margin: -1.575rem 0 0 -1.575rem;
-  border-radius: 1.15rem;
+  width: 4.35rem;
+  height: 4.35rem;
+  margin: -2.175rem 0 0 -2.175rem;
+  border-radius: 1.55rem;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42));
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
@@ -809,9 +809,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(var(--gx), var(--gy), 0) scale(0.12);
 }
 
-.is-pose-row .promo-moments__squircle.is-pick { transform: translate3d(-5.1rem, 0, 0) scale(1.72); }
+.is-pose-row .promo-moments__squircle.is-pick { transform: translate3d(-7rem, 0, 0) scale(1.72); }
 .is-pose-row .promo-moments__squircle.is-other { transform: translate3d(0, 0, 0) scale(1.72); }
-.is-pose-row .promo-moments__squircle.is-go { transform: translate3d(5.1rem, 0, 0) scale(1.72); }
+.is-pose-row .promo-moments__squircle.is-go { transform: translate3d(7rem, 0, 0) scale(1.72); }
 
 .is-pose-choice .promo-moments__squircle.is-go {
   opacity: 0;
@@ -819,13 +819,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__squircle.is-pick {
-  transform: translate3d(-4.7rem, -0.35rem, 0) scale(1.9);
+  transform: translate3d(-6.4rem, -0.35rem, 0) scale(1.9);
 }
 
 .is-pose-choice .promo-moments__squircle.is-other {
   opacity: 0.5;
   filter: blur(2px);
-  transform: translate3d(4.7rem, 0.2rem, 0) scale(1.55);
+  transform: translate3d(6.4rem, 0.2rem, 0) scale(1.55);
 }
 
 .is-pose-choice .promo-moments__bars {
@@ -868,13 +868,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-extra .promo-moments__squircle.is-pick,
 .is-pose-bundle .promo-moments__squircle.is-pick {
-  transform: translate3d(-3.35rem, 0, 0) scale(1.55);
+  transform: translate3d(-4.6rem, 0, 0) scale(1.55);
 }
 
 .is-pose-extra .promo-moments__squircle.is-extra,
 .is-pose-bundle .promo-moments__squircle.is-extra {
   opacity: 1;
-  transform: translate3d(3.15rem, 0, 0) scale(1.05);
+  transform: translate3d(4.3rem, 0, 0) scale(1.05);
 }
 
 .is-pose-fly .promo-moments__squircle,
@@ -957,9 +957,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__outline {
   z-index: 1;
-  width: 11.6rem;
-  height: 5.6rem;
-  margin: -2.8rem 0 0 -5.8rem;
+  width: 16rem;
+  height: 7.6rem;
+  margin: -3.8rem 0 0 -8rem;
   border-radius: 1.9rem;
   border: 1.5px solid #f9a353;
   opacity: 0;
@@ -982,7 +982,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: 0;
   color: #f9a353;
   opacity: 0;
-  transform: translate3d(4.4rem, -2.7rem, 0) scale(0.6);
+  transform: translate3d(6.1rem, -3.6rem, 0) scale(0.6);
   transition:
     transform 420ms var(--promo-spring),
     opacity 280ms ease;
@@ -1002,7 +1002,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-bundle .promo-moments__cart {
   opacity: 1;
-  transform: translate3d(4.4rem, -2.7rem, 0) scale(1);
+  transform: translate3d(6.1rem, -3.6rem, 0) scale(1);
 }
 
 .promo-moments__fly {
@@ -1046,12 +1046,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-orbit {
-  from { transform: translate3d(-50%, -50%, 0) rotate(0deg) translateX(6.4rem) rotate(0deg); }
-  to { transform: translate3d(-50%, -50%, 0) rotate(360deg) translateX(6.4rem) rotate(-360deg); }
+  from { transform: translate3d(-50%, -50%, 0) rotate(0deg) translateX(8.6rem) rotate(0deg); }
+  to { transform: translate3d(-50%, -50%, 0) rotate(360deg) translateX(8.6rem) rotate(-360deg); }
 }
 
 @keyframes promo-moments-rush {
-  0% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotate(var(--spin, 40deg)) translateX(6.4rem) scale(1); }
+  0% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotate(var(--spin, 40deg)) translateX(8.6rem) scale(1); }
   70% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.25); }
   100% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(0.05); }
 }
