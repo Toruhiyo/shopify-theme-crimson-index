@@ -509,227 +509,155 @@
     });
   }
 
-  const PROMO_MOMENT_SHOP = 'https://cdn.shopify.com/s/files/1/0697/1365/7930/files';
+  const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
+  const PROMO_MOMENT_GRID_COLS = 5;
+  const PROMO_MOMENT_ORBIT_COUNT = 4;
+  const PROMO_MOMENT_BIT_COUNT = 14;
+  const PROMO_MOMENT_PICK_INDEX = 6;
+  const PROMO_MOMENT_OTHER_INDEX = 7;
+  const PROMO_MOMENT_GO_INDEX = 8;
 
-  function momentPhoto(file) {
-    return `${PROMO_MOMENT_SHOP}/${file}?width=480`;
+  function momentSquircleRole(index) {
+    if (index === PROMO_MOMENT_PICK_INDEX) return 'pick';
+    if (index === PROMO_MOMENT_OTHER_INDEX) return 'other';
+    if (index === PROMO_MOMENT_GO_INDEX) return 'go';
+    return 'drop';
   }
 
-  const PROMO_MOMENT_PICK = {
-    name: 'LG gram 14',
-    spec: '0.99 kg',
-    choice: ['0.99 kg', '72 Wh'],
-    image: momentPhoto('lg-gram-14_3383cb71-9b8b-44d4-b1a9-cb849adba483.jpg'),
-  };
-
-  const PROMO_MOMENT_OTHER = {
-    name: 'Framework 13',
-    spec: '1.3 kg',
-    choice: ['1.3 kg', '61 Wh'],
-    image: momentPhoto('framework-laptop-13_751c7199-3b79-43c3-abdc-6ac3c14c2eca.jpg'),
-  };
-
-  const PROMO_MOMENT_GO = {
-    name: 'XPS 13',
-    spec: '1.17 kg',
-    choice: ['1.17 kg', '512 GB'],
-    image: momentPhoto('dell-xps-13-2024_14db10ef-2300-44be-af6c-93bdd636d971.jpg'),
-  };
-
-  const PROMO_MOMENT_MOUSE = {
-    name: 'Logitech G203',
-    spec: '8,000 DPI',
-    image: momentPhoto('logitech-g203-lightsync-black.jpg'),
-  };
-
-  const PROMO_MOMENT_PRODUCTS = [
-    { name: 'ThinkPad X1', spec: '1.09 kg', image: momentPhoto('thinkpad-x1-carbon-gen12_042e8c28-e786-42ca-998c-bc7f30b60cd8.jpg') },
-    { name: 'Zenbook 14', spec: '1.2 kg', image: momentPhoto('zenbook-14-oled-2024_db0b9bbb-12c5-4afa-af97-53d0d33fa985.jpg') },
-    { name: 'MateBook X Pro', spec: '980 g', image: momentPhoto('matebook-x-pro-2024_e6aab9e1-b831-4aa8-81d2-cfc77cec260b.jpg') },
-    { name: 'CreatorPro Z17', spec: '64 GB', image: momentPhoto('msi-creatorpro-z17-hx_2fa8c743-d32a-4746-a8d0-f6478c404293.jpg') },
-    { name: 'ZBook Firefly', spec: '32 GB', image: momentPhoto('hp-zbook-firefly-16-g11_b19b1b02-efdd-409e-ad38-c8d1a25c7e3a.jpg') },
-    { name: 'Precision 5490', spec: '14 inch', image: momentPhoto('dell-precision-5490_bbec1f5c-6b8e-49d5-bcc5-01ea2e5d18d9.jpg') },
-    PROMO_MOMENT_PICK,
-    PROMO_MOMENT_OTHER,
-    PROMO_MOMENT_GO,
-    { name: 'ThinkPad P16s', spec: '32 GB', image: momentPhoto('thinkpad-p16s-gen3_2a5ff3d1-d644-435e-9568-02cf9d0c44e3.jpg') },
-    { name: 'Galaxy Book4', spec: '1.46 kg', image: momentPhoto('galaxy-book4-360-15_565ac68e-c37b-4e4f-9888-9e60e85b6196.jpg') },
-    { name: 'Pavilion Plus', spec: '1.39 kg', image: momentPhoto('hp-pavilion-plus-14_16e4d045-30b4-491c-aab3-c9c6c78a40fa.jpg') },
-    { name: 'Yoga Slim 7i', spec: '65 Wh', image: momentPhoto('yoga-slim-7i-14_13b5a33b-6b93-47f3-b9b0-4bd9f792ec7f.jpg') },
-    { name: 'Swift Go 14', spec: '1.3 kg', image: momentPhoto('acer-swift-go-14_39005cb6-317f-4c21-9645-d8b030dde891.jpg') },
-    { name: 'Zenbook S 14', spec: '72 Wh', image: momentPhoto('zenbook-s-14_2dc3238c-4526-48d3-924c-a81ca6bc3998.jpg') },
-    { name: 'Book4 Pro', spec: '1.23 kg', image: momentPhoto('galaxy-book4-pro-14_eacec889-4310-423b-93ba-6d1e83b2ef33.jpg') },
-    { name: 'MacBook Air 15', spec: 'M3', image: momentPhoto('macbook-air-15-m3-midnight-refurbished.png') },
-    { name: 'MacBook Pro 14', spec: 'M3', image: momentPhoto('macbook-pro-14-m3-refurbished.png') },
-    { name: 'XPS 14', spec: 'OLED', image: momentPhoto('dell-xps-14_24ccf031-fc60-484a-85c2-220b1b3c7b1b.png') },
-    { name: 'Blade 14', spec: 'RTX 4060', image: momentPhoto('razer-blade-14_8cf6bdcb-e49b-4080-ba46-24433a04ae7c.png') },
-  ];
-
-  function momentFigure(product) {
-    const figure = document.createElement('div');
-    figure.className = 'promo-moments__figure';
-    const photo = document.createElement('img');
-    photo.className = 'promo-moments__photo';
-    photo.src = product.image;
-    photo.alt = '';
-    figure.appendChild(photo);
-    return figure;
+  function momentBars(differ) {
+    const bars = document.createElement('span');
+    bars.className = 'promo-moments__bars';
+    for (let slot = 0; slot < 3; slot += 1) {
+      const bar = document.createElement('i');
+      bar.className = differ && slot !== 1 ? 'promo-moments__bar is-diff' : 'promo-moments__bar';
+      bars.appendChild(bar);
+    }
+    return bars;
   }
 
-  function momentCopy(product, lines) {
-    const copy = document.createElement('div');
-    copy.className = 'promo-moments__copy';
-    const name = document.createElement('p');
-    name.className = 'promo-moments__name';
-    name.textContent = product.name;
-    copy.appendChild(name);
-    (lines || [product.spec]).forEach((text) => {
-      const spec = document.createElement('p');
-      spec.className = 'promo-moments__spec';
-      spec.textContent = text;
-      copy.appendChild(spec);
-    });
-    return copy;
+  function momentCheck() {
+    const mark = document.createElement('span');
+    mark.className = 'promo-moments__check';
+    mark.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8.2 6.3 11.4 12.8 4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    return mark;
   }
 
-  function momentCard(product, className, lines) {
-    const card = document.createElement('article');
-    card.className = className;
-    card.append(momentFigure(product), momentCopy(product, lines));
-    return card;
-  }
-
-  function momentCart(count) {
-    const cart = document.createElement('div');
-    cart.className = 'promo-moments__cart';
-    cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7L5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg>';
-    const badge = document.createElement('span');
-    badge.className = 'promo-moments__badge';
-    badge.textContent = String(count);
-    cart.appendChild(badge);
-    return cart;
-  }
-
-  function tickMomentBadge(badge, count) {
-    if (!badge) return;
-    badge.textContent = String(count);
-    badge.classList.remove('is-tick');
-    void badge.offsetWidth;
-    badge.classList.add('is-tick');
-  }
-
-  function renderCatalog(stage) {
-    const grid = document.createElement('div');
-    grid.className = 'promo-moments__catalog';
-    PROMO_MOMENT_PRODUCTS.slice(0, PROMO_MOMENTS_TILE_COUNT).forEach((product, index) => {
-      const tile = momentCard(
-        product,
-        PROMO_MOMENTS_TILE_KEEP.includes(index)
-          ? 'promo-moments__tile is-keep'
-          : 'promo-moments__tile is-drop',
-      );
-      grid.appendChild(tile);
-    });
-    stage.replaceChildren(grid);
-  }
-
-  function renderChoice(stage) {
-    const row = document.createElement('div');
-    row.className = 'promo-moments__choice';
-    [PROMO_MOMENT_PICK, PROMO_MOMENT_OTHER, PROMO_MOMENT_GO].forEach((product, index) => {
-      const card = momentCard(
-        product,
-        index === 0
-          ? 'promo-moments__card is-pick'
-          : index === 2
-            ? 'promo-moments__card is-go'
-            : 'promo-moments__card is-other',
-        product.choice,
-      );
-      if (index === 0) {
-        const pill = document.createElement('span');
-        pill.className = 'promo-moments__pill';
-        pill.textContent = 'Recommended';
-        card.appendChild(pill);
-      }
-      row.appendChild(card);
-    });
-    stage.replaceChildren(row);
-  }
-
-  function renderDoubt(stage) {
+  function ensureMomentBoard(stage) {
+    if (!stage) return null;
+    const existing = stage.querySelector('.promo-moments__board');
+    if (existing) return existing;
     const board = document.createElement('div');
-    board.className = 'promo-moments__doubt';
-    const cluster = document.createElement('div');
-    cluster.className = 'promo-moments__cluster';
-    const card = momentCard(PROMO_MOMENT_PICK, 'promo-moments__card is-pick is-chosen');
-    const mark = document.createElement('p');
-    mark.className = 'promo-moments__added';
-    mark.textContent = 'Added';
-    card.appendChild(mark);
-    cluster.append(card, momentCart(1));
-    board.appendChild(cluster);
-    ['Returns?', 'Battery?', 'Will it fit?', '16 GB enough?'].forEach((text, index) => {
-      const chip = document.createElement('span');
-      chip.className = `promo-moments__chip is-orbit-${index + 1}`;
-      chip.textContent = text;
-      board.appendChild(chip);
-    });
-    stage.replaceChildren(board);
-  }
-
-  function renderExtra(stage) {
-    const board = document.createElement('div');
-    board.className = 'promo-moments__extra';
-    const bundle = document.createElement('div');
-    bundle.className = 'promo-moments__bundle';
-    const card = momentCard(PROMO_MOMENT_PICK, 'promo-moments__card is-pick is-chosen');
+    board.className = 'promo-moments__board is-pose-grid';
+    board.dataset.pose = 'grid';
+    if (prefersReducedMotion()) board.classList.add('is-reduced');
+    for (let index = 0; index < PROMO_MOMENTS_TILE_COUNT; index += 1) {
+      const column = index % PROMO_MOMENT_GRID_COLS;
+      const row = Math.floor(index / PROMO_MOMENT_GRID_COLS);
+      const role = momentSquircleRole(index);
+      const squircle = document.createElement('div');
+      squircle.className = `promo-moments__squircle is-${role}`;
+      squircle.style.setProperty('--gx', `${(column - 2) * 4.15}rem`);
+      squircle.style.setProperty('--gy', `${(row - 1.5) * 3.65}rem`);
+      const face = document.createElement('span');
+      face.className = 'promo-moments__face';
+      squircle.appendChild(face);
+      if (role === 'pick' || role === 'other') squircle.appendChild(momentBars(role === 'pick'));
+      if (role === 'pick') squircle.appendChild(momentCheck());
+      board.appendChild(squircle);
+    }
+    const accessory = document.createElement('div');
+    accessory.className = 'promo-moments__squircle is-extra';
+    const accessoryFace = document.createElement('span');
+    accessoryFace.className = 'promo-moments__face';
+    accessory.appendChild(accessoryFace);
+    board.appendChild(accessory);
+    for (let index = 0; index < PROMO_MOMENT_ORBIT_COUNT; index += 1) {
+      const disc = document.createElement('span');
+      disc.className = `promo-moments__disc is-orbit-${index + 1}`;
+      disc.textContent = '?';
+      board.appendChild(disc);
+    }
+    const burst = document.createElement('div');
+    burst.className = 'promo-moments__burst';
+    for (let index = 0; index < PROMO_MOMENT_BIT_COUNT; index += 1) {
+      const bit = document.createElement('span');
+      bit.className = 'promo-moments__bit';
+      const angle = (index / PROMO_MOMENT_BIT_COUNT) * Math.PI * 2;
+      const distance = 4.1 + (index % 3) * 0.85;
+      bit.style.setProperty('--bx', `${Math.cos(angle) * distance}rem`);
+      bit.style.setProperty('--by', `${Math.sin(angle) * distance}rem`);
+      burst.appendChild(bit);
+    }
+    board.appendChild(burst);
     const plus = document.createElement('span');
     plus.className = 'promo-moments__plus';
     plus.textContent = '+';
-    const accessory = momentCard(PROMO_MOMENT_MOUSE, 'promo-moments__card is-accessory');
-    bundle.append(card, plus, accessory);
-    const cluster = document.createElement('div');
-    cluster.className = 'promo-moments__cluster';
-    cluster.append(bundle, momentCart(1));
-    board.appendChild(cluster);
+    const outline = document.createElement('div');
+    outline.className = 'promo-moments__outline';
+    const cart = document.createElement('div');
+    cart.className = 'promo-moments__cart';
+    cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count">2</span>';
+    const fly = document.createElement('span');
+    fly.className = 'promo-moments__fly';
+    board.append(plus, outline, cart, fly);
     stage.replaceChildren(board);
+    return board;
   }
 
-  function renderSalesperson(stage) {
-    stage.replaceChildren();
+  function applyMomentPose(stage, pose, options = {}) {
+    const board = ensureMomentBoard(stage);
+    if (!board || !pose) return;
+    const host = stage.closest('[data-promo-moments]');
+    const label = host?.querySelector('[data-promo-moments-label]');
+    if (options.instant) board.classList.add('is-instant');
+    if (board.dataset.pose !== pose) {
+      PROMO_MOMENT_POSES.forEach((name) => {
+        board.classList.toggle(`is-pose-${name}`, name === pose);
+      });
+      board.dataset.pose = pose;
+    }
+    const titled = Boolean(options.title);
+    host?.classList.toggle('is-title', titled);
+    if (label) label.textContent = titled ? 'The salesperson.' : '';
+    if (options.instant) {
+      void board.offsetWidth;
+      board.classList.remove('is-instant');
+    }
   }
 
   const PROMO_MOMENT_BEATS = [
     {
-      label: 'The catalog.',
       line: '[bright, excited, a big smile] I narrow it to the right few.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CATALOG_MS,
-      collapseMs: PROMO_MOMENTS_COLLAPSE_MS,
-      render: renderCatalog,
+      holdPose: 'grid',
+      playPose: 'row',
+      endPose: 'row',
     },
     {
-      label: 'The choice.',
       line: '[upbeat, energized, sure] I recommend the one that fits, and say why.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CHOICE_MS,
-      render: renderChoice,
+      holdPose: 'row',
+      playPose: 'choice',
+      endPose: 'choice',
     },
     {
-      label: 'The doubt.',
       line: '[bright, easy, upbeat] I clear it like an expert. [punchy, grinning] Then I close.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_DOUBT_MS,
-      render: renderDoubt,
+      holdPose: 'choice',
+      playPose: 'doubt',
+      endPose: 'close',
       closeAt: PROMO_MOMENTS_CLOSE_AT,
     },
     {
-      label: 'The extra.',
       line: '[cheerful, quick, excited] I add what goes with it, at the right moment.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_EXTRA_MS,
-      render: renderExtra,
+      holdPose: 'close',
+      playPose: 'extra',
+      endPose: 'bundle',
       bundleAt: PROMO_MOMENTS_BUNDLE_AT,
     },
     {
@@ -738,7 +666,9 @@
       payoff: true,
       voMs: PROMO_MOMENTS_SALESPERSON_VO_MS,
       speakMs: PROMO_MOMENTS_SALESPERSON_MS,
-      render: renderSalesperson,
+      holdPose: 'bundle',
+      playPose: 'fly',
+      endPose: 'gone',
       wave: true,
       holdMs: PROMO_MOMENTS_HOLD_MS,
     },
@@ -1585,63 +1515,28 @@
       return this.ensureMoments()?.querySelector('[data-promo-moments-stage]') || null;
     }
 
-    syncMomentBoard(stage) {
-      const board = stage?.firstElementChild;
-      if (!board) return;
-      ['is-play', 'is-end', 'is-vapor', 'is-bundled', 'is-collapsed'].forEach((name) => {
-        board.classList.toggle(name, stage.classList.contains(name));
-      });
-    }
-
     showMoment(beat, settled) {
       const stage = this.momentStage();
-      const label = this.root.querySelector('[data-promo-moments-label]');
       const host = this.root.querySelector('[data-promo-moments]');
-      if (label) {
-        label.textContent = beat.label;
-        label.classList.toggle('is-payoff', Boolean(beat.payoff));
-      }
       if (host) host.setAttribute('aria-hidden', 'false');
       if (!stage) return;
       this.clearMomentTimers();
-      beat.render(stage);
-      stage.classList.toggle('is-end', settled);
-      stage.classList.toggle('is-collapsed', settled && typeof beat.collapseMs === 'number');
-      stage.classList.remove('is-play', 'is-vapor', 'is-bundled');
-      if (settled && typeof beat.bundleAt === 'number') {
-        stage.classList.add('is-bundled');
-        const badge = stage.querySelector('.promo-moments__badge');
-        if (badge) badge.textContent = '2';
-      }
-      this.syncMomentBoard(stage);
+      applyMomentPose(stage, settled ? beat.endPose : beat.holdPose, {
+        title: Boolean(beat.payoff && settled),
+        instant: settled,
+      });
     }
 
     playMoment(beat) {
       const stage = this.momentStage();
       if (!stage) return;
-      stage.classList.add('is-play');
-      this.syncMomentBoard(stage);
+      applyMomentPose(stage, beat.playPose, { title: Boolean(beat.payoff) });
       if (beat.wave) setOpeningAvatarAction('waving');
-      if (typeof beat.collapseMs === 'number') {
+      if (typeof beat.closeAt === 'number' || typeof beat.bundleAt === 'number') {
+        const at = beat.closeAt ?? beat.bundleAt;
         this.momentTimers.push(window.setTimeout(() => {
-          stage.classList.add('is-collapsed');
-          this.syncMomentBoard(stage);
-        }, beat.collapseMs));
-      }
-      if (typeof beat.closeAt === 'number') {
-        this.momentTimers.push(window.setTimeout(() => {
-          stage.classList.add('is-vapor');
-          tickMomentBadge(stage.querySelector('.promo-moments__badge'), 1);
-          this.syncMomentBoard(stage);
-        }, beat.speakMs * beat.closeAt));
-      }
-      if (typeof beat.bundleAt === 'number') {
-        tickMomentBadge(stage.querySelector('.promo-moments__badge'), 1);
-        this.momentTimers.push(window.setTimeout(() => {
-          stage.classList.add('is-bundled', 'is-end');
-          tickMomentBadge(stage.querySelector('.promo-moments__badge'), 2);
-          this.syncMomentBoard(stage);
-        }, beat.speakMs * beat.bundleAt));
+          applyMomentPose(stage, beat.endPose, { title: Boolean(beat.payoff) });
+        }, beat.speakMs * at));
       }
     }
 
@@ -1662,9 +1557,7 @@
           await waitMs(beat.speakMs);
         } else {
           await playClerkLine(beat.line, beat.speakMs, () => this.playMoment(beat));
-          const stage = this.momentStage();
-          stage?.classList.add('is-end');
-          this.syncMomentBoard(stage);
+          applyMomentPose(this.momentStage(), beat.endPose, { title: Boolean(beat.payoff) });
         }
         if (beat.holdMs) await waitMs(beat.holdMs);
       }
@@ -2158,9 +2051,7 @@
           root.classList.add('is-moments');
           setOpeningAvatarAction('idle_neutral');
           this.showMoment(PROMO_MOMENT_BEATS[2], false);
-          const stage = this.momentStage();
-          stage?.classList.add('is-play');
-          this.syncMomentBoard(stage);
+          applyMomentPose(this.momentStage(), 'doubt', { instant: true });
           return 180;
         },
         '14e-moments-extra': () => {
@@ -2168,9 +2059,6 @@
           root.classList.add('is-moments');
           setOpeningAvatarAction('idle_neutral');
           this.showMoment(PROMO_MOMENT_BEATS[3], true);
-          this.momentStage()?.classList.add('is-bundled');
-          const badge = this.momentStage()?.querySelector('.promo-moments__badge');
-          if (badge) badge.textContent = '2';
           return 180;
         },
         '14f-moments-salesperson': () => {
