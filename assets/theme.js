@@ -1104,17 +1104,22 @@
       });
     }
 
+    syncWheelPerspective(index) {
+      const track = this.carouselTrack;
+      const view = track?.parentElement;
+      const focusIndex = Math.max(0, Math.round(index));
+      const focus = track?.children[focusIndex];
+      if (!view || !focus) return;
+      const originX = focus.offsetLeft - this.carouselOffset(focusIndex) + focus.offsetWidth / 2;
+      view.style.perspectiveOrigin = `${originX}px 46%`;
+    }
+
     placeCarousel(index, snap) {
       const track = this.carouselTrack;
       if (!track) return;
       if (snap) track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(index)}px, 0, 0)`;
-      const view = track.parentElement;
-      const focus = track.children[Math.round(index)] || track.children[0];
-      if (view && focus) {
-        const originX = focus.offsetLeft - this.carouselOffset(index) + focus.offsetWidth / 2;
-        view.style.perspectiveOrigin = `${originX}px 46%`;
-      }
+      this.syncWheelPerspective(index);
       this.applyWheel(index);
       if (snap) {
         track.getBoundingClientRect();
@@ -1196,6 +1201,7 @@
       this.stopGlide();
       track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(0)}px, 0, 0)`;
+      this.syncWheelPerspective(0);
       this.applyWheel(0);
       this.setActiveSlide(0, land <= 0);
       const first = this.stores[0];
@@ -1228,6 +1234,7 @@
         const offset = this.carouselOffset(base)
           + (this.carouselOffset(next) - this.carouselOffset(base)) * frac;
         track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+        this.syncWheelPerspective(index);
         this.applyWheel(index);
         const centered = Math.round(index);
         if (centered > arrived) {
