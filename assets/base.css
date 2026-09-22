@@ -850,7 +850,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__slide {
   position: relative;
   flex: 0 0 min(36rem, 64vw);
-  margin: 0;
+  margin: 0 -2.5rem 0 0;
   overflow: visible;
   background: none;
   opacity: var(--promo-wheel-fade, 1);

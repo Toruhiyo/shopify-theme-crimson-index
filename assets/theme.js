@@ -998,8 +998,10 @@
       const slide = track?.children[index];
       const view = track?.parentElement;
       if (!track || !slide || !view) return 0;
-      const lane = Math.max(slide.offsetWidth, view.clientWidth - PROMO_WHEEL_CLERK_LANE_PX);
-      return slide.offsetLeft - (lane - slide.offsetWidth) / 2;
+      const carouselLeft = view.getBoundingClientRect().left;
+      const lane = Math.max(slide.offsetWidth, window.innerWidth - PROMO_WHEEL_CLERK_LANE_PX);
+      const targetLeft = (lane - slide.offsetWidth) / 2;
+      return slide.offsetLeft - (targetLeft - carouselLeft);
     }
 
     wheelTransform(distance, shift) {
@@ -1028,7 +1030,7 @@
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(30 - Math.round(abs * 5));
         let fade = 1;
-        if (abs > 1.15) fade = Math.max(0, 1 - (abs - 1.15) / 0.9);
+        if (abs > 1.15) fade = Math.max(0, 1 - (abs - 1.15) / 0.7);
         slide.style.setProperty('--promo-wheel-fade', String(fade));
       });
     }
