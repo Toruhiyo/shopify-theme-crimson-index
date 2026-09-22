@@ -588,6 +588,13 @@
     return glyph;
   }
 
+  function momentKept() {
+    const kept = document.createElement('span');
+    kept.className = 'promo-moments__kept';
+    kept.appendChild(momentMark('yes'));
+    return kept;
+  }
+
   function momentMark(kind) {
     const mark = document.createElement('span');
     mark.className = `promo-moments__mark is-${kind}`;
@@ -635,12 +642,14 @@
       card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.appendChild(momentGlyph(kind));
+      if (role === 'pick') card.appendChild(momentKept());
       if (role === 'pick' || role === 'other' || role === 'go') card.appendChild(momentSpecs(role));
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-hexagon is-extra';
     accessory.appendChild(momentGlyph('hexagon'));
+    accessory.appendChild(momentKept());
     board.appendChild(accessory);
     const orbits = [
       ['1', '11.2rem', '-0.4s'],
@@ -1260,9 +1269,6 @@
       window.addEventListener('resize', this.boundDock);
       this.armPark();
       window.setTimeout(() => {
-        document.documentElement.classList.add('is-promo-clerk');
-      }, PROMO_PITCH_LOGO_HOLD_MS);
-      window.setTimeout(() => {
         this.root.classList.add('is-logo-leaving');
         window.setTimeout(() => this.playPitchLine(), PROMO_PITCH_LOGO_OUT_MS);
       }, PROMO_PITCH_LOGO_HOLD_MS);
@@ -1621,7 +1627,7 @@
         const cart = document.createElement('div');
         cart.className = 'promo-moments__cart';
         cart.setAttribute('aria-hidden', 'true');
-        cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
+        cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__cart-piece is-main" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2"/></svg></span><span class="promo-moments__cart-piece is-addon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/></svg></span><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
         bar.append(mark, cart);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
@@ -1654,7 +1660,16 @@
         festCheck.className = 'promo-moments__fest-check';
         festCheck.appendChild(momentMark('yes'));
         fest.append(orb, festCheck);
-        host.querySelector('.promo-opening__store')?.appendChild(fest);
+        const cartForFest = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
+        (cartForFest || host.querySelector('.promo-opening__store'))?.appendChild(fest);
+      }
+      const headerCartForFest = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
+      const festNode = host.querySelector('.promo-moments__fest');
+      if (headerCartForFest && festNode && festNode.parentElement !== headerCartForFest) {
+        headerCartForFest.appendChild(festNode);
+      }
+      if (headerCartForFest && !headerCartForFest.querySelector('.promo-moments__cart-piece')) {
+        headerCartForFest.insertAdjacentHTML('beforeend', '<span class="promo-moments__cart-piece is-main" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2"/></svg></span><span class="promo-moments__cart-piece is-addon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19.4 12 15.7 18.4 8.3 18.4 4.6 12 8.3 5.6 15.7 5.6z"/></svg></span>');
       }
       const storeMark = host.querySelector('.promo-opening__store-mark');
       if (storeMark && !storeMark.querySelector('svg')) {
@@ -2151,7 +2166,6 @@
         },
         '04-logo-docked': () => {
           enterPitch();
-          html.classList.remove('is-promo-clerk');
           root.classList.remove('is-logo-leaving');
           if (logo) {
             logo.style.opacity = '1';

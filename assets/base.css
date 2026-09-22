@@ -705,7 +705,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__store-bar {
   position: relative;
-  z-index: 2;
+  z-index: 4;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -736,8 +737,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   pointer-events: none;
   opacity: 1;
   transition: opacity 420ms var(--promo-spring, cubic-bezier(0.22, 1.35, 0.36, 1));
-  -webkit-mask-image: radial-gradient(ellipse at 50% 58%, #000 28%, transparent 78%);
-  mask-image: radial-gradient(ellipse at 50% 58%, #000 28%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 74%);
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 74%);
 }
 
 .promo-opening__moments.is-vignette-gone .promo-opening__moments-field {
@@ -751,46 +752,47 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   will-change: transform;
 }
 
+.promo-opening__moments-blob.is-rose,
+.promo-opening__moments-blob.is-orange,
+.promo-opening__moments-blob.is-blue {
+  left: 50%;
+  top: 50%;
+}
+
 .promo-opening__moments-blob.is-rose {
-  width: 22rem;
-  height: 18rem;
-  left: 6%;
-  top: 16%;
-  background: rgba(255, 200, 180, 0.18);
+  width: 16rem;
+  height: 14rem;
+  background: rgba(255, 200, 180, 0.16);
   animation: promo-moments-drift-a 22s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
 }
 
 .promo-opening__moments-blob.is-orange {
-  width: 20rem;
-  height: 20rem;
-  right: 2%;
-  top: 26%;
-  background: rgba(249, 163, 83, 0.28);
+  width: 24rem;
+  height: 24rem;
+  background: rgba(249, 163, 83, 0.3);
   animation: promo-moments-drift-b 26s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
 }
 
 .promo-opening__moments-blob.is-blue {
-  width: 18rem;
-  height: 16rem;
-  left: 24%;
-  bottom: 4%;
-  background: rgba(200, 210, 230, 0.25);
+  width: 14rem;
+  height: 12rem;
+  background: rgba(200, 210, 230, 0.2);
   animation: promo-moments-drift-c 18s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
 }
 
 @keyframes promo-moments-drift-a {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(10%, -8%, 0) scale(1.08); }
+  from { transform: translate(-62%, -58%) scale(1); }
+  to { transform: translate(-40%, -70%) scale(1.06); }
 }
 
 @keyframes promo-moments-drift-b {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(-12%, 10%, 0) scale(1.12); }
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-46%, -54%) scale(1.06); }
 }
 
 @keyframes promo-moments-drift-c {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(8%, -12%, 0) scale(0.94); }
+  from { transform: translate(-38%, -36%) scale(1); }
+  to { transform: translate(-52%, -28%) scale(0.96); }
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__line {
@@ -910,8 +912,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 38%;
   display: grid;
   place-items: center;
-  color: #c5ccd6;
-  opacity: 0.7;
+  color: #e4e9ef;
+  opacity: 1;
   transition:
     transform 380ms var(--promo-spring),
     opacity 380ms var(--promo-spring),
@@ -1578,6 +1580,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: auto;
   top: auto;
   z-index: 2;
+  overflow: visible;
   display: flex;
   align-items: center;
   gap: 0.28rem;
@@ -1614,21 +1617,98 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__cart-burst {
-  animation: promo-moments-cart-burst 780ms cubic-bezier(0.22, 1, 0.36, 1) 180ms forwards;
+  animation: promo-moments-cart-burst 1200ms cubic-bezier(0.22, 1, 0.36, 1) 280ms forwards;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__cart-burst {
-  animation: promo-moments-cart-burst-soft 640ms cubic-bezier(0.22, 1, 0.36, 1) 80ms forwards;
+  animation: promo-moments-cart-burst-soft 980ms cubic-bezier(0.22, 1, 0.36, 1) 160ms forwards;
+}
+
+.promo-moments__cart-piece {
+  width: 13px;
+  height: 13px;
+  color: #f9a353;
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+.promo-moments__cart-piece svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  stroke: none;
+}
+
+.is-pose-close .promo-moments__cart-piece.is-main,
+.is-pose-extra .promo-moments__cart-piece.is-main,
+.is-pose-bundle .promo-moments__cart-piece.is-main,
+.is-pose-bundle .promo-moments__cart-piece.is-addon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.is-pose-close .promo-opening__store-bar .promo-moments__cart,
+.is-pose-extra .promo-opening__store-bar .promo-moments__cart,
+.is-pose-bundle .promo-opening__store-bar .promo-moments__cart {
+  color: #f9a353;
+  opacity: 1;
+  transform: scale(1.16);
+  filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5));
+}
+
+.promo-moments__kept {
+  position: absolute;
+  right: 0.7rem;
+  top: 0.7rem;
+  z-index: 4;
+  width: 1.15rem;
+  height: 1.15rem;
+  color: #f9a353;
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+}
+
+.promo-moments__kept .promo-moments__mark {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transform: none;
+}
+
+.is-pose-close .promo-moments__card.is-pick .promo-moments__kept,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__kept,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__kept,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__kept {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.is-pose-close .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph {
+  color: #f9a353;
+  opacity: 1;
+}
+
+.is-pose-close .promo-moments__card.is-pick::after,
+.is-pose-extra .promo-moments__card.is-pick::after,
+.is-pose-bundle .promo-moments__card.is-pick::after,
+.is-pose-bundle .promo-moments__card.is-extra::after {
+  opacity: 1;
 }
 
 .promo-moments__fest {
   position: absolute;
   left: 0;
-  right: 0;
-  top: 88px;
-  bottom: 0;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
   z-index: 6;
-  overflow: hidden;
+  overflow: visible;
   pointer-events: none;
   opacity: 0;
 }
@@ -1640,17 +1720,21 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__wash {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 54%, rgba(249, 163, 83, 0.62), rgba(249, 163, 83, 0.08) 46%, transparent 72%);
+  left: 50%;
+  top: 50%;
+  width: 7rem;
+  height: 7rem;
+  margin: -3.5rem 0 0 -3.5rem;
+  background: radial-gradient(circle, rgba(249, 163, 83, 0.75), rgba(249, 163, 83, 0.08) 58%, transparent 72%);
   opacity: 0;
 }
 
 .promo-moments__fest-ring {
   position: absolute;
   left: 50%;
-  top: 54%;
-  width: 26%;
-  aspect-ratio: 1;
+  top: 50%;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 3px solid rgba(249, 163, 83, 0.95);
   box-shadow: 0 0 28px rgba(249, 163, 83, 0.55);
@@ -1660,10 +1744,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__to-cart {
   position: absolute;
   left: 50%;
-  top: 54%;
-  width: 1.6rem;
-  height: 1.6rem;
-  margin: -0.8rem 0 0 -0.8rem;
+  top: 50%;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: -0.675rem 0 0 -0.675rem;
   border-radius: 50%;
   background: #f9a353;
   box-shadow: 0 0 28px #f9a353, 0 0 64px rgba(249, 163, 83, 0.8);
@@ -1673,10 +1757,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__fest-check {
   position: absolute;
   left: 50%;
-  top: 54%;
-  width: 8.5rem;
-  height: 8.5rem;
-  margin: -4.25rem 0 0 -4.25rem;
+  top: 50%;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: -1.2rem 0 0 -1.2rem;
   color: #f9a353;
   filter: drop-shadow(0 0 22px rgba(249, 163, 83, 0.95));
   opacity: 0;
@@ -1694,11 +1778,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__wash {
-  animation: promo-moments-wash 980ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-moments-wash 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring {
-  animation: promo-moments-fest-ring 920ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-moments-fest-ring 1360ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .is-fr-2 { animation-delay: 90ms; }
@@ -1706,23 +1790,23 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-close:not(.is-settled):not(.is-reduced) .is-fr-4 { animation-delay: 270ms; }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__to-cart {
-  animation: promo-moments-to-cart 720ms var(--promo-spring) 160ms forwards;
+  animation: promo-moments-to-cart 980ms var(--promo-spring) 80ms forwards;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-check {
-  animation: promo-moments-fest-check 860ms var(--promo-spring) 80ms forwards;
+  animation: promo-moments-fest-check 1100ms var(--promo-spring) 420ms forwards;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__cart-piece.is-main {
+  animation: promo-moments-piece-in 520ms var(--promo-spring) 860ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__wash {
-  animation: promo-moments-wash-soft 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-moments-wash-soft 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring {
-  animation: promo-moments-fest-ring-soft 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest {
-  transform-origin: 64% 58%;
+  animation: promo-moments-fest-ring-soft 1080ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .is-fr-3,
@@ -1733,11 +1817,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .is-fr-2 { animation-delay: 80ms; }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__to-cart {
-  animation: promo-moments-to-cart-soft 640ms var(--promo-spring) 80ms forwards;
+  animation: promo-moments-to-cart-soft 860ms var(--promo-spring) 40ms forwards;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-check {
-  animation: promo-moments-fest-check-soft 700ms var(--promo-spring) forwards;
+  animation: promo-moments-fest-check-soft 980ms var(--promo-spring) 280ms forwards;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__cart-piece.is-addon {
+  animation: promo-moments-piece-in 480ms var(--promo-spring) 700ms both;
 }
 
 .promo-moments__count {
@@ -1764,11 +1852,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate 560ms var(--promo-spring) 220ms both;
+  animation: promo-moments-cart-celebrate 1100ms var(--promo-spring) 240ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate-soft 420ms var(--promo-spring) 120ms both;
+  animation: promo-moments-cart-celebrate-soft 960ms var(--promo-spring) 160ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
@@ -1915,71 +2003,75 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   100% { opacity: 1; transform: scale(1); }
 }
 
+@keyframes promo-moments-piece-in {
+  0% { opacity: 0; transform: scale(0.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 @keyframes promo-moments-cart-burst {
-  0% { opacity: 1; transform: scale(0.3); }
-  100% { opacity: 0; transform: scale(24); }
+  0% { opacity: 1; transform: scale(0.4); }
+  100% { opacity: 0; transform: scale(16); }
 }
 
 @keyframes promo-moments-cart-burst-soft {
-  0% { opacity: 0.95; transform: scale(0.35); }
-  100% { opacity: 0; transform: scale(14); }
+  0% { opacity: 0.9; transform: scale(0.4); }
+  100% { opacity: 0; transform: scale(10); }
 }
 
 @keyframes promo-moments-wash {
-  0% { opacity: 0; }
-  16% { opacity: 1; }
-  100% { opacity: 0; }
+  0% { opacity: 0; transform: scale(0.35); }
+  24% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.65); }
 }
 
 @keyframes promo-moments-wash-soft {
-  0% { opacity: 0; }
-  22% { opacity: 0.72; }
-  100% { opacity: 0; }
+  0% { opacity: 0; transform: scale(0.4); }
+  28% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.4); }
 }
 
 @keyframes promo-moments-fest-ring {
-  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.2); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(4.6); }
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.35); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(8); }
 }
 
 @keyframes promo-moments-fest-ring-soft {
-  0% { opacity: 0.95; transform: translate(-50%, -50%) scale(0.25); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.7); }
+  0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.35); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(5.4); }
 }
 
 @keyframes promo-moments-to-cart {
-  0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.5); }
-  100% { opacity: 0; transform: translate3d(16rem, -11rem, 0) scale(0.15); }
+  0% { opacity: 1; transform: translate(-16rem, 8.5rem) scale(1.25); }
+  100% { opacity: 0; transform: translate(0, 0) scale(0.2); }
 }
 
 @keyframes promo-moments-to-cart-soft {
-  0% { opacity: 1; transform: translate3d(6rem, 0, 0) scale(1.1); }
-  100% { opacity: 0; transform: translate3d(16rem, -11rem, 0) scale(0.18); }
+  0% { opacity: 1; transform: translate(-8rem, 8.5rem) scale(1.05); }
+  100% { opacity: 0; transform: translate(0, 0) scale(0.22); }
 }
 
 @keyframes promo-moments-fest-check {
-  0% { opacity: 0; transform: scale(0.15) rotate(-16deg); }
-  40% { opacity: 1; transform: scale(1.2) rotate(0deg); }
-  100% { opacity: 0; transform: scale(1.05); }
+  0% { opacity: 0; transform: scale(0.2); }
+  42% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1); }
 }
 
 @keyframes promo-moments-fest-check-soft {
-  0% { opacity: 0; transform: translate3d(7rem, 0, 0) scale(0.2); }
-  42% { opacity: 1; transform: translate3d(7rem, 0, 0) scale(0.72); }
-  100% { opacity: 0; transform: translate3d(7rem, 0, 0) scale(0.6); }
+  0% { opacity: 0; transform: scale(0.2); }
+  44% { opacity: 1; transform: scale(0.95); }
+  100% { opacity: 0; transform: scale(0.85); }
 }
 
 @keyframes promo-moments-cart-celebrate {
   0% { transform: scale(1); color: #7c8593; filter: none; }
-  26% { transform: scale(2.45); color: #f9a353; filter: drop-shadow(0 0 28px rgba(249, 163, 83, 1)); }
-  55% { transform: scale(1.55); color: #f9a353; filter: drop-shadow(0 0 16px rgba(249, 163, 83, 0.7)); }
-  100% { transform: scale(1); color: #7c8593; filter: none; }
+  34% { transform: scale(2.1); color: #f9a353; filter: drop-shadow(0 0 22px rgba(249, 163, 83, 0.95)); }
+  100% { transform: scale(1.16); color: #f9a353; filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5)); }
 }
 
 @keyframes promo-moments-cart-celebrate-soft {
-  0% { transform: scale(1); color: #7c8593; filter: none; }
-  36% { transform: scale(1.85); color: #f9a353; filter: drop-shadow(0 0 18px rgba(249, 163, 83, 0.9)); }
-  100% { transform: scale(1); color: #7c8593; filter: none; }
+  0% { transform: scale(1.16); color: #f9a353; filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5)); }
+  40% { transform: scale(1.82); color: #f9a353; filter: drop-shadow(0 0 20px rgba(249, 163, 83, 0.9)); }
+  100% { transform: scale(1.16); color: #f9a353; filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5)); }
 }
 
 @keyframes promo-moments-ask-out {
@@ -2774,21 +2866,6 @@ html.is-promo-opening.is-promo-pitch #bizmis-avatar-embed.is-promo-widget-parked
 html.is-promo-opening.is-promo-pitch .bizmis-viewport-portal-root {
   visibility: hidden !important;
   pointer-events: none !important;
-}
-
-html.is-promo-opening.is-promo-pitch:not(.is-promo-clerk) #bizmis-avatar-embed.is-promo-widget-parked,
-html.is-promo-opening.is-promo-pitch:not(.is-promo-clerk) #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container,
-html.is-promo-opening.is-promo-pitch:not(.is-promo-clerk) .bizmis-avatar-widget-root.is-promo-widget-parked {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-html.is-promo-opening.is-promo-pitch.is-promo-clerk #bizmis-avatar-embed.is-promo-widget-parked,
-html.is-promo-opening.is-promo-pitch.is-promo-clerk #bizmis-avatar-embed.is-promo-widget-parked .avatar-widget-container {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 html.is-promo-opening.is-promo-depart #bizmis-avatar-embed,
