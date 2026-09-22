@@ -1072,6 +1072,30 @@ html.is-promo-ready .promo-opening__boot {
   box-sizing: border-box;
 }
 
+.promo-opening__clerk-glow {
+  position: absolute;
+  z-index: 0;
+  left: 56%;
+  top: 46%;
+  width: 64rem;
+  height: 64rem;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 58%, transparent) 0%,
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 22%, transparent) 42%,
+    transparent 72%
+  );
+  filter: blur(42px);
+  opacity: 0;
+}
+
+.promo-opening.is-see-row .promo-opening__clerk-glow {
+  opacity: 1;
+}
+
 .promo-opening__stains {
   position: absolute;
   left: 46%;
@@ -1366,6 +1390,7 @@ html.is-promo-cover .promo-cover,
   .promo-opening__carousel-track,
   .promo-opening__slide,
   .promo-opening__widget,
+  .promo-opening__clerk-glow,
   .promo-cover {
     transition: none !important;
   }

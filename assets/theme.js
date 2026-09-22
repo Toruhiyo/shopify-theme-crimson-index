@@ -465,6 +465,23 @@
     return distance;
   }
 
+  function mixAccent(from, to, amount) {
+    const parse = (hex) => {
+      const raw = String(hex || '').replace('#', '');
+      if (!/^[0-9a-fA-F]{6}$/.test(raw)) return [249, 163, 83];
+      return [
+        parseInt(raw.slice(0, 2), 16),
+        parseInt(raw.slice(2, 4), 16),
+        parseInt(raw.slice(4, 6), 16),
+      ];
+    };
+    const start = parse(from);
+    const end = parse(to);
+    const blend = Math.min(1, Math.max(0, amount));
+    const channel = (index) => Math.round(start[index] + (end[index] - start[index]) * blend);
+    return `rgb(${channel(0)}, ${channel(1)}, ${channel(2)})`;
+  }
+
   function storeInk(accent) {
     const hex = String(accent || '').replace('#', '');
     if (!/^[0-9a-fA-F]{6}$/.test(hex)) return accent || '#1d1d1f';
@@ -677,6 +694,7 @@
       this.parkedStyle = null;
       this.parkTimer = 0;
       this.glideFrame = 0;
+      this.clerkGlow = this.ensureClerkGlow();
       this.boundDock = () => this.fitOpeningLayout();
       this.toggle?.addEventListener('click', () => this.flip());
       promoWidget.preloadStoreStamps(this.stores);
@@ -1102,6 +1120,37 @@
         slide.style.setProperty('--promo-wheel-fade', String(wheelFade(abs)));
         slide.style.setProperty('--promo-wheel-focus', wheelFocus(abs).toFixed(4));
       });
+      this.paintClerkGlow(activeIndex);
+    }
+
+    ensureClerkGlow() {
+      const widget = this.root.querySelector('[data-promo-widget]');
+      if (!widget) return null;
+      const existing = widget.querySelector('[data-promo-clerk-glow]');
+      if (existing) return existing;
+      const glow = document.createElement('div');
+      glow.className = 'promo-opening__clerk-glow';
+      glow.setAttribute('data-promo-clerk-glow', '');
+      glow.setAttribute('aria-hidden', 'true');
+      widget.prepend(glow);
+      return glow;
+    }
+
+    paintClerkGlow(activeIndex) {
+      const glow = this.clerkGlow;
+      const stores = this.stores || [];
+      if (!glow || !stores.length) return;
+      const count = stores.length;
+      const max = count - 1;
+      const base = Math.max(0, Math.min(max, Math.floor(activeIndex)));
+      const next = Math.min(max, base + 1);
+      const leftFocus = wheelFocus(Math.abs(loopDistance(base, activeIndex, count)));
+      const rightFocus = next === base
+        ? 0
+        : wheelFocus(Math.abs(loopDistance(next, activeIndex, count)));
+      const total = leftFocus + rightFocus;
+      const amount = total > 0 ? rightFocus / total : 0;
+      glow.style.setProperty('--promo-clerk-glow', mixAccent(stores[base].accent, stores[next].accent, amount));
     }
 
     syncWheelPerspective(index) {
