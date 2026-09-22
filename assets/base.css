@@ -1077,18 +1077,18 @@ html.is-promo-ready .promo-opening__boot {
   z-index: 0;
   left: 56%;
   top: 46%;
-  width: 64rem;
-  height: 64rem;
+  width: 78rem;
+  height: 78rem;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   pointer-events: none;
   background: radial-gradient(
     circle,
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 58%, transparent) 0%,
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 22%, transparent) 42%,
-    transparent 72%
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 26%, transparent) 0%,
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 10%, transparent) 48%,
+    transparent 78%
   );
-  filter: blur(42px);
+  filter: blur(88px);
   opacity: 0;
 }
 
