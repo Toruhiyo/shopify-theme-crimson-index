@@ -606,6 +606,28 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transition: none;
 }
 
+.promo-opening.is-moments:not(.is-see) .promo-opening__stage {
+  width: min(1480px, 100%);
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__moments {
+  grid-column: 1 / -1;
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__store {
+  width: min(96vw, 90rem);
+  max-height: 84vh;
+  aspect-ratio: 16 / 9;
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__widget {
+  right: 5.5rem;
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-moments__board {
+  transform: translate(calc(-50% - 7rem), -50%) scale(0.92);
+}
+
 .promo-opening.is-see-row #bizmis-avatar-embed div {
   transition: none !important;
 }
@@ -1253,7 +1275,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
-  animation: promo-moments-celebrate-soft 520ms var(--promo-spring);
+  animation: promo-moments-celebrate-soft 960ms var(--promo-spring) 80ms;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__glyph {
+  animation: promo-moments-item-pop 960ms var(--promo-spring) 80ms;
 }
 
 .promo-moments__celebrate,
@@ -1488,7 +1514,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
-  animation: promo-moments-celebrate 640ms var(--promo-spring) 180ms;
+  animation: promo-moments-celebrate 1100ms var(--promo-spring) 160ms;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__glyph {
+  animation: promo-moments-item-pop 1100ms var(--promo-spring) 160ms;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
@@ -2009,8 +2039,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-celebrate {
   0% { transform: translate3d(0, -0.5rem, 0) scale(2.462); }
-  36% { transform: translate3d(0, -1.15rem, 0) scale(2.95); }
+  42% { transform: translate3d(0, -1.6rem, 0) scale(3.55); }
   100% { transform: translate3d(0, -0.5rem, 0) scale(2.462); }
+}
+
+@keyframes promo-moments-item-pop {
+  0% { transform: scale(1); }
+  42% { transform: scale(1.45); }
+  100% { transform: scale(1); }
 }
 
 @keyframes promo-moments-card-in {
@@ -2020,7 +2056,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-celebrate-soft {
   0% { transform: translate3d(8.6rem, 0, 0) scale(1.55); }
-  40% { transform: translate3d(8.6rem, -0.2rem, 0) scale(1.68); }
+  42% { transform: translate3d(8.6rem, -0.8rem, 0) scale(2.55); }
   100% { transform: translate3d(8.6rem, 0, 0) scale(1.55); }
 }
 
