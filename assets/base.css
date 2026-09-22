@@ -2490,7 +2490,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-see-row .promo-opening__stores {
-  width: min(65.25rem, calc(100vw - 20rem));
+  width: min(60.5rem, calc(100vw - 22rem));
   max-width: none;
   max-height: 52rem;
   overflow: hidden;
