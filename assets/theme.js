@@ -670,6 +670,7 @@
       board.dataset.pose = pose;
     }
     host?.classList.remove('is-title');
+    host?.classList.toggle('is-vignette-gone', pose === 'fly' || pose === 'gone');
     if (label) label.textContent = '';
     if (options.instant) {
       void board.offsetWidth;
