@@ -680,7 +680,7 @@
 
   const PROMO_MOMENT_BEATS = [
     {
-      line: '[bright, excited, a big smile] I narrow it to the right few.',
+      line: '[fast pace] [bright, excited, a big smile] I narrow it to the right few.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CATALOG_MS,
       holdPose: 'grid',
@@ -688,7 +688,7 @@
       endPose: 'row',
     },
     {
-      line: '[upbeat, energized, sure] I recommend the one that fits, and say why.',
+      line: '[fast pace] [upbeat, energized, sure] I recommend the one that fits, and say why.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CHOICE_MS,
       holdPose: 'row',
@@ -696,7 +696,7 @@
       endPose: 'choice',
     },
     {
-      line: '[bright, easy, upbeat] I clear it like an expert. [punchy, grinning] Then I close.',
+      line: '[fast pace] [bright, easy, upbeat] I clear it like an expert. [fast pace] [punchy, grinning] Then I close.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_DOUBT_MS,
       holdPose: 'choice',
@@ -705,7 +705,7 @@
       closeAt: PROMO_MOMENTS_CLOSE_AT,
     },
     {
-      line: '[cheerful, quick, excited] I add what goes with it, at the right moment.',
+      line: '[fast pace] [cheerful, quick, excited] I add what goes with it, at the right moment.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_EXTRA_MS,
       holdPose: 'close',
@@ -714,7 +714,7 @@
       bundleAt: PROMO_MOMENTS_BUNDLE_AT,
     },
     {
-      line: "[proud, electric, a huge smile] That's me.",
+      line: "[fast pace] [proud, electric, a huge smile] That's me.",
       voMs: PROMO_MOMENTS_SALESPERSON_VO_MS,
       speakMs: PROMO_MOMENTS_SALESPERSON_MS,
       holdPose: 'bundle',
