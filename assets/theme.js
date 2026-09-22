@@ -156,7 +156,7 @@
   const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
-  const PROMO_CLERK_ROW_MS = 1100;
+  const PROMO_CLERK_ROW_MS = 1800;
   const PROMO_SEE_LAND_HOLD_MS = 900;
   const PROMO_SEE_GLIDE_START_MS = 480;
   const PROMO_SEE_GLIDE_END_MS = 1600;
@@ -930,10 +930,14 @@
 
     settleClerkRow() {
       const widget = this.root.querySelector('[data-promo-widget]');
-      if (!widget) return;
-      widget.style.transition = '';
-      widget.style.transform = '';
-      widget.style.transformOrigin = '';
+      const animation = this.clerkMove;
+      this.clerkMove = null;
+      if (widget) {
+        widget.style.transition = '';
+        widget.style.transform = '';
+        widget.style.transformOrigin = '';
+      }
+      if (animation) animation.cancel();
     }
 
     glideClerkIntoRow() {
@@ -957,15 +961,28 @@
         && Math.abs(sy - 1) < 0.01;
       if (still) return;
 
+      const from = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy}) translateY(-50%)`;
+      const to = 'translate(0px, 0px) scale(1, 1) translateY(-50%)';
       widget.style.transition = 'none';
       widget.style.transformOrigin = '0 50%';
-      widget.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy}) translateY(-50%)`;
-      widget.getBoundingClientRect();
-      window.requestAnimationFrame(() => {
-        widget.style.transition = `transform ${PROMO_CLERK_ROW_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`;
-        widget.style.transform = 'translate(0px, 0px) scale(1, 1) translateY(-50%)';
-      });
-      window.setTimeout(() => this.settleClerkRow(), PROMO_CLERK_ROW_MS + 80);
+      widget.style.transform = from;
+      this.clerkMove?.cancel();
+      const animation = widget.animate(
+        [
+          { transform: from, transformOrigin: '0 50%' },
+          { transform: to, transformOrigin: '0 50%' },
+        ],
+        {
+          duration: PROMO_CLERK_ROW_MS,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          fill: 'both',
+        },
+      );
+      this.clerkMove = animation;
+      animation.finished.then(() => {
+        if (this.clerkMove !== animation) return;
+        this.settleClerkRow();
+      }).catch(() => {});
     }
 
     resetSee() {
