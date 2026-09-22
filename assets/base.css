@@ -303,8 +303,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   top: 50%;
   left: 50%;
   z-index: 3;
-  width: min(420px, 72vw);
-  height: calc(min(420px, 72vw) * 640 / 1948);
+  width: min(590px, 72vw);
+  height: calc(min(590px, 72vw) * 640 / 1948);
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -314,6 +314,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     left 720ms cubic-bezier(0.22, 1, 0.36, 1),
     width 720ms cubic-bezier(0.22, 1, 0.36, 1),
     height 720ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.promo-opening__clock {
+  position: fixed;
+  left: 16px;
+  bottom: 14px;
+  z-index: 100001;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(47, 54, 64, 0.42);
+  pointer-events: none;
 }
 
 .promo-opening.is-holding .promo-opening__logo {
@@ -331,8 +345,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening.is-pitch.is-logo-docked .promo-opening__logo {
   top: var(--promo-logo-top, 50%);
   left: var(--promo-logo-left, 50%);
-  width: var(--promo-logo-w, min(420px, 72vw));
-  height: var(--promo-logo-h, calc(min(420px, 72vw) * 640 / 1948));
+  width: var(--promo-logo-w, min(590px, 72vw));
+  height: var(--promo-logo-h, calc(min(590px, 72vw) * 640 / 1948));
 }
 
 .promo-opening.is-logo-leaving .promo-opening__logo {
@@ -1671,6 +1685,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   color: #7c8593;
   opacity: 0.7;
   transform: none;
+  transform-origin: right center;
 }
 
 .promo-opening__store-bar .promo-moments__cart svg {
@@ -1928,11 +1943,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate 1100ms var(--promo-spring) 240ms both;
+  animation: promo-moments-cart-celebrate 1600ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate-soft 960ms var(--promo-spring) 160ms both;
+  animation: promo-moments-cart-celebrate-soft 1500ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
@@ -2146,13 +2161,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-cart-celebrate {
   0% { transform: scale(1); color: #7c8593; filter: none; }
-  34% { transform: scale(2.1); color: #f9a353; filter: drop-shadow(0 0 22px rgba(249, 163, 83, 0.95)); }
+  16% { transform: scale(3.4); color: #f9a353; filter: drop-shadow(0 0 28px rgba(249, 163, 83, 0.95)); }
+  62% { transform: scale(3.4); color: #f9a353; filter: drop-shadow(0 0 28px rgba(249, 163, 83, 0.95)); }
   100% { transform: scale(1.16); color: #f9a353; filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5)); }
 }
 
 @keyframes promo-moments-cart-celebrate-soft {
   0% { transform: scale(1.16); color: #f9a353; filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5)); }
-  40% { transform: scale(1.82); color: #f9a353; filter: drop-shadow(0 0 20px rgba(249, 163, 83, 0.9)); }
+  18% { transform: scale(3.1); color: #f9a353; filter: drop-shadow(0 0 26px rgba(249, 163, 83, 0.95)); }
+  58% { transform: scale(3.1); color: #f9a353; filter: drop-shadow(0 0 26px rgba(249, 163, 83, 0.95)); }
   100% { transform: scale(1.16); color: #f9a353; filter: drop-shadow(0 0 12px rgba(249, 163, 83, 0.5)); }
 }
 

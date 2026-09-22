@@ -125,6 +125,7 @@
 
   const PROMO_FLIP_KNOB_MS = 200;
   const PROMO_OPENING_REVEAL_STORE = false;
+  const PROMO_OPENING_CLOCK = true;
   const PROMO_AGENTIC_MOVE_MS = 900;
   const PROMO_AGENTIC_GROW_MS = 1800;
   const PROMO_AGENTIC_SCALE = 10;
@@ -445,6 +446,12 @@
     };
     run();
   }
+
+  window.addEventListener('avatar-animation', (event) => {
+    const detail = event.detail;
+    if (!detail || detail.name !== 'waving') return;
+    event.stopImmediatePropagation();
+  }, true);
 
   function momentsEnabled() {
     return promoSearchParams().get('moments') !== '0';
@@ -1123,6 +1130,26 @@
       run();
     }
 
+    startOpeningClock() {
+      if (!PROMO_OPENING_CLOCK) return;
+      if (this.root.querySelector('[data-promo-clock]')) return;
+      const node = document.createElement('div');
+      node.className = 'promo-opening__clock';
+      node.setAttribute('data-promo-clock', '');
+      node.setAttribute('aria-hidden', 'true');
+      this.root.appendChild(node);
+      const started = performance.now();
+      const paint = () => {
+        if (!node.isConnected || node.hidden) return;
+        const elapsed = performance.now() - started;
+        const seconds = Math.floor(elapsed / 1000);
+        const millis = Math.floor(elapsed % 1000);
+        node.textContent = `${seconds}.${String(millis).padStart(3, '0')}`;
+        window.requestAnimationFrame(paint);
+      };
+      window.requestAnimationFrame(paint);
+    }
+
     flip() {
       if (this.flipping) return;
       if (!this.assetsReady) {
@@ -1143,6 +1170,7 @@
 
       this.pinKnobOrigin();
       this.root.classList.add('is-on');
+      this.startOpeningClock();
       window.setTimeout(() => {
         this.root.style.setProperty('--promo-center', `${PROMO_AGENTIC_MOVE_MS}ms`);
         this.root.classList.add('is-cleared');
@@ -1718,7 +1746,6 @@
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
       this.glideClerkIntoRow('is-moments');
-      setOpeningAvatarAction('waving');
       if (!prefersReducedMotion()) await waitMs(PROMO_CLERK_ROW_MS);
 
       const reduced = prefersReducedMotion();
@@ -1889,6 +1916,8 @@
 
     showExportFrame(name) {
       const root = this.root;
+      const clock = root.querySelector('[data-promo-clock]');
+      if (clock) clock.hidden = true;
       const html = document.documentElement;
       const center = root.querySelector('.promo-opening__center');
       const logo = root.querySelector('.promo-opening__logo');
