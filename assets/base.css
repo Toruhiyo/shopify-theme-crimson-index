@@ -620,10 +620,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transition: none;
 }
 
-.promo-opening.is-see-row .promo-opening__widget {
-  right: -10rem;
-}
-
 .promo-opening.is-see-row .promo-opening__copy {
   position: relative;
   z-index: 2;
@@ -651,7 +647,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  transform: translate(calc(-50% - 11rem), -50%) scale(0.92);
+  transform: translate(calc(-50% - 8.25rem), -50%) scale(1.05);
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
+  -webkit-mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, #000 18%, transparent 68%);
+  mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, #000 18%, transparent 68%);
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__moments-blob.is-rose,
+.promo-opening.is-moments:not(.is-see) .promo-opening__moments-blob.is-orange,
+.promo-opening.is-moments:not(.is-see) .promo-opening__moments-blob.is-blue {
+  left: 36%;
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__store-bar .promo-moments__cart {
+  margin-right: 14rem;
 }
 
 .promo-opening.is-see-row #bizmis-avatar-embed div {
@@ -2490,10 +2501,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-see-row .promo-opening__stores {
-  width: min(60.5rem, calc(100vw - 22rem));
+  width: min(55rem, calc(100vw - 30rem));
   max-width: none;
   max-height: 52rem;
-  overflow: hidden;
+  overflow: visible;
   opacity: 1;
   transform: none;
 }
@@ -2514,7 +2525,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening__slide {
   position: relative;
-  flex: 0 0 min(36rem, 64vw);
+  flex: 0 0 min(22rem, 40vw);
   margin: 0 -2.5rem 0 0;
   overflow: visible;
   background: none;

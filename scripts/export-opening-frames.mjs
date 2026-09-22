@@ -39,9 +39,9 @@ const FRAMES = [
   ['14e-moments-extra', 'Moments. Extra. Circle and a pentagon add-on side by side inside the browser. Header cart shows 2. Clerk idle.', 500],
   ['14f-moments-salesperson', 'Moments. Wrap-up. Browser has faded. No spoken line. Clerk nods once.', 1600],
   ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 80],
-  ['16-see-stores', 'See for yourself. has left. Center store is fully visible. Side cards peek in from the edges. Soft screen tint. Clerk stands clear of the cards.', 2500],
-  ['17-see-roulette', 'Carousel on a mid-list store. Side cards stay clipped before the clerk. Soft screen tint. Clerk has morphed to that store avatar.', 2500],
-  ['18-see-meridian', 'Landed on Meridian. Name and sector fully visible. Clerk is the Meridian avatar, clear of the cards.', 2500],
+  ['16-see-stores', 'See for yourself. has left. Three store cards are fully on screen. Clerk stays in the moments seat, clear of the cards.', 2500],
+  ['17-see-roulette', 'Carousel on a mid-list store. Side cards are fully visible. Clerk has morphed and has not moved seats.', 2500],
+  ['18-see-meridian', 'Landed on Meridian. Name, sector, and both side cards are fully visible. Clerk stays clear of them.', 2500],
 ];
 
 async function loadPlaywright() {
