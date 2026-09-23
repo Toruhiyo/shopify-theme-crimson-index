@@ -198,7 +198,7 @@
   const PROMO_WHEEL_SELECT_SPAN = 0.2;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
-  const BIZMIS_ORANGE = '#f9a353';
+  const BIZMIS_ORANGE = getComputedStyle(document.documentElement).getPropertyValue('--bizmis-orange').trim();
   const PROMO_BIZMIS_MESH_COLORS = {
     UPPERBODY_Top: BIZMIS_ORANGE,
     HEAD_Hat: BIZMIS_ORANGE,
@@ -522,7 +522,6 @@
   const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
   const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
   const PROMO_MOMENT_NEW_INDEXES = [0];
-  const PROMO_MOMENT_SHAPE = '#CFC9C1';
   const PROMO_MOMENT_ICONS = {
     circle: '<circle cx="12" cy="12" r="7.2"/>',
     square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
@@ -547,7 +546,7 @@
   function momentGlyph(kind) {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
-    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="${PROMO_MOMENT_SHAPE}">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
+    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
     return glyph;
   }
 
@@ -1197,7 +1196,9 @@
 
   function storeInk(accent) {
     const hex = String(accent || '').replace('#', '');
-    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return accent || '#1d1d1f';
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
+      return accent || getComputedStyle(document.documentElement).getPropertyValue('--color-fg').trim();
+    }
     const red = parseInt(hex.slice(0, 2), 16);
     const green = parseInt(hex.slice(2, 4), 16);
     const blue = parseInt(hex.slice(4, 6), 16);
@@ -1330,7 +1331,7 @@
       `calc(${PROMO_WHEEL_NEIGHBOR_PULL} * min(36rem, 62cqw) + ${PROMO_WHEEL_TUCK_PX}px)`,
     );
     (stores || []).forEach((store) => {
-      const accent = store.accent || '#1d1d1f';
+      const accent = store.accent || getComputedStyle(document.documentElement).getPropertyValue('--color-fg').trim();
       const slide = document.createElement('article');
       slide.className = 'promo-opening__slide';
       slide.dataset.store = store.slug;

@@ -31,7 +31,7 @@
       if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '28px');
     })();
   </script>
-  <style>html.is-promo-opening{background:#fff}html.is-promo-cover{background:{{ promo_red }}}</style>
+  <style>html.is-promo-opening{background:var(--color-bg)}html.is-promo-cover{background:{{ promo_red }}}</style>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0">
   {%- assign _bg_check = settings.color_background | remove: '#' | downcase | slice: 0 -%}
@@ -43,7 +43,7 @@
       var isHome = {{ promo_home | json }};
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
-      if (promoVideo === 'opening') meta.content = '#ffffff';
+      if (promoVideo === 'opening') meta.content = {{ settings.color_background | json }};
       else if (isHome && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
     })();
   </script>

@@ -112,7 +112,7 @@ html.is-promo-greyscale {
 /* --- Promo video opening (?promo_video=opening) and arrival cover --- */
 html.is-promo-opening,
 html.is-promo-opening body {
-  background: #fff !important;
+  background: var(--color-bg) !important;
   overflow: hidden !important;
   height: 100% !important;
   overscroll-behavior: none;
@@ -120,7 +120,7 @@ html.is-promo-opening body {
 
 html.is-promo-opening.is-promo-pitch,
 html.is-promo-opening.is-promo-pitch body {
-  background: #f5f5f7 !important;
+  background: var(--color-card) !important;
 }
 
 html.is-promo-opening .os-viewport {
@@ -151,12 +151,12 @@ html.is-promo-opening.is-promo-depart body > * {
 
 html.is-promo-cover,
 html.is-promo-cover body {
-  background: var(--color-primary, #D1001A) !important;
+  background: var(--color-primary) !important;
 }
 
 html:not(.is-promo-cover):not(.is-promo-opening),
 html:not(.is-promo-cover):not(.is-promo-opening) body {
-  background: var(--color-bg, #fff);
+  background: var(--color-bg);
 }
 
 html.is-promo-cover body > *:not(.promo-cover) {
@@ -172,8 +172,8 @@ html.is-promo-cover body > *:not(.promo-cover) {
   inset: 0;
   z-index: 100000;
   overflow: visible;
-  background: #fff;
-  color: #2f3640;
+  background: var(--color-bg);
+  color: var(--color-fg);
   visibility: visible !important;
   pointer-events: auto !important;
   transition: background 1.2s cubic-bezier(0.32, 0.72, 0, 1);
@@ -197,7 +197,7 @@ html.is-promo-opening .promo-opening {
   position: absolute;
   inset: 0;
   z-index: 100000;
-  border: 1px solid rgba(29, 29, 31, 0.28);
+  border: 1px solid color-mix(in srgb, var(--color-fg) 28%, transparent);
   pointer-events: none;
 }
 
@@ -215,7 +215,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: -140vmax 0 0 -140vmax;
   border-radius: 50%;
   pointer-events: none;
-  background: var(--bizmis-orange, #f9a353);
+  background: var(--bizmis-orange);
   transform: scale(0);
   transform-origin: center;
   transition:
@@ -262,7 +262,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 56px;
   margin: -28px 0 0 -28px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.7);
+  border: 2px solid color-mix(in srgb, var(--color-bg) 70%, transparent);
   opacity: 0;
   transform: scale(0.2);
 }
@@ -293,7 +293,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__fill--red {
   position: absolute;
   inset: 0;
-  background: var(--color-primary, #D1001A);
+  background: var(--color-primary);
   opacity: 0;
   pointer-events: none;
   transition: opacity 700ms linear;
@@ -348,7 +348,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   font-weight: 500;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
-  color: rgba(47, 54, 64, 0.42);
+  color: color-mix(in srgb, var(--color-fg) 42%, transparent);
   pointer-events: none;
 }
 
@@ -361,7 +361,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-pitch .promo-opening__logo-layer--white {
-  background-color: var(--bizmis-orange, #f9a353);
+  background-color: var(--bizmis-orange);
 }
 
 .promo-opening.is-pitch.is-logo-docked .promo-opening__logo {
@@ -416,7 +416,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__logo-layer--white {
-  background-color: #ffffff;
+  background-color: var(--color-primary-fg);
 }
 
 .promo-opening__toggle {
@@ -433,7 +433,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__toggle:focus-visible {
-  outline: 2px solid var(--bizmis-orange, #f9a353);
+  outline: 2px solid var(--bizmis-orange);
   outline-offset: 6px;
   border-radius: 999px;
 }
@@ -462,21 +462,21 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__choice-layer--dark {
-  color: #2f3640;
+  color: var(--color-fg);
 }
 
 .promo-opening__choice-layer--muted,
 .promo-opening__choice-layer--idle {
-  color: #b9bec6;
+  color: var(--color-muted-fg);
 }
 
 .promo-opening__choice-layer--hot {
-  color: var(--bizmis-orange, #f9a353);
+  color: var(--bizmis-orange);
   transition: opacity 200ms linear, color 0ms linear;
 }
 
 .promo-opening.is-agentic-white .promo-opening__choice--right .promo-opening__choice-layer--hot {
-  color: #fff;
+  color: var(--color-primary-fg);
 }
 
 .promo-opening.is-on .promo-opening__choice--left .promo-opening__choice-layer--dark,
@@ -495,9 +495,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   flex: 0 0 auto;
   width: 200px;
   height: 70px;
-  border: 1px solid #d5d7db;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: #e4e6ea;
+  background: var(--color-border);
   cursor: pointer;
 }
 
@@ -508,8 +508,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(15, 18, 22, 0.16), 0 1px 1px rgba(15, 18, 22, 0.08);
+  background: var(--color-bg);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-fg) 16%, transparent), 0 1px 1px color-mix(in srgb, var(--color-fg) 8%, transparent);
   transform: translate3d(0, 0, 0);
   transition: transform 200ms ease;
 }
@@ -522,7 +522,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--bizmis-orange, #f9a353);
+  background: var(--bizmis-orange);
   opacity: 0;
   transition: opacity 200ms linear;
 }
@@ -681,8 +681,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
-  -webkit-mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, #000 18%, transparent 68%);
-  mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, #000 18%, transparent 68%);
+  -webkit-mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, var(--color-fg) 18%, transparent 68%);
+  mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, var(--color-fg) 18%, transparent 68%);
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-blob.is-rose,
@@ -731,15 +731,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   max-height: 62cqh;
   overflow: hidden;
   border-radius: 32px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid color-mix(in srgb, var(--color-bg) 65%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 24px 60px rgba(0, 0, 0, 0.06);
+    inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 2px 6px color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 24px 60px color-mix(in srgb, var(--color-fg) 6%, transparent);
   opacity: 1;
   transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -748,7 +748,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   content: "";
   position: absolute;
   inset: -40%;
-  background: linear-gradient(40deg, transparent 42%, rgba(255, 255, 255, 0.25) 50%, transparent 58%);
+  background: linear-gradient(40deg, transparent 42%, color-mix(in srgb, var(--color-bg) 25%, transparent) 50%, transparent 58%);
   transform: translate3d(-55%, 0, 0);
   animation: promo-moments-sheen 9s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
   pointer-events: none;
@@ -763,7 +763,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   flex: 0 0 64px;
   height: 64px;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-fg) 6%, transparent);
 }
 
 .promo-opening__browser-dots {
@@ -776,7 +776,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: rgba(140, 148, 160, 0.55);
+  background: color-mix(in srgb, var(--color-muted-fg) 55%, transparent);
 }
 
 .promo-opening__browser-pill {
@@ -784,8 +784,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: min(18rem, 36%);
   height: 26px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--color-bg) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-bg) 70%, transparent);
 }
 
 .promo-opening__store-bar {
@@ -812,7 +812,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   font-size: 1.5rem;
   font-weight: 560;
   letter-spacing: -0.03em;
-  color: #8d877f;
+  color: var(--color-muted-fg);
 }
 
 .promo-opening__store-mark {
@@ -820,7 +820,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   flex: 0 0 auto;
   width: 42px;
   height: 42px;
-  color: #8b93a0;
+  color: var(--color-muted-fg);
   opacity: 0.8;
 }
 
@@ -840,8 +840,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   pointer-events: none;
   opacity: 0;
   transition: opacity 420ms var(--promo-spring, cubic-bezier(0.22, 1.35, 0.36, 1));
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 74%);
-  mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 74%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, var(--color-fg) 30%, transparent 74%);
+  mask-image: radial-gradient(ellipse at 50% 50%, var(--color-fg) 30%, transparent 74%);
 }
 
 .promo-opening__moments.is-vignette-gone .promo-opening__moments-field {
@@ -865,14 +865,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__moments-blob.is-rose {
   width: 16rem;
   height: 14rem;
-  background: rgba(255, 200, 180, 0.16);
+  background: color-mix(in srgb, var(--bizmis-orange) 16%, transparent);
   animation: promo-moments-drift-a 22s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
 }
 
 .promo-opening__moments-blob.is-orange {
   width: 24rem;
   height: 24rem;
-  background: rgba(249, 163, 83, 0.3);
+  background: color-mix(in srgb, var(--bizmis-orange) 30%, transparent);
   opacity: 0;
   animation: promo-moments-drift-b 26s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
 }
@@ -880,7 +880,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__moments-blob.is-blue {
   width: 14rem;
   height: 12rem;
-  background: rgba(200, 210, 230, 0.2);
+  background: color-mix(in srgb, var(--color-muted-fg) 20%, transparent);
   animation: promo-moments-drift-c 18s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
 }
 
@@ -973,14 +973,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: hidden;
   border-radius: 20em;
   font-size: calc(var(--card-w) / 300);
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
-  border: 1em solid rgba(255, 255, 255, 0.65);
+  border: 1em solid color-mix(in srgb, var(--color-bg) 65%, transparent);
   box-shadow:
-    inset 0 1em 0 rgba(255, 255, 255, 0.8),
-    0 2em 6em rgba(0, 0, 0, 0.04),
-    0 24em 60em rgba(0, 0, 0, 0.06);
+    inset 0 1em 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    0 2em 6em color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 24em 60em color-mix(in srgb, var(--color-fg) 6%, transparent);
   transform: translate3d(calc(-50% + var(--gx, 0px)), calc(-50% + var(--gy, 0px)), 0);
   transform-origin: center center;
   opacity: 1;
@@ -999,7 +999,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   content: "";
   position: absolute;
   inset: -40%;
-  background: linear-gradient(40deg, transparent 42%, rgba(255, 255, 255, 0.25) 50%, transparent 58%);
+  background: linear-gradient(40deg, transparent 42%, color-mix(in srgb, var(--color-bg) 25%, transparent) 50%, transparent 58%);
   transform: translate3d(-55%, 0, 0);
   animation: promo-moments-sheen 9s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
   pointer-events: none;
@@ -1010,8 +1010,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1em solid rgba(249, 163, 83, 0.6);
-  box-shadow: 0 0 6em rgba(249, 163, 83, 0.12);
+  border: 1em solid color-mix(in srgb, var(--bizmis-orange) 60%, transparent);
+  box-shadow: 0 0 6em color-mix(in srgb, var(--bizmis-orange) 12%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity 380ms var(--promo-spring);
@@ -1025,7 +1025,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: calc(var(--card-h) * 0.62);
   overflow: hidden;
   border-radius: 12em;
-  background: #F3F1EE;
+  background: var(--color-card);
 }
 
 .promo-moments__glyph {
@@ -1038,7 +1038,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: auto;
   margin: 0;
   display: block;
-  color: #CFC9C1;
+  color: color-mix(in srgb, var(--color-muted-fg) 32%, var(--color-card));
   opacity: 1;
   transform: translate(-50%, -50%);
   transform-origin: center center;
@@ -1129,14 +1129,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: block;
   width: 0.7rem;
   height: 0.7rem;
-  color: #7c8593;
+  color: var(--color-muted-fg);
 }
 
 .promo-moments__bar {
   display: block;
   height: 6px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--color-fg) 8%, transparent);
 }
 
 .promo-moments__spec:nth-child(1) .promo-moments__bar { width: 70%; }
@@ -1170,8 +1170,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   stroke-width: 1.5;
 }
 
-.promo-moments__mark.is-yes { color: #f9a353; }
-.promo-moments__mark.is-no { color: #8a847c; }
+.promo-moments__mark.is-yes { color: var(--bizmis-orange); }
+.promo-moments__mark.is-no { color: var(--color-muted-fg); }
 
 .promo-moments__compare {
   position: absolute;
@@ -1184,13 +1184,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   gap: 0.22rem;
   border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid color-mix(in srgb, var(--color-bg) 65%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 16px 40px rgba(0, 0, 0, 0.06);
+    inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    0 16px 40px color-mix(in srgb, var(--color-fg) 6%, transparent);
   opacity: 0;
   transform: translate3d(0, 188px, 0);
   transform-origin: center top;
@@ -1213,7 +1213,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 6px;
   margin-top: -3px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
+  background: color-mix(in srgb, var(--color-fg) 8%, transparent);
 }
 
 .promo-moments__compare-cell {
@@ -1242,7 +1242,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: block;
   height: 6em;
   border-radius: 3em;
-  background: #E3E0DB;
+  background: var(--color-border);
 }
 
 .promo-moments__title { width: 70%; }
@@ -1256,7 +1256,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__price b {
   flex: 0 0 auto;
-  color: #9A948B;
+  color: var(--color-muted-fg);
   font-family: var(--font-heading);
   font-size: 10em;
   font-weight: 500;
@@ -1275,9 +1275,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   place-items: center;
   border-radius: calc(10em / 13);
-  border: calc(1em / 13) solid #E3E0DB;
+  border: calc(1em / 13) solid var(--color-border);
   background: transparent;
-  color: #9A948B;
+  color: var(--color-muted-fg);
   font-family: var(--font-heading);
   font-size: 13em;
   font-weight: 500;
@@ -1302,9 +1302,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   top: calc(6em / 9);
   padding: calc(2em / 9) calc(6em / 9);
   border-radius: 999px;
-  border: calc(1em / 9) solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.72);
-  color: #6f6a64;
+  border: calc(1em / 9) solid color-mix(in srgb, var(--color-bg) 70%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  color: var(--color-muted-fg);
   font-family: var(--font-heading);
   font-size: 9em;
   font-weight: 600;
@@ -1323,13 +1323,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 0.22rem;
   height: 0.22rem;
   border-radius: 999px;
-  border: 1px solid var(--ink, #7c8593);
+  border: 1px solid var(--ink, var(--color-muted-fg));
   background: transparent;
   opacity: 0.45;
 }
 
 .promo-moments__rating i.is-on {
-  background: var(--ink, #7c8593);
+  background: var(--ink, var(--color-muted-fg));
   opacity: 0.8;
 }
 
@@ -1343,9 +1343,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__add,
 .is-pose-bundle .promo-moments__card.is-pick .promo-moments__add,
 .is-pose-bundle .promo-moments__card.is-extra .promo-moments__add {
-  background: #F9A353;
-  border-color: #F9A353;
-  color: #fff;
+  background: var(--bizmis-orange);
+  border-color: var(--bizmis-orange);
+  color: var(--color-primary-fg);
   box-shadow: none;
 }
 
@@ -1429,10 +1429,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-grid.is-shortlist .promo-moments__card.is-pick,
 .is-pose-grid.is-shortlist .promo-moments__card.is-other {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 0 0 2px rgba(249, 163, 83, 0.9),
-    0 10px 28px rgba(249, 163, 83, 0.22);
+    inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--bizmis-orange) 90%, transparent),
+    0 10px 28px color-mix(in srgb, var(--bizmis-orange) 22%, transparent);
 }
 
 .is-pose-grid.is-shortlist .promo-moments__card.is-go::after,
@@ -1635,7 +1635,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 18rem;
   margin: -9rem 0 0 -9rem;
   border-radius: 50%;
-  background: rgba(249, 163, 83, 0.55);
+  background: color-mix(in srgb, var(--bizmis-orange) 55%, transparent);
   filter: blur(28px);
   opacity: 0;
 }
@@ -1645,8 +1645,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 7.5rem;
   margin: -3.75rem 0 0 -3.75rem;
   border-radius: 50%;
-  border: 2.5px solid rgba(249, 163, 83, 0.95);
-  box-shadow: 0 0 18px rgba(249, 163, 83, 0.45);
+  border: 2.5px solid color-mix(in srgb, var(--bizmis-orange) 95%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--bizmis-orange) 45%, transparent);
   opacity: 0;
 }
 
@@ -1655,8 +1655,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 0.62rem;
   margin: -0.31rem 0 0 -0.31rem;
   border-radius: 50%;
-  background: #f9a353;
-  box-shadow: 0 0 12px rgba(249, 163, 83, 0.9);
+  background: var(--bizmis-orange);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--bizmis-orange) 90%, transparent);
   opacity: 0;
 }
 
@@ -1664,8 +1664,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 5.2rem;
   height: 5.2rem;
   margin: -2.6rem 0 0 -2.6rem;
-  color: #f9a353;
-  filter: drop-shadow(0 0 16px rgba(249, 163, 83, 0.85));
+  color: var(--bizmis-orange);
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--bizmis-orange) 85%, transparent));
   opacity: 0;
 }
 
@@ -1750,16 +1750,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: -1.575rem 0 0 -1.575rem;
   overflow: hidden;
   border-radius: 999px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
   -webkit-backdrop-filter: blur(18px) saturate(1.6);
   backdrop-filter: blur(18px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid color-mix(in srgb, var(--color-bg) 65%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 14px 36px rgba(0, 0, 0, 0.06);
-  color: #7c8593;
+    inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 2px 6px color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 14px 36px color-mix(in srgb, var(--color-fg) 6%, transparent);
+  color: var(--color-muted-fg);
   font-family: var(--font-heading);
   font-size: 1.45rem;
   font-weight: 500;
@@ -1777,7 +1777,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__yes {
   width: 1.05rem;
   height: 1.05rem;
-  color: #f9a353;
+  color: var(--bizmis-orange);
   opacity: 0;
 }
 
@@ -1826,7 +1826,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 1.7rem;
   margin: -0.85rem 0 0 -1.2rem;
   border-radius: 50%;
-  background: rgba(249, 163, 83, 0.22);
+  background: color-mix(in srgb, var(--bizmis-orange) 22%, transparent);
   filter: blur(8px);
   opacity: 0;
   pointer-events: none;
@@ -1856,16 +1856,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: 0;
   padding: 0.32rem 0.62rem 0.32rem 0.42rem;
   border-radius: 999px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
   -webkit-backdrop-filter: blur(18px) saturate(1.6);
   backdrop-filter: blur(18px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid color-mix(in srgb, var(--color-bg) 65%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 14px 36px rgba(0, 0, 0, 0.06);
-  color: #7c8593;
+    inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 2px 6px color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 14px 36px color-mix(in srgb, var(--color-fg) 6%, transparent);
+  color: var(--color-muted-fg);
   font-family: var(--font-heading);
   font-size: 0.78rem;
   font-weight: 500;
@@ -1893,7 +1893,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 20px;
   height: 20px;
   margin: -10px 0 0 -10px;
-  color: #F9A353;
+  color: var(--bizmis-orange);
   opacity: 0;
   filter: none;
   transform: translate3d(45px, 30px, 0);
@@ -1932,8 +1932,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 8.125rem;
   margin: -4.0625rem 0 0 -4.0625rem;
   border-radius: 11px;
-  border: 1px solid rgba(249, 163, 83, 0.5);
-  box-shadow: 0 0 0 2px rgba(249, 163, 83, 0.12);
+  border: 1px solid color-mix(in srgb, var(--bizmis-orange) 50%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--bizmis-orange) 12%, transparent);
   opacity: 0;
   transform: translate3d(-7.2rem, 0, 0) scale(2.2);
   transition:
@@ -1963,7 +1963,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  color: #7c8593;
+  color: var(--color-muted-fg);
   opacity: 0.7;
   transform: none;
   transform-origin: right center;
@@ -1982,8 +1982,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 36px;
   margin-top: -18px;
   border-radius: 50%;
-  background: rgba(249, 163, 83, 0.55);
-  box-shadow: 0 0 18px rgba(249, 163, 83, 0.8);
+  background: color-mix(in srgb, var(--bizmis-orange) 55%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--bizmis-orange) 80%, transparent);
   opacity: 0;
   pointer-events: none;
 }
@@ -2005,7 +2005,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__cart-piece {
   width: 18px;
   height: 18px;
-  color: #f9a353;
+  color: var(--bizmis-orange);
   opacity: 0;
   transform: scale(0.4);
 }
@@ -2029,7 +2029,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-close .promo-opening__store-bar .promo-moments__cart,
 .is-pose-extra .promo-opening__store-bar .promo-moments__cart,
 .is-pose-bundle .promo-opening__store-bar .promo-moments__cart {
-  color: #f9a353;
+  color: var(--bizmis-orange);
   opacity: 1;
   transform: scale(1.16);
   filter: none;
@@ -2042,7 +2042,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 4;
   width: 12em;
   height: 12em;
-  color: #F9A353;
+  color: var(--bizmis-orange);
   opacity: 0;
   transform: none;
   pointer-events: none;
@@ -2104,7 +2104,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 7rem;
   height: 7rem;
   margin: -3.5rem 0 0 -3.5rem;
-  background: radial-gradient(circle, rgba(249, 163, 83, 0.75), rgba(249, 163, 83, 0.08) 58%, transparent 72%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--bizmis-orange) 75%, transparent), color-mix(in srgb, var(--bizmis-orange) 8%, transparent) 58%, transparent 72%);
   opacity: 0;
 }
 
@@ -2115,8 +2115,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 3px solid rgba(249, 163, 83, 0.95);
-  box-shadow: 0 0 28px rgba(249, 163, 83, 0.55);
+  border: 3px solid color-mix(in srgb, var(--bizmis-orange) 95%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--bizmis-orange) 55%, transparent);
   opacity: 0;
 }
 
@@ -2128,8 +2128,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 1.35rem;
   margin: -0.675rem 0 0 -0.675rem;
   border-radius: 50%;
-  background: #f9a353;
-  box-shadow: 0 0 28px #f9a353, 0 0 64px rgba(249, 163, 83, 0.8);
+  background: var(--bizmis-orange);
+  box-shadow: 0 0 28px var(--bizmis-orange), 0 0 64px color-mix(in srgb, var(--bizmis-orange) 80%, transparent);
   opacity: 0;
 }
 
@@ -2140,8 +2140,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 2.4rem;
   height: 2.4rem;
   margin: -1.2rem 0 0 -1.2rem;
-  color: #f9a353;
-  filter: drop-shadow(0 0 22px rgba(249, 163, 83, 0.95));
+  color: var(--bizmis-orange);
+  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--bizmis-orange) 95%, transparent));
   opacity: 0;
 }
 
@@ -2188,8 +2188,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 1.55rem;
   padding: 0 0.22rem;
   border-radius: 999px;
-  background: #f9a353;
-  color: #fff;
+  background: var(--bizmis-orange);
+  color: var(--color-primary-fg);
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 700;
@@ -2239,8 +2239,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 0.85rem;
   margin: -0.425rem 0 0 -0.425rem;
   border-radius: 999px;
-  background: #f9a353;
-  box-shadow: 0 0 18px rgba(249, 163, 83, 0.8);
+  background: var(--bizmis-orange);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--bizmis-orange) 80%, transparent);
   opacity: 0;
 }
 
@@ -2327,9 +2327,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-vapor {
-  0% { opacity: 1; filter: blur(0); transform: scale(1); background: rgba(255, 255, 255, 0.45); color: #7c8593; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06); }
-  45% { opacity: 0.72; filter: blur(3px); transform: scale(1.16); background: rgba(249, 163, 83, 0.18); color: #7c8593; box-shadow: 0 0 14px rgba(249, 163, 83, 0.22); }
-  100% { opacity: 0; filter: blur(16px); transform: scale(1.7); background: rgba(249, 163, 83, 0); color: transparent; box-shadow: none; }
+  0% { opacity: 1; filter: blur(0); transform: scale(1); background: color-mix(in srgb, var(--color-bg) 45%, transparent); color: var(--color-muted-fg); box-shadow: 0 14px 36px color-mix(in srgb, var(--color-fg) 6%, transparent); }
+  45% { opacity: 0.72; filter: blur(3px); transform: scale(1.16); background: color-mix(in srgb, var(--bizmis-orange) 18%, transparent); color: var(--color-muted-fg); box-shadow: 0 0 14px color-mix(in srgb, var(--bizmis-orange) 22%, transparent); }
+  100% { opacity: 0; filter: blur(16px); transform: scale(1.7); background: transparent; color: transparent; box-shadow: none; }
 }
 
 @keyframes promo-moments-vapor-bit {
@@ -2452,15 +2452,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-cart-celebrate {
-  0% { transform: scale(1); color: #7c8593; filter: none; }
-  40% { transform: scale(1.28); color: #f9a353; filter: none; }
-  100% { transform: scale(1.16); color: #f9a353; filter: none; }
+  0% { transform: scale(1); color: var(--color-muted-fg); filter: none; }
+  40% { transform: scale(1.28); color: var(--bizmis-orange); filter: none; }
+  100% { transform: scale(1.16); color: var(--bizmis-orange); filter: none; }
 }
 
 @keyframes promo-moments-cart-celebrate-soft {
-  0% { transform: scale(1.16); color: #f9a353; filter: none; }
-  40% { transform: scale(1.28); color: #f9a353; filter: none; }
-  100% { transform: scale(1.16); color: #f9a353; filter: none; }
+  0% { transform: scale(1.16); color: var(--bizmis-orange); filter: none; }
+  40% { transform: scale(1.28); color: var(--bizmis-orange); filter: none; }
+  100% { transform: scale(1.16); color: var(--bizmis-orange); filter: none; }
 }
 
 @keyframes promo-moments-ask-out {
@@ -2490,13 +2490,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 @keyframes promo-moments-add-fill {
   from {
     background: transparent;
-    color: #9A948B;
-    border-color: #E3E0DB;
+    color: var(--color-muted-fg);
+    border-color: var(--color-border);
   }
   to {
-    background: #f9a353;
-    color: #fff;
-    border-color: #f9a353;
+    background: var(--bizmis-orange);
+    color: var(--color-primary-fg);
+    border-color: var(--bizmis-orange);
   }
 }
 
@@ -2507,8 +2507,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-count-in {
   0% { opacity: 0; transform: scale(0.2); }
-  46% { opacity: 1; transform: scale(2.35); color: #fff; }
-  100% { opacity: 1; transform: scale(1); color: #fff; }
+  46% { opacity: 1; transform: scale(2.35); color: var(--color-primary-fg); }
+  100% { opacity: 1; transform: scale(1); color: var(--color-primary-fg); }
 }
 
 @keyframes promo-moments-bloom {
@@ -2588,7 +2588,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: 0;
   max-width: none;
   overflow: visible;
-  color: #1d1d1f;
+  color: var(--color-fg);
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(4.4rem, 8.4cqw, 7.2rem);
@@ -2635,7 +2635,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__line.is-redefined .promo-opening__word--salesperson {
-  color: var(--bizmis-orange, #f9a353);
+  color: var(--bizmis-orange);
 }
 
 .promo-opening__word {
@@ -2680,7 +2680,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__word--sell {
-  color: var(--bizmis-orange, #f9a353);
+  color: var(--bizmis-orange);
 }
 
 .promo-opening__see,
@@ -2711,7 +2711,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: block;
   margin: 0;
   min-width: 0;
-  color: #1d1d1f;
+  color: var(--color-fg);
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(6.2rem, 9.6cqw, 8.6rem);
@@ -2839,7 +2839,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   font-size: 1.75rem;
   line-height: 1.05;
   letter-spacing: -0.03em;
-  color: var(--promo-store-accent, #1d1d1f);
+  color: var(--promo-store-accent, var(--color-fg));
 }
 
 .promo-opening__slide-name {
@@ -2849,7 +2849,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   line-height: 1.2;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(29, 29, 31, 0.46);
+  color: color-mix(in srgb, var(--color-fg) 46%, transparent);
 }
 
 .promo-opening__slide-card {
@@ -2857,8 +2857,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   aspect-ratio: 16 / 10;
   border-radius: 1.15rem;
   overflow: hidden;
-  background: #f6f4f1;
-  box-shadow: 0 14px 36px rgba(29, 29, 31, 0.07);
+  background: var(--color-card);
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--color-fg) 7%, transparent);
 }
 
 .promo-opening__slide-glow {
@@ -2953,7 +2953,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   top: 0.42em;
   height: 0.08em;
-  background: var(--bizmis-orange, #f9a353);
+  background: var(--bizmis-orange);
   transform: scaleX(0);
   transform-origin: left center;
   pointer-events: none;
@@ -2997,8 +2997,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  color: #1d1d1f;
+  background: var(--color-bg);
+  color: var(--color-fg);
   pointer-events: all;
 }
 
@@ -3085,7 +3085,7 @@ html.is-promo-ready .promo-opening__boot {
   position: absolute;
   background: radial-gradient(
     circle at 38% 42%,
-    color-mix(in srgb, var(--promo-stain, #f9a353) 88%, white) 0%,
+    color-mix(in srgb, var(--promo-stain, var(--bizmis-orange)) 88%, var(--color-bg)) 0%,
     transparent 68%
   );
   filter: blur(7px);
@@ -3366,7 +3366,7 @@ html.is-promo-opening.is-promo-pitch .bizmis-caption-word {
   z-index: 100000;
   align-items: center;
   justify-content: center;
-  background: var(--color-primary, #D1001A);
+  background: var(--color-primary);
   pointer-events: none;
 }
 
@@ -3389,7 +3389,7 @@ html.is-promo-cover .promo-cover,
 
 .promo-cover__subtitle {
   margin: 0;
-  color: #fff;
+  color: var(--color-primary-fg);
   font-family: var(--font-body);
   font-weight: 500;
   font-size: clamp(0.95rem, 1.7vw, 1.15rem);
