@@ -172,7 +172,7 @@ html.is-promo-cover body > *:not(.promo-cover) {
   inset: 0;
   z-index: 100000;
   overflow: visible;
-  background: var(--color-bg);
+  background: #fff;
   color: var(--color-fg);
   visibility: visible !important;
   pointer-events: auto !important;
@@ -735,7 +735,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   max-height: 62cqh;
   overflow: hidden;
   border-radius: 32px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
+  background: #FCFBFA;
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
   border: 1px solid color-mix(in srgb, var(--color-bg) 65%, transparent);
@@ -816,7 +816,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   font-size: 1.5rem;
   font-weight: 560;
   letter-spacing: -0.03em;
-  color: var(--color-muted-fg);
+  color: #3F3D3A;
 }
 
 .promo-opening__search {
@@ -827,26 +827,26 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: 34px;
   transform: translate(-50%, -50%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-fg) 5%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
+  background: #fff;
+  border: 1px solid color-mix(in srgb, #3F3D3A 10%, transparent);
   pointer-events: none;
 }
 
 .promo-opening__store-mark {
   display: block;
   flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
-  color: var(--color-muted-fg);
-  opacity: 0.8;
+  width: 16px;
+  height: 16px;
+  color: #D4D3CF;
+  opacity: 1;
 }
 
 .promo-opening__store-mark svg {
   display: block;
   width: 100%;
   height: 100%;
-  fill: none;
-  stroke: currentColor;
+  fill: currentColor;
+  stroke: none;
 }
 
 .promo-opening__moments-field {
@@ -1309,7 +1309,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   min-height: calc(var(--card-h) * 0.5);
   overflow: hidden;
   border-radius: 12em;
-  background: #F1EFEE;
+  background: linear-gradient(180deg, var(--shelf, #F4EFE7) 0%, var(--shelf-deep, #EDE8E0) 100%);
 }
 
 .promo-moments__glyph {
@@ -1322,7 +1322,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   height: auto;
   margin: 0;
   display: block;
-  color: #DCD8D1;
+  color: var(--shape, #D9D4CC);
   opacity: 1;
   transform: translate(-50%, -50%);
   transform-origin: center center;
@@ -1501,7 +1501,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   place-items: center;
   border-radius: 7px;
-  background: #F1EFEE;
+  background: #EFEEEA;
   color: #8A847C;
 }
 
@@ -1794,22 +1794,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(calc(-50% + 280px), calc(-50% + 80px), 0);
 }
 
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:not(.is-extra):not(.is-catalog) {
+.promo-moments__board.is-pose-grid.is-entering:not(.is-reduced) .promo-moments__card:not(.is-extra) {
   animation: promo-moments-card-in 480ms var(--promo-spring) both;
+  animation-delay: calc(var(--enter, 0) * 40ms);
 }
 
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(1) { animation-delay: 30ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(2) { animation-delay: 60ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(3) { animation-delay: 90ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(4) { animation-delay: 120ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(5) { animation-delay: 150ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(6) { animation-delay: 180ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(7) { animation-delay: 210ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(8) { animation-delay: 240ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(9) { animation-delay: 270ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(10) { animation-delay: 300ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(11) { animation-delay: 330ms; }
-.promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:nth-child(12) { animation-delay: 360ms; }
+.promo-moments__board.is-pose-grid .promo-moments__card.is-idle-lift:not(.is-pain-hover):not(.is-pain-open) {
+  animation: promo-shelf-pass 600ms ease both;
+}
 
 .is-pose-row .promo-moments__card.is-drop,
 .is-pose-choice .promo-moments__card.is-drop,
@@ -2818,6 +2810,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 @keyframes promo-moments-card-in {
   0% { opacity: 0; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy) + 12px), 0) scale(0.92); }
   100% { opacity: 1; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
+}
+
+@keyframes promo-shelf-pass {
+  0% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
+  45% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy) - 2px), 0); }
+  100% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
 }
 
 @keyframes promo-moments-celebrate-soft {

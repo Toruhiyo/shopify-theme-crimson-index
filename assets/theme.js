@@ -241,7 +241,7 @@
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1200;
-  const PROMO_SEE_LAND_HOLD_MS = 900;
+  const PROMO_SEE_LAND_HOLD_MS = 1200;
   const PROMO_SEE_GLIDE_MS = 9800;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 9;
@@ -329,7 +329,7 @@
       }
       if (config && config.lighting != null) return config;
       const mode = promoSearchParams().get(PROMO_VIDEO_PARAM);
-      if (mode === 'opening' || mode === 'true') {
+      if (promoVideo === 'opening' || mode === 'opening' || mode === 'true') {
         return Object.assign({}, config, { lighting: 'studio' });
       }
       return config;
@@ -602,6 +602,76 @@
     'spec-shield': '<path d="M12 2.4 20.2 5.6v6.2c0 4.4-3 7.6-8.2 9.8-5.2-2.2-8.2-5.4-8.2-9.8V5.6z"/>',
   };
 
+  const PROMO_SHELF = [
+    { shelf: '#F4EFE7', deep: '#EDE8E0', shape: '#D9D4CC', shade: '#C9C4BC' },
+    { shelf: '#F5ECE8', deep: '#EEE5E1', shape: '#DAD1CD', shade: '#CAC1BD' },
+    { shelf: '#EEF1EA', deep: '#E7EAE3', shape: '#D3D6CF', shade: '#C3C6BF' },
+    { shelf: '#EFEEEA', deep: '#E8E7E3', shape: '#D4D3CF', shade: '#C4C3BF' },
+  ];
+  const PROMO_GRID_STAGGER_MS = 40;
+  const PROMO_GRID_LIFE_MS = 4000;
+  const PROMO_GRID_LIFT_MS = 600;
+  const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'scroll-2', 'scroll-up', 'leave'];
+  let gridLifeTimer = 0;
+
+  const PROMO_SHELF_AT = [
+    1, 2, 2, 0, 2, 0, 3, 3, 1, 3, 1, 1,
+    2, 3, 3, 1, 3, 2, 2, 1, 3, 3, 3, 0,
+    2, 0, 0, 3, 1, 0, 0, 0, 1, 3, 2, 2,
+    2, 1, 1, 1, 0, 3, 0, 0, 3, 0, 1, 0,
+  ];
+
+  function shelfFor(index) {
+    return PROMO_SHELF[PROMO_SHELF_AT[index % PROMO_SHELF_AT.length]];
+  }
+
+  function paintShelf(card, index) {
+    const tone = shelfFor(index);
+    card.style.setProperty('--shelf', tone.shelf);
+    card.style.setProperty('--shelf-deep', tone.deep);
+    card.style.setProperty('--shape', tone.shape);
+    card.style.setProperty('--enter', String(index));
+  }
+
+  function armGridEntrance(board) {
+    if (!board || board.dataset.entered || prefersReducedMotion()) return;
+    board.dataset.entered = '1';
+    board.classList.add('is-entering');
+    const count = board.querySelectorAll('.promo-moments__card:not(.is-extra)').length;
+    window.setTimeout(() => {
+      board.classList.remove('is-entering');
+    }, count * PROMO_GRID_STAGGER_MS + 520);
+  }
+
+  function stopGridLife() {
+    window.clearInterval(gridLifeTimer);
+    gridLifeTimer = 0;
+    document.querySelectorAll('.promo-moments__card.is-idle-lift').forEach((card) => {
+      card.classList.remove('is-idle-lift');
+    });
+  }
+
+  function startGridLife(board) {
+    if (!board || gridLifeTimer || prefersReducedMotion()) return;
+    gridLifeTimer = window.setInterval(() => {
+      if (board.dataset.life === 'hold' || !board.classList.contains('is-pose-grid')) return;
+      const stage = board.parentElement;
+      if (!stage) return;
+      const stageBox = stage.getBoundingClientRect();
+      const visible = [...board.querySelectorAll('.promo-moments__card:not(.is-extra):not(.is-pain-hover):not(.is-pain-open):not(.is-idle-lift)')].filter((card) => {
+        const box = card.getBoundingClientRect();
+        return box.top >= stageBox.top - 8
+          && box.bottom <= stageBox.bottom + 8
+          && box.right > stageBox.left + 8
+          && box.left < stageBox.right - 8;
+      });
+      if (!visible.length) return;
+      const card = visible[Math.floor(Math.random() * visible.length)];
+      card.classList.add('is-idle-lift');
+      window.setTimeout(() => card.classList.remove('is-idle-lift'), PROMO_GRID_LIFT_MS);
+    }, PROMO_GRID_LIFE_MS);
+  }
+
   function momentShapeRole(index) {
     if (index === PROMO_MOMENT_PICK_INDEX) return 'pick';
     if (index === PROMO_MOMENT_OTHER_INDEX) return 'other';
@@ -621,9 +691,9 @@
     return `${momentShapeOpen(kind)} ${attrs}/>`;
   }
 
-  function momentFacetTag(kind) {
-    if (kind === 'square') return '<path d="M18 0h64a18 18 0 0 1 18 18v16H0V18A18 18 0 0 1 18 0z" fill="#F1EFEE"/>';
-    if (kind === 'hexagon') return '<path d="M50 0 100 25 0 25z" fill="#F1EFEE"/>';
+  function momentFacetTag(kind, hi) {
+    if (kind === 'square') return `<path d="M18 0h64a18 18 0 0 1 18 18v16H0V18A18 18 0 0 1 18 0z" fill="${hi}"/>`;
+    if (kind === 'hexagon') return `<path d="M50 0 100 25 0 25z" fill="${hi}"/>`;
     return '';
   }
 
@@ -640,10 +710,11 @@
       glyph.style.setProperty('--nudge-x', `${nudge[0]}%`);
       glyph.style.setProperty('--nudge-y', `${nudge[1]}%`);
     }
+    const tone = shelfFor(index);
     const id = `promo-shape-${index}`;
     const bottom = kind === 'pill' ? 78 : 100;
-    const base = kind === 'circle' ? `url(#${id}-sphere)` : '#DCD8D1';
-    glyph.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="${id}-lit" cx="18%" cy="12%" r="80%"><stop offset="0%" stop-color="#fff" stop-opacity="0.35"/><stop offset="60%" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="${id}-shade" cx="86%" cy="88%" r="75%"><stop offset="0%" stop-color="#C9C3BA" stop-opacity="0.12"/><stop offset="62%" stop-color="#C9C3BA" stop-opacity="0"/></radialGradient><radialGradient id="${id}-sphere" cx="32%" cy="28%" r="78%"><stop offset="0%" stop-color="#F1EFEE"/><stop offset="46%" stop-color="#DCD8D1"/><stop offset="100%" stop-color="#CFC8BE"/></radialGradient><linearGradient id="${id}-edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1EFEE"/><stop offset="42%" stop-color="#F1EFEE" stop-opacity="0.4"/><stop offset="68%" stop-color="#F1EFEE" stop-opacity="0"/></linearGradient><clipPath id="${id}-clip">${momentShapeTag(kind, '')}</clipPath></defs><ellipse cx="50" cy="${bottom}" rx="30" ry="6" fill="#1C1917" opacity="0.25" style="filter:blur(10px);transform:translateY(6px)"/><g clip-path="url(#${id}-clip)">${momentShapeTag(kind, `fill="${base}"`)}${momentFacetTag(kind)}${momentShapeTag(kind, `fill="url(#${id}-lit)"`)}${momentShapeTag(kind, `fill="url(#${id}-shade)"`)}${momentShapeTag(kind, `fill="none" stroke="url(#${id}-edge)" stroke-width="2" vector-effect="non-scaling-stroke"`)}</g></svg>`;
+    const base = kind === 'circle' ? `url(#${id}-sphere)` : tone.shape;
+    glyph.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="${id}-lit" cx="18%" cy="12%" r="80%"><stop offset="0%" stop-color="#fff" stop-opacity="0.35"/><stop offset="60%" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="${id}-shade" cx="86%" cy="88%" r="75%"><stop offset="0%" stop-color="${tone.shade}" stop-opacity="0.12"/><stop offset="62%" stop-color="${tone.shade}" stop-opacity="0"/></radialGradient><radialGradient id="${id}-sphere" cx="32%" cy="28%" r="78%"><stop offset="0%" stop-color="${tone.shelf}"/><stop offset="46%" stop-color="${tone.shape}"/><stop offset="100%" stop-color="${tone.shade}"/></radialGradient><linearGradient id="${id}-edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${tone.shelf}"/><stop offset="42%" stop-color="${tone.shelf}" stop-opacity="0.4"/><stop offset="68%" stop-color="${tone.shelf}" stop-opacity="0"/></linearGradient><clipPath id="${id}-clip">${momentShapeTag(kind, '')}</clipPath></defs><ellipse cx="50" cy="${bottom}" rx="30" ry="6" fill="#1C1917" opacity="0.25" style="filter:blur(10px);transform:translateY(6px)"/><g clip-path="url(#${id}-clip)">${momentShapeTag(kind, `fill="${base}"`)}${momentFacetTag(kind, tone.shelf)}${momentShapeTag(kind, `fill="url(#${id}-lit)"`)}${momentShapeTag(kind, `fill="url(#${id}-shade)"`)}${momentShapeTag(kind, `fill="none" stroke="url(#${id}-edge)" stroke-width="2" vector-effect="non-scaling-stroke"`)}</g></svg>`;
     return glyph;
   }
 
@@ -750,6 +821,7 @@
       const kind = PROMO_MOMENT_CARD_KINDS[index];
       const card = document.createElement('div');
       card.className = `promo-moments__card is-${kind} is-${role}`;
+      paintShelf(card, index);
       card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(0)}px`);
       card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(0)}px`);
       card.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
@@ -760,8 +832,9 @@
     for (let index = catalogStart; index < PROMO_PAIN_POOL; index += 1) {
       const kind = PROMO_MOMENT_CARD_KINDS[(index + 5) % PROMO_MOMENT_CARD_KINDS.length];
       const extra = document.createElement('div');
-      extra.className = `promo-moments__card is-${kind} is-drop is-catalog`;
-      extra.style.setProperty('--gx', '0px');
+        extra.className = `promo-moments__card is-${kind} is-drop is-catalog`;
+        paintShelf(extra, index);
+        extra.style.setProperty('--gx', '0px');
       extra.style.setProperty('--gy', '0px');
       extra.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
       board.appendChild(extra);
@@ -880,7 +953,13 @@
       });
     }
     if (label) label.textContent = '';
-    if (pose === 'grid') layoutStoreGrid(board);
+    if (pose === 'grid') {
+      layoutStoreGrid(board);
+      armGridEntrance(board);
+      startGridLife(board);
+    } else {
+      stopGridLife();
+    }
     if (options.instant) {
       void board.offsetWidth;
       board.classList.remove('is-instant');
@@ -2122,7 +2201,7 @@
         const mark = document.createElement('span');
         mark.className = 'promo-opening__store-mark';
         mark.setAttribute('aria-hidden', 'true');
-        mark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
+        mark.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/></svg>';
         const name = document.createElement('span');
         name.className = 'promo-opening__store-name';
         name.textContent = 'Your store';
@@ -2152,7 +2231,7 @@
       host.querySelector('.promo-moments__fest')?.remove();
       const storeMark = host.querySelector('.promo-opening__store-mark');
       if (storeMark) {
-        storeMark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
+        storeMark.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/></svg>';
         const bar = storeMark.closest('.promo-opening__store-bar');
         let brand = storeMark.closest('.promo-opening__store-brand');
         if (bar && !brand) {
@@ -2659,6 +2738,8 @@
       host.setAttribute('data-promo-pain-scene', scene);
       host.setAttribute('data-promo-pain-beat', beat);
       board.classList.toggle('is-instant', !!instant);
+      if (PROMO_PAIN_LIFE_HOLD.includes(beat)) board.dataset.life = 'hold';
+      else delete board.dataset.life;
       const browseSlot = beat === 'enter' || beat === 'open' || beat === 'back' ? 0
         : beat === 'scroll-1' ? 1
           : beat === 'scroll-2' ? 2
