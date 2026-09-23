@@ -1311,9 +1311,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   left: 50%;
   top: 44%;
-  max-height: 68%;
   z-index: 1;
-  width: 60%;
+  width: calc(60% * var(--clay-scale, 1));
+  max-height: 90%;
   aspect-ratio: 1;
   height: auto;
   margin: 0;

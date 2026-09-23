@@ -572,12 +572,12 @@
 
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
   const PROMO_MOMENT_GRID_COLS = 4;
-  const PROMO_MOMENT_CARD_KINDS = [
-    'cone', 'capsule', 'cylinder', 'cube',
-    'cylinder', 'sphere', 'capsule', 'cone',
-    'cube', 'capsule', 'cylinder', 'cube',
-  ];
-  const PROMO_CLAY_KINDS = ['sphere', 'cube', 'cylinder', 'cone', 'capsule'];
+  const PROMO_MOMENT_CARD_COUNT = 12;
+  const PROMO_CATALOG_SEED = 40721;
+  const PROMO_CLAY_KINDS = ['sphere', 'cube', 'rounded-cube', 'cylinder', 'low-cylinder', 'tall-box', 'cone', 'capsule', 'torus', 'dome'];
+  const PROMO_CLAY_TURNS = ['m20', '0', 'p20'];
+  const PROMO_CLAY_FINISHES = ['matte', 'satin'];
+  const PROMO_CLAY_SCALES = [0.8, 0.86, 0.92, 0.98, 1.04, 1.1];
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
@@ -628,12 +628,91 @@
     card.style.setProperty('--enter', String(index));
   }
 
-  function claySrc(kind) {
-    const listed = promoClayUrls()[kind];
+  function mulberry32(seed) {
+    let state = seed >>> 0;
+    return () => {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function clayFileKey(look) {
+    return `${look.kind}-${look.turn}-${look.finish}`;
+  }
+
+  function claySrc(key) {
+    const listed = promoClayUrls()[key];
     if (listed) return listed;
     const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
     const base = stamp.replace(/[^/]+(\?.*)?$/, '');
-    return `${base}promo-clay-${kind}.png`;
+    return `${base}promo-clay-${key}.png`;
+  }
+
+  function catalogLooks(count, cols) {
+    const rand = mulberry32(PROMO_CATALOG_SEED);
+    const heroes = [PROMO_MOMENT_GO_INDEX, PROMO_MOMENT_OTHER_INDEX, PROMO_MOMENT_PICK_INDEX];
+    const kinds = [];
+    const looks = [];
+    for (let index = 0; index < count; index += 1) {
+      const column = index % cols;
+      const blocked = new Set();
+      if (column > 0) blocked.add(kinds[index - 1]);
+      if (index >= cols) blocked.add(kinds[index - cols]);
+      if (heroes.includes(index)) {
+        heroes.forEach((hero) => {
+          if (hero < index) blocked.add(kinds[hero]);
+        });
+      }
+      const options = PROMO_CLAY_KINDS.filter((kind) => !blocked.has(kind));
+      const kind = options[Math.floor(rand() * options.length)];
+      kinds.push(kind);
+      looks.push({
+        kind,
+        turn: PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
+        finish: PROMO_CLAY_FINISHES[Math.floor(rand() * PROMO_CLAY_FINISHES.length)],
+        scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
+      });
+    }
+    return looks;
+  }
+
+  function accessoryLook(blockedKind) {
+    const rand = mulberry32(PROMO_CATALOG_SEED + 17);
+    const options = PROMO_CLAY_KINDS.filter((kind) => kind !== blockedKind);
+    return {
+      kind: options[Math.floor(rand() * options.length)],
+      turn: PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
+      finish: PROMO_CLAY_FINISHES[Math.floor(rand() * PROMO_CLAY_FINISHES.length)],
+      scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
+    };
+  }
+
+  function applyClayLook(card, look) {
+    PROMO_CLAY_KINDS.forEach((kind) => card.classList.remove(`is-${kind}`));
+    card.classList.add(`is-${look.kind}`);
+    card.dataset.clayKind = look.kind;
+    card.dataset.clayTurn = look.turn;
+    card.dataset.clayFinish = look.finish;
+    card.style.setProperty('--clay-scale', String(look.scale));
+    const img = card.querySelector('.promo-moments__glyph img');
+    const src = claySrc(clayFileKey(look));
+    if (img && img.getAttribute('src') !== src) img.src = src;
+  }
+
+  const PROMO_CATALOG_COLS = 6;
+
+  function paintCatalogClay(board) {
+    if (!board || board.dataset.clayReady === '1') return;
+    const cards = [...board.querySelectorAll('.promo-moments__card:not(.is-extra)')];
+    const looks = catalogLooks(cards.length, PROMO_CATALOG_COLS);
+    cards.forEach((card, index) => applyClayLook(card, looks[index]));
+    const extra = board.querySelector('.promo-moments__card.is-extra');
+    const pick = looks[PROMO_MOMENT_PICK_INDEX];
+    if (extra && pick) applyClayLook(extra, accessoryLook(pick.kind));
+    board.dataset.clayReady = '1';
   }
 
   function promoClayUrls() {
@@ -692,13 +771,12 @@
     return 'drop';
   }
 
-  function momentGlyph(kind) {
+  function momentGlyph() {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
     const img = document.createElement('img');
     img.alt = '';
     img.draggable = false;
-    img.src = claySrc(PROMO_CLAY_KINDS.includes(kind) ? kind : 'sphere');
     glyph.appendChild(img);
     return glyph;
   }
@@ -711,10 +789,10 @@
     return pill;
   }
 
-  function momentPhoto(kind, index) {
+  function momentPhoto(index) {
     const photo = document.createElement('span');
     photo.className = 'promo-moments__photo';
-    photo.appendChild(momentGlyph(kind, index));
+    photo.appendChild(momentGlyph());
     const badge = momentBadge(index);
     if (badge) photo.appendChild(badge);
     return photo;
@@ -799,34 +877,31 @@
     board.className = 'promo-moments__board is-pose-grid';
     board.dataset.pose = 'grid';
     if (prefersReducedMotion()) board.classList.add('is-reduced');
-    for (let index = 0; index < PROMO_MOMENT_CARD_KINDS.length; index += 1) {
+    for (let index = 0; index < PROMO_MOMENT_CARD_COUNT; index += 1) {
       const column = index % PROMO_MOMENT_GRID_COLS;
       const row = Math.floor(index / PROMO_MOMENT_GRID_COLS);
       const role = momentShapeRole(index);
-      const kind = PROMO_MOMENT_CARD_KINDS[index];
       const card = document.createElement('div');
-      card.className = `promo-moments__card is-${kind} is-${role}`;
+      card.className = `promo-moments__card is-${role}`;
       paintShelf(card, index);
       card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(0)}px`);
       card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(0)}px`);
-      card.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
+      card.append(momentPhoto(index), momentMeta(index), momentAdd());
       if (role === 'pick') card.appendChild(momentKept());
       board.appendChild(card);
     }
-    const catalogStart = PROMO_MOMENT_CARD_KINDS.length;
-    for (let index = catalogStart; index < PROMO_PAIN_POOL; index += 1) {
-      const kind = PROMO_MOMENT_CARD_KINDS[(index + 5) % PROMO_MOMENT_CARD_KINDS.length];
+    for (let index = PROMO_MOMENT_CARD_COUNT; index < PROMO_PAIN_POOL; index += 1) {
       const extra = document.createElement('div');
-        extra.className = `promo-moments__card is-${kind} is-drop is-catalog`;
-        paintShelf(extra, index);
-        extra.style.setProperty('--gx', '0px');
+      extra.className = 'promo-moments__card is-drop is-catalog';
+      paintShelf(extra, index);
+      extra.style.setProperty('--gx', '0px');
       extra.style.setProperty('--gy', '0px');
-      extra.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
+      extra.append(momentPhoto(index), momentMeta(index), momentAdd());
       board.appendChild(extra);
     }
     const accessory = document.createElement('div');
-    accessory.className = 'promo-moments__card is-cylinder is-extra';
-    accessory.append(momentPhoto('cylinder', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
+    accessory.className = 'promo-moments__card is-extra';
+    accessory.append(momentPhoto(PROMO_MOMENT_CARD_COUNT), momentMeta(PROMO_MOMENT_CARD_COUNT), momentAdd());
     board.appendChild(accessory);
     board.appendChild(momentCompare());
     const orbits = [
@@ -916,6 +991,7 @@
     });
     board.dataset.painCols = String(cols);
     board.dataset.painPitch = String(pitchY);
+    paintCatalogClay(board);
   }
 
   function applyMomentPose(stage, pose, options = {}) {
