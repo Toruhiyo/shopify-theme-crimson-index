@@ -1225,17 +1225,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: hidden;
 }
 
-.promo-opening.is-pain .promo-opening__moments-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  box-shadow:
-    inset 0 36px 42px -14px rgba(55, 50, 46, 0.2),
-    inset 0 -44px 48px -12px rgba(55, 50, 46, 0.22);
-}
-
 .promo-moments__board {
   position: absolute;
   left: 50%;
@@ -1505,7 +1494,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   border: none;
   box-shadow: none;
   opacity: 0;
-  transform: translate3d(var(--row-nudge, 0px), var(--row-compare-y, 170px), 0);
+  transform: translate3d(var(--row-nudge, 0px), calc(var(--row-compare-y, 170px) - var(--row-lift, 0px)), 0);
   transform-origin: center top;
   pointer-events: none;
 }
@@ -1910,16 +1899,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick {
-  transform: translate3d(calc(-50% + var(--row-nudge, 0px)), calc(-50% - 18px), 0);
+  transform: translate3d(calc(-50% + var(--row-nudge, 0px)), calc(-50% - var(--row-lift, 0px) - 18px), 0);
 }
 
 .is-pose-choice .promo-moments__card.is-go {
-  transform: translate3d(calc(-50% - var(--row-seat, 256px) + var(--row-nudge, 0px)), -50%, 0);
+  transform: translate3d(calc(-50% - var(--row-seat, 256px) + var(--row-nudge, 0px)), calc(-50% - var(--row-lift, 0px)), 0);
 }
 
 .is-pose-choice .promo-moments__card.is-other {
   opacity: 1;
-  transform: translate3d(calc(-50% + var(--row-seat, 256px) + var(--row-nudge, 0px)), -50%, 0);
+  transform: translate3d(calc(-50% + var(--row-seat, 256px) + var(--row-nudge, 0px)), calc(-50% - var(--row-lift, 0px)), 0);
 }
 
 .is-pose-choice .promo-moments__card.is-pick::after,
@@ -2788,22 +2777,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-pair-pick {
   from { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), -50%, 0); }
-  to { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), -50%, 0); }
+  to { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), calc(-50% - var(--row-lift, 0px)), 0); }
 }
 
 @keyframes promo-moments-pair-lift {
-  from { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), -50%, 0); }
-  to { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), calc(-50% - 18px), 0); }
+  from { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), calc(-50% - var(--row-lift, 0px)), 0); }
+  to { transform: translate3d(calc(-50% + var(--row-nudge, 0px)), calc(-50% - var(--row-lift, 0px) - 18px), 0); }
 }
 
 @keyframes promo-moments-compare-in {
-  from { opacity: 0; transform: translate3d(var(--row-nudge, 0px), calc(var(--row-compare-y, 170px) + 16px), 0) scaleY(0.92); }
-  to { opacity: 1; transform: translate3d(var(--row-nudge, 0px), var(--row-compare-y, 170px), 0) scaleY(1); }
+  from { opacity: 0; transform: translate3d(var(--row-nudge, 0px), calc(var(--row-compare-y, 170px) - var(--row-lift, 0px) + 16px), 0) scaleY(0.92); }
+  to { opacity: 1; transform: translate3d(var(--row-nudge, 0px), calc(var(--row-compare-y, 170px) - var(--row-lift, 0px)), 0) scaleY(1); }
 }
 
 @keyframes promo-moments-compare-fold {
-  from { opacity: 1; transform: translate3d(var(--row-nudge, 0px), var(--row-compare-y, 170px), 0) scaleY(1); }
-  to { opacity: 0; transform: translate3d(var(--row-nudge, 0px), var(--row-compare-y, 170px), 0) scaleY(0.15); }
+  from { opacity: 1; transform: translate3d(var(--row-nudge, 0px), calc(var(--row-compare-y, 170px) - var(--row-lift, 0px)), 0) scaleY(1); }
+  to { opacity: 0; transform: translate3d(var(--row-nudge, 0px), calc(var(--row-compare-y, 170px) - var(--row-lift, 0px)), 0) scaleY(0.15); }
 }
 
 @keyframes promo-moments-sheen {
