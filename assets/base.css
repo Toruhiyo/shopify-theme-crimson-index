@@ -1455,21 +1455,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 780px;
-  margin: 0 0 0 -390px;
-  padding: 0.42rem 0.2rem;
+  width: 768px;
+  margin: 0 0 0 -384px;
+  padding: 0.2rem 0;
   display: grid;
-  gap: 0.22rem;
-  border-radius: 18px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg) 55%, transparent), color-mix(in srgb, var(--color-bg) 25%, transparent));
-  -webkit-backdrop-filter: blur(30px) saturate(1.6);
-  backdrop-filter: blur(30px) saturate(1.6);
-  border: 1px solid color-mix(in srgb, var(--color-bg) 65%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
-    0 16px 40px color-mix(in srgb, var(--color-fg) 6%, transparent);
+  gap: 0;
+  border-radius: 16px;
+  background: #F7F6F4;
+  border: 1px solid color-mix(in srgb, var(--color-fg) 7%, transparent);
+  box-shadow: none;
   opacity: 0;
-  transform: translate3d(0, 188px, 0);
+  transform: translate3d(0, 170px, 0);
   transform-origin: center top;
   pointer-events: none;
 }
@@ -1479,20 +1475,40 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  min-height: 1.15rem;
+  min-height: 1.7rem;
+}
+
+.promo-moments__compare-row + .promo-moments__compare-row {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-fg) 7%, transparent);
 }
 
 .promo-moments__compare-row .promo-moments__spec-icon {
   position: absolute;
-  left: 0.55rem;
+  left: 0.85rem;
   top: 50%;
-  width: 1.05rem;
-  height: 1.05rem;
-  margin-top: -0.525rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: -0.575rem;
+  color: #8A847C;
 }
 
 .promo-moments__compare-row .promo-moments__spec-icon svg {
-  stroke-width: 1.75;
+  fill: currentColor;
+  stroke: none;
+  stroke-width: 0;
+}
+
+.promo-moments__compare-cell .promo-moments__mark {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, #F7F6F4);
+}
+
+.promo-moments__compare-cell .promo-moments__mark svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  stroke-width: 1.8;
 }
 
 .promo-moments__compare-cell {
@@ -2655,13 +2671,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-compare-in {
-  from { opacity: 0; transform: translate3d(0, 230px, 0) scaleY(0.86); }
-  to { opacity: 1; transform: translate3d(0, 188px, 0) scaleY(1); }
+  from { opacity: 0; transform: translate3d(0, 186px, 0) scaleY(0.92); }
+  to { opacity: 1; transform: translate3d(0, 170px, 0) scaleY(1); }
 }
 
 @keyframes promo-moments-compare-fold {
-  from { opacity: 1; transform: translate3d(0, 188px, 0) scaleY(1); }
-  to { opacity: 0; transform: translate3d(0, 188px, 0) scaleY(0.15); }
+  from { opacity: 1; transform: translate3d(0, 170px, 0) scaleY(1); }
+  to { opacity: 0; transform: translate3d(0, 170px, 0) scaleY(0.15); }
 }
 
 @keyframes promo-moments-sheen {

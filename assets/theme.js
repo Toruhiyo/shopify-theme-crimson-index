@@ -593,9 +593,9 @@
     triangle: '<path d="M50 0 100 100H0z"/>',
     hexagon: '<path d="M50 0 100 25 100 75 50 100 0 75 0 25z"/>',
     pill: '<rect y="22" width="100" height="56" rx="28"/>',
-    'spec-bolt': '<path d="M13 3.2 6.2 13h4.6l-.8 7.8L17.8 11H13.2z"/>',
-    'spec-gauge': '<path d="M4.8 16.2a7.2 7.2 0 1 1 14.4 0"/><path d="M12 16.2 15.4 9.6"/>',
-    'spec-shield': '<path d="M12 3.4 18.8 6.1v5.2c0 3.8-2.6 6.6-6.8 8.6-4.2-2-6.8-4.8-6.8-8.6V6.1z"/>',
+    'spec-bolt': '<path d="M13.2 2.2 5.4 13.2h5.2l-1.1 8.6 8.6-12.2h-5.4z"/>',
+    'spec-gauge': '<path fill-rule="evenodd" d="M3.2 17.6a8.8 8.8 0 0 1 17.6 0h-3.4a5.4 5.4 0 0 0-10.8 0z"/><path d="M11.1 16.8 16.2 7.6 13.4 16.2z"/>',
+    'spec-shield': '<path d="M12 2.4 20.2 5.6v6.2c0 4.4-3 7.6-8.2 9.8-5.2-2.2-8.2-5.4-8.2-9.8V5.6z"/>',
   };
 
   function momentShapeRole(index) {
