@@ -184,14 +184,14 @@
   const PROMO_PAIN_TYPE_CHAR_MS = 14;
   const PROMO_PAIN_ZOOM_MS = 480;
   const PROMO_PAIN_EXIT_MS = 260;
-  const PROMO_PAIN_LINE_1 = 'I want a portable laptop with long battery life.';
-  const PROMO_PAIN_LINE_2 = 'Which one would you pick for coding?';
+  const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
+  const PROMO_PAIN_LINE_2 = 'Which one would you pick for me?';
   const PROMO_PAIN_ANSWER_1 = [
-    'Several portable laptops are listed in the catalog.',
-    'Battery life depends on the configuration you select.',
+    'You can browse our full collection.',
+    'Use the filters to narrow by size and weight.',
   ];
-  const PROMO_PAIN_LINKS = ['View laptop list', 'Battery life article'];
-  const PROMO_PAIN_ANSWER_2 = 'Performance varies by model. Check the Specifications tab, or I can open a support ticket.';
+  const PROMO_PAIN_LINKS = ['View collection', 'Size guide'];
+  const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
     ['grid', 0],
@@ -567,10 +567,17 @@
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
   const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_CARD_KINDS = [
-    'triangle', 'pill', 'diamond', 'ring',
-    'star', 'circle', 'pill', 'diamond',
-    'ring', 'star', 'pill', 'square',
+    'triangle', 'pill', 'hexagon', 'square',
+    'hexagon', 'circle', 'pill', 'triangle',
+    'square', 'pill', 'hexagon', 'square',
   ];
+  const PROMO_MOMENT_SHAPE_SIZE = [58, 64, 55, 61, 63, 60, 56, 65, 57, 62, 59, 55, 58];
+  const PROMO_MOMENT_SHAPE_NUDGE = {
+    2: [5, -4],
+    6: [-4, 5],
+    8: [6, 4],
+    10: [-5, -6],
+  };
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
@@ -581,14 +588,11 @@
   const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
   const PROMO_MOMENT_NEW_INDEXES = [0];
   const PROMO_MOMENT_ICONS = {
-    circle: '<circle cx="12" cy="12" r="7.2"/>',
-    square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
-    triangle: '<path d="M12 4.6 19.4 18.2H4.6z"/>',
-    pentagon: '<path d="M12 4.2 19.3 9.6 16.5 18.3 7.5 18.3 4.7 9.6z"/>',
-    pill: '<rect x="4.2" y="7.2" width="15.6" height="9.6" rx="4.8"/>',
-    diamond: '<path d="M12 4.2 19.8 12 12 19.8 4.2 12z"/>',
-    ring: '<path fill-rule="evenodd" d="M12 4.8a7.2 7.2 0 1 0 .01 0zM12 8.6a3.4 3.4 0 1 1-.01 0z"/>',
-    star: '<path d="M12 3.4 14.3 9.2 20.5 9.5 16 13.4 17.6 19.4 12 16.2 6.4 19.4 8 13.4 3.5 9.5 9.7 9.2z"/>',
+    circle: '<circle cx="50" cy="50" r="50"/>',
+    square: '<rect width="100" height="100" rx="18"/>',
+    triangle: '<path d="M50 0 100 100H0z"/>',
+    hexagon: '<path d="M50 0 100 25 100 75 50 100 0 75 0 25z"/>',
+    pill: '<rect y="22" width="100" height="56" rx="28"/>',
     'spec-bolt': '<path d="M13 3.2 6.2 13h4.6l-.8 7.8L17.8 11H13.2z"/>',
     'spec-gauge': '<path d="M4.8 16.2a7.2 7.2 0 1 1 14.4 0"/><path d="M12 16.2 15.4 9.6"/>',
     'spec-shield': '<path d="M12 3.4 18.8 6.1v5.2c0 3.8-2.6 6.6-6.8 8.6-4.2-2-6.8-4.8-6.8-8.6V6.1z"/>',
@@ -601,10 +605,17 @@
     return 'drop';
   }
 
-  function momentGlyph(kind) {
+  function momentGlyph(kind, index) {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
-    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
+    glyph.style.setProperty('--shape', `${PROMO_MOMENT_SHAPE_SIZE[index] || 60}%`);
+    const nudge = PROMO_MOMENT_SHAPE_NUDGE[index];
+    if (nudge) {
+      glyph.style.setProperty('--nudge-x', `${nudge[0]}%`);
+      glyph.style.setProperty('--nudge-y', `${nudge[1]}%`);
+    }
+    const gradientId = `promo-shape-${index}`;
+    glyph.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="${gradientId}" cx="22%" cy="16%" r="72%"><stop offset="0%" stop-color="#E7E3DC"/><stop offset="46%" stop-color="#DCD8D1"/><stop offset="100%" stop-color="#DCD8D1"/></radialGradient></defs><g fill="url(#${gradientId})">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
     return glyph;
   }
 
@@ -619,7 +630,7 @@
   function momentPhoto(kind, index) {
     const photo = document.createElement('span');
     photo.className = 'promo-moments__photo';
-    photo.appendChild(momentGlyph(kind));
+    photo.appendChild(momentGlyph(kind, index));
     const badge = momentBadge(index);
     if (badge) photo.appendChild(badge);
     return photo;
@@ -718,8 +729,8 @@
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
-    accessory.className = 'promo-moments__card is-pentagon is-extra';
-    accessory.append(momentPhoto('pentagon', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
+    accessory.className = 'promo-moments__card is-hexagon is-extra';
+    accessory.append(momentPhoto('hexagon', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
     board.appendChild(accessory);
     board.appendChild(momentCompare());
     const orbits = [

@@ -1300,23 +1300,25 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   min-height: calc(var(--card-h) * 0.5);
   overflow: hidden;
   border-radius: 12em;
-  background: var(--color-card);
+  background: #F1EFEE;
 }
 
 .promo-moments__glyph {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: calc(50% + var(--nudge-x, 0%));
+  top: calc(50% + var(--nudge-y, 0%));
   z-index: 1;
-  width: 36%;
+  width: var(--shape, 60%);
   aspect-ratio: 1;
   height: auto;
   margin: 0;
   display: block;
-  color: color-mix(in srgb, var(--color-muted-fg) 32%, var(--color-card));
+  color: #DCD8D1;
   opacity: 1;
   transform: translate(-50%, -50%);
   transform-origin: center center;
+  filter: none;
+  box-shadow: none;
   transition:
     transform 380ms var(--promo-spring),
     opacity 380ms var(--promo-spring);
@@ -1326,7 +1328,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   height: 100%;
   overflow: visible;
-  fill: currentColor;
+  fill: none;
   stroke: none;
   filter: none;
 }
