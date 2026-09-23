@@ -1381,32 +1381,30 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__glyph {
   position: absolute;
-  left: calc(50% + var(--nudge-x, 0%));
-  top: calc(50% + var(--nudge-y, 0%));
+  left: 50%;
+  top: 50%;
   z-index: 1;
-  width: var(--shape, 60%);
+  width: 60%;
   aspect-ratio: 1;
   height: auto;
   margin: 0;
   display: block;
-  color: var(--shape, #D9D4CC);
   opacity: 1;
   transform: translate(-50%, -50%);
   transform-origin: center center;
-  filter: none;
+  filter: var(--clay, none);
   box-shadow: none;
   transition:
     transform 380ms var(--promo-spring),
     opacity 380ms var(--promo-spring);
 }
 
-.promo-moments__glyph svg {
+.promo-moments__glyph img {
   width: 100%;
   height: 100%;
-  overflow: visible;
-  fill: none;
-  stroke: none;
-  filter: none;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .promo-moments__spec-icon svg,
@@ -1428,10 +1426,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   stroke-linejoin: round;
 }
 
-.promo-moments__glyph svg {
-  stroke-width: 1.25;
-}
-
 .promo-moments__spec-icon svg {
   stroke-width: 1;
 }
@@ -1449,7 +1443,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   vector-effect: none;
 }
 
-.promo-moments__glyph svg *,
 .promo-moments__spec-icon svg *,
 .promo-moments__cart svg * {
   vector-effect: non-scaling-stroke;

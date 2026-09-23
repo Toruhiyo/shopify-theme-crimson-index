@@ -572,17 +572,11 @@
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
   const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_CARD_KINDS = [
-    'triangle', 'pill', 'hexagon', 'square',
-    'hexagon', 'circle', 'pill', 'triangle',
-    'square', 'pill', 'hexagon', 'square',
+    'cone', 'capsule', 'cylinder', 'cube',
+    'cylinder', 'sphere', 'capsule', 'cone',
+    'cube', 'capsule', 'cylinder', 'cube',
   ];
-  const PROMO_MOMENT_SHAPE_SIZE = [58, 64, 55, 61, 63, 60, 56, 65, 57, 62, 59, 55, 58];
-  const PROMO_MOMENT_SHAPE_NUDGE = {
-    2: [5, -4],
-    6: [-4, 5],
-    8: [6, 4],
-    10: [-5, -6],
-  };
+  const PROMO_CLAY_KINDS = ['sphere', 'cube', 'cylinder', 'cone', 'capsule'];
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
@@ -593,11 +587,6 @@
   const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
   const PROMO_MOMENT_NEW_INDEXES = [0];
   const PROMO_MOMENT_ICONS = {
-    circle: '<circle cx="50" cy="50" r="50"/>',
-    square: '<rect width="100" height="100" rx="18"/>',
-    triangle: '<path d="M50 0 100 100H0z"/>',
-    hexagon: '<path d="M50 0 100 25 100 75 50 100 0 75 0 25z"/>',
-    pill: '<rect y="22" width="100" height="56" rx="28"/>',
     'spec-bolt': '<path d="M13.2 2.2 5.4 13.2h5.2l-1.1 8.6 8.6-12.2h-5.4z"/>',
     'spec-gauge': '<path fill-rule="evenodd" d="M3.2 17.6a8.8 8.8 0 0 1 17.6 0h-3.4a5.4 5.4 0 0 0-10.8 0z"/><path d="M11.1 16.8 16.2 7.6 13.4 16.2z"/>',
     'spec-shield': '<path d="M12 2.4 20.2 5.6v6.2c0 4.4-3 7.6-8.2 9.8-5.2-2.2-8.2-5.4-8.2-9.8V5.6z"/>',
@@ -608,6 +597,12 @@
     { shelf: '#F5ECE8', deep: '#EEE5E1', shape: '#DAD1CD', shade: '#CAC1BD' },
     { shelf: '#EEF1EA', deep: '#E7EAE3', shape: '#D3D6CF', shade: '#C3C6BF' },
     { shelf: '#EFEEEA', deep: '#E8E7E3', shape: '#D4D3CF', shade: '#C4C3BF' },
+  ];
+  const PROMO_CLAY_TINT = [
+    'sepia(0.42) hue-rotate(12deg) saturate(0.3)',
+    'sepia(0.38) hue-rotate(336deg) saturate(0.34)',
+    'sepia(0.2) hue-rotate(78deg) saturate(0.28)',
+    'sepia(0.1) hue-rotate(18deg) saturate(0.16)',
   ];
   const PROMO_GRID_STAGGER_MS = 40;
   const PROMO_GRID_LIFE_MS = 4000;
@@ -622,16 +617,32 @@
     2, 1, 1, 1, 0, 3, 0, 0, 3, 0, 1, 0,
   ];
 
-  function shelfFor(index) {
-    return PROMO_SHELF[PROMO_SHELF_AT[index % PROMO_SHELF_AT.length]];
-  }
-
   function paintShelf(card, index) {
-    const tone = shelfFor(index);
+    const toneIndex = PROMO_SHELF_AT[index % PROMO_SHELF_AT.length];
+    const tone = PROMO_SHELF[toneIndex];
     card.style.setProperty('--shelf', tone.shelf);
     card.style.setProperty('--shelf-deep', tone.deep);
     card.style.setProperty('--shape', tone.shape);
+    card.style.setProperty('--clay', PROMO_CLAY_TINT[toneIndex]);
     card.style.setProperty('--enter', String(index));
+  }
+
+  function claySrc(kind) {
+    const listed = promoClayUrls()[kind];
+    if (listed) return listed;
+    const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
+    const base = stamp.replace(/[^/]+(\?.*)?$/, '');
+    return `${base}promo-clay-${kind}.png`;
+  }
+
+  function promoClayUrls() {
+    if (promoClayUrls.cache) return promoClayUrls.cache;
+    try {
+      promoClayUrls.cache = JSON.parse(document.documentElement.getAttribute('data-promo-clay') || '{}');
+    } catch (error) {
+      promoClayUrls.cache = {};
+    }
+    return promoClayUrls.cache;
   }
 
   function armGridEntrance(board) {
@@ -680,42 +691,14 @@
     return 'drop';
   }
 
-  function momentShapeOpen(kind) {
-    if (kind === 'circle') return '<circle cx="50" cy="50" r="50"';
-    if (kind === 'square') return '<rect width="100" height="100" rx="18"';
-    if (kind === 'pill') return '<rect y="22" width="100" height="56" rx="28"';
-    if (kind === 'triangle') return '<path d="M50 0 100 100H0z"';
-    return '<path d="M50 0 100 25 100 75 50 100 0 75 0 25z"';
-  }
-
-  function momentShapeTag(kind, attrs) {
-    return `${momentShapeOpen(kind)} ${attrs}/>`;
-  }
-
-  function momentFacetTag(kind, hi) {
-    if (kind === 'square') return `<path d="M18 0h64a18 18 0 0 1 18 18v16H0V18A18 18 0 0 1 18 0z" fill="${hi}"/>`;
-    if (kind === 'hexagon') return `<path d="M50 0 100 25 0 25z" fill="${hi}"/>`;
-    return '';
-  }
-
-  function momentGlyph(kind, index) {
+  function momentGlyph(kind) {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
-    const shape = PROMO_MOMENT_SHAPE_SIZE[index % PROMO_MOMENT_SHAPE_SIZE.length] || 60;
-    glyph.style.setProperty('--shape', `${shape}%`);
-    const nudge = PROMO_MOMENT_SHAPE_NUDGE[index]
-      || (index >= PROMO_MOMENT_CARD_KINDS.length && index % 4 === 1
-        ? (index % 8 === 1 ? [5, -4] : [-4, 5])
-        : null);
-    if (nudge) {
-      glyph.style.setProperty('--nudge-x', `${nudge[0]}%`);
-      glyph.style.setProperty('--nudge-y', `${nudge[1]}%`);
-    }
-    const tone = shelfFor(index);
-    const id = `promo-shape-${index}`;
-    const bottom = kind === 'pill' ? 78 : 100;
-    const base = kind === 'circle' ? `url(#${id}-sphere)` : tone.shape;
-    glyph.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="${id}-lit" cx="18%" cy="12%" r="80%"><stop offset="0%" stop-color="#fff" stop-opacity="0.35"/><stop offset="60%" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="${id}-shade" cx="86%" cy="88%" r="75%"><stop offset="0%" stop-color="${tone.shade}" stop-opacity="0.12"/><stop offset="62%" stop-color="${tone.shade}" stop-opacity="0"/></radialGradient><radialGradient id="${id}-sphere" cx="32%" cy="28%" r="78%"><stop offset="0%" stop-color="${tone.shelf}"/><stop offset="46%" stop-color="${tone.shape}"/><stop offset="100%" stop-color="${tone.shade}"/></radialGradient><linearGradient id="${id}-edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${tone.shelf}"/><stop offset="42%" stop-color="${tone.shelf}" stop-opacity="0.4"/><stop offset="68%" stop-color="${tone.shelf}" stop-opacity="0"/></linearGradient><clipPath id="${id}-clip">${momentShapeTag(kind, '')}</clipPath></defs><ellipse cx="50" cy="${bottom}" rx="30" ry="6" fill="#1C1917" opacity="0.25" style="filter:blur(10px);transform:translateY(6px)"/><g clip-path="url(#${id}-clip)">${momentShapeTag(kind, `fill="${base}"`)}${momentFacetTag(kind, tone.shelf)}${momentShapeTag(kind, `fill="url(#${id}-lit)"`)}${momentShapeTag(kind, `fill="url(#${id}-shade)"`)}${momentShapeTag(kind, `fill="none" stroke="url(#${id}-edge)" stroke-width="2" vector-effect="non-scaling-stroke"`)}</g></svg>`;
+    const img = document.createElement('img');
+    img.alt = '';
+    img.draggable = false;
+    img.src = claySrc(PROMO_CLAY_KINDS.includes(kind) ? kind : 'sphere');
+    glyph.appendChild(img);
     return glyph;
   }
 
@@ -841,8 +824,8 @@
       board.appendChild(extra);
     }
     const accessory = document.createElement('div');
-    accessory.className = 'promo-moments__card is-hexagon is-extra';
-    accessory.append(momentPhoto('hexagon', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
+    accessory.className = 'promo-moments__card is-cylinder is-extra';
+    accessory.append(momentPhoto('cylinder', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
     board.appendChild(accessory);
     board.appendChild(momentCompare());
     const orbits = [

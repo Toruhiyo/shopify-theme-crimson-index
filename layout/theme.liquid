@@ -11,7 +11,8 @@
 {%- if promo_bar_class contains 'has-promo-bar' -%}
   {%- assign has_promo_bar = true -%}
 {%- endif -%}
-<html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize data-promo-bizmis-stamp="{{ 'bizmis-logo-full-white-transparent.png' | asset_url }}">
+{%- capture promo_clay_urls -%}{"sphere":{{ 'promo-clay-sphere.png' | asset_url | json }},"cube":{{ 'promo-clay-cube.png' | asset_url | json }},"cylinder":{{ 'promo-clay-cylinder.png' | asset_url | json }},"cone":{{ 'promo-clay-cone.png' | asset_url | json }},"capsule":{{ 'promo-clay-capsule.png' | asset_url | json }}}{%- endcapture -%}
+<html class="no-js{% if request.query_string contains 'promo_video=mock' or request.query_string contains 'promo_video=unattended' %} is-promo-greyscale{% endif %}" lang="{{ request.locale.iso_code }}" data-overlayscrollbars-initialize data-promo-bizmis-stamp="{{ 'bizmis-logo-full-white-transparent.png' | asset_url }}" data-promo-clay="{{ promo_clay_urls | escape }}">
 <head>
   <meta charset="utf-8">
   <script>
