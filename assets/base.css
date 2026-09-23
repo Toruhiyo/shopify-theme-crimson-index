@@ -2823,25 +2823,25 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__slide-name,
 .promo-opening__slide-sector {
   margin: 0;
+}
+
+.promo-opening__slide-sector {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   color: var(--promo-store-accent, #1d1d1f);
 }
 
 .promo-opening__slide-name {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.45rem;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-}
-
-.promo-opening__slide-sector {
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   line-height: 1.2;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  opacity: 0.8;
+  color: rgba(29, 29, 31, 0.46);
 }
 
 .promo-opening__slide-card {
