@@ -709,35 +709,6 @@
     const celebrate = document.createElement('div');
     celebrate.className = 'promo-moments__celebrate';
     celebrate.setAttribute('aria-hidden', 'true');
-    const bloom = document.createElement('span');
-    bloom.className = 'promo-moments__bloom';
-    celebrate.appendChild(bloom);
-    for (let halo = 1; halo <= 3; halo += 1) {
-      const ring = document.createElement('span');
-      ring.className = `promo-moments__halo is-halo-${halo}`;
-      celebrate.appendChild(ring);
-    }
-    [
-      ['-1', '-0.12'],
-      ['1', '-0.18'],
-      ['0.15', '-1'],
-      ['-0.2', '1'],
-      ['0.82', '0.62'],
-      ['-0.88', '0.5'],
-      ['0.68', '-0.82'],
-      ['-0.62', '-0.78'],
-    ].forEach(([x, y], index) => {
-      const spark = document.createElement('span');
-      spark.className = 'promo-moments__spark';
-      spark.style.setProperty('--sx', x);
-      spark.style.setProperty('--sy', y);
-      spark.style.setProperty('--sd', `${index * 24}ms`);
-      celebrate.appendChild(spark);
-    });
-    const burstCheck = document.createElement('span');
-    burstCheck.className = 'promo-moments__burst-check';
-    burstCheck.appendChild(momentMark('yes'));
-    celebrate.appendChild(burstCheck);
     board.append(added, plus, outline, celebrate);
     board.querySelector('.promo-moments__cart')?.remove();
     board.querySelector('.promo-moments__fly')?.remove();
@@ -2000,7 +1971,7 @@
         const cart = document.createElement('div');
         cart.className = 'promo-moments__cart';
         cart.setAttribute('aria-hidden', 'true');
-        cart.innerHTML = '<span class="promo-moments__cart-burst" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
+        cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
         bar.append(brand, cart);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
@@ -2015,32 +1986,7 @@
         browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
         host.querySelector('.promo-opening__store')?.prepend(browser);
       }
-      if (!host.querySelector('.promo-moments__fest')) {
-        const fest = document.createElement('div');
-        fest.className = 'promo-moments__fest';
-        fest.setAttribute('aria-hidden', 'true');
-        const wash = document.createElement('span');
-        wash.className = 'promo-moments__wash';
-        fest.appendChild(wash);
-        for (let index = 1; index <= 4; index += 1) {
-          const ring = document.createElement('span');
-          ring.className = `promo-moments__fest-ring is-fr-${index}`;
-          fest.appendChild(ring);
-        }
-        const orb = document.createElement('span');
-        orb.className = 'promo-moments__to-cart';
-        const festCheck = document.createElement('span');
-        festCheck.className = 'promo-moments__fest-check';
-        festCheck.appendChild(momentMark('yes'));
-        fest.append(orb, festCheck);
-        const cartForFest = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
-        (cartForFest || host.querySelector('.promo-opening__store'))?.appendChild(fest);
-      }
-      const headerCartForFest = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
-      const festNode = host.querySelector('.promo-moments__fest');
-      if (headerCartForFest && festNode && festNode.parentElement !== headerCartForFest) {
-        headerCartForFest.appendChild(festNode);
-      }
+      host.querySelector('.promo-moments__fest')?.remove();
       const storeMark = host.querySelector('.promo-opening__store-mark');
       if (storeMark) {
         storeMark.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
@@ -2059,14 +2005,7 @@
           brand.appendChild(name);
         }
       }
-      host.querySelectorAll('.promo-moments__cart-piece').forEach((piece) => piece.remove());
-      const headerCart = host.querySelector('.promo-opening__store-bar .promo-moments__cart');
-      if (headerCart && !headerCart.querySelector('.promo-moments__cart-burst')) {
-        const burst = document.createElement('span');
-        burst.className = 'promo-moments__cart-burst';
-        burst.setAttribute('aria-hidden', 'true');
-        headerCart.prepend(burst);
-      }
+      host.querySelectorAll('.promo-moments__cart-piece, .promo-moments__cart-burst').forEach((piece) => piece.remove());
       if (!host.querySelector('.promo-moments__fly')) {
         const fly = document.createElement('span');
         fly.className = 'promo-moments__fly';
