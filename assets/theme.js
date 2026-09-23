@@ -182,6 +182,7 @@
   const PROMO_PAIN_POOL = 48;
   const PROMO_PAIN_CARD_W = 150;
   const PROMO_PAIN_CARD_H = 200;
+  const PROMO_STORE_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
   const PROMO_PAIN_PAD = 24;
   const PROMO_PAIN_SCROLL_MS = 1800;
   const PROMO_PAIN_TYPE_CHAR_MS = 16;
@@ -880,25 +881,19 @@
     return board;
   }
 
-  function collectionChrome() {
-    const row = document.createElement('div');
-    row.className = 'promo-opening__collection';
-    row.innerHTML = '<div class="promo-opening__collection-copy"><span class="promo-opening__collection-bar"></span><span class="promo-opening__collection-line"></span></div><div class="promo-opening__collection-tools"><span class="promo-opening__collection-pill"></span><span class="promo-opening__collection-count"></span><span class="promo-opening__collection-sort"></span></div>';
-    return row;
-  }
-
   function layoutStoreGrid(board) {
     const stage = board?.parentElement;
     if (!stage || stage.clientWidth < 240 || stage.clientHeight < 160) return;
     const shiftRaw = getComputedStyle(board).getPropertyValue('--promo-board-x').trim();
     const shift = shiftRaw.endsWith('rem') ? parseFloat(shiftRaw) * 16 : (parseFloat(shiftRaw) || 0);
-    const cols = PROMO_MOMENT_GRID_COLS;
     const contentWidth = stage.clientWidth;
-    const cardW = contentWidth * 0.22;
-    const gutter = contentWidth * 0.025;
+    const cardW = PROMO_PAIN_CARD_W;
+    const cardH = PROMO_PAIN_CARD_H;
+    const minGutter = 16;
+    const cols = Math.min(6, Math.max(4, Math.floor((contentWidth + minGutter) / (cardW + minGutter))));
+    const gutter = (contentWidth - cols * cardW) / Math.max(cols - 1, 1);
     const pitchX = cardW + gutter;
-    const cardH = (stage.clientHeight - gutter) / 2;
-    const pitchY = cardH + gutter;
+    const pitchY = cardH + 16;
     const inset = (contentWidth - (cols * cardW + (cols - 1) * gutter)) / 2;
     const gx0 = inset + cardW / 2 - (contentWidth / 2 + shift);
     const gy0 = -stage.clientHeight / 2 + cardH / 2;
@@ -2199,7 +2194,7 @@
         const mark = document.createElement('span');
         mark.className = 'promo-opening__store-mark';
         mark.setAttribute('aria-hidden', 'true');
-        mark.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/></svg>';
+        mark.innerHTML = PROMO_STORE_MARK;
         const name = document.createElement('span');
         name.className = 'promo-opening__store-name';
         name.textContent = 'Your store';
@@ -2209,15 +2204,10 @@
         cart.setAttribute('aria-hidden', 'true');
         cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
         bar.append(brand, cart);
-        const search = document.createElement('span');
-        search.className = 'promo-opening__search';
-        search.setAttribute('aria-hidden', 'true');
-        bar.appendChild(search);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
         if (field) store.appendChild(field);
         store.appendChild(bar);
-        store.appendChild(collectionChrome());
         if (stage) store.appendChild(stage);
         host.insertBefore(store, host.firstChild);
       }
@@ -2227,15 +2217,12 @@
         browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
         host.querySelector('.promo-opening__store')?.prepend(browser);
       }
-      const store = host.querySelector('.promo-opening__store');
-      if (store && !store.querySelector('.promo-opening__collection')) {
-        const stage = store.querySelector('[data-promo-moments-stage]');
-        store.insertBefore(collectionChrome(), stage);
-      }
+      host.querySelector('.promo-opening__collection')?.remove();
+      host.querySelector('.promo-opening__search')?.remove();
       host.querySelector('.promo-moments__fest')?.remove();
       const storeMark = host.querySelector('.promo-opening__store-mark');
       if (storeMark) {
-        storeMark.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/></svg>';
+        storeMark.innerHTML = PROMO_STORE_MARK;
         const bar = storeMark.closest('.promo-opening__store-bar');
         let brand = storeMark.closest('.promo-opening__store-brand');
         if (bar && !brand) {
@@ -2249,12 +2236,6 @@
           name.className = 'promo-opening__store-name';
           name.textContent = 'Your store';
           brand.appendChild(name);
-        }
-        if (bar && !bar.querySelector('.promo-opening__search')) {
-          const search = document.createElement('span');
-          search.className = 'promo-opening__search';
-          search.setAttribute('aria-hidden', 'true');
-          bar.appendChild(search);
         }
       }
       host.querySelectorAll('.promo-moments__cart-piece, .promo-moments__cart-burst').forEach((piece) => piece.remove());
@@ -2587,6 +2568,26 @@
       panel.append(title, chips, log, typing, input, footer);
       chat.append(panel, launcher);
       store.appendChild(chat);
+      this.lockPainChatBox();
+    }
+
+    lockPainChatBox() {
+      const chat = this.root.querySelector('[data-promo-pain-chat]');
+      const panel = chat?.querySelector('.promo-pain__panel');
+      if (!panel || panel.dataset.locked === '1') return;
+      const wasHidden = chat.hasAttribute('hidden');
+      const wasOpen = chat.classList.contains('is-open');
+      chat.classList.add('is-measuring', 'is-open');
+      chat.removeAttribute('hidden');
+      this.paintPainLog('answer-2');
+      const height = Math.ceil(panel.getBoundingClientRect().height);
+      this.paintPainLog('launcher');
+      chat.classList.remove('is-measuring');
+      chat.classList.toggle('is-open', wasOpen);
+      if (wasHidden) chat.setAttribute('hidden', '');
+      if (height < 80) return;
+      panel.style.height = `${height}px`;
+      panel.dataset.locked = '1';
     }
 
     openPainStage() {
@@ -2610,6 +2611,7 @@
         cursor.style.opacity = '0';
       }
       this.root.querySelector('[data-promo-pain-chat]')?.setAttribute('hidden', '');
+      this.lockPainChatBox();
       const laid = stage?.querySelector('.promo-moments__board');
       if (laid) layoutStoreGrid(laid);
     }
@@ -2780,6 +2782,7 @@
         }
       }
       this.root.classList.remove('is-pain-zoom');
+      if (chatOn) this.lockPainChatBox();
       if (scene === 'unattended' && beat !== 'grid') {
         if (beat === 'leave') this.placePainCursorEdge();
         else if (browseSlot >= 0) this.placePainCursor(this.painBrowseCard(browseSlot), true, instant ? 0 : scrollDelta);
