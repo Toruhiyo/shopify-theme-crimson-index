@@ -178,10 +178,12 @@
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_SELL_OUT_MS = 900;
   const PROMO_PAIN_EASE = 'cubic-bezier(0.45, 0.05, 0.2, 1)';
-  const PROMO_PAIN_CARDS = [6, 4, 5];
-  const PROMO_PAIN_OPEN_MS = 640;
-  const PROMO_PAIN_TYPE_CHAR_MS = 28;
-  const PROMO_PAIN_ZOOM_MS = 1400;
+  const PROMO_PAIN_BROWSE = [1, 5, 9];
+  const PROMO_PAIN_SCROLL_MS = 640;
+  const PROMO_PAIN_SCROLL = [0, -110, -200];
+  const PROMO_PAIN_TYPE_CHAR_MS = 14;
+  const PROMO_PAIN_ZOOM_MS = 480;
+  const PROMO_PAIN_EXIT_MS = 260;
   const PROMO_PAIN_LINE_1 = 'I want a portable laptop with long battery life.';
   const PROMO_PAIN_LINE_2 = 'Which one would you pick for coding?';
   const PROMO_PAIN_ANSWER_1 = [
@@ -193,34 +195,20 @@
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
     ['grid', 0],
-    ['enter', 640],
-    ['hover-1', 280],
-    ['open-1', 560],
-    ['look-1', 640],
-    ['back-1', 480],
-    ['hover-2', 560],
-    ['open-2', 560],
-    ['look-2', 520],
-    ['back-2', 480],
-    ['hover-3', 560],
-    ['open-3', 560],
-    ['add-3', 640],
-    ['retreat', 480],
-    ['leave', 1040],
+    ['enter', 280],
+    ['scroll-1', PROMO_PAIN_SCROLL_MS],
+    ['scroll-2', PROMO_PAIN_SCROLL_MS],
+    ['leave', 320],
   ];
   const PROMO_PAIN_B = [
-    ['launcher', 520],
-    ['launcher-hold', 360],
-    ['panel', 620],
-    ['panel-pause', 280],
+    ['launcher', 240],
+    ['panel', 320],
     ['typed-1', PROMO_PAIN_LINE_1.length * PROMO_PAIN_TYPE_CHAR_MS],
-    ['think-1', 620],
-    ['answer-1', 780],
-    ['between', 360],
+    ['think-1', 220],
+    ['answer-1', 320],
     ['typed-2', PROMO_PAIN_LINE_2.length * PROMO_PAIN_TYPE_CHAR_MS],
-    ['think-2', 620],
-    ['answer-2', 780],
-    ['before-zoom', 280],
+    ['think-2', 180],
+    ['answer-2', 360],
     ['zoom', PROMO_PAIN_ZOOM_MS],
   ];
   const PROMO_PITCH_SETTLE_MS = 700;
@@ -2360,8 +2348,9 @@
 
     releasePainStage() {
       this.clearPainTimers();
-      this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-moments');
+      this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-pain-out', 'is-moments');
       const host = this.painHost();
+      host?.querySelector('.promo-moments__board')?.style.removeProperty('--pain-scroll');
       host?.classList.remove('is-pain-dim');
       this.painCards().forEach((card) => {
         card.classList.remove('is-pain-open', 'is-pain-hover', 'is-pain-add');
@@ -2427,8 +2416,9 @@
 
     openPainStage() {
       this.root.style.setProperty('--promo-pain-ease', PROMO_PAIN_EASE);
-      this.root.style.setProperty('--promo-pain-open', `${PROMO_PAIN_OPEN_MS}ms`);
+      this.root.style.setProperty('--promo-pain-open', `${PROMO_PAIN_SCROLL_MS}ms`);
       this.root.style.setProperty('--promo-pain-zoom', `${PROMO_PAIN_ZOOM_MS}ms`);
+      this.root.style.setProperty('--promo-pain-exit', `${PROMO_PAIN_EXIT_MS}ms`);
       this.ensureMoments();
       const stage = this.momentStage();
       applyMomentPose(stage, 'grid', { instant: true });
@@ -2447,11 +2437,19 @@
       this.root.querySelector('[data-promo-pain-chat]')?.setAttribute('hidden', '');
     }
 
-    painCard(slot) {
-      return this.painCards()[PROMO_PAIN_CARDS[slot]] || null;
+    painBrowseCard(slot) {
+      return this.painCards()[PROMO_PAIN_BROWSE[slot]] || null;
     }
 
-    placePainCursor(target, visible) {
+    setPainScroll(px) {
+      const board = this.painHost()?.querySelector('.promo-moments__board');
+      if (!board) return 0;
+      const previous = Number.parseFloat(board.style.getPropertyValue('--pain-scroll')) || 0;
+      board.style.setProperty('--pain-scroll', `${px}px`);
+      return px - previous;
+    }
+
+    placePainCursor(target, visible, scrollDelta = 0) {
       const cursor = this.root.querySelector('[data-promo-pain-cursor]');
       const store = this.painStore();
       if (!cursor || !store) return;
@@ -2462,8 +2460,8 @@
       }
       const storeBox = store.getBoundingClientRect();
       const box = target.getBoundingClientRect();
-      const x = box.left + box.width * 0.72 - storeBox.left;
-      const y = box.top + box.height * 0.55 - storeBox.top;
+      const x = box.left + box.width * 0.55 - storeBox.left;
+      const y = box.top + box.height * 0.34 - storeBox.top + scrollDelta;
       cursor.style.setProperty('--pain-x', `${Math.round(x)}px`);
       cursor.style.setProperty('--pain-y', `${Math.round(y)}px`);
       cursor.style.opacity = visible ? '1' : '0';
@@ -2524,19 +2522,19 @@
         log.appendChild(block);
       };
       if (through === 'typed-1') input.textContent = PROMO_PAIN_LINE_1;
-      if (through === 'think-1' || through === 'answer-1' || through === 'between' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+      if (through === 'think-1' || through === 'answer-1' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'zoom') {
         addUser(PROMO_PAIN_LINE_1);
       }
       if (through === 'think-1') typing.hidden = false;
-      if (through === 'answer-1' || through === 'between' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+      if (through === 'answer-1' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'zoom') {
         addBot(PROMO_PAIN_ANSWER_1, PROMO_PAIN_LINKS);
       }
       if (through === 'typed-2') input.textContent = PROMO_PAIN_LINE_2;
-      if (through === 'think-2' || through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+      if (through === 'think-2' || through === 'answer-2' || through === 'zoom') {
         addUser(PROMO_PAIN_LINE_2);
       }
       if (through === 'think-2') typing.hidden = false;
-      if (through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+      if (through === 'answer-2' || through === 'zoom') {
         addBot([PROMO_PAIN_ANSWER_2], null, ['Open a ticket', 'No, thanks']);
       }
     }
@@ -2549,33 +2547,23 @@
       host.setAttribute('data-promo-pain-scene', scene);
       host.setAttribute('data-promo-pain-beat', beat);
       board.classList.toggle('is-instant', !!instant);
-      const openSlot = beat === 'open-1' || beat === 'look-1' ? 0
-        : beat === 'open-2' || beat === 'look-2' ? 1
-          : beat === 'open-3' || beat === 'add-3' ? 2
-            : -1;
-      host.classList.toggle('is-pain-dim', openSlot >= 0);
-      this.painCards().forEach((card, index) => {
-        const slot = PROMO_PAIN_CARDS.indexOf(index);
-        card.classList.toggle('is-pain-open', openSlot >= 0 && slot === openSlot);
-        card.classList.toggle('is-pain-hover', (
-          (beat === 'hover-1' && slot === 0)
-          || (beat === 'hover-2' && slot === 1)
-          || (beat === 'hover-3' && slot === 2)
-          || (beat === 'open-1' && slot === 0)
-          || (beat === 'open-2' && slot === 1)
-          || (beat === 'open-3' && slot === 2)
-          || (beat === 'add-3' && slot === 2)
-        ));
-        card.classList.toggle('is-pain-add', beat === 'add-3' && slot === 2);
+      const browseSlot = beat === 'enter' ? 0 : beat === 'scroll-1' ? 1 : beat === 'scroll-2' ? 2 : -1;
+      const scrollIndex = beat === 'scroll-1' ? 1 : beat === 'scroll-2' || beat === 'leave' ? 2 : 0;
+      const scrollDelta = scene === 'unattended' ? this.setPainScroll(PROMO_PAIN_SCROLL[scrollIndex]) : 0;
+      if (instant && scene === 'unattended') board.offsetWidth;
+      host.classList.remove('is-pain-dim');
+      this.painCards().forEach((card) => {
+        card.classList.remove('is-pain-open', 'is-pain-add');
+        card.classList.toggle('is-pain-hover', browseSlot >= 0 && card === this.painBrowseCard(browseSlot));
       });
       const chat = this.root.querySelector('[data-promo-pain-chat]');
       const cursor = this.root.querySelector('[data-promo-pain-cursor]');
-      const chatBeats = ['launcher', 'launcher-hold', 'panel', 'panel-pause', 'typed-1', 'think-1', 'answer-1', 'between', 'typed-2', 'think-2', 'answer-2', 'before-zoom', 'zoom'];
+      const chatBeats = ['launcher', 'panel', 'typed-1', 'think-1', 'answer-1', 'typed-2', 'think-2', 'answer-2', 'zoom'];
       const chatOn = chatBeats.includes(beat);
       if (chat) {
         if (chatOn) chat.removeAttribute('hidden');
         else chat.setAttribute('hidden', '');
-        chat.classList.toggle('is-open', chatOn && beat !== 'launcher' && beat !== 'launcher-hold');
+        chat.classList.toggle('is-open', chatOn && beat !== 'launcher');
       }
       if (cursor) {
         cursor.style.transitionDuration = instant ? '0ms' : '';
@@ -2586,13 +2574,7 @@
       this.root.classList.toggle('is-pain-zoom', beat === 'zoom');
       if (scene === 'unattended' && beat !== 'grid') {
         if (beat === 'leave') this.placePainCursorEdge();
-        else if (beat === 'add-3') this.placePainCursor(this.painCard(2)?.querySelector('.promo-moments__add'), true);
-        else if (beat === 'retreat') this.placePainCursor(this.painCard(2), true);
-        else if (openSlot >= 0 || beat.startsWith('hover-') || beat.startsWith('look-') || beat.startsWith('back-') || beat === 'enter') {
-          const slot = beat.endsWith('2') || beat === 'hover-2' ? 1 : beat.endsWith('3') ? 2 : 0;
-          const resolved = beat.startsWith('back-') ? (beat.endsWith('1') ? 0 : 1) : slot;
-          this.placePainCursor(this.painCard(resolved), true);
-        }
+        else if (browseSlot >= 0) this.placePainCursor(this.painBrowseCard(browseSlot), true, instant ? 0 : scrollDelta);
       }
       this.paintPainLog(beat);
     }
@@ -2655,7 +2637,17 @@
       }
       await this.playPainSteps(PROMO_PAIN_A, 'unattended');
       await this.playPainSteps(PROMO_PAIN_B, 'chat');
-      if (marketingPart() === 'full') this.flip();
+      if (marketingPart() === 'full') {
+        await this.dismissPainStage();
+        this.flip();
+      }
+    }
+
+    async dismissPainStage() {
+      if (!this.root.classList.contains('is-pain')) return;
+      this.root.classList.add('is-pain-out');
+      if (!prefersReducedMotion()) await waitMs(PROMO_PAIN_EXIT_MS);
+      this.releasePainStage();
     }
 
     showPainExport(beat) {
@@ -3138,13 +3130,9 @@
           return 220;
         },
         'pain-a-grid': () => this.showPainExport('grid'),
-        'pain-a-hover-1': () => this.showPainExport('hover-1'),
-        'pain-a-open-1': () => this.showPainExport('open-1'),
-        'pain-a-back-1': () => this.showPainExport('back-1'),
-        'pain-a-open-2': () => this.showPainExport('open-2'),
-        'pain-a-back-2': () => this.showPainExport('back-2'),
-        'pain-a-open-3': () => this.showPainExport('open-3'),
-        'pain-a-add': () => this.showPainExport('add-3'),
+        'pain-a-enter': () => this.showPainExport('enter'),
+        'pain-a-scroll-1': () => this.showPainExport('scroll-1'),
+        'pain-a-scroll-2': () => this.showPainExport('scroll-2'),
         'pain-a-leave': () => this.showPainExport('leave'),
         'pain-b-launcher': () => this.showPainExport('launcher'),
         'pain-b-panel': () => this.showPainExport('panel'),

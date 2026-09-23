@@ -20,13 +20,9 @@ const REST_PAD_MS = 100;
 
 const FRAMES = [
   ['pain-a-grid', 'Pain, unattended. Twelve-card store. Clerk corner is empty. Cart is empty.', 0],
-  ['pain-a-hover-1', 'Pain, unattended. Cursor rests on the first card.', 0],
-  ['pain-a-open-1', 'Pain, unattended. First card is hero size. The other cards are dim. Cart is unchanged.', 0],
-  ['pain-a-back-1', 'Pain, unattended. First card is back in the grid.', 0],
-  ['pain-a-open-2', 'Pain, unattended. Second card is hero size.', 0],
-  ['pain-a-back-2', 'Pain, unattended. Second card is back in the grid.', 0],
-  ['pain-a-open-3', 'Pain, unattended. Third card is hero size.', 0],
-  ['pain-a-add', 'Pain, unattended. Cursor rests on the ghost Add. Cart is still empty.', 0],
+  ['pain-a-enter', 'Pain, unattended. Cursor rests on a product image. Add is not under it.', 0],
+  ['pain-a-scroll-1', 'Pain, unattended. The catalog has scrolled. Cursor is on another product image.', 0],
+  ['pain-a-scroll-2', 'Pain, unattended. The catalog has scrolled further. Cart is still empty.', 0],
   ['pain-a-leave', 'Pain, unattended. Cursor has left at the stage edge.', 0],
   ['pain-b-launcher', 'Pain, dull chatbot. Grey launcher sits where the clerk will stand.', 0],
   ['pain-b-panel', 'Pain, dull chatbot. Grey panel is open. Title Dull Chatbot. Footer Powered by Every Chatbot Ever.', 0],

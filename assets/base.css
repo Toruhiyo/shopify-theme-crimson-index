@@ -679,6 +679,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate(calc(-50% + var(--promo-board-x)), -50%) scale(var(--promo-grid-fit));
 }
 
+.promo-opening.is-pain.is-moments:not(.is-see) .promo-moments__board.is-pose-grid {
+  transform: translate(calc(-50% + var(--promo-board-x)), calc(-50% + var(--pain-scroll, 0px))) scale(var(--promo-grid-fit));
+  transition: transform var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1));
+}
+
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
   -webkit-mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, var(--color-fg) 18%, transparent 68%);
   mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, var(--color-fg) 18%, transparent 68%);
@@ -924,6 +929,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-pain-zoom .promo-opening__stage {
   transform: scale(0.92);
+}
+
+.promo-opening.is-pain.is-pain-out .promo-opening__moments {
+  opacity: 0;
+  transition: opacity var(--promo-pain-exit, 260ms) linear;
 }
 
 .promo-opening.is-bursting .promo-pain__chat {
