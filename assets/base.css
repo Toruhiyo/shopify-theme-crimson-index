@@ -670,14 +670,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
   flex: 0 0 auto;
   width: min(70rem, 66cqw);
-  height: min(43.5rem, 76cqh);
+  height: min(48.5rem, 96cqh);
   max-height: none;
   aspect-ratio: auto;
-  transform: translateY(-2.5rem);
+  transform: none;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  transform: translate(calc(-50% - 8.25rem), -50%) scale(1.05);
+  transform: translate(-50%, -50%);
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
@@ -960,27 +960,35 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__card {
+  --card-w: 150px;
+  --card-h: 200px;
   z-index: 2;
-  width: 6.4rem;
-  height: 9.2rem;
-  margin: -4.6rem 0 0 -3.2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: var(--card-w);
+  height: var(--card-h);
+  margin: 0;
+  padding: 16em;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 20em;
+  font-size: calc(var(--card-w) / 300);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1em solid rgba(255, 255, 255, 0.65);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 24px 60px rgba(0, 0, 0, 0.06);
-  transform: translate3d(var(--gx, 0rem), var(--gy, 0rem), 0) scale(1);
+    inset 0 1em 0 rgba(255, 255, 255, 0.8),
+    0 2em 6em rgba(0, 0, 0, 0.04),
+    0 24em 60em rgba(0, 0, 0, 0.06);
+  transform: translate3d(calc(-50% + var(--gx, 0px)), calc(-50% + var(--gy, 0px)), 0);
   transform-origin: center center;
   opacity: 1;
   filter: none;
   transition:
     transform 380ms var(--promo-spring),
+    width 380ms var(--promo-spring),
+    height 380ms var(--promo-spring),
     opacity 380ms var(--promo-spring),
     filter 380ms var(--promo-spring),
     box-shadow 380ms var(--promo-spring);
@@ -1002,23 +1010,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1px solid rgba(249, 163, 83, 0.6);
+  border: 1em solid rgba(249, 163, 83, 0.6);
+  box-shadow: 0 0 6em rgba(249, 163, 83, 0.12);
   opacity: 0;
   pointer-events: none;
   transition: opacity 380ms var(--promo-spring);
 }
 
 .promo-moments__photo {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  left: 0.28rem;
-  right: 0.28rem;
-  top: 0.28rem;
-  height: 65%;
+  flex: 0 0 auto;
+  width: 100%;
+  height: calc(var(--card-h) * 0.62);
   overflow: hidden;
-  border-radius: 16px;
-  background: #F1EFEC;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  border-radius: 12em;
+  background: #F3F1EE;
 }
 
 .promo-moments__glyph {
@@ -1026,12 +1033,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 2.69rem;
-  height: 2.69rem;
-  margin: -1.345rem 0 0 -1.345rem;
+  width: 36%;
+  aspect-ratio: 1;
+  height: auto;
+  margin: 0;
   display: block;
-  color: #D9D4CC;
+  color: #CFC9C1;
   opacity: 1;
+  transform: translate(-50%, -50%);
   transform-origin: center center;
   transition:
     transform 380ms var(--promo-spring),
@@ -1044,7 +1053,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: visible;
   fill: currentColor;
   stroke: none;
-  filter: drop-shadow(0 0.28rem 0.2rem rgba(55, 48, 40, 0.18));
+  filter: none;
 }
 
 .promo-moments__spec-icon svg,
@@ -1169,8 +1178,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 15.75rem;
-  margin: 0 0 0 -7.875rem;
+  width: 500px;
+  margin: 0 0 0 -250px;
   padding: 0.42rem 0.2rem;
   display: grid;
   gap: 0.22rem;
@@ -1183,7 +1192,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 16px 40px rgba(0, 0, 0, 0.06);
   opacity: 0;
-  transform: translate3d(0, 7.6rem, 0);
+  transform: translate3d(0, 188px, 0);
   transform-origin: center top;
   pointer-events: none;
 }
@@ -1219,60 +1228,62 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__meta {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  left: 0.42rem;
-  right: 0.42rem;
-  top: 71%;
-  display: grid;
-  gap: 0.16rem;
+  flex: 0 0 auto;
+  margin-top: 12em;
+  display: flex;
+  flex-direction: column;
+  gap: 8em;
 }
 
 .promo-moments__title,
 .promo-moments__price i {
   display: block;
-  height: 0.24rem;
-  width: var(--bar, 62%);
-  border-radius: 999px;
-  background: rgba(90, 98, 110, 0.16);
+  height: 6em;
+  border-radius: 3em;
+  background: #E3E0DB;
 }
+
+.promo-moments__title { width: 70%; }
 
 .promo-moments__price {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 4em;
   min-width: 0;
 }
 
 .promo-moments__price b {
   flex: 0 0 auto;
-  color: #8a847c;
+  color: #9A948B;
   font-family: var(--font-heading);
-  font-size: 0.5rem;
-  font-weight: 600;
+  font-size: 10em;
+  font-weight: 500;
   line-height: 1;
 }
 
-.promo-moments__price i { height: 0.26rem; }
+.promo-moments__price i { width: 38%; }
 
 .promo-moments__add {
-  position: absolute;
+  position: relative;
   z-index: 2;
-  left: 0.48rem;
-  right: 0.48rem;
-  bottom: 0.38rem;
-  height: 1.02rem;
+  flex: 0 0 auto;
+  margin-top: 14em;
+  width: 100%;
+  height: calc(34em / 13);
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(124, 133, 147, 0.28);
-  background: rgba(255, 255, 255, 0.28);
-  color: rgba(124, 133, 147, 0.72);
+  border-radius: calc(10em / 13);
+  border: calc(1em / 13) solid #E3E0DB;
+  background: transparent;
+  color: #9A948B;
   font-family: var(--font-heading);
-  font-size: 0.58rem;
-  font-weight: 600;
+  font-size: 13em;
+  font-weight: 500;
   line-height: 1;
   letter-spacing: 0.01em;
+  box-shadow: none;
   transition:
     background 380ms var(--promo-spring),
     color 380ms var(--promo-spring),
@@ -1287,15 +1298,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__new {
-  left: 0.28rem;
-  top: 0.28rem;
-  padding: 0.1rem 0.28rem;
+  left: calc(6em / 9);
+  top: calc(6em / 9);
+  padding: calc(2em / 9) calc(6em / 9);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: calc(1em / 9) solid rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.72);
   color: #6f6a64;
   font-family: var(--font-heading);
-  font-size: 0.42rem;
+  font-size: 9em;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -1332,9 +1343,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__add,
 .is-pose-bundle .promo-moments__card.is-pick .promo-moments__add,
 .is-pose-bundle .promo-moments__card.is-extra .promo-moments__add {
-  background: #f9a353;
-  border-color: #f9a353;
+  background: #F9A353;
+  border-color: #F9A353;
   color: #fff;
+  box-shadow: none;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add {
@@ -1360,8 +1372,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__card.is-extra {
   z-index: 3;
+  --card-w: 210px;
+  --card-h: 280px;
   opacity: 0;
-  transform: translate3d(12rem, 0, 0) scale(0.4);
+  transform: translate3d(calc(-50% + 280px), calc(-50% + 80px), 0);
 }
 
 .promo-moments__board.is-pose-grid:not(.is-settled):not(.is-reduced) .promo-moments__card:not(.is-extra) {
@@ -1390,12 +1404,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-fly .promo-moments__card.is-drop,
 .is-pose-gone .promo-moments__card.is-drop {
   opacity: 0;
-  transform: translate3d(var(--gx), var(--gy), 0) scale(0.12);
+  transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(0.4);
 }
 
-.is-pose-row .promo-moments__card.is-go { --tx: -8.3rem; --ts: 1.18; transform: translate3d(-8.3rem, 0, 0) scale(1.18); }
-.is-pose-row .promo-moments__card.is-pick { --tx: 0rem; --ts: 1.18; transform: translate3d(0, 0, 0) scale(1.18); }
-.is-pose-row .promo-moments__card.is-other { --tx: 8.3rem; --ts: 1.18; transform: translate3d(8.3rem, 0, 0) scale(1.18); }
+.is-pose-row .promo-moments__card.is-go,
+.is-pose-row .promo-moments__card.is-pick,
+.is-pose-row .promo-moments__card.is-other,
+.is-pose-choice .promo-moments__card.is-go,
+.is-pose-choice .promo-moments__card.is-pick,
+.is-pose-choice .promo-moments__card.is-other {
+  --card-w: 240px;
+  --card-h: 320px;
+}
+
+.is-pose-row .promo-moments__card.is-go { --tx: -256px; transform: translate3d(calc(-50% - 256px), -50%, 0); }
+.is-pose-row .promo-moments__card.is-pick { --tx: 0px; transform: translate3d(-50%, -50%, 0); }
+.is-pose-row .promo-moments__card.is-other { --tx: 256px; transform: translate3d(calc(-50% + 256px), -50%, 0); }
 
 .promo-moments__board.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card:not(.is-extra) {
   animation: none;
@@ -1445,16 +1469,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick {
-  transform: translate3d(4.1rem, -8px, 0) scale(1.18);
+  transform: translate3d(calc(-50% + 130px), calc(-50% - 8px), 0);
 }
 
 .is-pose-choice .promo-moments__card.is-go {
-  transform: translate3d(-4.1rem, 0, 0) scale(1.18);
+  transform: translate3d(calc(-50% - 130px), -50%, 0);
 }
 
 .is-pose-choice .promo-moments__card.is-other {
   opacity: 0;
-  transform: translate3d(14rem, 0.3rem, 0) scale(0.55);
+  transform: translate3d(calc(-50% + 420px), -50%, 0) scale(0.55);
 }
 
 .is-pose-choice .promo-moments__card.is-pick::after,
@@ -1524,14 +1548,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__compare-row:nth-child(3) .promo-moments__mark { animation-delay: 1460ms; }
 
 .is-pose-doubt .promo-moments__card.is-pick,
-.is-pose-close .promo-moments__card.is-pick {
-  transform: translate3d(0, -0.5rem, 0) scale(2.462);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 0 0 3px rgba(249, 163, 83, 0.12),
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 28px 70px rgba(0, 0, 0, 0.09);
+.is-pose-close .promo-moments__card.is-pick,
+.is-pose-extra .promo-moments__card.is-pick,
+.is-pose-bundle .promo-moments__card.is-pick {
+  --card-w: 300px;
+  --card-h: 400px;
+  transform: translate3d(-50%, -50%, 0);
 }
 
 .is-pose-doubt .promo-moments__card.is-other,
@@ -1545,24 +1567,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-extra .promo-moments__card.is-pick,
 .is-pose-bundle .promo-moments__card.is-pick {
-  transform: translate3d(-6.4rem, 0, 0) scale(2.05);
-}
-
-.is-pose-extra .promo-moments__card.is-pick .promo-moments__glyph,
-.is-pose-bundle .promo-moments__card.is-pick .promo-moments__glyph {
-  transform: none;
-}
-
-.is-pose-extra .promo-moments__specs,
-.is-pose-bundle .promo-moments__specs {
-  opacity: 0;
+  transform: translate3d(calc(-50% - 115px), -50%, 0);
 }
 
 .is-pose-extra .promo-moments__card.is-extra,
 .is-pose-bundle .promo-moments__card.is-extra {
   z-index: 6;
   opacity: 1;
-  transform: translate3d(8.6rem, 0, 0) scale(1.55);
+  transform: translate3d(calc(-50% + 160px), calc(-50% + 60px), 0);
 }
 
 .is-pose-extra .promo-moments__card.is-extra::after {
@@ -1575,7 +1587,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-bundle .promo-moments__card.is-extra::after {
-  opacity: 1;
+  opacity: 0;
 }
 
 .is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
@@ -1878,41 +1890,31 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__plus {
   z-index: 8;
-  width: 4.8rem;
-  height: 4.8rem;
-  margin: -2.4rem 0 0 -2.4rem;
-  color: #f9a353;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  color: #F9A353;
   opacity: 0;
   filter: none;
-  transform: translate3d(2.2rem, 0, 0) scale(0.96);
+  transform: translate3d(45px, 30px, 0);
   transition:
     transform 380ms var(--promo-spring),
     opacity 380ms var(--promo-spring);
 }
 
-.promo-moments__plus i {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  background: currentColor;
-  border-radius: 999px;
-}
-
-.promo-moments__plus i:first-child {
-  width: 4.8rem;
-  height: 0.72rem;
-  margin: -0.36rem 0 0 -2.4rem;
-}
-
-.promo-moments__plus i:last-child {
-  width: 0.72rem;
-  height: 4.8rem;
-  margin: -2.4rem 0 0 -0.36rem;
+.promo-moments__plus svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 
 .is-pose-extra .promo-moments__plus {
   opacity: 0;
-  transform: translate3d(2.2rem, 0, 0) scale(0.96);
+  transform: translate3d(45px, 30px, 0);
 }
 
 .is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__plus {
@@ -1921,7 +1923,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-bundle .promo-moments__plus {
   opacity: 1;
-  transform: translate3d(2.2rem, 0, 0) scale(1);
+  transform: translate3d(45px, 30px, 0);
 }
 
 .promo-moments__outline {
@@ -2035,20 +2037,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__kept {
   position: absolute;
-  right: 0.7rem;
-  top: 0.7rem;
+  right: 22em;
+  top: 22em;
   z-index: 4;
-  width: 1.15rem;
-  height: 1.15rem;
-  color: #f9a353;
+  width: 12em;
+  height: 12em;
+  color: #F9A353;
   opacity: 0;
-  transform: scale(0.6);
+  transform: none;
   pointer-events: none;
 }
 
 .promo-moments__kept .promo-moments__mark {
-  width: 100%;
-  height: 100%;
+  width: 12em;
+  height: 12em;
   opacity: 1;
   transform: none;
 }
@@ -2073,8 +2075,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-close .promo-moments__card.is-pick::after,
 .is-pose-extra .promo-moments__card.is-pick::after,
-.is-pose-bundle .promo-moments__card.is-pick::after,
-.is-pose-bundle .promo-moments__card.is-extra::after {
+.is-pose-bundle .promo-moments__card.is-pick::after {
   opacity: 1;
 }
 
@@ -2269,33 +2270,33 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-pair-go {
-  from { opacity: 1; transform: translate3d(-8.3rem, 0, 0) scale(1.18); }
-  to { opacity: 1; transform: translate3d(-4.1rem, 0, 0) scale(1.18); }
+  from { opacity: 1; transform: translate3d(calc(-50% - 256px), -50%, 0); }
+  to { opacity: 1; transform: translate3d(calc(-50% - 130px), -50%, 0); }
 }
 
 @keyframes promo-moments-pair-pick {
-  from { transform: translate3d(0, 0, 0) scale(1.18); }
-  to { transform: translate3d(4.1rem, 0, 0) scale(1.18); }
+  from { transform: translate3d(-50%, -50%, 0); }
+  to { transform: translate3d(calc(-50% + 130px), -50%, 0); }
 }
 
 @keyframes promo-moments-pair-lift {
-  from { transform: translate3d(4.1rem, 0, 0) scale(1.18); }
-  to { transform: translate3d(4.1rem, -8px, 0) scale(1.18); }
+  from { transform: translate3d(calc(-50% + 130px), -50%, 0); }
+  to { transform: translate3d(calc(-50% + 130px), calc(-50% - 8px), 0); }
 }
 
 @keyframes promo-moments-pair-other {
-  from { opacity: 1; transform: translate3d(8.3rem, 0, 0) scale(1.18); }
-  to { opacity: 0; transform: translate3d(14rem, 0.3rem, 0) scale(0.55); }
+  from { opacity: 1; transform: translate3d(calc(-50% + 256px), -50%, 0); }
+  to { opacity: 0; transform: translate3d(calc(-50% + 420px), -50%, 0) scale(0.55); }
 }
 
 @keyframes promo-moments-compare-in {
-  from { opacity: 0; transform: translate3d(0, 7.6rem, 0) scaleY(0.86); }
-  to { opacity: 1; transform: translate3d(0, 5.7rem, 0) scaleY(1); }
+  from { opacity: 0; transform: translate3d(0, 230px, 0) scaleY(0.86); }
+  to { opacity: 1; transform: translate3d(0, 188px, 0) scaleY(1); }
 }
 
 @keyframes promo-moments-compare-fold {
-  from { opacity: 1; transform: translate3d(0, 5.7rem, 0) scaleY(1); }
-  to { opacity: 0; transform: translate3d(0, 5.7rem, 0) scaleY(0.15); }
+  from { opacity: 1; transform: translate3d(0, 188px, 0) scaleY(1); }
+  to { opacity: 0; transform: translate3d(0, 188px, 0) scaleY(0.15); }
 }
 
 @keyframes promo-moments-sheen {
@@ -2343,40 +2344,40 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-catalog-out {
-  0% { opacity: 1; filter: none; transform: translate3d(var(--gx), var(--gy), 0) scale(1); }
-  100% { opacity: 0; filter: blur(8px); transform: translate3d(var(--gx), calc(var(--gy) + 0.35rem), 0) scale(0.5); }
+  0% { opacity: 1; filter: none; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
+  100% { opacity: 0; filter: blur(8px); transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(0.5); }
 }
 
 @keyframes promo-moments-select {
-  0% { opacity: 1; filter: none; transform: translate3d(var(--gx), var(--gy), 0) scale(1); }
-  100% { opacity: 1; filter: none; transform: translate3d(var(--tx), 0, 0) scale(var(--ts)); }
+  0% { opacity: 1; filter: none; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
+  100% { opacity: 1; filter: none; transform: translate3d(calc(-50% + var(--tx)), -50%, 0); }
 }
 
 @keyframes promo-moments-addon-in {
-  0% { opacity: 0; transform: translate3d(20rem, 1.4rem, 0) scale(0.35); }
-  100% { opacity: 1; transform: translate3d(8.6rem, 0, 0) scale(1.55); }
+  0% { opacity: 0; transform: translate3d(calc(-50% + 280px), calc(-50% + 80px), 0); }
+  100% { opacity: 1; transform: translate3d(calc(-50% + 160px), calc(-50% + 60px), 0); }
 }
 
 @keyframes promo-moments-plus-in {
-  0% { opacity: 0; transform: translate3d(2.2rem, 0, 0) scale(0.15); }
-  100% { opacity: 1; transform: translate3d(2.2rem, 0, 0) scale(1); }
+  0% { opacity: 0; transform: translate3d(45px, 30px, 0) scale(0.4); }
+  100% { opacity: 1; transform: translate3d(45px, 30px, 0) scale(1); }
 }
 
 @keyframes promo-moments-celebrate {
-  0% { transform: translate3d(0, -0.5rem, 0) scale(2.462); }
-  42% { transform: translate3d(0, -1.6rem, 0) scale(3.55); }
-  100% { transform: translate3d(0, -0.5rem, 0) scale(2.462); }
+  0% { transform: translate3d(-50%, -50%, 0); }
+  42% { transform: translate3d(-50%, calc(-50% - 10px), 0) scale(1.04); }
+  100% { transform: translate3d(-50%, -50%, 0); }
 }
 
 @keyframes promo-moments-item-pop {
-  0% { transform: scale(1); }
-  42% { transform: scale(1.45); }
-  100% { transform: scale(1); }
+  0% { transform: translate(-50%, -50%) scale(1); }
+  42% { transform: translate(-50%, -50%) scale(1.08); }
+  100% { transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes promo-moments-card-in {
-  0% { opacity: 0; transform: translate3d(var(--gx), calc(var(--gy) + 0.7rem), 0) scale(0.62); }
-  100% { opacity: 1; transform: translate3d(var(--gx), var(--gy), 0) scale(1); }
+  0% { opacity: 0; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy) + 12px), 0) scale(0.92); }
+  100% { opacity: 1; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
 }
 
 @keyframes promo-moments-celebrate-soft {
@@ -2488,9 +2489,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-add-fill {
   from {
-    background: rgba(255, 255, 255, 0.28);
-    color: rgba(124, 133, 147, 0.72);
-    border-color: rgba(124, 133, 147, 0.28);
+    background: transparent;
+    color: #9A948B;
+    border-color: #E3E0DB;
   }
   to {
     background: #f9a353;

@@ -517,12 +517,12 @@
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
   const PROMO_MOMENT_OTHER_INDEX = 11;
-  const PROMO_MOMENT_GRID_PITCH_X = 6.9;
-  const PROMO_MOMENT_GRID_PITCH_Y = 9.6;
+  const PROMO_MOMENT_GRID_PITCH_X = 168;
+  const PROMO_MOMENT_GRID_PITCH_Y = 208;
   const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
   const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
   const PROMO_MOMENT_NEW_INDEXES = [0];
-  const PROMO_MOMENT_SHAPE = '#D9D4CC';
+  const PROMO_MOMENT_SHAPE = '#CFC9C1';
   const PROMO_MOMENT_ICONS = {
     circle: '<circle cx="12" cy="12" r="7.2"/>',
     square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
@@ -646,8 +646,8 @@
       const kind = PROMO_MOMENT_CARD_KINDS[index];
       const card = document.createElement('div');
       card.className = `promo-moments__card is-${kind} is-${role}`;
-      card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(2)}rem`);
-      card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(2)}rem`);
+      card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(0)}px`);
+      card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(0)}px`);
       card.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
       if (role === 'pick') card.appendChild(momentKept());
       board.appendChild(card);
@@ -695,7 +695,7 @@
     added.append(momentMark('yes'), document.createTextNode('Added'));
     const plus = document.createElement('span');
     plus.className = 'promo-moments__plus';
-    plus.append(document.createElement('i'), document.createElement('i'));
+    plus.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v13M3.5 10h13"/></svg>';
     const outline = document.createElement('div');
     outline.className = 'promo-moments__outline';
     const celebrate = document.createElement('div');
