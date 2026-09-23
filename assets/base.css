@@ -665,19 +665,29 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-items: center;
   justify-content: flex-start;
   padding-left: 2.5cqw;
+  padding-right: 36cqw;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
   flex: 0 0 auto;
-  width: min(70rem, 66cqw);
-  height: min(48.5rem, 96cqh);
+  width: min(54rem, 100%);
+  height: min(43.5rem, 84cqh);
   max-height: none;
   aspect-ratio: auto;
-  transform: none;
+  transform: translateY(-0.75rem);
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
   transform: translate(-50%, -50%);
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-moments__board.is-pose-grid {
+  --promo-grid-fit: min(0.84, calc((84cqh - 11.5rem) / 38.5rem));
+  transform: translate(-50%, -50%) scale(var(--promo-grid-fit));
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-moments__board.is-pose-choice {
+  transform: translate(-50%, calc(-50% - 3.25rem));
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
