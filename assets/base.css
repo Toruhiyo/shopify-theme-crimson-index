@@ -2035,8 +2035,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
-  opacity: 0;
-  animation: promo-moments-count-in 380ms var(--promo-spring) calc(var(--promo-close-cart-at, 1280ms) + 80ms) both;
+  animation-name: promo-moments-count-in;
+  animation-duration: 380ms;
+  animation-timing-function: var(--promo-spring);
+  animation-delay: calc(var(--promo-close-cart-at, 1280ms) + 80ms);
+  animation-fill-mode: both;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
@@ -2052,8 +2055,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-two {
-  opacity: 0;
-  animation: promo-moments-count-in 380ms var(--promo-spring) 170ms both;
+  animation-name: promo-moments-count-in;
+  animation-duration: 380ms;
+  animation-timing-function: var(--promo-spring);
+  animation-delay: 170ms;
+  animation-fill-mode: both;
 }
 
 .is-pose-bundle.is-settled .promo-moments__count.is-two,
