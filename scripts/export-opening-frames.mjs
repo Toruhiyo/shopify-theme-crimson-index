@@ -19,18 +19,17 @@ const VIEWPORT = {
 const REST_PAD_MS = 100;
 
 const FRAMES = [
-  ['pain-a-grid', 'Pain, unattended. Twelve-card store. Clerk corner is empty. Cart is empty.', 0],
+  ['pain-a-grid', 'Pain, unattended. The store is full of products. Clerk corner is empty. Cart is empty.', 0],
   ['pain-a-enter', 'Pain, unattended. Cursor rests on a product image. Add is not under it.', 0],
-  ['pain-a-scroll-1', 'Pain, unattended. The catalog has scrolled. Cursor is on another product image.', 0],
-  ['pain-a-scroll-2', 'Pain, unattended. The catalog has scrolled further. Cart is still empty.', 0],
+  ['pain-a-scroll-1', 'Pain, unattended. The catalog has scrolled one row. New products have entered from below.', 0],
+  ['pain-a-scroll-2', 'Pain, unattended. The catalog has scrolled another row. The window is still full of products.', 0],
   ['pain-a-leave', 'Pain, unattended. Cursor has left at the stage edge.', 0],
   ['pain-b-launcher', 'Pain, dull chatbot. Grey launcher sits where the clerk will stand.', 0],
   ['pain-b-panel', 'Pain, dull chatbot. Grey panel is open. Title Dull Chatbot. Footer Powered by Every Chatbot Ever.', 0],
   ['pain-b-typed-1', 'Pain, dull chatbot. Input reads: Looking for something light I can take everywhere.', 0],
   ['pain-b-answer-1', 'Pain, dull chatbot. Collection answer with View collection and Size guide. Grid and cart unchanged.', 0],
   ['pain-b-typed-2', 'Pain, dull chatbot. Input reads: Which one would you pick for me?', 0],
-  ['pain-b-answer-2', 'Pain, dull chatbot. Ticket answer with Open a ticket and No, thanks.', 0],
-  ['pain-b-zoom', 'Pain, dull chatbot. Stage has settled at scale 0.92.', 0],
+  ['pain-b-answer-2', 'Pain, dull chatbot. Ticket answer with Open a ticket and No, thanks. The store is still full size.', 0],
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.', 40],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
   ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],

@@ -178,12 +178,11 @@
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_SELL_OUT_MS = 900;
   const PROMO_PAIN_EASE = 'cubic-bezier(0.45, 0.05, 0.2, 1)';
-  const PROMO_PAIN_BROWSE = [1, 5, 9];
-  const PROMO_PAIN_SCROLL_MS = 640;
-  const PROMO_PAIN_SCROLL = [0, -110, -200];
-  const PROMO_PAIN_TYPE_CHAR_MS = 14;
-  const PROMO_PAIN_ZOOM_MS = 480;
-  const PROMO_PAIN_EXIT_MS = 260;
+  const PROMO_PAIN_BROWSE = [5, 13, 18];
+  const PROMO_PAIN_CATALOG_ROWS = 4;
+  const PROMO_PAIN_SCROLL_MS = 1700;
+  const PROMO_PAIN_TYPE_CHAR_MS = 16;
+  const PROMO_PAIN_EXIT_MS = 420;
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
   const PROMO_PAIN_LINE_2 = 'Which one would you pick for me?';
   const PROMO_PAIN_ANSWER_1 = [
@@ -194,38 +193,37 @@
   const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
-    ['grid', 0],
-    ['enter', 280],
+    ['grid', 1000],
+    ['enter', 1200],
     ['scroll-1', PROMO_PAIN_SCROLL_MS],
     ['scroll-2', PROMO_PAIN_SCROLL_MS],
-    ['leave', 320],
+    ['leave', 800],
   ];
   const PROMO_PAIN_B = [
-    ['launcher', 240],
-    ['panel', 320],
+    ['launcher', 600],
+    ['panel', 700],
     ['typed-1', PROMO_PAIN_LINE_1.length * PROMO_PAIN_TYPE_CHAR_MS],
-    ['think-1', 220],
-    ['answer-1', 320],
+    ['think-1', 500],
+    ['answer-1', 1800],
     ['typed-2', PROMO_PAIN_LINE_2.length * PROMO_PAIN_TYPE_CHAR_MS],
-    ['think-2', 180],
-    ['answer-2', 360],
-    ['zoom', PROMO_PAIN_ZOOM_MS],
+    ['think-2', 450],
+    ['answer-2', 2000],
   ];
   const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_MOMENTS_VO_MS = 280;
   const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
-  const PROMO_MOMENTS_CATALOG_MS = 1900;
-  const PROMO_MOMENTS_CATALOG_LOOK_MS = 1200;
-  const PROMO_MOMENTS_CHOICE_MS = 2400;
-  const PROMO_MOMENTS_DOUBT_MS = 3800;
-  const PROMO_MOMENTS_EXTRA_MS = 3200;
+  const PROMO_MOMENTS_CATALOG_MS = 3200;
+  const PROMO_MOMENTS_CATALOG_LOOK_MS = 2000;
+  const PROMO_MOMENTS_CHOICE_MS = 4200;
+  const PROMO_MOMENTS_DOUBT_MS = 6200;
+  const PROMO_MOMENTS_EXTRA_MS = 5400;
   const PROMO_MOMENTS_SALESPERSON_MS = 800;
   const PROMO_MOMENTS_HOLD_MS = 700;
   const PROMO_MOMENTS_VAPOR_MS = 480;
   const PROMO_MOMENTS_CART_GAP_MS = 420;
   const PROMO_MOMENTS_ACCESSORY_MS = 350;
   const PROMO_MOMENTS_COLLAPSE_MS = 560;
-  const PROMO_MOMENTS_SHORTLIST_MS = 480;
+  const PROMO_MOMENTS_SHORTLIST_MS = 800;
   const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
@@ -233,7 +231,7 @@
   const PROMO_MOMENTS_PAYOFF_RATIO = 0.6;
   const PROMO_MOMENTS_CLOSE_AT = 0.3;
   const PROMO_MOMENTS_BUNDLE_AT = 0.44;
-  const PROMO_MOMENTS_TAIL_MS = 200;
+  const PROMO_MOMENTS_TAIL_MS = 600;
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1200;
@@ -608,8 +606,12 @@
   function momentGlyph(kind, index) {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
-    glyph.style.setProperty('--shape', `${PROMO_MOMENT_SHAPE_SIZE[index] || 60}%`);
-    const nudge = PROMO_MOMENT_SHAPE_NUDGE[index];
+    const shape = PROMO_MOMENT_SHAPE_SIZE[index % PROMO_MOMENT_SHAPE_SIZE.length] || 60;
+    glyph.style.setProperty('--shape', `${shape}%`);
+    const nudge = PROMO_MOMENT_SHAPE_NUDGE[index]
+      || (index >= PROMO_MOMENT_CARD_KINDS.length && index % 4 === 1
+        ? (index % 8 === 1 ? [5, -4] : [-4, 5])
+        : null);
     if (nudge) {
       glyph.style.setProperty('--nudge-x', `${nudge[0]}%`);
       glyph.style.setProperty('--nudge-y', `${nudge[1]}%`);
@@ -727,6 +729,19 @@
       card.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
       if (role === 'pick') card.appendChild(momentKept());
       board.appendChild(card);
+    }
+    const catalogStart = PROMO_MOMENT_CARD_KINDS.length;
+    for (let row = 3; row < 3 + PROMO_PAIN_CATALOG_ROWS; row += 1) {
+      for (let column = 0; column < PROMO_MOMENT_GRID_COLS; column += 1) {
+        const index = catalogStart + (row - 3) * PROMO_MOMENT_GRID_COLS + column;
+        const kind = PROMO_MOMENT_CARD_KINDS[(index + 5) % PROMO_MOMENT_CARD_KINDS.length];
+        const extra = document.createElement('div');
+        extra.className = `promo-moments__card is-${kind} is-drop is-catalog`;
+        extra.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(0)}px`);
+        extra.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(0)}px`);
+        extra.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
+        board.appendChild(extra);
+      }
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-hexagon is-extra';
@@ -2428,7 +2443,6 @@
     openPainStage() {
       this.root.style.setProperty('--promo-pain-ease', PROMO_PAIN_EASE);
       this.root.style.setProperty('--promo-pain-open', `${PROMO_PAIN_SCROLL_MS}ms`);
-      this.root.style.setProperty('--promo-pain-zoom', `${PROMO_PAIN_ZOOM_MS}ms`);
       this.root.style.setProperty('--promo-pain-exit', `${PROMO_PAIN_EXIT_MS}ms`);
       this.ensureMoments();
       const stage = this.momentStage();
@@ -2450,6 +2464,14 @@
 
     painBrowseCard(slot) {
       return this.painCards()[PROMO_PAIN_BROWSE[slot]] || null;
+    }
+
+    painScrollStops() {
+      const cards = this.painCards();
+      const upper = cards[1]?.getBoundingClientRect();
+      const lower = cards[5]?.getBoundingClientRect();
+      const row = upper && lower ? Math.round(lower.top - upper.top) : PROMO_MOMENT_GRID_PITCH_Y;
+      return [0, -row, -(row * 2)];
     }
 
     setPainScroll(px) {
@@ -2533,19 +2555,19 @@
         log.appendChild(block);
       };
       if (through === 'typed-1') input.textContent = PROMO_PAIN_LINE_1;
-      if (through === 'think-1' || through === 'answer-1' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'zoom') {
+      if (through === 'think-1' || through === 'answer-1' || through === 'typed-2' || through === 'think-2' || through === 'answer-2') {
         addUser(PROMO_PAIN_LINE_1);
       }
       if (through === 'think-1') typing.hidden = false;
-      if (through === 'answer-1' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'zoom') {
+      if (through === 'answer-1' || through === 'typed-2' || through === 'think-2' || through === 'answer-2') {
         addBot(PROMO_PAIN_ANSWER_1, PROMO_PAIN_LINKS);
       }
       if (through === 'typed-2') input.textContent = PROMO_PAIN_LINE_2;
-      if (through === 'think-2' || through === 'answer-2' || through === 'zoom') {
+      if (through === 'think-2' || through === 'answer-2') {
         addUser(PROMO_PAIN_LINE_2);
       }
       if (through === 'think-2') typing.hidden = false;
-      if (through === 'answer-2' || through === 'zoom') {
+      if (through === 'answer-2') {
         addBot([PROMO_PAIN_ANSWER_2], null, ['Open a ticket', 'No, thanks']);
       }
     }
@@ -2560,7 +2582,7 @@
       board.classList.toggle('is-instant', !!instant);
       const browseSlot = beat === 'enter' ? 0 : beat === 'scroll-1' ? 1 : beat === 'scroll-2' ? 2 : -1;
       const scrollIndex = beat === 'scroll-1' ? 1 : beat === 'scroll-2' || beat === 'leave' ? 2 : 0;
-      const scrollDelta = scene === 'unattended' ? this.setPainScroll(PROMO_PAIN_SCROLL[scrollIndex]) : 0;
+      const scrollDelta = scene === 'unattended' ? this.setPainScroll(this.painScrollStops()[scrollIndex]) : 0;
       if (instant && scene === 'unattended') board.offsetWidth;
       host.classList.remove('is-pain-dim');
       this.painCards().forEach((card) => {
@@ -2569,7 +2591,7 @@
       });
       const chat = this.root.querySelector('[data-promo-pain-chat]');
       const cursor = this.root.querySelector('[data-promo-pain-cursor]');
-      const chatBeats = ['launcher', 'panel', 'typed-1', 'think-1', 'answer-1', 'typed-2', 'think-2', 'answer-2', 'zoom'];
+      const chatBeats = ['launcher', 'panel', 'typed-1', 'think-1', 'answer-1', 'typed-2', 'think-2', 'answer-2'];
       const chatOn = chatBeats.includes(beat);
       if (chat) {
         if (chatOn) chat.removeAttribute('hidden');
@@ -2582,7 +2604,7 @@
           cursor.style.opacity = '0';
         }
       }
-      this.root.classList.toggle('is-pain-zoom', beat === 'zoom');
+      this.root.classList.remove('is-pain-zoom');
       if (scene === 'unattended' && beat !== 'grid') {
         if (beat === 'leave') this.placePainCursorEdge();
         else if (browseSlot >= 0) this.placePainCursor(this.painBrowseCard(browseSlot), true, instant ? 0 : scrollDelta);
@@ -2642,7 +2664,7 @@
       this.startOpeningClock();
       this.openPainStage();
       if (prefersReducedMotion()) {
-        this.applyPainBeat('zoom', true);
+        this.applyPainBeat('answer-2', true);
         if (marketingPart() === 'full') this.flip();
         return;
       }
@@ -3151,7 +3173,7 @@
         'pain-b-answer-1': () => this.showPainExport('answer-1'),
         'pain-b-typed-2': () => this.showPainExport('typed-2'),
         'pain-b-answer-2': () => this.showPainExport('answer-2'),
-        'pain-b-zoom': () => this.showPainExport('zoom'),
+        'pain-b-zoom': () => this.showPainExport('answer-2'),
       };
 
       const run = frames[name];
