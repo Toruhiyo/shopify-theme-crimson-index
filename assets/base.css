@@ -1047,9 +1047,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__photo {
   position: relative;
   z-index: 1;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   width: 100%;
-  height: calc(var(--card-h) * 0.62);
+  height: auto;
+  min-height: calc(var(--card-h) * 0.5);
   overflow: hidden;
   border-radius: 12em;
   background: var(--color-card);
@@ -1258,17 +1259,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: relative;
   z-index: 1;
   flex: 0 0 auto;
-  margin-top: 12em;
+  margin-top: 14em;
   display: flex;
   flex-direction: column;
-  gap: 8em;
+  gap: 10em;
 }
 
 .promo-moments__title,
 .promo-moments__price i {
   display: block;
-  height: 6em;
-  border-radius: 3em;
+  height: 14em;
+  border-radius: 7em;
   background: var(--color-border);
 }
 
@@ -1285,7 +1286,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   flex: 0 0 auto;
   color: var(--color-muted-fg);
   font-family: var(--font-heading);
-  font-size: 10em;
+  font-size: 22em;
   font-weight: 500;
   line-height: 1;
 }
@@ -1296,17 +1297,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  margin-top: 14em;
+  margin-top: calc(14em / 16);
   width: 100%;
-  height: calc(34em / 13);
+  height: calc(46em / 16);
   display: grid;
   place-items: center;
-  border-radius: calc(10em / 13);
-  border: calc(1em / 13) solid var(--color-border);
+  border-radius: calc(12em / 16);
+  border: calc(1em / 16) solid var(--color-border);
   background: transparent;
   color: var(--color-muted-fg);
   font-family: var(--font-heading);
-  font-size: 13em;
+  font-size: 16em;
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.01em;
