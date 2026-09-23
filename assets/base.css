@@ -675,7 +675,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board.is-pose-grid {
-  --promo-grid-fit: min(0.84, calc((92cqh - 12rem) / 38.5rem));
+  --promo-grid-fit: 1;
   transform: translate(calc(-50% + var(--promo-board-x)), -50%) scale(var(--promo-grid-fit));
 }
 
@@ -819,6 +819,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   color: var(--color-muted-fg);
 }
 
+.promo-opening__search {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(22rem, 36%);
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-fg) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
+  pointer-events: none;
+}
+
 .promo-opening__store-mark {
   display: block;
   flex: 0 0 auto;
@@ -934,11 +947,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-pain .promo-moments__card {
   transition:
-    transform var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
-    width var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
-    height var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
-    --card-w var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
-    --card-h var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    transform var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    width var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    height var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    --card-w var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    --card-h var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
     opacity 420ms linear;
 }
 
@@ -974,12 +987,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 8;
   left: 0;
   top: 0;
-  width: 22px;
-  height: 22px;
+  width: 33px;
+  height: 33px;
   color: var(--color-fg);
   pointer-events: none;
   opacity: 0;
   transform: translate(var(--pain-x, -28px), var(--pain-y, 42%));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22));
   transition:
     transform var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
     opacity 280ms linear;
@@ -996,22 +1010,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-pain__cursor svg {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 33px;
+  height: 33px;
   fill: currentColor;
-  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--color-fg) 18%, transparent));
 }
 
 .promo-pain__chat {
   position: absolute;
-  right: 1.5rem;
-  bottom: 4.25rem;
+  right: 24px;
+  bottom: 32px;
   z-index: 7;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.6rem;
-  width: min(18rem, 46%);
+  gap: 0;
+  width: 300px;
+  max-width: calc(100% - 48px);
 }
 
 .promo-pain__chat[hidden] {
@@ -1046,7 +1060,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   border-radius: 16px;
   background: var(--color-card);
   color: var(--color-muted-fg);
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--color-fg) 8%, transparent);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.10);
+}
+
+.promo-pain__chat.is-open .promo-pain__launcher {
+  display: none;
 }
 
 .promo-pain__chat.is-open .promo-pain__panel {
@@ -1448,12 +1466,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 1;
   width: 768px;
   margin: 0 0 0 -384px;
-  padding: 0.2rem 0;
+  padding: 0;
   display: grid;
-  gap: 0;
-  border-radius: 16px;
-  background: #F7F6F4;
-  border: 1px solid color-mix(in srgb, var(--color-fg) 7%, transparent);
+  gap: 0.55rem;
+  border-radius: 0;
+  background: none;
+  border: none;
   box-shadow: none;
   opacity: 0;
   transform: translate3d(0, 170px, 0);
@@ -1466,40 +1484,46 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  min-height: 1.7rem;
+  min-height: 1.5rem;
 }
 
 .promo-moments__compare-row + .promo-moments__compare-row {
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-fg) 7%, transparent);
+  box-shadow: none;
 }
 
 .promo-moments__compare-row .promo-moments__spec-icon {
   position: absolute;
-  left: 0.85rem;
+  left: 0.15rem;
   top: 50%;
-  width: 1.15rem;
-  height: 1.15rem;
-  margin-top: -0.575rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  margin-top: -0.775rem;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #F1EFEE;
   color: #8A847C;
 }
 
 .promo-moments__compare-row .promo-moments__spec-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
   fill: currentColor;
   stroke: none;
   stroke-width: 0;
 }
 
 .promo-moments__compare-cell .promo-moments__mark {
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, currentColor 14%, #F7F6F4);
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
 }
 
 .promo-moments__compare-cell .promo-moments__mark svg {
-  width: 0.72rem;
-  height: 0.72rem;
-  stroke-width: 1.8;
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 1.7;
 }
 
 .promo-moments__compare-cell {
@@ -1751,12 +1775,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation-fill-mode: both;
 }
 
-.promo-moments__card.is-catalog {
-  display: none;
-}
-
-.promo-opening.is-pain .promo-moments__card.is-catalog {
-  display: flex;
+.promo-moments__board.is-pose-grid .promo-moments__card.is-catalog {
   animation: none;
   opacity: 1;
   transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0);
@@ -3123,7 +3142,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__line.is-revealing .promo-opening__face--from .promo-opening__word {
-  animation: promo-pitch-word 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: promo-pitch-word 340ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .promo-opening__line.is-revealing .promo-opening__face--from.is-exiting .promo-opening__word {

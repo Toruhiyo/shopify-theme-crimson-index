@@ -21,8 +21,11 @@ const REST_PAD_MS = 100;
 const FRAMES = [
   ['pain-a-grid', 'Pain, unattended. The store is full of products. Clerk corner is empty. Cart is empty.', 0],
   ['pain-a-enter', 'Pain, unattended. Cursor rests on a product image. Add is not under it.', 0],
+  ['pain-a-open', 'Pain, unattended. One product card is open. Cursor stays on the image, not Add.', 0],
+  ['pain-a-back', 'Pain, unattended. The opened card has closed. Cursor is still on the image.', 0],
   ['pain-a-scroll-1', 'Pain, unattended. The catalog has scrolled one row. New products have entered from below.', 0],
   ['pain-a-scroll-2', 'Pain, unattended. The catalog has scrolled another row. The window is still full of products.', 0],
+  ['pain-a-scroll-up', 'Pain, unattended. The catalog has scrolled back up one row. The window is still full.', 0],
   ['pain-a-leave', 'Pain, unattended. Cursor has left at the stage edge.', 0],
   ['pain-b-launcher', 'Pain, dull chatbot. Grey launcher sits where the clerk will stand.', 0],
   ['pain-b-panel', 'Pain, dull chatbot. Grey panel is open. Title Dull Chatbot. Footer Powered by Every Chatbot Ever.', 0],

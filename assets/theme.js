@@ -145,6 +145,7 @@
   }
 
   const PROMO_FLIP_KNOB_MS = 200;
+  const PROMO_TOGGLE_REST_MS = 1000;
   const PROMO_OPENING_REVEAL_STORE = false;
   const PROMO_OPENING_CLOCK = true;
   const PROMO_AGENTIC_MOVE_MS = 900;
@@ -159,9 +160,9 @@
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
   const PROMO_LOGO_DOCK_MS = 720;
   const PROMO_PITCH_LOGO_OUT_MS = 420;
-  const PROMO_PITCH_WORD_STAGGER_MS = 100;
-  const PROMO_PITCH_WORD_IN_MS = 420;
-  const PROMO_PITCH_REDEFINE_HOLD_MS = 480;
+  const PROMO_PITCH_WORD_STAGGER_MS = 80;
+  const PROMO_PITCH_WORD_IN_MS = 340;
+  const PROMO_PITCH_REDEFINE_HOLD_MS = 380;
   const PROMO_PITCH_STRIKE_MS = 420;
   const PROMO_PITCH_STRIKE_HOLD_MS = 200;
   const PROMO_PITCH_MORPH_MS = 720;
@@ -178,9 +179,11 @@
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_SELL_OUT_MS = 900;
   const PROMO_PAIN_EASE = 'cubic-bezier(0.45, 0.05, 0.2, 1)';
-  const PROMO_PAIN_BROWSE = [5, 13, 18];
-  const PROMO_PAIN_CATALOG_ROWS = 4;
-  const PROMO_PAIN_SCROLL_MS = 1700;
+  const PROMO_PAIN_POOL = 48;
+  const PROMO_PAIN_CARD_W = 150;
+  const PROMO_PAIN_CARD_H = 200;
+  const PROMO_PAIN_PAD = 24;
+  const PROMO_PAIN_SCROLL_MS = 1800;
   const PROMO_PAIN_TYPE_CHAR_MS = 16;
   const PROMO_PAIN_EXIT_MS = 420;
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -193,11 +196,14 @@
   const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
-    ['grid', 1000],
-    ['enter', 1200],
+    ['grid', 800],
+    ['enter', 700],
+    ['open', 1000],
+    ['back', 700],
     ['scroll-1', PROMO_PAIN_SCROLL_MS],
     ['scroll-2', PROMO_PAIN_SCROLL_MS],
-    ['leave', 800],
+    ['scroll-up', 1600],
+    ['leave', 600],
   ];
   const PROMO_PAIN_B = [
     ['launcher', 600],
@@ -603,6 +609,24 @@
     return 'drop';
   }
 
+  function momentShapeOpen(kind) {
+    if (kind === 'circle') return '<circle cx="50" cy="50" r="50"';
+    if (kind === 'square') return '<rect width="100" height="100" rx="18"';
+    if (kind === 'pill') return '<rect y="22" width="100" height="56" rx="28"';
+    if (kind === 'triangle') return '<path d="M50 0 100 100H0z"';
+    return '<path d="M50 0 100 25 100 75 50 100 0 75 0 25z"';
+  }
+
+  function momentShapeTag(kind, attrs) {
+    return `${momentShapeOpen(kind)} ${attrs}/>`;
+  }
+
+  function momentFacetTag(kind) {
+    if (kind === 'square') return '<path d="M18 0h64a18 18 0 0 1 18 18v16H0V18A18 18 0 0 1 18 0z" fill="#F1EFEE"/>';
+    if (kind === 'hexagon') return '<path d="M50 0 100 25 0 25z" fill="#F1EFEE"/>';
+    return '';
+  }
+
   function momentGlyph(kind, index) {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
@@ -616,8 +640,10 @@
       glyph.style.setProperty('--nudge-x', `${nudge[0]}%`);
       glyph.style.setProperty('--nudge-y', `${nudge[1]}%`);
     }
-    const gradientId = `promo-shape-${index}`;
-    glyph.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="${gradientId}" cx="22%" cy="16%" r="72%"><stop offset="0%" stop-color="#E7E3DC"/><stop offset="46%" stop-color="#DCD8D1"/><stop offset="100%" stop-color="#DCD8D1"/></radialGradient></defs><g fill="url(#${gradientId})">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
+    const id = `promo-shape-${index}`;
+    const bottom = kind === 'pill' ? 78 : 100;
+    const base = kind === 'circle' ? `url(#${id}-sphere)` : '#DCD8D1';
+    glyph.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="${id}-lit" cx="18%" cy="12%" r="80%"><stop offset="0%" stop-color="#fff" stop-opacity="0.35"/><stop offset="60%" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="${id}-shade" cx="86%" cy="88%" r="75%"><stop offset="0%" stop-color="#C9C3BA" stop-opacity="0.12"/><stop offset="62%" stop-color="#C9C3BA" stop-opacity="0"/></radialGradient><radialGradient id="${id}-sphere" cx="32%" cy="28%" r="78%"><stop offset="0%" stop-color="#F1EFEE"/><stop offset="46%" stop-color="#DCD8D1"/><stop offset="100%" stop-color="#CFC8BE"/></radialGradient><linearGradient id="${id}-edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1EFEE"/><stop offset="42%" stop-color="#F1EFEE" stop-opacity="0.4"/><stop offset="68%" stop-color="#F1EFEE" stop-opacity="0"/></linearGradient><clipPath id="${id}-clip">${momentShapeTag(kind, '')}</clipPath></defs><ellipse cx="50" cy="${bottom}" rx="30" ry="6" fill="#1C1917" opacity="0.25" style="filter:blur(10px);transform:translateY(6px)"/><g clip-path="url(#${id}-clip)">${momentShapeTag(kind, `fill="${base}"`)}${momentFacetTag(kind)}${momentShapeTag(kind, `fill="url(#${id}-lit)"`)}${momentShapeTag(kind, `fill="url(#${id}-shade)"`)}${momentShapeTag(kind, `fill="none" stroke="url(#${id}-edge)" stroke-width="2" vector-effect="non-scaling-stroke"`)}</g></svg>`;
     return glyph;
   }
 
@@ -731,17 +757,14 @@
       board.appendChild(card);
     }
     const catalogStart = PROMO_MOMENT_CARD_KINDS.length;
-    for (let row = 3; row < 3 + PROMO_PAIN_CATALOG_ROWS; row += 1) {
-      for (let column = 0; column < PROMO_MOMENT_GRID_COLS; column += 1) {
-        const index = catalogStart + (row - 3) * PROMO_MOMENT_GRID_COLS + column;
-        const kind = PROMO_MOMENT_CARD_KINDS[(index + 5) % PROMO_MOMENT_CARD_KINDS.length];
-        const extra = document.createElement('div');
-        extra.className = `promo-moments__card is-${kind} is-drop is-catalog`;
-        extra.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(0)}px`);
-        extra.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(0)}px`);
-        extra.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
-        board.appendChild(extra);
-      }
+    for (let index = catalogStart; index < PROMO_PAIN_POOL; index += 1) {
+      const kind = PROMO_MOMENT_CARD_KINDS[(index + 5) % PROMO_MOMENT_CARD_KINDS.length];
+      const extra = document.createElement('div');
+      extra.className = `promo-moments__card is-${kind} is-drop is-catalog`;
+      extra.style.setProperty('--gx', '0px');
+      extra.style.setProperty('--gy', '0px');
+      extra.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
+      board.appendChild(extra);
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-hexagon is-extra';
@@ -796,7 +819,37 @@
     board.querySelector('.promo-moments__cart')?.remove();
     board.querySelector('.promo-moments__fly')?.remove();
     stage.replaceChildren(board);
+    layoutStoreGrid(board);
     return board;
+  }
+
+  function layoutStoreGrid(board) {
+    const stage = board?.parentElement;
+    if (!stage || stage.clientWidth < 240) return;
+    const shiftRaw = getComputedStyle(board).getPropertyValue('--promo-board-x').trim();
+    const shift = shiftRaw.endsWith('rem') ? parseFloat(shiftRaw) * 16 : (parseFloat(shiftRaw) || 0);
+    const pad = PROMO_PAIN_PAD;
+    const cardW = PROMO_PAIN_CARD_W;
+    const cardH = PROMO_PAIN_CARD_H;
+    const contentWidth = stage.clientWidth - pad * 2;
+    let cols = 6;
+    let gutter = (contentWidth - cols * cardW) / (cols - 1);
+    if (gutter < 12) {
+      cols = 5;
+      gutter = (contentWidth - cols * cardW) / (cols - 1);
+    }
+    const pitchX = cardW + Math.max(gutter, 12);
+    const pitchY = cardH + 16;
+    const gx0 = pad + cardW / 2 - (stage.clientWidth / 2 + shift);
+    const gy0 = -stage.clientHeight / 2 + cardH / 2 - 36;
+    board.querySelectorAll('.promo-moments__card:not(.is-extra)').forEach((card, index) => {
+      const column = index % cols;
+      const row = Math.floor(index / cols);
+      card.style.setProperty('--gx', `${(gx0 + column * pitchX).toFixed(1)}px`);
+      card.style.setProperty('--gy', `${(gy0 + row * pitchY).toFixed(1)}px`);
+    });
+    board.dataset.painCols = String(cols);
+    board.dataset.painPitch = String(pitchY);
   }
 
   function applyMomentPose(stage, pose, options = {}) {
@@ -827,6 +880,7 @@
       });
     }
     if (label) label.textContent = '';
+    if (pose === 'grid') layoutStoreGrid(board);
     if (options.instant) {
       void board.offsetWidth;
       board.classList.remove('is-instant');
@@ -1534,6 +1588,8 @@
       this.fitOpeningType();
       this.fitClerk();
       this.dockLogo();
+      const board = this.root.querySelector('.promo-moments__board.is-pose-grid');
+      if (board) layoutStoreGrid(board);
     }
 
     dockLogo() {
@@ -2076,6 +2132,10 @@
         cart.setAttribute('aria-hidden', 'true');
         cart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.35" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.35" fill="currentColor"/></svg><span class="promo-moments__count is-one">1</span><span class="promo-moments__count is-two">2</span>';
         bar.append(brand, cart);
+        const search = document.createElement('span');
+        search.className = 'promo-opening__search';
+        search.setAttribute('aria-hidden', 'true');
+        bar.appendChild(search);
         const field = host.querySelector('.promo-opening__moments-field');
         const stage = host.querySelector('[data-promo-moments-stage]');
         if (field) store.appendChild(field);
@@ -2106,6 +2166,12 @@
           name.className = 'promo-opening__store-name';
           name.textContent = 'Your store';
           brand.appendChild(name);
+        }
+        if (bar && !bar.querySelector('.promo-opening__search')) {
+          const search = document.createElement('span');
+          search.className = 'promo-opening__search';
+          search.setAttribute('aria-hidden', 'true');
+          bar.appendChild(search);
         }
       }
       host.querySelectorAll('.promo-moments__cart-piece, .promo-moments__cart-burst').forEach((piece) => piece.remove());
@@ -2443,6 +2509,7 @@
     openPainStage() {
       this.root.style.setProperty('--promo-pain-ease', PROMO_PAIN_EASE);
       this.root.style.setProperty('--promo-pain-open', `${PROMO_PAIN_SCROLL_MS}ms`);
+      this.root.style.setProperty('--promo-pain-card', '720ms');
       this.root.style.setProperty('--promo-pain-exit', `${PROMO_PAIN_EXIT_MS}ms`);
       this.ensureMoments();
       const stage = this.momentStage();
@@ -2460,18 +2527,30 @@
         cursor.style.opacity = '0';
       }
       this.root.querySelector('[data-promo-pain-chat]')?.setAttribute('hidden', '');
+      const laid = stage?.querySelector('.promo-moments__board');
+      if (laid) layoutStoreGrid(laid);
+    }
+
+    painCols() {
+      const board = this.painHost()?.querySelector('.promo-moments__board');
+      return Number(board?.dataset.painCols) || 6;
     }
 
     painBrowseCard(slot) {
-      return this.painCards()[PROMO_PAIN_BROWSE[slot]] || null;
+      const cols = this.painCols();
+      const base = cols + 1;
+      const indexes = [base, base + cols, base + cols * 2, base + cols];
+      return this.painCards()[indexes[slot]] || null;
     }
 
     painScrollStops() {
       const cards = this.painCards();
-      const upper = cards[1]?.getBoundingClientRect();
-      const lower = cards[5]?.getBoundingClientRect();
-      const row = upper && lower ? Math.round(lower.top - upper.top) : PROMO_MOMENT_GRID_PITCH_Y;
-      return [0, -row, -(row * 2)];
+      const cols = this.painCols();
+      const upper = cards[0]?.getBoundingClientRect();
+      const lower = cards[cols]?.getBoundingClientRect();
+      const measured = upper && lower ? Math.round(lower.top - upper.top) : 0;
+      const row = measured > 20 ? measured : Number(this.painHost()?.querySelector('.promo-moments__board')?.dataset.painPitch) || (PROMO_PAIN_CARD_H + 16);
+      return [0, -row, -(row * 2), -row];
     }
 
     setPainScroll(px) {
@@ -2580,13 +2659,22 @@
       host.setAttribute('data-promo-pain-scene', scene);
       host.setAttribute('data-promo-pain-beat', beat);
       board.classList.toggle('is-instant', !!instant);
-      const browseSlot = beat === 'enter' ? 0 : beat === 'scroll-1' ? 1 : beat === 'scroll-2' ? 2 : -1;
-      const scrollIndex = beat === 'scroll-1' ? 1 : beat === 'scroll-2' || beat === 'leave' ? 2 : 0;
+      const browseSlot = beat === 'enter' || beat === 'open' || beat === 'back' ? 0
+        : beat === 'scroll-1' ? 1
+          : beat === 'scroll-2' ? 2
+            : beat === 'scroll-up' ? 3
+              : -1;
+      const scrollIndex = beat === 'scroll-1' ? 1
+        : beat === 'scroll-2' ? 2
+          : beat === 'scroll-up' || beat === 'leave' ? 3
+            : 0;
       const scrollDelta = scene === 'unattended' ? this.setPainScroll(this.painScrollStops()[scrollIndex]) : 0;
       if (instant && scene === 'unattended') board.offsetWidth;
       host.classList.remove('is-pain-dim');
+      const opened = beat === 'open' ? this.painBrowseCard(0) : null;
       this.painCards().forEach((card) => {
-        card.classList.remove('is-pain-open', 'is-pain-add');
+        card.classList.remove('is-pain-add');
+        card.classList.toggle('is-pain-open', card === opened);
         card.classList.toggle('is-pain-hover', browseSlot >= 0 && card === this.painBrowseCard(browseSlot));
       });
       const chat = this.root.querySelector('[data-promo-pain-chat]');
@@ -2672,6 +2760,7 @@
       await this.playPainSteps(PROMO_PAIN_B, 'chat');
       if (marketingPart() === 'full') {
         await this.dismissPainStage();
+        await waitMs(PROMO_TOGGLE_REST_MS);
         this.flip();
       }
     }
@@ -3164,8 +3253,11 @@
         },
         'pain-a-grid': () => this.showPainExport('grid'),
         'pain-a-enter': () => this.showPainExport('enter'),
+        'pain-a-open': () => this.showPainExport('open'),
+        'pain-a-back': () => this.showPainExport('back'),
         'pain-a-scroll-1': () => this.showPainExport('scroll-1'),
         'pain-a-scroll-2': () => this.showPainExport('scroll-2'),
+        'pain-a-scroll-up': () => this.showPainExport('scroll-up'),
         'pain-a-leave': () => this.showPainExport('leave'),
         'pain-b-launcher': () => this.showPainExport('launcher'),
         'pain-b-panel': () => this.showPainExport('panel'),
