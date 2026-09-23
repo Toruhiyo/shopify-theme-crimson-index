@@ -957,6 +957,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-pain .promo-moments__card {
+  box-shadow:
+    inset 0 1em 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    0 2em 6em color-mix(in srgb, var(--color-fg) 4%, transparent);
   transition:
     transform var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
     width var(--promo-pain-card, 720ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
@@ -978,6 +981,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 6;
   --card-w: 300px;
   --card-h: 400px;
+  box-shadow:
+    inset 0 1em 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
+    0 2em 6em color-mix(in srgb, var(--color-fg) 4%, transparent),
+    0 24em 60em color-mix(in srgb, var(--color-fg) 6%, transparent);
 }
 
 .promo-opening.is-pain .promo-moments__card.is-pain-open .promo-moments__add {
@@ -1218,9 +1225,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: hidden;
 }
 
-.promo-opening.is-pain .promo-opening__moments-stage {
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 72px, #000 calc(100% - 88px), transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 72px, #000 calc(100% - 88px), transparent 100%);
+.promo-opening.is-pain .promo-opening__moments-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow:
+    inset 0 36px 42px -14px rgba(55, 50, 46, 0.2),
+    inset 0 -44px 48px -12px rgba(55, 50, 46, 0.22);
 }
 
 .promo-moments__board {
