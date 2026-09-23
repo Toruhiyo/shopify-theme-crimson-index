@@ -145,6 +145,35 @@ async function revealForcedFaces(page) {
   });
 }
 
+async function serveExportAssets(page) {
+  const themeJs = fs.readFileSync(path.join(THEME_ROOT, 'assets/theme.js'));
+  await page.route('**/assets/theme.js*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/javascript; charset=utf-8',
+      body: themeJs,
+    });
+  });
+  const widgetResponse = await fetch('https://cdn.bizmis.ai/widget/avatar-widget.js');
+  if (!widgetResponse.ok) throw new Error(`Widget fetch failed: ${widgetResponse.status}`);
+  const widgetSource = await widgetResponse.text();
+  const mouthNeedle = 'if(!e||!e.morphTargetDictionary)return;Object.keys(e.morphTargetDictionary).forEach((e=>{if("eyeBlinkLeft"===e||"eyeBlinkRight"===e)return;';
+  if (!widgetSource.includes(mouthNeedle)) {
+    throw new Error('Widget mouth loop was not found. Speech frames cannot pin the mouth.');
+  }
+  const widgetPatched = widgetSource.replace(
+    mouthNeedle,
+    'if(!e||!e.morphTargetDictionary)return;window.__promoMouthMesh=e;Object.keys(e.morphTargetDictionary).forEach((e=>{if("eyeBlinkLeft"===e||"eyeBlinkRight"===e)return;',
+  );
+  await page.route('**/avatar-widget.js*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/javascript; charset=utf-8',
+      body: widgetPatched,
+    });
+  });
+}
+
 async function main() {
   emptyOutDir();
 
@@ -158,6 +187,7 @@ async function main() {
     deviceScaleFactor: 1,
   });
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await serveExportAssets(page);
   await page.goto(openingUrl(), { waitUntil: 'domcontentloaded', timeout: 20000 });
   await unlockStorefront(page);
   if (!page.url().includes('promo_video=opening')) {
@@ -209,6 +239,10 @@ async function main() {
     ]);
     await revealForcedFaces(page);
     await page.waitForTimeout(mode === 'rest' ? REST_PAD_MS : waitMs);
+    if (String(id).endsWith('-speech')) {
+      const mouth = await page.evaluate(() => document.documentElement.dataset.promoMouth || 'unset');
+      process.stdout.write(`mouth ${id} ${mouth}\n`);
+    }
     await page.screenshot({
       path: path.join(OUT_DIR, `${id}.png`),
       type: 'png',

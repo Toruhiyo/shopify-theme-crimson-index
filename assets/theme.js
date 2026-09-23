@@ -756,6 +756,13 @@
     const board = ensureMomentBoard(stage);
     if (!board) return null;
     const host = momentHostOf(stage);
+    momentMotions(stage).forEach((anim) => {
+      try {
+        anim.cancel();
+      } catch (error) {
+        return;
+      }
+    });
     clearMomentInline(stage);
     board.dataset.pose = '';
     board.classList.remove('is-settled', 'is-reduced', 'is-instant');
@@ -764,7 +771,9 @@
       board.classList.remove(`is-pose-${name}`);
       host?.classList.remove(`is-pose-${name}`);
     });
+    void board.offsetWidth;
     applyMomentPose(stage, pose);
+    void board.offsetWidth;
     return board;
   }
 
@@ -895,6 +904,9 @@
   }
 
   function findMouthMesh() {
+    if (window.__promoMouthMesh && window.__promoMouthMesh.morphTargetDictionary) {
+      return window.__promoMouthMesh;
+    }
     const roots = document.querySelectorAll('[data-promo-widget], canvas');
     for (const root of roots) {
       const key = Object.keys(root).find((name) => name.startsWith('__reactFiber'));
@@ -1014,7 +1026,7 @@
         const motions = momentMotions(stage);
         const ticks = motions.filter((anim) => (anim.animationName || '') === 'promo-moments-tick');
         const ticksDone = ticks.length >= 9 && ticks.every((anim) => anim.playState === 'finished');
-        if (!ticksDone && attempt <= 240) {
+        if (!ticksDone) {
           window.requestAnimationFrame(() => watch(attempt + 1));
           return;
         }
