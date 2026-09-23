@@ -182,15 +182,15 @@ html.is-promo-cover body > *:not(.promo-cover) {
 html.is-promo-opening .promo-opening {
   display: grid;
   place-items: center;
+  overflow: hidden;
 }
 
 .promo-opening__canvas {
   position: relative;
   container-type: size;
   width: min(100%, calc(100dvh * 16 / 9));
-  max-height: 100%;
-  aspect-ratio: 16 / 9;
-  overflow: visible;
+  height: min(100%, calc(100dvw * 9 / 16));
+  overflow: hidden;
 }
 
 .promo-opening__guide {
@@ -648,7 +648,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__stage {
-  width: min(1400px, 100%);
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-opening__copy {
+  position: static;
+  max-width: none;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments {
@@ -657,12 +663,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 4;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-left: 2.5cqw;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
   flex: 0 0 auto;
-  width: min(70rem, 78cqw);
+  width: min(70rem, 66cqw);
   height: min(43.5rem, 76cqh);
   max-height: none;
   aspect-ratio: auto;
