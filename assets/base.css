@@ -954,9 +954,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__card {
   z-index: 2;
-  width: 8.125rem;
-  height: 8.125rem;
-  margin: -4.0625rem 0 0 -4.0625rem;
+  width: 6.4rem;
+  height: 9.2rem;
+  margin: -4.6rem 0 0 -3.2rem;
   overflow: hidden;
   border-radius: 28px;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
@@ -1004,10 +1004,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__photo {
   position: absolute;
   z-index: 1;
-  left: 0.38rem;
-  right: 0.38rem;
+  left: 0.28rem;
+  right: 0.28rem;
   top: 0.28rem;
-  height: 2.35rem;
+  height: 65%;
   overflow: hidden;
   border-radius: 16px;
   background: #F1EFEC;
@@ -1019,9 +1019,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: calc(1.6rem * var(--shape-scale, 1));
-  height: calc(1.6rem * var(--shape-scale, 1));
-  margin: calc(-0.8rem * var(--shape-scale, 1)) 0 0 calc(-0.8rem * var(--shape-scale, 1));
+  width: 2.69rem;
+  height: 2.69rem;
+  margin: -1.345rem 0 0 -1.345rem;
   display: block;
   color: #D9D4CC;
   opacity: 1;
@@ -1157,14 +1157,68 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__mark.is-yes { color: #f9a353; }
 .promo-moments__mark.is-no { color: #8a847c; }
 
+.promo-moments__compare {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 15.75rem;
+  margin: 0 0 0 -7.875rem;
+  padding: 0.42rem 0.2rem;
+  display: grid;
+  gap: 0.22rem;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 16px 40px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  transform: translate3d(0, 7.6rem, 0);
+  transform-origin: center top;
+  pointer-events: none;
+}
+
+.promo-moments__compare-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 1.15rem;
+}
+
+.promo-moments__compare-bar {
+  position: absolute;
+  left: 0.45rem;
+  top: 50%;
+  width: var(--bar, 16%);
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.promo-moments__compare-cell {
+  display: grid;
+  place-items: center;
+}
+
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__compare {
+  animation:
+    promo-moments-compare-in 420ms var(--promo-spring) 460ms both,
+    promo-moments-compare-fold 200ms var(--promo-spring) var(--promo-compare-fold, 2200ms) forwards;
+}
+
 .promo-moments__meta {
   position: absolute;
   z-index: 1;
-  left: 0.5rem;
-  right: 0.5rem;
-  top: 2.74rem;
+  left: 0.42rem;
+  right: 0.42rem;
+  top: 71%;
   display: grid;
-  gap: 0.1rem;
+  gap: 0.16rem;
 }
 
 .promo-moments__title,
@@ -1332,9 +1386,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(var(--gx), var(--gy), 0) scale(0.12);
 }
 
-.is-pose-row .promo-moments__card.is-go { --tx: -10.8rem; --ts: 1.28; transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
-.is-pose-row .promo-moments__card.is-pick { --tx: 0rem; --ts: 1.28; transform: translate3d(0, 0, 0) scale(1.28); }
-.is-pose-row .promo-moments__card.is-other { --tx: 10.8rem; --ts: 1.28; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
+.is-pose-row .promo-moments__card.is-go { --tx: -8.3rem; --ts: 1.18; transform: translate3d(-8.3rem, 0, 0) scale(1.18); }
+.is-pose-row .promo-moments__card.is-pick { --tx: 0rem; --ts: 1.18; transform: translate3d(0, 0, 0) scale(1.18); }
+.is-pose-row .promo-moments__card.is-other { --tx: 8.3rem; --ts: 1.18; transform: translate3d(8.3rem, 0, 0) scale(1.18); }
 
 .promo-moments__board.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card:not(.is-extra) {
   animation: none;
@@ -1384,21 +1438,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick {
-  transform: translate3d(0, -0.45rem, 0) scale(1.7);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 0 0 4px rgba(249, 163, 83, 0.22),
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 28px 70px rgba(0, 0, 0, 0.09);
+  transform: translate3d(4.1rem, -8px, 0) scale(1.18);
 }
 
 .is-pose-choice .promo-moments__card.is-go {
-  transform: translate3d(-13.2rem, 0, 0) scale(1.38);
+  transform: translate3d(-4.1rem, 0, 0) scale(1.18);
 }
 
 .is-pose-choice .promo-moments__card.is-other {
-  transform: translate3d(13.2rem, 0, 0) scale(1.38);
+  opacity: 0;
+  transform: translate3d(14rem, 0.3rem, 0) scale(0.55);
 }
 
 .is-pose-choice .promo-moments__card.is-pick::after,
@@ -1439,40 +1488,33 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice .promo-moments__mark { opacity: 1; transform: scale(1); }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go {
-  animation: promo-moments-go 900ms var(--promo-spring) forwards;
+  animation: promo-moments-pair-go 480ms var(--promo-spring) both;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
-  animation: promo-moments-pick 2000ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation:
+    promo-moments-pair-pick 480ms var(--promo-spring) both,
+    promo-moments-pair-lift 280ms var(--promo-spring) 1820ms forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
-  animation: promo-moments-other 900ms var(--promo-spring) forwards;
+  animation: promo-moments-pair-other 420ms var(--promo-spring) both;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
   opacity: 0;
-  animation: promo-moments-ring 320ms var(--promo-spring) 1580ms both;
+  animation: promo-moments-ring 280ms var(--promo-spring) 1820ms both;
 }
 
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__specs {
-  opacity: 0;
-  animation: promo-moments-specs 280ms var(--promo-spring) 240ms forwards;
-}
-
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__specs {
-  animation-name: promo-moments-specs-on;
-}
-
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__mark {
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__compare .promo-moments__mark {
   opacity: 0;
   transform: scale(0.96);
-  animation: promo-moments-tick 320ms var(--promo-spring) forwards;
+  animation: promo-moments-tick 280ms var(--promo-spring) forwards;
 }
 
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(1) .promo-moments__mark { animation-delay: 480ms; }
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(2) .promo-moments__mark { animation-delay: 700ms; }
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(3) .promo-moments__mark { animation-delay: 920ms; }
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__compare-row:nth-child(1) .promo-moments__mark { animation-delay: 980ms; }
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__compare-row:nth-child(2) .promo-moments__mark { animation-delay: 1220ms; }
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__compare-row:nth-child(3) .promo-moments__mark { animation-delay: 1460ms; }
 
 .is-pose-doubt .promo-moments__card.is-pick,
 .is-pose-close .promo-moments__card.is-pick {
@@ -2219,55 +2261,39 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: none !important;
 }
 
-@keyframes promo-moments-go {
-  0% { opacity: 1; filter: none; transform: translate3d(-10.8rem, 0, 0) scale(1.28); }
-  100% { opacity: 1; filter: none; transform: translate3d(-13.2rem, 0, 0) scale(1.38); }
+@keyframes promo-moments-pair-go {
+  from { opacity: 1; transform: translate3d(-8.3rem, 0, 0) scale(1.18); }
+  to { opacity: 1; transform: translate3d(-4.1rem, 0, 0) scale(1.18); }
+}
+
+@keyframes promo-moments-pair-pick {
+  from { transform: translate3d(0, 0, 0) scale(1.18); }
+  to { transform: translate3d(4.1rem, 0, 0) scale(1.18); }
+}
+
+@keyframes promo-moments-pair-lift {
+  from { transform: translate3d(4.1rem, 0, 0) scale(1.18); }
+  to { transform: translate3d(4.1rem, -8px, 0) scale(1.18); }
+}
+
+@keyframes promo-moments-pair-other {
+  from { opacity: 1; transform: translate3d(8.3rem, 0, 0) scale(1.18); }
+  to { opacity: 0; transform: translate3d(14rem, 0.3rem, 0) scale(0.55); }
+}
+
+@keyframes promo-moments-compare-in {
+  from { opacity: 0; transform: translate3d(0, 7.6rem, 0) scaleY(0.86); }
+  to { opacity: 1; transform: translate3d(0, 5.7rem, 0) scaleY(1); }
+}
+
+@keyframes promo-moments-compare-fold {
+  from { opacity: 1; transform: translate3d(0, 5.7rem, 0) scaleY(1); }
+  to { opacity: 0; transform: translate3d(0, 5.7rem, 0) scaleY(0.15); }
 }
 
 @keyframes promo-moments-sheen {
   from { transform: translate3d(-62%, 0, 0); }
   to { transform: translate3d(62%, 0, 0); }
-}
-
-@keyframes promo-moments-pick {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1.28);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-      0 4px 12px rgba(0, 0, 0, 0.05),
-      0 28px 70px rgba(0, 0, 0, 0.09);
-  }
-  46% {
-    transform: translate3d(0, 0, 0) scale(1.38);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-      0 4px 12px rgba(0, 0, 0, 0.05),
-      0 28px 70px rgba(0, 0, 0, 0.09);
-  }
-  75% {
-    transform: translate3d(0, 0, 0) scale(1.38);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-      0 4px 12px rgba(0, 0, 0, 0.05),
-      0 28px 70px rgba(0, 0, 0, 0.09);
-  }
-  100% {
-    transform: translate3d(0, -0.45rem, 0) scale(1.7);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-      0 0 0 4px rgba(249, 163, 83, 0.22),
-      0 4px 12px rgba(0, 0, 0, 0.05),
-      0 28px 70px rgba(0, 0, 0, 0.09);
-  }
-}
-
-@keyframes promo-moments-other {
-  0% { opacity: 1; filter: none; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
-  100% { opacity: 1; filter: none; transform: translate3d(13.2rem, 0, 0) scale(1.38); }
 }
 
 @keyframes promo-moments-ring {

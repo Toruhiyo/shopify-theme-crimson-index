@@ -517,8 +517,8 @@
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
   const PROMO_MOMENT_OTHER_INDEX = 11;
-  const PROMO_MOMENT_GRID_PITCH = 8.55;
-  const PROMO_MOMENT_SHAPE_SCALES = [0.86, 1, 0.74, 0.92, 0.7, 1, 0.8, 0.96, 0.78, 0.88, 0.72, 0.94];
+  const PROMO_MOMENT_GRID_PITCH_X = 6.9;
+  const PROMO_MOMENT_GRID_PITCH_Y = 9.6;
   const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
   const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
   const PROMO_MOMENT_NEW_INDEXES = [0];
@@ -609,20 +609,26 @@
     return mark;
   }
 
-  function momentSpecs(role) {
-    const specs = document.createElement('span');
-    specs.className = 'promo-moments__specs';
-    PROMO_MOMENT_SPEC_KINDS.forEach((_, index) => {
-      const row = document.createElement('span');
-      row.className = 'promo-moments__spec';
+  function momentCompare() {
+    const panel = document.createElement('div');
+    panel.className = 'promo-moments__compare';
+    const bars = [18, 12, 22];
+    for (let row = 0; row < PROMO_MOMENT_SPEC_KINDS.length; row += 1) {
+      const line = document.createElement('div');
+      line.className = 'promo-moments__compare-row';
       const bar = document.createElement('i');
-      bar.className = 'promo-moments__bar';
-      const failAt = role === 'go' ? 2 : role === 'other' ? 1 : -1;
-      const verdict = index === failAt ? 'no' : 'yes';
-      row.append(bar, momentMark(verdict));
-      specs.appendChild(row);
-    });
-    return specs;
+      bar.className = 'promo-moments__compare-bar';
+      bar.style.setProperty('--bar', `${bars[row]}%`);
+      const loser = document.createElement('span');
+      loser.className = 'promo-moments__compare-cell';
+      loser.appendChild(momentMark(row === 2 ? 'no' : 'yes'));
+      const winner = document.createElement('span');
+      winner.className = 'promo-moments__compare-cell';
+      winner.appendChild(momentMark('yes'));
+      line.append(bar, loser, winner);
+      panel.appendChild(line);
+    }
+    return panel;
   }
 
   function ensureMomentBoard(stage) {
@@ -640,19 +646,17 @@
       const kind = PROMO_MOMENT_CARD_KINDS[index];
       const card = document.createElement('div');
       card.className = `promo-moments__card is-${kind} is-${role}`;
-      card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
-      card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
-      card.style.setProperty('--shape-scale', String(PROMO_MOMENT_SHAPE_SCALES[index]));
+      card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH_X).toFixed(2)}rem`);
+      card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH_Y).toFixed(2)}rem`);
       card.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
       if (role === 'pick') card.appendChild(momentKept());
-      if (role === 'pick' || role === 'other' || role === 'go') card.appendChild(momentSpecs(role));
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-pentagon is-extra';
-    accessory.style.setProperty('--shape-scale', '0.88');
     accessory.append(momentPhoto('pentagon', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
     board.appendChild(accessory);
+    board.appendChild(momentCompare());
     const orbits = [
       ['1', '11.2rem', '-0.4s'],
       ['2', '13.4rem', '-4.1s'],
@@ -774,8 +778,11 @@
 
   function momentMotions(stage) {
     const host = momentHostOf(stage);
-    if (!host) return [];
-    return [host, ...host.querySelectorAll('*')].flatMap((node) => node.getAnimations());
+    if (!host || typeof document.getAnimations !== 'function') return [];
+    return document.getAnimations().filter((anim) => {
+      const target = anim.effect && anim.effect.target;
+      return target && target.nodeType === 1 && host.contains(target);
+    });
   }
 
   function motionSpan(anim) {
@@ -1065,17 +1072,14 @@
       const watch = (attempt) => {
         const motions = momentMotions(stage);
         const ticks = motions.filter((anim) => (anim.animationName || '') === 'promo-moments-tick');
-        const ticksDone = ticks.length >= 9 && ticks.every((anim) => anim.playState === 'finished');
+        const ticksDone = ticks.length >= 6 && ticks.every((anim) => anim.playState === 'finished');
         if (!ticksDone) {
           window.requestAnimationFrame(() => watch(attempt + 1));
           return;
         }
         motions.forEach((anim) => {
           const name = anim.animationName || '';
-          if (name === 'promo-moments-pick') {
-            const span = motionSpan(anim);
-            holdMomentAt(anim, span.delay + span.duration * 0.6);
-          } else if (name === 'promo-moments-ring') {
+          if (name === 'promo-moments-pair-lift' || name === 'promo-moments-ring' || name === 'promo-moments-compare-fold') {
             holdMomentAt(anim, 0);
           }
         });
@@ -2081,6 +2085,7 @@
       this.root.style.setProperty('--promo-moments-fly', `${PROMO_MOMENTS_FLY_MS}ms`);
       this.root.style.setProperty('--promo-moments-tick', `${PROMO_MOMENTS_BADGE_TICK_MS}ms`);
       this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
+      this.root.style.setProperty('--promo-compare-fold', `${PROMO_MOMENTS_CHOICE_MS - 200}ms`);
       return host;
     }
 
@@ -2670,8 +2675,7 @@
           const stage = openMoments();
           return poseOnTimeline(stage, 'choice', (anim, span) => {
             const name = anim.animationName || '';
-            if (name === 'promo-moments-tick' || name === 'promo-moments-ring') return { time: 0 };
-            if (name === 'promo-moments-pick') return { time: span.delay + span.duration * 0.6 };
+            if (name === 'promo-moments-tick' || name === 'promo-moments-ring' || name === 'promo-moments-pair-lift' || name === 'promo-moments-compare-fold') return { time: 0 };
             return { time: span.delay + span.duration };
           });
         },
