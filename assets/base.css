@@ -1350,13 +1350,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-drop {
-  animation: promo-moments-catalog-out 900ms var(--promo-spring) both;
+  animation: promo-moments-catalog-out 680ms var(--promo-spring) both;
 }
 
 .is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go,
 .is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick,
 .is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
-  animation: promo-moments-select 1080ms var(--promo-spring) 180ms both;
+  animation: promo-moments-select 820ms var(--promo-spring) 100ms both;
 }
 
 .is-pose-doubt .promo-moments__card.is-go,
@@ -1423,25 +1423,25 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice .promo-moments__mark { opacity: 1; transform: scale(1); }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go {
-  animation: promo-moments-go 1400ms var(--promo-spring) forwards;
+  animation: promo-moments-go 900ms var(--promo-spring) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
-  animation: promo-moments-pick 2800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-moments-pick 2000ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
-  animation: promo-moments-other 1400ms var(--promo-spring) forwards;
+  animation: promo-moments-other 900ms var(--promo-spring) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
   opacity: 0;
-  animation: promo-moments-ring 380ms var(--promo-spring) 2200ms both;
+  animation: promo-moments-ring 320ms var(--promo-spring) 1580ms both;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__specs {
   opacity: 0;
-  animation: promo-moments-specs 380ms var(--promo-spring) 420ms forwards;
+  animation: promo-moments-specs 280ms var(--promo-spring) 240ms forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__specs {
@@ -1451,12 +1451,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__mark {
   opacity: 0;
   transform: scale(0.96);
-  animation: promo-moments-tick 380ms var(--promo-spring) forwards;
+  animation: promo-moments-tick 320ms var(--promo-spring) forwards;
 }
 
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(1) .promo-moments__mark { animation-delay: 1100ms; }
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(2) .promo-moments__mark { animation-delay: 1380ms; }
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(3) .promo-moments__mark { animation-delay: 1660ms; }
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(1) .promo-moments__mark { animation-delay: 480ms; }
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(2) .promo-moments__mark { animation-delay: 700ms; }
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__spec:nth-child(3) .promo-moments__mark { animation-delay: 920ms; }
 
 .is-pose-doubt .promo-moments__card.is-pick,
 .is-pose-close .promo-moments__card.is-pick {
