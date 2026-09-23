@@ -962,6 +962,21 @@
     const celebrate = document.createElement('div');
     celebrate.className = 'promo-moments__celebrate';
     celebrate.setAttribute('aria-hidden', 'true');
+    const bloom = document.createElement('span');
+    bloom.className = 'promo-moments__bloom';
+    const halo = document.createElement('span');
+    halo.className = 'promo-moments__halo';
+    const burstCheck = document.createElement('span');
+    burstCheck.className = 'promo-moments__burst-check';
+    burstCheck.appendChild(momentMark('yes'));
+    celebrate.append(bloom, halo, burstCheck);
+    [[1, -0.15], [0.62, -0.82], [-0.2, -1], [-0.86, -0.42], [0.9, 0.42], [-0.48, 0.78], [0.12, 0.96], [-0.95, 0.22]].forEach(([sx, sy]) => {
+      const spark = document.createElement('span');
+      spark.className = 'promo-moments__spark';
+      spark.style.setProperty('--sx', String(sx));
+      spark.style.setProperty('--sy', String(sy));
+      celebrate.appendChild(spark);
+    });
     board.append(added, plus, outline, celebrate);
     board.querySelector('.promo-moments__cart')?.remove();
     board.querySelector('.promo-moments__fly')?.remove();
@@ -2415,7 +2430,14 @@
           brand.appendChild(name);
         }
       }
-      host.querySelectorAll('.promo-moments__cart-piece, .promo-moments__cart-burst').forEach((piece) => piece.remove());
+      host.querySelectorAll('.promo-moments__cart-piece').forEach((piece) => piece.remove());
+      host.querySelectorAll('.promo-moments__cart').forEach((cart) => {
+        if (cart.querySelector('.promo-moments__cart-burst')) return;
+        const burst = document.createElement('span');
+        burst.className = 'promo-moments__cart-burst';
+        burst.setAttribute('aria-hidden', 'true');
+        cart.prepend(burst);
+      });
       if (!host.querySelector('.promo-moments__fly')) {
         const fly = document.createElement('span');
         fly.className = 'promo-moments__fly';
