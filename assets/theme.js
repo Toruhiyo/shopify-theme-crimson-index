@@ -2794,14 +2794,10 @@
       return this.painCards()[index] || null;
     }
 
-    painScrollStops() {
-      const cards = this.painCards();
-      const cols = this.painCols();
-      const upper = cards[0]?.getBoundingClientRect();
-      const lower = cards[cols]?.getBoundingClientRect();
-      const measured = upper && lower ? Math.round(lower.top - upper.top) : 0;
-      const row = measured > 20 ? measured : Number(this.painHost()?.querySelector('.promo-moments__board')?.dataset.painPitch) || (PROMO_PAIN_CARD_H + 16);
-      return [0, -row, -(row * 2), -(row * 3), -(row * 4)];
+    painBrowseScroll(slot) {
+      const card = this.painBrowseCard(slot);
+      const gy = Number.parseFloat(card?.style.getPropertyValue('--gy')) || 0;
+      return -gy;
     }
 
     setPainScroll(px) {
@@ -2918,12 +2914,9 @@
             : beat === 'scroll-3' ? 3
               : beat === 'scroll-4' ? 4
                 : -1;
-      const scrollIndex = beat === 'scroll-1' ? 1
-        : beat === 'scroll-2' ? 2
-          : beat === 'scroll-3' ? 3
-            : beat === 'scroll-4' || beat === 'leave' ? 4
-              : 0;
-      const scrollDelta = scene === 'unattended' ? this.setPainScroll(this.painScrollStops()[scrollIndex]) : 0;
+      const scrollSlot = browseSlot >= 0 ? browseSlot : beat === 'leave' ? 4 : -1;
+      const scrollTarget = scrollSlot < 0 ? 0 : this.painBrowseScroll(scrollSlot);
+      const scrollDelta = scene === 'unattended' ? this.setPainScroll(scrollTarget) : 0;
       if (instant && scene === 'unattended') board.offsetWidth;
       host.classList.remove('is-pain-dim');
       const opened = beat === 'open' ? this.painBrowseCard(0) : null;

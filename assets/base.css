@@ -1218,6 +1218,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   overflow: hidden;
 }
 
+.promo-opening.is-pain .promo-opening__moments-stage {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 72px, #000 calc(100% - 88px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 72px, #000 calc(100% - 88px), transparent 100%);
+}
+
 .promo-moments__board {
   position: absolute;
   left: 50%;
