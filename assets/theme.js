@@ -932,20 +932,17 @@
 
   function pinMouth(mesh) {
     const dict = mesh.morphTargetDictionary || {};
-    const openIndexes = ['A', 'jawOpen'].map((name) => dict[name]).filter((index) => index != null);
-    const closedIndex = dict.X;
+    const openNames = ['A', 'smile'];
+    const openIndexes = openNames.map((name) => dict[name]).filter((index) => index != null);
     const original = mesh.morphTargetInfluences;
     if (!original || !openIndexes.length) return false;
     const proxy = new Proxy(original, {
       set(target, prop, value) {
-        if (openIndexes.some((index) => prop === index || prop === String(index))) {
-          openIndexes.forEach((index) => {
-            target[index] = 0.9;
+        const index = Number(prop);
+        if (openIndexes.includes(index)) {
+          openIndexes.forEach((openIndex) => {
+            target[openIndex] = 1;
           });
-          return true;
-        }
-        if (closedIndex != null && (prop === closedIndex || prop === String(closedIndex))) {
-          target[closedIndex] = 0;
           return true;
         }
         target[prop] = value;
@@ -953,9 +950,8 @@
       },
     });
     openIndexes.forEach((index) => {
-      original[index] = 0.9;
+      original[index] = 1;
     });
-    if (closedIndex != null) original[closedIndex] = 0;
     mesh.morphTargetInfluences = proxy;
     speechMouthHold = { mesh, original, proxy };
     return true;
