@@ -18,13 +18,14 @@
     (function () {
       var params = new URLSearchParams(location.search);
       var promoVideo = params.get('promo_video');
+      var marketingAd = params.get('marketing') === 'ad-1' || promoVideo === 'opening';
       var isHome = {{ promo_home | json }};
       var root = document.documentElement;
       root.className = root.className.replace('no-js', 'js');
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
-      root.classList.toggle('is-promo-opening', promoVideo === 'opening');
-      root.classList.toggle('is-promo-cover', isHome && promoVideo !== 'opening' && params.get('nocover') !== '1');
-      if (promoVideo) {
+      root.classList.toggle('is-promo-opening', marketingAd);
+      root.classList.toggle('is-promo-cover', isHome && !marketingAd && params.get('nocover') !== '1');
+      if (promoVideo || params.get('marketing')) {
         try { sessionStorage.removeItem('bizmis-session'); } catch (e) {}
         try { localStorage.removeItem('bizmis-session'); } catch (e) {}
       }
@@ -40,10 +41,11 @@
     (function () {
       var params = new URLSearchParams(location.search);
       var promoVideo = params.get('promo_video');
+      var marketingAd = params.get('marketing') === 'ad-1' || promoVideo === 'opening';
       var isHome = {{ promo_home | json }};
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
-      if (promoVideo === 'opening') meta.content = {{ settings.color_background | json }};
+      if (marketingAd) meta.content = {{ settings.color_background | json }};
       else if (isHome && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
     })();
   </script>

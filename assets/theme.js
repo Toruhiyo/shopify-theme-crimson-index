@@ -6,13 +6,28 @@
   'use strict';
 
   const PROMO_VIDEO_PARAM = 'promo_video';
-  const promoVideo = new URLSearchParams(location.search).get(PROMO_VIDEO_PARAM);
+  const PROMO_MARKETING_PARAM = 'marketing';
+  const PROMO_MARKETING_AD = 'ad-1';
+  const promoBootParams = new URLSearchParams(location.search);
+  const legacyPromoVideo = promoBootParams.get(PROMO_VIDEO_PARAM);
+  const marketingValue = promoBootParams.get(PROMO_MARKETING_PARAM);
+  const isMarketingAd = marketingValue === PROMO_MARKETING_AD || legacyPromoVideo === 'opening';
+  const promoVideo = isMarketingAd ? 'opening' : legacyPromoVideo;
+  if (isMarketingAd) {
+    document.documentElement.classList.add('is-promo-opening');
+    document.documentElement.classList.remove('is-promo-cover');
+  }
   const PROMO_GREYSCALE = promoVideo === 'mock' || promoVideo === 'unattended';
   document.documentElement.classList.toggle('is-promo-greyscale', PROMO_GREYSCALE);
   document.body.classList.toggle('is-promo-greyscale', PROMO_GREYSCALE);
 
   function propagatePromoVideoParam() {
-    if (!promoVideo) return;
+    const source = new URLSearchParams(location.search);
+    const keys = [];
+    if (source.get(PROMO_MARKETING_PARAM)) keys.push(PROMO_MARKETING_PARAM);
+    if (source.get(PROMO_VIDEO_PARAM)) keys.push(PROMO_VIDEO_PARAM);
+    if (!keys.length) return;
+    const carry = ['part', 'hold', 'store', 'auto', 'nocover', 'lighting', 'moments'];
 
     const updateLink = (link) => {
       const href = link.getAttribute('href');
@@ -26,19 +41,25 @@
       }
 
       if (url.origin !== window.location.origin) return;
-      url.searchParams.set(PROMO_VIDEO_PARAM, promoVideo);
+      keys.forEach((key) => url.searchParams.set(key, source.get(key)));
+      carry.forEach((key) => {
+        const value = source.get(key);
+        if (value != null && value !== '') url.searchParams.set(key, value);
+      });
       link.href = url.toString();
     };
 
     const updateForm = (form) => {
       const method = (form.getAttribute('method') || 'get').toLowerCase();
-      if (method !== 'get' || form.querySelector(`[name="${PROMO_VIDEO_PARAM}"]`)) return;
-
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = PROMO_VIDEO_PARAM;
-      input.value = promoVideo;
-      form.appendChild(input);
+      if (method !== 'get') return;
+      keys.forEach((key) => {
+        if (form.querySelector(`[name="${key}"]`)) return;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = source.get(key);
+        form.appendChild(input);
+      });
     };
 
     const updateNode = (node) => {
@@ -156,6 +177,52 @@
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
   const PROMO_SELL_OUT_MS = 900;
+  const PROMO_PAIN_EASE = 'cubic-bezier(0.45, 0.05, 0.2, 1)';
+  const PROMO_PAIN_CARDS = [6, 4, 5];
+  const PROMO_PAIN_OPEN_MS = 640;
+  const PROMO_PAIN_TYPE_CHAR_MS = 28;
+  const PROMO_PAIN_ZOOM_MS = 1400;
+  const PROMO_PAIN_LINE_1 = 'I want a portable laptop with long battery life.';
+  const PROMO_PAIN_LINE_2 = 'Which one would you pick for coding?';
+  const PROMO_PAIN_ANSWER_1 = [
+    'Several portable laptops are listed in the catalog.',
+    'Battery life depends on the configuration you select.',
+  ];
+  const PROMO_PAIN_LINKS = ['View laptop list', 'Battery life article'];
+  const PROMO_PAIN_ANSWER_2 = 'Performance varies by model. Check the Specifications tab, or I can open a support ticket.';
+  const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
+  const PROMO_PAIN_A = [
+    ['grid', 0],
+    ['enter', 640],
+    ['hover-1', 280],
+    ['open-1', 560],
+    ['look-1', 640],
+    ['back-1', 480],
+    ['hover-2', 560],
+    ['open-2', 560],
+    ['look-2', 520],
+    ['back-2', 480],
+    ['hover-3', 560],
+    ['open-3', 560],
+    ['add-3', 640],
+    ['retreat', 480],
+    ['leave', 1040],
+  ];
+  const PROMO_PAIN_B = [
+    ['launcher', 520],
+    ['launcher-hold', 360],
+    ['panel', 620],
+    ['panel-pause', 280],
+    ['typed-1', PROMO_PAIN_LINE_1.length * PROMO_PAIN_TYPE_CHAR_MS],
+    ['think-1', 620],
+    ['answer-1', 780],
+    ['between', 360],
+    ['typed-2', PROMO_PAIN_LINE_2.length * PROMO_PAIN_TYPE_CHAR_MS],
+    ['think-2', 620],
+    ['answer-2', 780],
+    ['before-zoom', 280],
+    ['zoom', PROMO_PAIN_ZOOM_MS],
+  ];
   const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_MOMENTS_VO_MS = 280;
   const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
@@ -228,7 +295,9 @@
     const stampWaiters = [];
 
     function isOpening() {
-      return promoSearchParams().get(PROMO_VIDEO_PARAM) === 'opening';
+      const params = promoSearchParams();
+      return params.get(PROMO_MARKETING_PARAM) === PROMO_MARKETING_AD
+        || params.get(PROMO_VIDEO_PARAM) === 'opening';
     }
 
     function lookForPromo(config) {
@@ -1118,6 +1187,19 @@
     return new URLSearchParams(window.location.search);
   }
 
+  function marketingPart() {
+    if (!isMarketingAd) return 'pitch';
+    const part = (promoSearchParams().get('part') || 'full').trim().toLowerCase();
+    if (part === 'pain' || part === 'pitch' || part === 'full') return part;
+    return 'full';
+  }
+
+  function promoHoldMs() {
+    const raw = Number(promoSearchParams().get('hold'));
+    if (!Number.isFinite(raw) || raw < 0) return 0;
+    return raw;
+  }
+
   function loadPromoStores() {
     const node = document.getElementById('promo-opening-stores');
     if (!node) return [];
@@ -1395,10 +1477,15 @@
       if (this.assetsReady) return;
       this.assetsReady = true;
       document.documentElement.classList.add('is-promo-ready');
-      if (this.flipWhenReady) this.flip();
+      if (this.flipWhenReady) {
+        this.flip();
+        return;
+      }
+      if (marketingPart() !== 'pitch') this.playPain();
     }
 
     armAutoFlip() {
+      if (marketingPart() !== 'pitch') return;
       const raw = promoSearchParams().get('auto');
       if (raw == null || raw === '') return;
       const autoMs = Number(raw);
@@ -1604,6 +1691,7 @@
     }
 
     async pitch() {
+      this.releasePainStage();
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
       window.requestAnimationFrame(() => {
@@ -1921,6 +2009,7 @@
     }
 
     showReducedSee() {
+      this.releasePainStage();
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch', 'is-logo-leaving');
       window.requestAnimationFrame(() => this.fitOpeningLayout());
@@ -2251,7 +2340,335 @@
       this.onStoreReady?.();
     }
 
+    clearPainTimers() {
+      (this.painTimers || []).forEach((timer) => window.clearTimeout(timer));
+      this.painTimers = [];
+    }
+
+    painHost() {
+      return this.root.querySelector('[data-promo-moments]');
+    }
+
+    painStore() {
+      return this.painHost()?.querySelector('.promo-opening__store') || null;
+    }
+
+    painCards() {
+      const board = this.painHost()?.querySelector('.promo-moments__board');
+      if (!board) return [];
+      return [...board.querySelectorAll('.promo-moments__card:not(.is-extra)')];
+    }
+
+    releasePainStage() {
+      this.clearPainTimers();
+      this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-moments');
+      const host = this.painHost();
+      host?.classList.remove('is-pain-dim');
+      this.painCards().forEach((card) => {
+        card.classList.remove('is-pain-open', 'is-pain-hover', 'is-pain-add');
+      });
+      host?.querySelector('.promo-moments__board')?.classList.remove('is-instant');
+      this.root.querySelector('[data-promo-pain-chat]')?.setAttribute('hidden', '');
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      if (cursor) cursor.hidden = true;
+    }
+
+    ensurePainChrome() {
+      const store = this.painStore();
+      if (!store) return;
+      if (!store.querySelector('[data-promo-pain-cursor]')) {
+        const cursor = document.createElement('span');
+        cursor.className = 'promo-pain__cursor';
+        cursor.setAttribute('data-promo-pain-cursor', '');
+        cursor.setAttribute('aria-hidden', 'true');
+        cursor.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.2 19.2 12.1 11.6 13.4 8.8 20.6z"/></svg>';
+        store.appendChild(cursor);
+      }
+      if (store.querySelector('[data-promo-pain-chat]')) return;
+      const chat = document.createElement('div');
+      chat.className = 'promo-pain__chat';
+      chat.setAttribute('data-promo-pain-chat', '');
+      chat.setAttribute('hidden', '');
+      const launcher = document.createElement('button');
+      launcher.type = 'button';
+      launcher.className = 'promo-pain__launcher';
+      launcher.setAttribute('aria-hidden', 'true');
+      launcher.tabIndex = -1;
+      launcher.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7.2h12a2 2 0 0 1 2 2v5.2a2 2 0 0 1-2 2H11l-3.6 2.6V16.4H6a2 2 0 0 1-2-2V9.2a2 2 0 0 1 2-2z"/></svg>';
+      const panel = document.createElement('div');
+      panel.className = 'promo-pain__panel';
+      const title = document.createElement('p');
+      title.className = 'promo-pain__title';
+      title.textContent = 'Dull Chatbot';
+      const chips = document.createElement('div');
+      chips.className = 'promo-pain__chips';
+      PROMO_PAIN_CHIPS.forEach((label) => {
+        const chip = document.createElement('span');
+        chip.className = 'promo-pain__chip';
+        chip.textContent = label;
+        chips.appendChild(chip);
+      });
+      const log = document.createElement('div');
+      log.className = 'promo-pain__log';
+      log.setAttribute('data-promo-pain-log', '');
+      const input = document.createElement('p');
+      input.className = 'promo-pain__input';
+      input.setAttribute('data-promo-pain-input', '');
+      const typing = document.createElement('p');
+      typing.className = 'promo-pain__typing';
+      typing.setAttribute('data-promo-pain-typing', '');
+      typing.innerHTML = '<i></i><i></i><i></i>';
+      const footer = document.createElement('p');
+      footer.className = 'promo-pain__footer';
+      footer.textContent = 'Powered by Every Chatbot Ever';
+      panel.append(title, chips, log, typing, input, footer);
+      chat.append(panel, launcher);
+      store.appendChild(chat);
+    }
+
+    openPainStage() {
+      this.root.style.setProperty('--promo-pain-ease', PROMO_PAIN_EASE);
+      this.root.style.setProperty('--promo-pain-open', `${PROMO_PAIN_OPEN_MS}ms`);
+      this.root.style.setProperty('--promo-pain-zoom', `${PROMO_PAIN_ZOOM_MS}ms`);
+      this.ensureMoments();
+      const stage = this.momentStage();
+      applyMomentPose(stage, 'grid', { instant: true });
+      this.ensurePainChrome();
+      this.root.classList.add('is-pain', 'is-moments');
+      this.root.classList.remove('is-pain-zoom');
+      const host = this.painHost();
+      host?.setAttribute('data-promo-pain', '');
+      host?.setAttribute('data-promo-pain-scene', 'unattended');
+      host?.setAttribute('data-promo-pain-beat', 'grid');
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      if (cursor) {
+        cursor.hidden = false;
+        cursor.style.opacity = '0';
+      }
+      this.root.querySelector('[data-promo-pain-chat]')?.setAttribute('hidden', '');
+    }
+
+    painCard(slot) {
+      return this.painCards()[PROMO_PAIN_CARDS[slot]] || null;
+    }
+
+    placePainCursor(target, visible) {
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const store = this.painStore();
+      if (!cursor || !store) return;
+      cursor.hidden = false;
+      if (!target) {
+        cursor.style.opacity = '0';
+        return;
+      }
+      const storeBox = store.getBoundingClientRect();
+      const box = target.getBoundingClientRect();
+      const x = box.left + box.width * 0.72 - storeBox.left;
+      const y = box.top + box.height * 0.55 - storeBox.top;
+      cursor.style.setProperty('--pain-x', `${Math.round(x)}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(y)}px`);
+      cursor.style.opacity = visible ? '1' : '0';
+    }
+
+    placePainCursorEdge() {
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const store = this.painStore();
+      if (!cursor || !store) return;
+      cursor.hidden = false;
+      cursor.style.setProperty('--pain-x', `${store.clientWidth - 18}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(store.clientHeight * 0.62)}px`);
+      cursor.style.opacity = '0';
+    }
+
+    paintPainLog(through) {
+      const log = this.root.querySelector('[data-promo-pain-log]');
+      const input = this.root.querySelector('[data-promo-pain-input]');
+      const typing = this.root.querySelector('[data-promo-pain-typing]');
+      if (!log || !input || !typing) return;
+      log.replaceChildren();
+      input.textContent = '';
+      typing.hidden = true;
+      const addUser = (text) => {
+        const line = document.createElement('p');
+        line.className = 'promo-pain__msg is-user';
+        line.textContent = text;
+        log.appendChild(line);
+      };
+      const addBot = (lines, links, actions) => {
+        const block = document.createElement('div');
+        block.className = 'promo-pain__msg is-bot';
+        lines.forEach((text) => {
+          const line = document.createElement('p');
+          line.textContent = text;
+          block.appendChild(line);
+        });
+        if (links) {
+          const list = document.createElement('div');
+          list.className = 'promo-pain__links';
+          links.forEach((label) => {
+            const link = document.createElement('span');
+            link.textContent = label;
+            list.appendChild(link);
+          });
+          block.appendChild(list);
+        }
+        if (actions) {
+          const row = document.createElement('div');
+          row.className = 'promo-pain__actions';
+          actions.forEach((label) => {
+            const button = document.createElement('span');
+            button.textContent = label;
+            row.appendChild(button);
+          });
+          block.appendChild(row);
+        }
+        log.appendChild(block);
+      };
+      if (through === 'typed-1') input.textContent = PROMO_PAIN_LINE_1;
+      if (through === 'think-1' || through === 'answer-1' || through === 'between' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+        addUser(PROMO_PAIN_LINE_1);
+      }
+      if (through === 'think-1') typing.hidden = false;
+      if (through === 'answer-1' || through === 'between' || through === 'typed-2' || through === 'think-2' || through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+        addBot(PROMO_PAIN_ANSWER_1, PROMO_PAIN_LINKS);
+      }
+      if (through === 'typed-2') input.textContent = PROMO_PAIN_LINE_2;
+      if (through === 'think-2' || through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+        addUser(PROMO_PAIN_LINE_2);
+      }
+      if (through === 'think-2') typing.hidden = false;
+      if (through === 'answer-2' || through === 'before-zoom' || through === 'zoom') {
+        addBot([PROMO_PAIN_ANSWER_2], null, ['Open a ticket', 'No, thanks']);
+      }
+    }
+
+    applyPainBeat(beat, instant) {
+      const host = this.painHost();
+      const board = host?.querySelector('.promo-moments__board');
+      if (!host || !board) return;
+      const scene = PROMO_PAIN_B.some(([name]) => name === beat) ? 'chat' : 'unattended';
+      host.setAttribute('data-promo-pain-scene', scene);
+      host.setAttribute('data-promo-pain-beat', beat);
+      board.classList.toggle('is-instant', !!instant);
+      const openSlot = beat === 'open-1' || beat === 'look-1' ? 0
+        : beat === 'open-2' || beat === 'look-2' ? 1
+          : beat === 'open-3' || beat === 'add-3' ? 2
+            : -1;
+      host.classList.toggle('is-pain-dim', openSlot >= 0);
+      this.painCards().forEach((card, index) => {
+        const slot = PROMO_PAIN_CARDS.indexOf(index);
+        card.classList.toggle('is-pain-open', openSlot >= 0 && slot === openSlot);
+        card.classList.toggle('is-pain-hover', (
+          (beat === 'hover-1' && slot === 0)
+          || (beat === 'hover-2' && slot === 1)
+          || (beat === 'hover-3' && slot === 2)
+          || (beat === 'open-1' && slot === 0)
+          || (beat === 'open-2' && slot === 1)
+          || (beat === 'open-3' && slot === 2)
+          || (beat === 'add-3' && slot === 2)
+        ));
+        card.classList.toggle('is-pain-add', beat === 'add-3' && slot === 2);
+      });
+      const chat = this.root.querySelector('[data-promo-pain-chat]');
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const chatBeats = ['launcher', 'launcher-hold', 'panel', 'panel-pause', 'typed-1', 'think-1', 'answer-1', 'between', 'typed-2', 'think-2', 'answer-2', 'before-zoom', 'zoom'];
+      const chatOn = chatBeats.includes(beat);
+      if (chat) {
+        if (chatOn) chat.removeAttribute('hidden');
+        else chat.setAttribute('hidden', '');
+        chat.classList.toggle('is-open', chatOn && beat !== 'launcher' && beat !== 'launcher-hold');
+      }
+      if (cursor) {
+        cursor.style.transitionDuration = instant ? '0ms' : '';
+        if (scene === 'chat' || beat === 'grid') {
+          cursor.style.opacity = '0';
+        }
+      }
+      this.root.classList.toggle('is-pain-zoom', beat === 'zoom');
+      if (scene === 'unattended' && beat !== 'grid') {
+        if (beat === 'leave') this.placePainCursorEdge();
+        else if (beat === 'add-3') this.placePainCursor(this.painCard(2)?.querySelector('.promo-moments__add'), true);
+        else if (beat === 'retreat') this.placePainCursor(this.painCard(2), true);
+        else if (openSlot >= 0 || beat.startsWith('hover-') || beat.startsWith('look-') || beat.startsWith('back-') || beat === 'enter') {
+          const slot = beat.endsWith('2') || beat === 'hover-2' ? 1 : beat.endsWith('3') ? 2 : 0;
+          const resolved = beat.startsWith('back-') ? (beat.endsWith('1') ? 0 : 1) : slot;
+          this.placePainCursor(this.painCard(resolved), true);
+        }
+      }
+      this.paintPainLog(beat);
+    }
+
+    whenPainRest(host) {
+      return new Promise((resolve) => {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            const stage = host?.closest('.promo-opening__stage') || host;
+            const pending = (stage?.getAnimations({ subtree: true }) || []).filter((anim) => {
+              if (anim.playState !== 'running' && anim.playState !== 'pending') return false;
+              const timing = anim.effect?.getComputedTiming?.();
+              if (!timing || timing.iterations === Infinity) return false;
+              return timing.duration !== Infinity;
+            });
+            if (!pending.length) {
+              resolve();
+              return;
+            }
+            Promise.all(pending.map((anim) => anim.finished.catch(() => {}))).then(() => resolve());
+          });
+        });
+      });
+    }
+
+    async playPainSteps(steps, scene) {
+      const host = this.painHost();
+      host?.setAttribute('data-promo-pain-scene', scene);
+      for (const [beat, ms] of steps) {
+        this.applyPainBeat(beat, prefersReducedMotion());
+        if (prefersReducedMotion()) continue;
+        if (beat === 'typed-1' || beat === 'typed-2') {
+          const input = this.root.querySelector('[data-promo-pain-input]');
+          const text = beat === 'typed-1' ? PROMO_PAIN_LINE_1 : PROMO_PAIN_LINE_2;
+          if (input) input.textContent = '';
+          for (let index = 1; index <= text.length; index += 1) {
+            if (input) input.textContent = text.slice(0, index);
+            await waitMs(PROMO_PAIN_TYPE_CHAR_MS);
+          }
+          continue;
+        }
+        await Promise.all([
+          this.whenPainRest(host),
+          ms > 0 ? waitMs(ms) : Promise.resolve(),
+        ]);
+      }
+      const hold = promoHoldMs();
+      if (hold > 0 && !prefersReducedMotion()) await waitMs(hold);
+    }
+
+    async playPain() {
+      if (this.painPlayed) return;
+      this.painPlayed = true;
+      this.startOpeningClock();
+      this.openPainStage();
+      if (prefersReducedMotion()) {
+        this.applyPainBeat('zoom', true);
+        if (marketingPart() === 'full') this.flip();
+        return;
+      }
+      await this.playPainSteps(PROMO_PAIN_A, 'unattended');
+      await this.playPainSteps(PROMO_PAIN_B, 'chat');
+      if (marketingPart() === 'full') this.flip();
+    }
+
+    showPainExport(beat) {
+      this.openPainStage();
+      this.applyPainBeat(beat, false);
+      const host = this.painHost();
+      return this.whenPainRest(host);
+    }
+
     showExportFrame(name) {
+      this.clearPainTimers();
+      if (!String(name).startsWith('pain-')) this.releasePainStage();
       releaseSpeechMouth();
       const root = this.root;
       const clock = root.querySelector('[data-promo-clock]');
@@ -2721,6 +3138,22 @@
           showSee('landed');
           return 220;
         },
+        'pain-a-grid': () => this.showPainExport('grid'),
+        'pain-a-hover-1': () => this.showPainExport('hover-1'),
+        'pain-a-open-1': () => this.showPainExport('open-1'),
+        'pain-a-back-1': () => this.showPainExport('back-1'),
+        'pain-a-open-2': () => this.showPainExport('open-2'),
+        'pain-a-back-2': () => this.showPainExport('back-2'),
+        'pain-a-open-3': () => this.showPainExport('open-3'),
+        'pain-a-add': () => this.showPainExport('add-3'),
+        'pain-a-leave': () => this.showPainExport('leave'),
+        'pain-b-launcher': () => this.showPainExport('launcher'),
+        'pain-b-panel': () => this.showPainExport('panel'),
+        'pain-b-typed-1': () => this.showPainExport('typed-1'),
+        'pain-b-answer-1': () => this.showPainExport('answer-1'),
+        'pain-b-typed-2': () => this.showPainExport('typed-2'),
+        'pain-b-answer-2': () => this.showPainExport('answer-2'),
+        'pain-b-zoom': () => this.showPainExport('zoom'),
       };
 
       const run = frames[name];

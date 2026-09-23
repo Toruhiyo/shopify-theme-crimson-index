@@ -19,6 +19,22 @@ const VIEWPORT = {
 const REST_PAD_MS = 100;
 
 const FRAMES = [
+  ['pain-a-grid', 'Pain, unattended. Twelve-card store. Clerk corner is empty. Cart is empty.', 0],
+  ['pain-a-hover-1', 'Pain, unattended. Cursor rests on the first card.', 0],
+  ['pain-a-open-1', 'Pain, unattended. First card is hero size. The other cards are dim. Cart is unchanged.', 0],
+  ['pain-a-back-1', 'Pain, unattended. First card is back in the grid.', 0],
+  ['pain-a-open-2', 'Pain, unattended. Second card is hero size.', 0],
+  ['pain-a-back-2', 'Pain, unattended. Second card is back in the grid.', 0],
+  ['pain-a-open-3', 'Pain, unattended. Third card is hero size.', 0],
+  ['pain-a-add', 'Pain, unattended. Cursor rests on the ghost Add. Cart is still empty.', 0],
+  ['pain-a-leave', 'Pain, unattended. Cursor has left at the stage edge.', 0],
+  ['pain-b-launcher', 'Pain, dull chatbot. Grey launcher sits where the clerk will stand.', 0],
+  ['pain-b-panel', 'Pain, dull chatbot. Grey panel is open. Title Dull Chatbot. Footer Powered by Every Chatbot Ever.', 0],
+  ['pain-b-typed-1', 'Pain, dull chatbot. Input reads: I want a portable laptop with long battery life.', 0],
+  ['pain-b-answer-1', 'Pain, dull chatbot. Two-line answer and two link bullets. Grid and cart unchanged.', 0],
+  ['pain-b-typed-2', 'Pain, dull chatbot. Input reads: Which one would you pick for coding?', 0],
+  ['pain-b-answer-2', 'Pain, dull chatbot. Ticket answer with Open a ticket and No, thanks.', 0],
+  ['pain-b-zoom', 'Pain, dull chatbot. Stage has settled at scale 0.92.', 0],
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.', 40],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
   ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],
@@ -76,7 +92,8 @@ async function loadPlaywright() {
 
 function openingUrl() {
   const url = new URL(BASE_URL);
-  url.searchParams.set('promo_video', 'opening');
+  url.searchParams.set('marketing', 'ad-1');
+  url.searchParams.set('part', 'pitch');
   url.searchParams.set('v', `frames-${Date.now()}`);
   return url.toString();
 }
@@ -96,7 +113,7 @@ function writeCaptions() {
   const body = [
     '# Bizmis promo opening storyboard',
     '',
-    'Forced keyframes from `?promo_video=opening`. Read the PNGs in filename order.',
+    'Forced keyframes from `?marketing=ad-1&part=pitch`, plus the pain stills. Read the PNGs in filename order.',
     '',
     'Layout: one centered 1100px two-column stage. Copy left, clerk right. Overflow hidden so the columns do not overlap.',
     '',
@@ -190,7 +207,7 @@ async function main() {
   await serveExportAssets(page);
   await page.goto(openingUrl(), { waitUntil: 'domcontentloaded', timeout: 20000 });
   await unlockStorefront(page);
-  if (!page.url().includes('promo_video=opening')) {
+  if (!page.url().includes('marketing=ad-1')) {
     await page.goto(openingUrl(), { waitUntil: 'domcontentloaded', timeout: 20000 });
   }
   await waitForOpening(page);

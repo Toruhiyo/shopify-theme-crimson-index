@@ -906,6 +906,255 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 0;
 }
 
+.promo-opening.is-pain .promo-opening__pitch {
+  opacity: 1;
+}
+
+.promo-opening.is-pain.is-on .promo-opening__center,
+.promo-opening.is-pain.is-bursting .promo-opening__fill--orange,
+.promo-opening.is-pain.is-bursting .promo-opening__radiance {
+  z-index: 5;
+}
+
+.promo-opening.is-pain:not(.is-on) .promo-opening__center,
+.promo-opening.is-pain:not(.is-pitch) .promo-opening__widget {
+  visibility: hidden;
+}
+
+.promo-opening.is-pain .promo-opening__stage {
+  transform-origin: center center;
+  transition: transform var(--promo-pain-zoom, 1400ms) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.promo-opening.is-pain-zoom .promo-opening__stage {
+  transform: scale(0.92);
+}
+
+.promo-opening.is-bursting .promo-pain__chat {
+  opacity: 0;
+  transition: opacity 280ms linear;
+}
+
+.promo-opening.is-pain .promo-moments__card {
+  transition:
+    transform var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    width var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    height var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    --card-w var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    --card-h var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    opacity 420ms linear;
+}
+
+.promo-opening.is-pain .promo-opening__moments.is-pain-dim .promo-moments__card:not(.is-pain-open) {
+  opacity: 0.32;
+}
+
+.promo-opening.is-pain .promo-moments__card.is-pain-hover:not(.is-pain-open) {
+  transform: translate3d(calc(-50% + var(--gx, 0px)), calc(-50% + var(--gy, 0px)), 0) scale(1.04);
+}
+
+.promo-opening.is-pain .promo-moments__card.is-pain-open {
+  z-index: 6;
+  --card-w: 300px;
+  --card-h: 400px;
+}
+
+.promo-opening.is-pain .promo-moments__card.is-pain-open .promo-moments__add {
+  height: calc(46em / 16);
+  margin-top: calc(14em / 16);
+  border-width: calc(1em / 16);
+  opacity: 1;
+  transform: none;
+}
+
+.promo-opening.is-pain .promo-moments__card.is-pain-add .promo-moments__add {
+  border-color: var(--color-fg);
+  color: var(--color-fg);
+}
+
+.promo-pain__cursor {
+  position: absolute;
+  z-index: 8;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--color-fg);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(var(--pain-x, -28px), var(--pain-y, 42%));
+  transition:
+    transform var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1)),
+    opacity 280ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-opening.is-pain .promo-opening__stage,
+  .promo-opening.is-pain .promo-moments__card,
+  .promo-pain__cursor,
+  .promo-opening.is-bursting .promo-pain__chat {
+    transition: none;
+  }
+}
+
+.promo-pain__cursor svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--color-fg) 18%, transparent));
+}
+
+.promo-pain__chat {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 4.25rem;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+  width: min(18rem, 46%);
+}
+
+.promo-pain__chat[hidden] {
+  display: none;
+}
+
+.promo-pain__launcher {
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-muted);
+  color: var(--color-muted-fg);
+  display: grid;
+  place-items: center;
+}
+
+.promo-pain__launcher svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.promo-pain__panel {
+  display: none;
+  width: 100%;
+  padding: 0.85rem 0.85rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card);
+  color: var(--color-muted-fg);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--color-fg) 8%, transparent);
+}
+
+.promo-pain__chat.is-open .promo-pain__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.promo-pain__title,
+.promo-pain__footer,
+.promo-pain__input,
+.promo-pain__msg,
+.promo-pain__chip {
+  margin: 0;
+  font-family: var(--font-heading);
+}
+
+.promo-pain__title {
+  color: var(--color-fg);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.promo-pain__chips,
+.promo-pain__links,
+.promo-pain__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.promo-pain__chip,
+.promo-pain__actions span {
+  padding: 0.28rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-muted-fg);
+  font-size: 0.72rem;
+}
+
+.promo-pain__log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 0;
+}
+
+.promo-pain__msg {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.promo-pain__msg.is-user {
+  align-self: flex-end;
+  max-width: 92%;
+  padding: 0.4rem 0.55rem;
+  border-radius: 12px;
+  background: var(--color-muted);
+  color: var(--color-fg);
+}
+
+.promo-pain__msg.is-bot p {
+  margin: 0 0 0.28rem;
+}
+
+.promo-pain__links span {
+  color: var(--color-muted-fg);
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
+
+.promo-pain__typing {
+  display: flex;
+  gap: 0.22rem;
+  margin: 0;
+}
+
+.promo-pain__typing[hidden] {
+  display: none;
+}
+
+.promo-pain__typing i {
+  width: 0.32rem;
+  height: 0.32rem;
+  border-radius: 999px;
+  background: var(--color-muted-fg);
+  opacity: 0.45;
+}
+
+.promo-pain__input {
+  min-height: 1.8rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-size: 0.75rem;
+}
+
+.promo-pain__footer {
+  font-size: 0.65rem;
+  color: var(--color-muted-fg);
+}
+
 .promo-opening__moments-label {
   position: absolute;
   width: 0;
