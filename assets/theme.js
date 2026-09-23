@@ -160,9 +160,9 @@
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
   const PROMO_LOGO_DOCK_MS = 720;
   const PROMO_PITCH_LOGO_OUT_MS = 420;
-  const PROMO_PITCH_WORD_STAGGER_MS = 80;
-  const PROMO_PITCH_WORD_IN_MS = 340;
-  const PROMO_PITCH_REDEFINE_HOLD_MS = 380;
+  const PROMO_PITCH_WORD_STAGGER_MS = 36;
+  const PROMO_PITCH_WORD_IN_MS = 180;
+  const PROMO_PITCH_REDEFINE_HOLD_MS = 180;
   const PROMO_PITCH_STRIKE_MS = 420;
   const PROMO_PITCH_STRIKE_HOLD_MS = 200;
   const PROMO_PITCH_MORPH_MS = 720;
@@ -196,14 +196,15 @@
   const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
-    ['grid', 800],
-    ['enter', 700],
-    ['open', 1000],
-    ['back', 700],
+    ['grid', 600],
+    ['enter', 500],
+    ['open', 800],
+    ['back', 500],
     ['scroll-1', PROMO_PAIN_SCROLL_MS],
     ['scroll-2', PROMO_PAIN_SCROLL_MS],
-    ['scroll-up', 1600],
-    ['leave', 600],
+    ['scroll-3', PROMO_PAIN_SCROLL_MS],
+    ['scroll-4', PROMO_PAIN_SCROLL_MS],
+    ['leave', 500],
   ];
   const PROMO_PAIN_B = [
     ['launcher', 600],
@@ -585,7 +586,7 @@
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
-  const PROMO_MOMENT_OTHER_INDEX = 11;
+  const PROMO_MOMENT_OTHER_INDEX = 3;
   const PROMO_MOMENT_GRID_PITCH_X = 168;
   const PROMO_MOMENT_GRID_PITCH_Y = 208;
   const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
@@ -611,7 +612,7 @@
   const PROMO_GRID_STAGGER_MS = 40;
   const PROMO_GRID_LIFE_MS = 4000;
   const PROMO_GRID_LIFT_MS = 600;
-  const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'scroll-2', 'scroll-up', 'leave'];
+  const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'scroll-2', 'scroll-3', 'scroll-4', 'leave'];
   let gridLifeTimer = 0;
 
   const PROMO_SHELF_AT = [
@@ -896,25 +897,39 @@
     return board;
   }
 
+  function collectionChrome() {
+    const row = document.createElement('div');
+    row.className = 'promo-opening__collection';
+    row.innerHTML = '<div class="promo-opening__collection-copy"><span class="promo-opening__collection-bar"></span><span class="promo-opening__collection-line"></span></div><div class="promo-opening__collection-tools"><span class="promo-opening__collection-pill"></span><span class="promo-opening__collection-count"></span><span class="promo-opening__collection-sort"></span></div>';
+    return row;
+  }
+
   function layoutStoreGrid(board) {
     const stage = board?.parentElement;
-    if (!stage || stage.clientWidth < 240) return;
+    if (!stage || stage.clientWidth < 240 || stage.clientHeight < 160) return;
     const shiftRaw = getComputedStyle(board).getPropertyValue('--promo-board-x').trim();
     const shift = shiftRaw.endsWith('rem') ? parseFloat(shiftRaw) * 16 : (parseFloat(shiftRaw) || 0);
-    const pad = PROMO_PAIN_PAD;
-    const cardW = PROMO_PAIN_CARD_W;
-    const cardH = PROMO_PAIN_CARD_H;
-    const contentWidth = stage.clientWidth - pad * 2;
-    let cols = 6;
-    let gutter = (contentWidth - cols * cardW) / (cols - 1);
-    if (gutter < 12) {
-      cols = 5;
-      gutter = (contentWidth - cols * cardW) / (cols - 1);
-    }
-    const pitchX = cardW + Math.max(gutter, 12);
-    const pitchY = cardH + 16;
-    const gx0 = pad + cardW / 2 - (stage.clientWidth / 2 + shift);
-    const gy0 = -stage.clientHeight / 2 + cardH / 2 - 36;
+    const cols = PROMO_MOMENT_GRID_COLS;
+    const contentWidth = stage.clientWidth;
+    const cardW = contentWidth * 0.22;
+    const gutter = contentWidth * 0.025;
+    const pitchX = cardW + gutter;
+    const cardH = (stage.clientHeight - gutter) / 2;
+    const pitchY = cardH + gutter;
+    const inset = (contentWidth - (cols * cardW + (cols - 1) * gutter)) / 2;
+    const gx0 = inset + cardW / 2 - (contentWidth / 2 + shift);
+    const gy0 = -stage.clientHeight / 2 + cardH / 2;
+    const rowGap = 10;
+    const rowInset = 18;
+    const rowSeat = cardW + rowGap;
+    const groupHalf = rowSeat + cardW / 2;
+    const minShift = rowInset - contentWidth / 2 + groupHalf;
+    const rowNudge = Math.max(0, minShift - shift);
+    board.style.setProperty('--catalog-w', `${cardW.toFixed(1)}px`);
+    board.style.setProperty('--catalog-h', `${cardH.toFixed(1)}px`);
+    board.style.setProperty('--row-seat', `${rowSeat.toFixed(1)}px`);
+    board.style.setProperty('--row-nudge', `${rowNudge.toFixed(1)}px`);
+    stage.closest('.promo-opening__store')?.style.setProperty('--catalog-inset', `${Math.max(inset, 0).toFixed(1)}px`);
     board.querySelectorAll('.promo-moments__card:not(.is-extra)').forEach((card, index) => {
       const column = index % cols;
       const row = Math.floor(index / cols);
@@ -2219,6 +2234,7 @@
         const stage = host.querySelector('[data-promo-moments-stage]');
         if (field) store.appendChild(field);
         store.appendChild(bar);
+        store.appendChild(collectionChrome());
         if (stage) store.appendChild(stage);
         host.insertBefore(store, host.firstChild);
       }
@@ -2227,6 +2243,11 @@
         browser.className = 'promo-opening__browser';
         browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
         host.querySelector('.promo-opening__store')?.prepend(browser);
+      }
+      const store = host.querySelector('.promo-opening__store');
+      if (store && !store.querySelector('.promo-opening__collection')) {
+        const stage = store.querySelector('[data-promo-moments-stage]');
+        store.insertBefore(collectionChrome(), stage);
       }
       host.querySelector('.promo-moments__fest')?.remove();
       const storeMark = host.querySelector('.promo-opening__store-mark');
@@ -2612,14 +2633,14 @@
 
     painCols() {
       const board = this.painHost()?.querySelector('.promo-moments__board');
-      return Number(board?.dataset.painCols) || 6;
+      return Number(board?.dataset.painCols) || PROMO_MOMENT_GRID_COLS;
     }
 
     painBrowseCard(slot) {
       const cols = this.painCols();
       const base = cols + 1;
-      const indexes = [base, base + cols, base + cols * 2, base + cols];
-      return this.painCards()[indexes[slot]] || null;
+      const index = base + Math.max(0, slot) * cols;
+      return this.painCards()[index] || null;
     }
 
     painScrollStops() {
@@ -2629,7 +2650,7 @@
       const lower = cards[cols]?.getBoundingClientRect();
       const measured = upper && lower ? Math.round(lower.top - upper.top) : 0;
       const row = measured > 20 ? measured : Number(this.painHost()?.querySelector('.promo-moments__board')?.dataset.painPitch) || (PROMO_PAIN_CARD_H + 16);
-      return [0, -row, -(row * 2), -row];
+      return [0, -row, -(row * 2), -(row * 3), -(row * 4)];
     }
 
     setPainScroll(px) {
@@ -2743,12 +2764,14 @@
       const browseSlot = beat === 'enter' || beat === 'open' || beat === 'back' ? 0
         : beat === 'scroll-1' ? 1
           : beat === 'scroll-2' ? 2
-            : beat === 'scroll-up' ? 3
-              : -1;
+            : beat === 'scroll-3' ? 3
+              : beat === 'scroll-4' ? 4
+                : -1;
       const scrollIndex = beat === 'scroll-1' ? 1
         : beat === 'scroll-2' ? 2
-          : beat === 'scroll-up' || beat === 'leave' ? 3
-            : 0;
+          : beat === 'scroll-3' ? 3
+            : beat === 'scroll-4' || beat === 'leave' ? 4
+              : 0;
       const scrollDelta = scene === 'unattended' ? this.setPainScroll(this.painScrollStops()[scrollIndex]) : 0;
       if (instant && scene === 'unattended') board.offsetWidth;
       host.classList.remove('is-pain-dim');
@@ -3338,7 +3361,9 @@
         'pain-a-back': () => this.showPainExport('back'),
         'pain-a-scroll-1': () => this.showPainExport('scroll-1'),
         'pain-a-scroll-2': () => this.showPainExport('scroll-2'),
-        'pain-a-scroll-up': () => this.showPainExport('scroll-up'),
+        'pain-a-scroll-3': () => this.showPainExport('scroll-3'),
+        'pain-a-scroll-4': () => this.showPainExport('scroll-4'),
+        'pain-a-scroll-up': () => this.showPainExport('scroll-4'),
         'pain-a-leave': () => this.showPainExport('leave'),
         'pain-b-launcher': () => this.showPainExport('launcher'),
         'pain-b-panel': () => this.showPainExport('panel'),
