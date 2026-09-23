@@ -587,7 +587,13 @@
   function momentAdd() {
     const add = document.createElement('span');
     add.className = 'promo-moments__add';
-    add.textContent = 'Add';
+    const label = document.createElement('span');
+    label.className = 'promo-moments__add-label';
+    label.textContent = 'Add';
+    const done = document.createElement('span');
+    done.className = 'promo-moments__add-done';
+    done.append(momentMark('yes'), document.createTextNode('Added'));
+    add.append(label, done);
     return add;
   }
 

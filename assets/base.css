@@ -1318,6 +1318,31 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     border-color 380ms var(--promo-spring);
 }
 
+.promo-moments__add-label,
+.promo-moments__add-done {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.32em;
+  white-space: nowrap;
+}
+
+.promo-moments__add-done {
+  opacity: 0;
+}
+
+.promo-moments__add-done .promo-moments__mark {
+  width: 0.9em;
+  height: 0.9em;
+  color: inherit;
+}
+
+.promo-moments__add-done .promo-moments__mark svg {
+  width: 100%;
+  height: 100%;
+}
+
 .promo-moments__new,
 .promo-moments__rating {
   position: absolute;
@@ -1375,6 +1400,36 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   border-color: var(--bizmis-orange);
   color: var(--color-primary-fg);
   box-shadow: none;
+}
+
+.is-pose-close .promo-moments__card.is-pick .promo-moments__add-label,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__add-label,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add-label,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-label {
+  opacity: 0;
+}
+
+.is-pose-close .promo-moments__card.is-pick .promo-moments__add-done,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__add-done,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add-done,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-done {
+  opacity: 1;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add-label {
+  animation: promo-moments-add-out 280ms var(--promo-spring) var(--promo-close-cart-at, 1280ms) both;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add-done {
+  animation: promo-moments-add-in 280ms var(--promo-spring) var(--promo-close-cart-at, 1280ms) both;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-label {
+  animation: promo-moments-add-out 280ms var(--promo-spring) 170ms both;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-done {
+  animation: promo-moments-add-in 280ms var(--promo-spring) 170ms both;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add {
@@ -2626,6 +2681,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     color: var(--color-primary-fg);
     border-color: var(--bizmis-orange);
   }
+}
+
+@keyframes promo-moments-add-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes promo-moments-add-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes promo-moments-kept-in {
