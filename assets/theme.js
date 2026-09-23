@@ -571,9 +571,13 @@
   }
 
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
-  const PROMO_MOMENT_GRID_COLS = 4;
+  const PROMO_MOMENT_GRID_COLS = 5;
   const PROMO_MOMENT_CARD_COUNT = 12;
   const PROMO_CATALOG_SEED = 40721;
+  const PROMO_CATALOG_COLS = 5;
+  const PROMO_CATALOG_GUTTER = 20;
+  const PROMO_CATALOG_ROW_GAP = 18;
+  const PROMO_CATALOG_VISIBLE_ROWS = 2.2;
   const PROMO_CLAY_KINDS = ['sphere', 'cube', 'rounded-cube', 'cylinder', 'low-cylinder', 'tall-box', 'cone', 'capsule', 'torus', 'dome'];
   const PROMO_CLAY_TURNS = ['m20', '0', 'p20'];
   const PROMO_CLAY_FINISHES = ['matte', 'satin'];
@@ -701,8 +705,6 @@
     const src = claySrc(clayFileKey(look));
     if (img && img.getAttribute('src') !== src) img.src = src;
   }
-
-  const PROMO_CATALOG_COLS = 6;
 
   function paintCatalogClay(board) {
     if (!board || board.dataset.clayReady === '1') return;
@@ -962,13 +964,13 @@
     const shiftRaw = getComputedStyle(board).getPropertyValue('--promo-board-x').trim();
     const shift = shiftRaw.endsWith('rem') ? parseFloat(shiftRaw) * 16 : (parseFloat(shiftRaw) || 0);
     const contentWidth = stage.clientWidth;
-    const cardW = PROMO_PAIN_CARD_W;
-    const cardH = PROMO_PAIN_CARD_H;
-    const minGutter = 16;
-    const cols = Math.min(6, Math.max(4, Math.floor((contentWidth + minGutter) / (cardW + minGutter))));
-    const gutter = (contentWidth - cols * cardW) / Math.max(cols - 1, 1);
+    const cols = PROMO_CATALOG_COLS;
+    const gutter = PROMO_CATALOG_GUTTER;
+    const rowGapY = PROMO_CATALOG_ROW_GAP;
+    const cardW = (contentWidth - (cols - 1) * gutter) / cols;
+    const cardH = (stage.clientHeight - rowGapY) / PROMO_CATALOG_VISIBLE_ROWS;
     const pitchX = cardW + gutter;
-    const pitchY = cardH + 16;
+    const pitchY = cardH + rowGapY;
     const inset = (contentWidth - (cols * cardW + (cols - 1) * gutter)) / 2;
     const gx0 = inset + cardW / 2 - (contentWidth / 2 + shift);
     const gy0 = -stage.clientHeight / 2 + cardH / 2;
