@@ -155,6 +155,7 @@
   const PROMO_PITCH_HERO_OUT_MS = 340;
   const PROMO_PITCH_HERO_OVERLAP_MS = 160;
   const PROMO_PITCH_SELL_HOLD_MS = 2000;
+  const PROMO_SELL_OUT_MS = 900;
   const PROMO_PITCH_SETTLE_MS = 700;
   const PROMO_MOMENTS_VO_MS = 280;
   const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
@@ -2079,6 +2080,7 @@
       const sell = this.root.querySelector('.promo-opening__word--sell');
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
+      if (!prefersReducedMotion()) await waitMs(PROMO_SELL_OUT_MS);
       this.glideClerkIntoRow('is-moments');
       if (!prefersReducedMotion()) await waitMs(PROMO_CLERK_ROW_MS);
 

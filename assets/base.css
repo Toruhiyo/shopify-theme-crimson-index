@@ -2865,7 +2865,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__face--to .promo-opening__word--sell.is-out {
-  animation: promo-pitch-sell-out 720ms cubic-bezier(0.7, 0, 1, 1) forwards;
+  animation: promo-pitch-sell-out 900ms cubic-bezier(0.85, 0, 1, 1) forwards;
 }
 
 .promo-opening__face--to .promo-opening__word--sell {
@@ -3117,7 +3117,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   }
   100% {
     opacity: 0;
-    transform: translateX(18rem);
+    transform: translateX(22rem);
   }
 }
 
