@@ -762,21 +762,35 @@
 
   function scrubMoment(stage, pose, timeOf) {
     restartMomentPose(stage, pose);
+    const host = momentHostOf(stage);
+    if (host) void host.offsetWidth;
     return new Promise((resolve) => {
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          momentMotions(stage).forEach((anim) => {
-            const span = motionSpan(anim);
-            const time = timeOf(anim, span);
-            if (Number.isFinite(time)) {
-              const cap = span.total > 0 ? span.total : time;
-              anim.currentTime = Math.max(0, Math.min(cap, time));
-            }
-            anim.pause();
-          });
-          resolve();
+      const freeze = (attempt) => {
+        const motions = document.getAnimations().filter((anim) => {
+          const node = anim.effect && anim.effect.target;
+          return node && host && (node === host || host.contains(node));
         });
-      });
+        const named = motions.some((anim) => anim.animationName);
+        if (!named && attempt < 6) {
+          window.requestAnimationFrame(() => freeze(attempt + 1));
+          return;
+        }
+        motions.forEach((anim) => {
+          const span = motionSpan(anim);
+          const time = timeOf(anim, span);
+          if (!Number.isFinite(time)) return;
+          const cap = span.total > 0 ? span.total : time;
+          try {
+            anim.currentTime = Math.max(0, Math.min(cap, time));
+            if (typeof anim.commitStyles === 'function') anim.commitStyles();
+          } catch (error) {
+            return;
+          }
+          anim.cancel();
+        });
+        resolve();
+      };
+      window.requestAnimationFrame(() => freeze(0));
     });
   }
 
@@ -2322,7 +2336,7 @@
           return scrubMoment(stage, 'row', (anim, span) => {
             const name = anim.animationName || '';
             if (name === 'promo-moments-select' || name === 'promo-moments-catalog-out') {
-              return span.delay + span.duration * 0.5;
+              return span.delay + span.duration * 0.2;
             }
             return 0;
           });
@@ -2359,7 +2373,7 @@
           const stage = openMoments();
           return scrubMoment(stage, 'close', (anim, span) => {
             if ((anim.animationName || '') === 'promo-moments-vapor') {
-              return span.delay + span.duration * 0.55;
+              return span.delay + span.duration * 0.22;
             }
             return 0;
           });
@@ -2382,11 +2396,11 @@
         },
         '14f1-moments-contract': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'fly', () => 140);
+          return scrubMoment(stage, 'fly', () => 200);
         },
         '14f2-moments-dot': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'fly', () => 608);
+          return scrubMoment(stage, 'fly', () => 430);
         },
         '14f3-moments-nod': () => {
           const stage = openMoments();
