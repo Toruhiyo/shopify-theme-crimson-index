@@ -726,10 +726,22 @@
     return { delay, duration, total: delay + duration, iterations: timing.iterations };
   }
 
+  function clearMomentInline(stage) {
+    const host = momentHostOf(stage);
+    if (!host) return;
+    [host, ...host.querySelectorAll('[style]')].forEach((node) => {
+      [...node.style].forEach((prop) => {
+        if (prop.startsWith('--')) return;
+        node.style.removeProperty(prop);
+      });
+    });
+  }
+
   function restartMomentPose(stage, pose) {
     const board = ensureMomentBoard(stage);
     if (!board) return null;
     const host = momentHostOf(stage);
+    clearMomentInline(stage);
     board.dataset.pose = '';
     board.classList.remove('is-settled', 'is-reduced', 'is-instant');
     host?.classList.remove('is-settled', 'is-reduced', 'is-instant', 'is-vignette-gone');
@@ -2376,6 +2388,17 @@
               return span.delay + span.duration * 0.22;
             }
             return 0;
+          }).then(() => {
+            const host = momentHostOf(stage);
+            host?.querySelectorAll('.promo-moments__count').forEach((node) => {
+              node.style.opacity = '0';
+            });
+            const cart = host?.querySelector('.promo-moments__cart');
+            if (cart) {
+              cart.style.color = '#7c8593';
+              cart.style.filter = 'none';
+              cart.style.transform = 'none';
+            }
           });
         },
         '14d3-moments-close': () => {
