@@ -194,6 +194,11 @@
   const PROMO_PAIN_SCROLL_MS = 1800;
   const PROMO_PAIN_TYPE_CHAR_MS = 16;
   const PROMO_PAIN_EXIT_MS = 420;
+  const PROMO_WINDOW_AIM_MS = 820;
+  const PROMO_WINDOW_PRESS_MS = 200;
+  const PROMO_WINDOW_CLOSE_MS = 760;
+  const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
+  const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
   const PROMO_PAIN_LINE_2 = 'Which one would you pick for me?';
   const PROMO_PAIN_ANSWER_1 = [
@@ -2402,9 +2407,10 @@
       if (!host.querySelector('.promo-opening__browser')) {
         const browser = document.createElement('div');
         browser.className = 'promo-opening__browser';
-        browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
+        browser.innerHTML = '<span class="promo-opening__browser-dots" aria-hidden="true"><i data-promo-window-close></i><i></i><i></i></span><span class="promo-opening__browser-pill" aria-hidden="true"></span>';
         host.querySelector('.promo-opening__store')?.prepend(browser);
       }
+      host.querySelector('.promo-opening__browser-dots i')?.setAttribute('data-promo-window-close', '');
       host.querySelector('.promo-opening__collection')?.remove();
       host.querySelector('.promo-opening__search')?.remove();
       host.querySelector('.promo-moments__fest')?.remove();
@@ -2700,7 +2706,7 @@
 
     releasePainStage() {
       this.clearPainTimers();
-      this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-pain-out', 'is-moments');
+      this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-pain-out', 'is-moments', 'is-window-aim', 'is-window-shut');
       const host = this.painHost();
       host?.querySelector('.promo-moments__board')?.style.removeProperty('--pain-scroll');
       host?.classList.remove('is-pain-dim');
@@ -3037,17 +3043,83 @@
       }
       await this.playPainSteps(PROMO_PAIN_A, 'unattended');
       await this.playPainSteps(PROMO_PAIN_B, 'chat');
+      await this.dismissPainStage();
       if (marketingPart() === 'full') {
-        await this.dismissPainStage();
         await waitMs(PROMO_TOGGLE_REST_MS);
         this.flip();
       }
     }
 
+    painCursorPoint(target) {
+      const store = this.painStore();
+      if (!store || !target) return null;
+      const storeBox = store.getBoundingClientRect();
+      const box = target.getBoundingClientRect();
+      return {
+        x: box.left + box.width / 2 - storeBox.left - PROMO_CURSOR_HOT_X,
+        y: box.top + box.height / 2 - storeBox.top - PROMO_CURSOR_HOT_Y,
+      };
+    }
+
+    pinWindowCloseOrigin() {
+      const store = this.painStore();
+      const dot = store?.querySelector('[data-promo-window-close]');
+      if (!store || !dot) return;
+      const storeBox = store.getBoundingClientRect();
+      const box = dot.getBoundingClientRect();
+      store.style.setProperty('--window-close-x', `${box.left + box.width / 2 - storeBox.left}px`);
+      store.style.setProperty('--window-close-y', `${box.top + box.height / 2 - storeBox.top}px`);
+    }
+
+    parkPainCursor() {
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const host = this.painHost();
+      const store = this.painStore();
+      if (!cursor || !host || !store || cursor.parentElement === host) return;
+      const hostBox = host.getBoundingClientRect();
+      const box = cursor.getBoundingClientRect();
+      host.appendChild(cursor);
+      cursor.style.transitionDuration = '0ms';
+      cursor.style.setProperty('--pain-x', `${Math.round(box.left - hostBox.left - host.clientLeft)}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(box.top - hostBox.top - host.clientTop)}px`);
+      cursor.getBoundingClientRect();
+      cursor.style.transitionDuration = '';
+    }
+
     async dismissPainStage() {
       if (!this.root.classList.contains('is-pain')) return;
-      this.root.classList.add('is-pain-out');
-      if (!prefersReducedMotion()) await waitMs(PROMO_PAIN_EXIT_MS);
+      const store = this.painStore();
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const dot = store?.querySelector('[data-promo-window-close]');
+      if (!store || !cursor || !dot || prefersReducedMotion()) {
+        this.root.classList.add('is-pain-out');
+        if (!prefersReducedMotion()) await waitMs(PROMO_PAIN_EXIT_MS);
+        this.releasePainStage();
+        return;
+      }
+      cursor.hidden = false;
+      cursor.style.transitionDuration = '0ms';
+      cursor.style.setProperty('--pain-x', `${Math.round(store.clientWidth * 0.46)}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(store.clientHeight * 0.62)}px`);
+      cursor.style.opacity = '0';
+      cursor.getBoundingClientRect();
+      this.root.style.setProperty('--promo-pain-open', `${PROMO_WINDOW_AIM_MS}ms`);
+      this.root.style.setProperty('--promo-window-close', `${PROMO_WINDOW_CLOSE_MS}ms`);
+      cursor.style.transitionDuration = '';
+      const aim = this.painCursorPoint(dot);
+      cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
+      cursor.style.opacity = '1';
+      await waitMs(PROMO_WINDOW_AIM_MS);
+      this.pinWindowCloseOrigin();
+      this.root.classList.add('is-window-aim');
+      await waitMs(PROMO_WINDOW_PRESS_MS);
+      this.parkPainCursor();
+      this.root.classList.add('is-window-shut');
+      window.setTimeout(() => {
+        cursor.style.opacity = '0';
+      }, Math.round(PROMO_WINDOW_CLOSE_MS * 0.62));
+      await waitMs(PROMO_WINDOW_CLOSE_MS);
       this.releasePainStage();
     }
 
@@ -3056,6 +3128,25 @@
       this.applyPainBeat(beat, false);
       const host = this.painHost();
       return this.whenPainRest(host);
+    }
+
+    showPainCloseAim() {
+      this.openPainStage();
+      this.applyPainBeat('answer-2', true);
+      const store = this.painStore();
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const dot = store?.querySelector('[data-promo-window-close]');
+      const aim = this.painCursorPoint(dot);
+      if (cursor && aim) {
+        cursor.hidden = false;
+        cursor.style.transitionDuration = '0ms';
+        cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
+        cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
+        cursor.style.opacity = '1';
+      }
+      this.pinWindowCloseOrigin();
+      this.root.classList.add('is-window-aim');
+      return this.whenPainRest(this.painHost());
     }
 
     showExportFrame(name) {
@@ -3547,6 +3638,7 @@
         'pain-b-answer-1': () => this.showPainExport('answer-1'),
         'pain-b-typed-2': () => this.showPainExport('typed-2'),
         'pain-b-answer-2': () => this.showPainExport('answer-2'),
+        'pain-c-aim': () => this.showPainCloseAim(),
         'pain-b-zoom': () => this.showPainExport('answer-2'),
       };
 
