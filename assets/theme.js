@@ -174,7 +174,7 @@
   const PROMO_AVATAR_BOX_H = 340;
   const PROMO_AVATAR_LIFT_PX = -120;
   const PROMO_CLERK_CORNER_MS = 1080;
-  const PROMO_CLERK_CORNER_SCALE = 0.92;
+  const PROMO_CLERK_CORNER_SCALE = 1.65;
   const PROMO_CLERK_CORNER_INSET_X = 22;
   const PROMO_CLERK_CORNER_INSET_Y = 52;
   const PROMO_AVATAR_CANVAS_WIDTH_PX = 720;
@@ -585,6 +585,8 @@
   const PROMO_CATALOG_GUTTER = 20;
   const PROMO_CATALOG_ROW_GAP = 18;
   const PROMO_CATALOG_VISIBLE_ROWS = 2.2;
+  const PROMO_ROW_CLERK_LANE = 300;
+  const PROMO_ROW_GAP = 20;
   const PROMO_CLAY_KINDS = ['sphere', 'cube', 'rounded-cube', 'cylinder', 'low-cylinder', 'tall-box', 'cone', 'capsule', 'torus', 'dome'];
   const PROMO_CLAY_TURNS = ['m20', '0', 'p20'];
   const PROMO_CLAY_FINISHES = ['matte', 'satin'];
@@ -981,16 +983,22 @@
     const inset = (contentWidth - (cols * cardW + (cols - 1) * gutter)) / 2;
     const gx0 = inset + cardW / 2 - (contentWidth / 2 + shift);
     const gy0 = -stage.clientHeight / 2 + cardH / 2;
-    const rowGap = 10;
+    const rowGap = PROMO_ROW_GAP;
     const rowInset = 18;
-    const rowSeat = cardW + rowGap;
-    const groupHalf = rowSeat + cardW / 2;
+    const rowBudget = contentWidth - PROMO_ROW_CLERK_LANE - rowInset;
+    const rowCardW = (rowBudget - rowGap * 2) / 3;
+    const rowCardH = Math.min(rowCardW * (cardH / cardW), stage.clientHeight * 0.64);
+    const rowSeat = rowCardW + rowGap;
+    const groupHalf = rowSeat + rowCardW / 2;
     const minShift = rowInset - contentWidth / 2 + groupHalf;
     const rowNudge = Math.max(0, minShift - shift);
     board.style.setProperty('--catalog-w', `${cardW.toFixed(1)}px`);
     board.style.setProperty('--catalog-h', `${cardH.toFixed(1)}px`);
+    board.style.setProperty('--row-card-w', `${rowCardW.toFixed(1)}px`);
+    board.style.setProperty('--row-card-h', `${rowCardH.toFixed(1)}px`);
     board.style.setProperty('--row-seat', `${rowSeat.toFixed(1)}px`);
     board.style.setProperty('--row-nudge', `${rowNudge.toFixed(1)}px`);
+    board.style.setProperty('--row-compare-y', `${(rowCardH / 2 + 28).toFixed(1)}px`);
     stage.closest('.promo-opening__store')?.style.setProperty('--catalog-inset', `${Math.max(inset, 0).toFixed(1)}px`);
     board.querySelectorAll('.promo-moments__card:not(.is-extra)').forEach((card, index) => {
       const column = index % cols;
