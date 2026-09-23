@@ -979,27 +979,50 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transition: opacity 380ms var(--promo-spring);
 }
 
+.promo-moments__card[data-tone="0"] { --photo: #eef3ec; --ink: #6f7d72; }
+.promo-moments__card[data-tone="1"] { --photo: #eaf1f6; --ink: #6d7e8c; }
+.promo-moments__card[data-tone="2"] { --photo: #f6f1e8; --ink: #8a7d68; }
+.promo-moments__card[data-tone="3"] { --photo: #f3eef6; --ink: #7d7288; }
+
+.promo-moments__photo {
+  position: absolute;
+  z-index: 1;
+  left: 0.42rem;
+  right: 0.42rem;
+  top: 0.42rem;
+  height: 4.15rem;
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.72), transparent 62%),
+    var(--photo, #eef1ee);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
+}
+
 .promo-moments__glyph {
   position: absolute;
-  left: 31%;
-  top: 31%;
-  width: 38%;
-  height: 38%;
-  display: grid;
-  place-items: center;
-  color: #e6dfd6;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: calc(2.35rem * var(--shape-scale, 1));
+  height: calc(2.35rem * var(--shape-scale, 1));
+  margin: calc(-1.175rem * var(--shape-scale, 1)) 0 0 calc(-1.175rem * var(--shape-scale, 1));
+  display: block;
+  color: var(--ink, #7c8593);
   opacity: 1;
+  transform-origin: center center;
   transition:
     transform 380ms var(--promo-spring),
-    opacity 380ms var(--promo-spring),
-    top 380ms var(--promo-spring);
+    opacity 380ms var(--promo-spring);
 }
 
 .promo-moments__glyph svg {
   width: 100%;
   height: 100%;
+  overflow: visible;
   fill: currentColor;
   stroke: none;
+  filter: drop-shadow(0 0.28rem 0.2rem rgba(55, 48, 40, 0.18));
 }
 
 .promo-moments__spec-icon svg,
@@ -1047,9 +1070,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__specs {
   position: absolute;
+  z-index: 2;
   left: 18%;
   right: 18%;
-  bottom: 16%;
+  bottom: 1.85rem;
   display: grid;
   gap: 0.28rem;
   opacity: 0;
@@ -1107,6 +1131,150 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__mark.is-yes { color: #f9a353; }
 .promo-moments__mark.is-no { color: #7c8593; }
+
+.promo-moments__meta {
+  position: absolute;
+  z-index: 1;
+  left: 0.5rem;
+  right: 0.5rem;
+  top: 4.78rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.promo-moments__title,
+.promo-moments__price i {
+  display: block;
+  height: 0.32rem;
+  width: var(--bar, 62%);
+  border-radius: 999px;
+  background: rgba(90, 98, 110, 0.16);
+}
+
+.promo-moments__price {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.promo-moments__price b {
+  flex: 0 0 auto;
+  color: var(--ink, #7c8593);
+  font-family: var(--font-heading);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.promo-moments__price i { height: 0.26rem; }
+
+.promo-moments__add {
+  position: absolute;
+  z-index: 2;
+  left: 0.48rem;
+  right: 0.48rem;
+  bottom: 0.38rem;
+  height: 1.12rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 133, 147, 0.28);
+  background: rgba(255, 255, 255, 0.28);
+  color: rgba(124, 133, 147, 0.72);
+  font-family: var(--font-heading);
+  font-size: 0.58rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  transition:
+    background 380ms var(--promo-spring),
+    color 380ms var(--promo-spring),
+    border-color 380ms var(--promo-spring);
+}
+
+.promo-moments__new,
+.promo-moments__rating {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.promo-moments__new {
+  left: 0.28rem;
+  top: 0.28rem;
+  padding: 0.1rem 0.28rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink, #7c8593);
+  font-family: var(--font-heading);
+  font-size: 0.42rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.promo-moments__rating {
+  left: 0.32rem;
+  bottom: 0.28rem;
+  display: flex;
+  gap: 0.12rem;
+}
+
+.promo-moments__rating i {
+  width: 0.22rem;
+  height: 0.22rem;
+  border-radius: 999px;
+  border: 1px solid var(--ink, #7c8593);
+  background: transparent;
+  opacity: 0.45;
+}
+
+.promo-moments__rating i.is-on {
+  background: var(--ink, #7c8593);
+  opacity: 0.8;
+}
+
+.is-pose-choice .promo-moments__title,
+.is-pose-choice .promo-moments__price,
+.is-pose-doubt .promo-moments__title,
+.is-pose-doubt .promo-moments__price,
+.is-pose-choice .promo-moments__rating,
+.is-pose-doubt .promo-moments__rating {
+  opacity: 0;
+}
+
+.is-pose-close .promo-moments__specs,
+.is-pose-extra .promo-moments__specs,
+.is-pose-bundle .promo-moments__specs {
+  opacity: 0;
+}
+
+.is-pose-close .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add {
+  background: #f9a353;
+  border-color: #f9a353;
+  color: #fff;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add {
+  animation-name: promo-moments-add-fill;
+  animation-duration: 380ms;
+  animation-timing-function: var(--promo-spring);
+  animation-delay: var(--promo-close-cart-at, 1280ms);
+  animation-fill-mode: both;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add {
+  animation-name: promo-moments-add-fill;
+  animation-duration: 380ms;
+  animation-timing-function: var(--promo-spring);
+  animation-delay: 170ms;
+  animation-fill-mode: both;
+}
 
 .promo-moments__card.is-drop { z-index: 1; }
 .promo-moments__card.is-go { z-index: 2; }
@@ -1228,12 +1396,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice .promo-moments__card.is-other .promo-moments__glyph,
 .is-pose-doubt .promo-moments__card.is-pick .promo-moments__glyph,
 .is-pose-close .promo-moments__card.is-pick .promo-moments__glyph {
-  top: 14%;
-}
-
-.is-pose-choice .promo-moments__card.is-pick .promo-moments__glyph,
-.is-pose-doubt .promo-moments__card.is-pick .promo-moments__glyph,
-.is-pose-close .promo-moments__card.is-pick .promo-moments__glyph {
   opacity: 1;
 }
 
@@ -1253,8 +1415,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick .promo-moments__specs,
-.is-pose-doubt .promo-moments__card.is-pick .promo-moments__specs,
-.is-pose-close .promo-moments__card.is-pick .promo-moments__specs {
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__specs {
   opacity: 1;
   transform: none;
 }
@@ -1343,8 +1504,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 1;
 }
 
-.is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph {
-  color: #c4b8aa;
+.is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph {
+  opacity: 1;
 }
 
 .is-pose-bundle .promo-moments__card.is-extra::after {
@@ -1621,10 +1783,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__glyph {
-  color: #e6dfd6;
-  animation:
-    promo-moments-item-pop 1100ms var(--promo-spring) var(--promo-close-cart-at, 1280ms),
-    promo-moments-glyph-add 180ms ease var(--promo-close-cart-at, 1280ms) forwards;
+  animation: promo-moments-item-pop 1100ms var(--promo-spring) var(--promo-close-cart-at, 1280ms);
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
@@ -1857,7 +2016,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__glyph,
 .is-pose-bundle .promo-moments__card.is-pick .promo-moments__glyph,
 .is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph {
-  color: #f9a353;
   opacity: 1;
 }
 
@@ -2325,8 +2483,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   to { opacity: 0; transform: translate3d(0, -0.2rem, 0); }
 }
 
-@keyframes promo-moments-glyph-add {
-  to { color: #f9a353; }
+@keyframes promo-moments-add-fill {
+  from {
+    background: rgba(255, 255, 255, 0.28);
+    color: rgba(124, 133, 147, 0.72);
+    border-color: rgba(124, 133, 147, 0.28);
+  }
+  to {
+    background: #f9a353;
+    color: #fff;
+    border-color: #f9a353;
+  }
 }
 
 @keyframes promo-moments-kept-in {

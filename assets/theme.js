@@ -518,6 +518,17 @@
   const PROMO_MOMENT_GO_INDEX = 0;
   const PROMO_MOMENT_OTHER_INDEX = 11;
   const PROMO_MOMENT_GRID_PITCH = 8.55;
+  const PROMO_MOMENT_SHAPE_SCALES = [0.86, 1, 0.74, 0.92, 0.7, 1, 0.8, 0.96, 0.78, 0.88, 0.72, 0.94];
+  const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
+  const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
+  const PROMO_MOMENT_NEW_INDEXES = [2, 5];
+  const PROMO_MOMENT_RATING_INDEXES = [7, 11];
+  const PROMO_MOMENT_TONES = [
+    { hi: '#e7efe4', tone: '#8ea892' },
+    { hi: '#e4eef5', tone: '#87a3b8' },
+    { hi: '#f3eee4', tone: '#c2b294' },
+    { hi: '#eee7f3', tone: '#a898b4' },
+  ];
   const PROMO_MOMENT_ICONS = {
     circle: '<circle cx="12" cy="12" r="7.2"/>',
     square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
@@ -539,11 +550,65 @@
     return 'drop';
   }
 
-  function momentGlyph(kind) {
+  function momentGlyph(kind, index) {
+    const tone = PROMO_MOMENT_TONES[index % PROMO_MOMENT_TONES.length];
+    const gradientId = `promo-shape-${index}`;
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
-    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${PROMO_MOMENT_ICONS[kind] || ''}</svg>`;
+    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${gradientId}" x1="18%" y1="0%" x2="82%" y2="100%"><stop offset="0%" stop-color="${tone.hi}"/><stop offset="100%" stop-color="${tone.tone}"/></linearGradient></defs><g fill="url(#${gradientId})">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
     return glyph;
+  }
+
+  function momentBadge(index) {
+    if (PROMO_MOMENT_NEW_INDEXES.includes(index)) {
+      const pill = document.createElement('span');
+      pill.className = 'promo-moments__new';
+      pill.textContent = 'NEW';
+      return pill;
+    }
+    if (!PROMO_MOMENT_RATING_INDEXES.includes(index)) return null;
+    const rating = document.createElement('span');
+    rating.className = 'promo-moments__rating';
+    const filledDots = 4;
+    for (let dot = 0; dot < 5; dot += 1) {
+      const mark = document.createElement('i');
+      if (dot < filledDots) mark.className = 'is-on';
+      rating.appendChild(mark);
+    }
+    return rating;
+  }
+
+  function momentPhoto(kind, index) {
+    const photo = document.createElement('span');
+    photo.className = 'promo-moments__photo';
+    photo.appendChild(momentGlyph(kind, index));
+    const badge = momentBadge(index);
+    if (badge) photo.appendChild(badge);
+    return photo;
+  }
+
+  function momentMeta(index) {
+    const meta = document.createElement('span');
+    meta.className = 'promo-moments__meta';
+    const title = document.createElement('i');
+    title.className = 'promo-moments__title';
+    title.style.setProperty('--bar', `${PROMO_MOMENT_TITLE_WIDTHS[index] || 64}%`);
+    const price = document.createElement('span');
+    price.className = 'promo-moments__price';
+    const dollar = document.createElement('b');
+    dollar.textContent = '$';
+    const bar = document.createElement('i');
+    bar.style.setProperty('--bar', `${PROMO_MOMENT_PRICE_WIDTHS[index] || 32}%`);
+    price.append(dollar, bar);
+    meta.append(title, price);
+    return meta;
+  }
+
+  function momentAdd() {
+    const add = document.createElement('span');
+    add.className = 'promo-moments__add';
+    add.textContent = 'Add';
+    return add;
   }
 
   function momentKept() {
@@ -597,16 +662,20 @@
       const kind = PROMO_MOMENT_CARD_KINDS[index];
       const card = document.createElement('div');
       card.className = `promo-moments__card is-${kind} is-${role}`;
+      card.dataset.tone = String(index % PROMO_MOMENT_TONES.length);
       card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
-      card.appendChild(momentGlyph(kind));
+      card.style.setProperty('--shape-scale', String(PROMO_MOMENT_SHAPE_SCALES[index]));
+      card.append(momentPhoto(kind, index), momentMeta(index), momentAdd());
       if (role === 'pick') card.appendChild(momentKept());
       if (role === 'pick' || role === 'other' || role === 'go') card.appendChild(momentSpecs(role));
       board.appendChild(card);
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-pentagon is-extra';
-    accessory.appendChild(momentGlyph('pentagon'));
+    accessory.dataset.tone = '2';
+    accessory.style.setProperty('--shape-scale', '0.88');
+    accessory.append(momentPhoto('pentagon', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
     accessory.appendChild(momentKept());
     board.appendChild(accessory);
     const orbits = [
