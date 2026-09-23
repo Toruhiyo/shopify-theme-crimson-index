@@ -617,29 +617,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-.promo-opening.is-see:not(.is-see-row):not(.is-moments) .promo-opening__widget {
-  position: relative;
-  top: auto;
-  right: auto;
-  width: 100%;
-  transform: none;
+.promo-opening.is-see:not(.is-see-row):not(.is-moments) .promo-opening__widget,
+.promo-opening.is-see-row .promo-opening__widget,
+.promo-opening.is-moments .promo-opening__widget,
+.promo-opening.is-pitch .promo-opening__widget {
+  position: absolute;
+  top: 50%;
+  right: 6.25cqw;
+  z-index: 6;
+  width: max-content;
+  transform: translateY(-50%);
   transition: none;
 }
 
 .promo-opening.is-see-row .promo-opening__stage {
   width: min(1400px, 100%);
   grid-template-columns: minmax(0, 1fr) 24rem;
-}
-
-.promo-opening.is-see-row .promo-opening__widget,
-.promo-opening.is-moments .promo-opening__widget {
-  position: absolute;
-  top: 50%;
-  right: max(0.35rem, 0.6cqw);
-  z-index: 6;
-  width: max-content;
-  transform: translateY(-50%);
-  transition: none;
 }
 
 .promo-opening.is-see-row .promo-opening__copy {
@@ -664,7 +657,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-inline: 6.25cqw;
+  padding-inline: 6.25cqw 11.875cqw;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
@@ -677,7 +670,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  --promo-board-x: -15rem;
+  --promo-board-x: -12.5rem;
   transform: translate(calc(-50% + var(--promo-board-x)), -50%);
 }
 
@@ -2985,7 +2978,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-see-row .promo-opening__stores {
-  width: min(55rem, calc(100cqw - 30rem));
+  width: min(55rem, calc(100cqw - 35rem));
   max-width: none;
   max-height: 52rem;
   overflow: visible;
