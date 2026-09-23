@@ -2164,8 +2164,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-vapor {
   0% { opacity: 1; filter: blur(0); transform: scale(1); background: rgba(255, 255, 255, 0.45); color: #7c8593; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06); }
-  40% { opacity: 0.55; filter: blur(6px); transform: scale(1.3); background: rgba(249, 163, 83, 0.22); color: transparent; box-shadow: 0 0 18px rgba(249, 163, 83, 0.28); }
-  100% { opacity: 0; filter: blur(16px); transform: scale(1.7); background: rgba(249, 163, 83, 0); box-shadow: none; }
+  45% { opacity: 0.72; filter: blur(3px); transform: scale(1.16); background: rgba(249, 163, 83, 0.18); color: #7c8593; box-shadow: 0 0 14px rgba(249, 163, 83, 0.22); }
+  100% { opacity: 0; filter: blur(16px); transform: scale(1.7); background: rgba(249, 163, 83, 0); color: transparent; box-shadow: none; }
 }
 
 @keyframes promo-moments-vapor-bit {

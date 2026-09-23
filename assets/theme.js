@@ -841,6 +841,198 @@
     return whenMomentsRest(stage);
   }
 
+  let speechMouthHold = null;
+  let speechMouthArmed = false;
+
+  function mouthMeshFrom(object, depth) {
+    if (!object || depth > 40) return null;
+    const dict = object.morphTargetDictionary;
+    if (dict && (dict.A != null || dict.jawOpen != null)) return object;
+    const children = object.children || [];
+    for (let index = 0; index < children.length; index += 1) {
+      const found = mouthMeshFrom(children[index], depth + 1);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function sceneFromFiber(start) {
+    const stack = start ? [start] : [];
+    const seen = new Set();
+    while (stack.length) {
+      const node = stack.pop();
+      if (!node || seen.has(node)) continue;
+      seen.add(node);
+      const props = node.memoizedProps || {};
+      const mesh = mouthMeshFrom(node.stateNode, 0) || mouthMeshFrom(props.object, 0);
+      if (mesh) return mesh;
+      let hook = node.memoizedState;
+      while (hook) {
+        const value = hook.memoizedState;
+        const store = value && typeof value.getState === 'function'
+          ? value
+          : value && value.current && typeof value.current.getState === 'function'
+            ? value.current
+            : null;
+        if (store) {
+          try {
+            const state = store.getState();
+            const found = mouthMeshFrom(state && state.scene, 0);
+            if (found) return found;
+          } catch (error) {
+            hook = hook.next;
+            continue;
+          }
+        }
+        const direct = mouthMeshFrom(value && value.scene, 0);
+        if (direct) return direct;
+        hook = hook.next;
+      }
+      if (node.child) stack.push(node.child);
+      if (node.sibling) stack.push(node.sibling);
+    }
+    return null;
+  }
+
+  function findMouthMesh() {
+    const roots = document.querySelectorAll('[data-promo-widget], canvas');
+    for (const root of roots) {
+      const key = Object.keys(root).find((name) => name.startsWith('__reactFiber'));
+      let fiber = key ? root[key] : null;
+      for (let step = 0; fiber && step < 16; step += 1) {
+        const mesh = sceneFromFiber(fiber);
+        if (mesh) return mesh;
+        fiber = fiber.return;
+      }
+    }
+    return null;
+  }
+
+  function releaseSpeechMouth() {
+    if (speechMouthHold) {
+      speechMouthHold.mesh.morphTargetInfluences = speechMouthHold.original;
+      speechMouthHold = null;
+    }
+    if (!speechMouthArmed) return;
+    speechMouthArmed = false;
+    setOpeningAvatarAction('idle_neutral');
+  }
+
+  function pinMouth(mesh) {
+    const dict = mesh.morphTargetDictionary || {};
+    const openIndexes = ['A', 'jawOpen'].map((name) => dict[name]).filter((index) => index != null);
+    const closedIndex = dict.X;
+    const original = mesh.morphTargetInfluences;
+    if (!original || !openIndexes.length) return false;
+    const proxy = new Proxy(original, {
+      set(target, prop, value) {
+        if (openIndexes.some((index) => prop === index || prop === String(index))) {
+          openIndexes.forEach((index) => {
+            target[index] = 0.9;
+          });
+          return true;
+        }
+        if (closedIndex != null && (prop === closedIndex || prop === String(closedIndex))) {
+          target[closedIndex] = 0;
+          return true;
+        }
+        target[prop] = value;
+        return true;
+      },
+    });
+    openIndexes.forEach((index) => {
+      original[index] = 0.9;
+    });
+    if (closedIndex != null) original[closedIndex] = 0;
+    mesh.morphTargetInfluences = proxy;
+    speechMouthHold = { mesh, original, proxy };
+    return true;
+  }
+
+  function holdSpeechMouth() {
+    releaseSpeechMouth();
+    speechMouthArmed = true;
+    document.documentElement.dataset.promoMouth = 'seeking';
+    setOpeningAvatarAction('exaggerated_talking');
+    return new Promise((resolve) => {
+      const watch = (left) => {
+        if (!speechMouthArmed) {
+          resolve();
+          return;
+        }
+        const mesh = findMouthMesh();
+        const pinned = mesh && (speechMouthHold?.mesh === mesh && mesh.morphTargetInfluences === speechMouthHold.proxy || pinMouth(mesh));
+        document.documentElement.dataset.promoMouth = pinned ? 'open' : 'missing';
+        if (left <= 0) {
+          resolve();
+          return;
+        }
+        window.requestAnimationFrame(() => watch(pinned ? 0 : left - 1));
+      };
+      watch(30);
+    });
+  }
+
+  function holdMomentAt(anim, time) {
+    const span = motionSpan(anim);
+    const cap = span.total > 0 ? span.total : time;
+    anim.currentTime = Math.max(0, Math.min(cap, time));
+    anim.pause();
+  }
+
+  function poseOnTimeline(stage, pose, place) {
+    restartMomentPose(stage, pose);
+    const host = momentHostOf(stage);
+    if (host) void host.offsetWidth;
+    return new Promise((resolve) => {
+      const freeze = (attempt) => {
+        const motions = momentMotions(stage);
+        if (!motions.some((anim) => anim.animationName) && attempt < 8) {
+          window.requestAnimationFrame(() => freeze(attempt + 1));
+          return;
+        }
+        motions.forEach((anim) => {
+          const span = motionSpan(anim);
+          const placed = place(anim, span);
+          if (!placed || !Number.isFinite(placed.time)) return;
+          try {
+            holdMomentAt(anim, placed.time);
+          } catch (error) {
+            return;
+          }
+        });
+        resolve();
+      };
+      window.requestAnimationFrame(() => freeze(0));
+    });
+  }
+
+  function playChoiceUntilTicks(stage) {
+    restartMomentPose(stage, 'choice');
+    return new Promise((resolve) => {
+      const watch = (attempt) => {
+        const motions = momentMotions(stage);
+        const ticks = motions.filter((anim) => (anim.animationName || '') === 'promo-moments-tick');
+        const ticksDone = ticks.length >= 9 && ticks.every((anim) => anim.playState === 'finished');
+        if (!ticksDone && attempt <= 240) {
+          window.requestAnimationFrame(() => watch(attempt + 1));
+          return;
+        }
+        motions.forEach((anim) => {
+          const name = anim.animationName || '';
+          if (name === 'promo-moments-pick') {
+            const span = motionSpan(anim);
+            holdMomentAt(anim, span.delay + span.duration * 0.6);
+          } else if (name === 'promo-moments-ring') {
+            holdMomentAt(anim, 0);
+          }
+        });
+        resolve();
+      };
+      window.requestAnimationFrame(() => watch(0));
+    });
+  }
+
   const PROMO_MOMENT_BEATS = [
     {
       line: '[fast pace] [bursting with energy, huge smile, thrilled] I narrow it down to the best few.',
@@ -2043,6 +2235,7 @@
     }
 
     showExportFrame(name) {
+      releaseSpeechMouth();
       const root = this.root;
       const clock = root.querySelector('[data-promo-clock]');
       if (clock) clock.hidden = true;
@@ -2377,19 +2570,19 @@
           showHero(2);
           return 180;
         },
-        '14b1-moments-grid': () => {
+        '14b1-beat-1-grid': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'grid');
         },
-        '14b1s-moments-shortlist': () => {
+        '14b2-beat-1-shortlist': () => {
           const stage = openMoments();
           const board = restartMomentPose(stage, 'grid');
           return whenMomentsRest(stage).then(() => {
             board?.classList.add('is-shortlist');
-            return waitMs(520);
+            return whenMomentsRest(stage);
           });
         },
-        '14b2-moments-collapse': () => {
+        '14b3-beat-1-collapse': () => {
           const stage = openMoments();
           return scrubMoment(stage, 'row', (anim, span) => {
             const name = anim.animationName || '';
@@ -2399,70 +2592,89 @@
             return 0;
           });
         },
-        '14b3-moments-row': () => {
+        '14b4-beat-1-row': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'row');
         },
-        '14c0-moments-choice-vo': () => {
+        '14b5-beat-1-speech': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'row').then(() => holdSpeechMouth());
+        },
+        '14c1-beat-2-hold': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'row');
         },
-        '14c1-moments-choice-before-ticks': () => {
+        '14c2-beat-2-specs': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'choice', (anim) => {
+          return poseOnTimeline(stage, 'choice', (anim, span) => {
             const name = anim.animationName || '';
-            if (name === 'promo-moments-tick' || name === 'promo-moments-ring') return 0;
-            return 1000;
+            if (name === 'promo-moments-tick' || name === 'promo-moments-ring') return { time: 0 };
+            if (name === 'promo-moments-pick') return { time: span.delay + span.duration * 0.6 };
+            return { time: span.delay + span.duration };
           });
         },
-        '14c2-moments-choice': () => {
+        '14c3-beat-2-ticked': () => {
+          const stage = openMoments();
+          return playChoiceUntilTicks(stage);
+        },
+        '14c4-beat-2-lifted': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'choice');
         },
-        '14d0-moments-doubt-vo': () => {
+        '14c5-beat-2-speech': () => {
+          const stage = openMoments();
+          return playChoiceUntilTicks(stage).then(() => holdSpeechMouth());
+        },
+        '14d1-beat-3-hold': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'choice');
         },
-        '14d1-moments-doubt': () => {
+        '14d2-beat-3-doubt': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'doubt');
         },
-        '14d2-moments-vapor': () => {
+        '14d3-beat-3-vapor': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'close', (anim, span) => {
+          return poseOnTimeline(stage, 'close', (anim, span) => {
             const name = anim.animationName || '';
             if (name === 'promo-moments-vapor' || name === 'promo-moments-vapor-bit') {
-              return span.delay + span.duration * 0.42;
+              return { time: span.delay + span.duration * 0.45 };
             }
-            return 0;
-          }).then(() => {
-            const host = momentHostOf(stage);
-            host?.querySelectorAll('.promo-moments__count').forEach((node) => {
-              node.style.opacity = '0';
-            });
-            const cart = host?.querySelector('.promo-moments__cart');
-            if (cart) {
-              cart.style.color = '#7c8593';
-              cart.style.filter = 'none';
-              cart.style.transform = 'none';
-            }
+            return { time: 0 };
           });
         },
-        '14d3-moments-close': () => {
+        '14d4-beat-3-close': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'close');
         },
-        '14e0-moments-extra-vo': () => {
+        '14d5-beat-3-speech': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'doubt').then(() => holdSpeechMouth());
+        },
+        '14e1-beat-4-hold': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'close');
         },
-        '14e1-moments-addon': () => {
+        '14e2-beat-4-arriving': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'extra', () => 520);
+          return poseOnTimeline(stage, 'extra', (anim, span) => {
+            const name = anim.animationName || '';
+            if (name === 'promo-moments-addon-in') return { time: span.delay + span.duration * 0.15 };
+            if (name === 'promo-moments-plus-in') return { time: span.delay + span.duration };
+            return { time: 0 };
+          });
         },
-        '14e2-moments-bundle': () => {
+        '14e3-beat-4-docked': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'extra');
+        },
+        '14e4-beat-4-bundle': () => {
           const stage = openMoments();
           return playMomentPose(stage, 'bundle');
+        },
+        '14e5-beat-4-speech': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'extra').then(() => holdSpeechMouth());
         },
         '14f1-moments-contract': () => {
           const stage = openMoments();
