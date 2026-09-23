@@ -1087,7 +1087,7 @@
         }
         motions.forEach((anim) => {
           const name = anim.animationName || '';
-          if (name === 'promo-moments-pair-lift' || name === 'promo-moments-ring' || name === 'promo-moments-compare-fold') {
+          if (name === 'promo-moments-pair-lift' || name === 'promo-moments-ring' || name === 'promo-moments-compare-fold' || name === 'promo-moments-add-reveal') {
             holdMomentAt(anim, 0);
           }
         });
@@ -2684,7 +2684,7 @@
           const stage = openMoments();
           return poseOnTimeline(stage, 'choice', (anim, span) => {
             const name = anim.animationName || '';
-            if (name === 'promo-moments-tick' || name === 'promo-moments-ring' || name === 'promo-moments-pair-lift' || name === 'promo-moments-compare-fold') return { time: 0 };
+            if (name === 'promo-moments-tick' || name === 'promo-moments-ring' || name === 'promo-moments-pair-lift' || name === 'promo-moments-compare-fold' || name === 'promo-moments-add-reveal') return { time: 0 };
             return { time: span.delay + span.duration };
           });
         },

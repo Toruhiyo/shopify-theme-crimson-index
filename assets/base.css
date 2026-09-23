@@ -1296,13 +1296,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  margin-top: calc(14em / 16);
+  margin-top: 0;
   width: 100%;
-  height: calc(46em / 16);
+  min-height: 0;
+  height: 0;
   display: grid;
   place-items: center;
+  overflow: hidden;
   border-radius: calc(12em / 16);
   border: calc(1em / 16) solid var(--color-border);
+  border-width: 0;
   background: transparent;
   color: var(--color-muted-fg);
   font-family: var(--font-heading);
@@ -1311,10 +1314,41 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   line-height: 1;
   letter-spacing: 0.01em;
   box-shadow: none;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
   transition:
+    height 480ms var(--promo-spring),
+    margin-top 480ms var(--promo-spring),
+    border-width 480ms var(--promo-spring),
+    opacity 360ms var(--promo-spring),
+    transform 480ms var(--promo-spring),
     background 380ms var(--promo-spring),
     color 380ms var(--promo-spring),
     border-color 380ms var(--promo-spring);
+}
+
+.is-pose-choice .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-extra .promo-moments__card.is-extra .promo-moments__add,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add {
+  height: calc(46em / 16);
+  margin-top: calc(14em / 16);
+  border-width: calc(1em / 16);
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add {
+  animation: promo-moments-add-reveal 480ms var(--promo-spring) 1820ms both;
+}
+
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add {
+  animation: promo-moments-add-reveal 420ms var(--promo-spring) 640ms both;
 }
 
 .promo-moments__add-label,
@@ -2670,6 +2704,26 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-count-out {
   to { opacity: 0; transform: translate3d(0, -0.2rem, 0); }
+}
+
+@keyframes promo-moments-add-reveal {
+  0% {
+    height: 0;
+    margin-top: 0;
+    border-width: 0;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    height: calc(46em / 16);
+    margin-top: calc(14em / 16);
+    border-width: calc(1em / 16);
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes promo-moments-add-fill {
