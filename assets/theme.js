@@ -655,16 +655,12 @@
     };
   }
 
-  function clayFileKey(look) {
-    return `${look.kind}-${look.turn}-${look.finish}`;
-  }
-
-  function claySrc(key) {
-    const listed = promoClayUrls()[key];
+  function claySrc(kind) {
+    const listed = promoClayUrls()[kind];
     if (listed) return listed;
     const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
     const base = stamp.replace(/[^/]+(\?.*)?$/, '');
-    return `${base}promo-clay-${key}.png`;
+    return `${base}promo-product-${kind}.png`;
   }
 
   function catalogLooks(count, cols) {
@@ -714,7 +710,7 @@
     card.dataset.clayFinish = look.finish;
     card.style.setProperty('--clay-scale', String(look.scale));
     const img = card.querySelector('.promo-moments__glyph img');
-    const src = claySrc(clayFileKey(look));
+    const src = claySrc(look.kind);
     if (img && img.getAttribute('src') !== src) img.src = src;
   }
 

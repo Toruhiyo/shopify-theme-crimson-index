@@ -1333,26 +1333,24 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   height: auto;
   min-height: calc(var(--card-h) * 0.5);
-  overflow: visible;
+  overflow: hidden;
   border-radius: 12em;
   background: linear-gradient(180deg, var(--shelf, #F4EFE7) 0%, var(--shelf-deep, #EDE8E0) 100%);
 }
 
 .promo-moments__glyph {
   position: absolute;
-  left: 50%;
-  top: 44%;
+  inset: 0;
   z-index: 1;
-  width: calc(60% * var(--clay-scale, 1));
-  max-height: 90%;
-  aspect-ratio: 1;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  max-height: none;
   margin: 0;
   display: block;
   opacity: 1;
-  transform: translate(-50%, -50%);
+  transform: none;
   transform-origin: center center;
-  filter: var(--clay, none);
+  filter: none;
   box-shadow: none;
   transition:
     transform 380ms var(--promo-spring),
@@ -1363,7 +1361,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center;
   pointer-events: none;
 }
 
@@ -2929,9 +2928,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-item-pop {
-  0% { transform: translate(-50%, -50%) scale(1); }
-  36% { transform: translate(-50%, -50%) scale(1.12); }
-  100% { transform: translate(-50%, -50%) scale(1); }
+  0% { transform: scale(1); }
+  36% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 
 @keyframes promo-moments-card-in {
