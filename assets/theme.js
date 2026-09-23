@@ -176,7 +176,7 @@
   const PROMO_MOMENTS_LABEL_RATIO = 0.4;
   const PROMO_MOMENTS_PAYOFF_RATIO = 0.6;
   const PROMO_MOMENTS_CLOSE_AT = 0.3;
-  const PROMO_MOMENTS_BUNDLE_AT = 0.36;
+  const PROMO_MOMENTS_BUNDLE_AT = 0.44;
   const PROMO_MOMENTS_TAIL_MS = 200;
   const PROMO_SEE_HOLD_MS = 2400;
   const PROMO_SEE_ROW_AT_MS = 3120;
@@ -521,14 +521,8 @@
   const PROMO_MOMENT_SHAPE_SCALES = [0.86, 1, 0.74, 0.92, 0.7, 1, 0.8, 0.96, 0.78, 0.88, 0.72, 0.94];
   const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
   const PROMO_MOMENT_PRICE_WIDTHS = [36, 28, 42, 24, 32, 38, 26, 44, 30, 34, 40, 28];
-  const PROMO_MOMENT_NEW_INDEXES = [2, 5];
-  const PROMO_MOMENT_RATING_INDEXES = [7, 11];
-  const PROMO_MOMENT_TONES = [
-    { hi: '#e7efe4', tone: '#8ea892' },
-    { hi: '#e4eef5', tone: '#87a3b8' },
-    { hi: '#f3eee4', tone: '#c2b294' },
-    { hi: '#eee7f3', tone: '#a898b4' },
-  ];
+  const PROMO_MOMENT_NEW_INDEXES = [0];
+  const PROMO_MOMENT_SHAPE = '#D9D4CC';
   const PROMO_MOMENT_ICONS = {
     circle: '<circle cx="12" cy="12" r="7.2"/>',
     square: '<rect x="5" y="5" width="14" height="14" rx="1.6"/>',
@@ -550,38 +544,25 @@
     return 'drop';
   }
 
-  function momentGlyph(kind, index) {
-    const tone = PROMO_MOMENT_TONES[index % PROMO_MOMENT_TONES.length];
-    const gradientId = `promo-shape-${index}`;
+  function momentGlyph(kind) {
     const glyph = document.createElement('span');
     glyph.className = 'promo-moments__glyph';
-    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${gradientId}" x1="18%" y1="0%" x2="82%" y2="100%"><stop offset="0%" stop-color="${tone.hi}"/><stop offset="100%" stop-color="${tone.tone}"/></linearGradient></defs><g fill="url(#${gradientId})">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
+    glyph.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="${PROMO_MOMENT_SHAPE}">${PROMO_MOMENT_ICONS[kind] || ''}</g></svg>`;
     return glyph;
   }
 
   function momentBadge(index) {
-    if (PROMO_MOMENT_NEW_INDEXES.includes(index)) {
-      const pill = document.createElement('span');
-      pill.className = 'promo-moments__new';
-      pill.textContent = 'NEW';
-      return pill;
-    }
-    if (!PROMO_MOMENT_RATING_INDEXES.includes(index)) return null;
-    const rating = document.createElement('span');
-    rating.className = 'promo-moments__rating';
-    const filledDots = 4;
-    for (let dot = 0; dot < 5; dot += 1) {
-      const mark = document.createElement('i');
-      if (dot < filledDots) mark.className = 'is-on';
-      rating.appendChild(mark);
-    }
-    return rating;
+    if (!PROMO_MOMENT_NEW_INDEXES.includes(index)) return null;
+    const pill = document.createElement('span');
+    pill.className = 'promo-moments__new';
+    pill.textContent = 'NEW';
+    return pill;
   }
 
   function momentPhoto(kind, index) {
     const photo = document.createElement('span');
     photo.className = 'promo-moments__photo';
-    photo.appendChild(momentGlyph(kind, index));
+    photo.appendChild(momentGlyph(kind));
     const badge = momentBadge(index);
     if (badge) photo.appendChild(badge);
     return photo;
@@ -622,26 +603,23 @@
     const mark = document.createElement('span');
     mark.className = `promo-moments__mark is-${kind}`;
     const path = kind === 'no'
-      ? 'M4.2 4.2 11.8 11.8M11.8 4.2 4.2 11.8'
-      : 'M3.2 8.2 6.3 11.4 12.8 4.6';
-    mark.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      ? 'M2.2 2.2 9.8 9.8M9.8 2.2 2.2 9.8'
+      : 'M1.8 6.1 4.6 9.1 10.2 2.8';
+    mark.innerHTML = `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     return mark;
   }
 
   function momentSpecs(role) {
     const specs = document.createElement('span');
     specs.className = 'promo-moments__specs';
-    PROMO_MOMENT_SPEC_KINDS.forEach((kind, index) => {
+    PROMO_MOMENT_SPEC_KINDS.forEach((_, index) => {
       const row = document.createElement('span');
       row.className = 'promo-moments__spec';
-      const icon = document.createElement('span');
-      icon.className = 'promo-moments__spec-icon';
-      icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${PROMO_MOMENT_ICONS[kind]}</svg>`;
       const bar = document.createElement('i');
       bar.className = 'promo-moments__bar';
       const failAt = role === 'go' ? 2 : role === 'other' ? 1 : -1;
       const verdict = index === failAt ? 'no' : 'yes';
-      row.append(icon, bar, momentMark(verdict));
+      row.append(bar, momentMark(verdict));
       specs.appendChild(row);
     });
     return specs;
@@ -662,7 +640,6 @@
       const kind = PROMO_MOMENT_CARD_KINDS[index];
       const card = document.createElement('div');
       card.className = `promo-moments__card is-${kind} is-${role}`;
-      card.dataset.tone = String(index % PROMO_MOMENT_TONES.length);
       card.style.setProperty('--gx', `${((column - 1.5) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.style.setProperty('--gy', `${((row - 1) * PROMO_MOMENT_GRID_PITCH).toFixed(2)}rem`);
       card.style.setProperty('--shape-scale', String(PROMO_MOMENT_SHAPE_SCALES[index]));
@@ -673,10 +650,8 @@
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-pentagon is-extra';
-    accessory.dataset.tone = '2';
     accessory.style.setProperty('--shape-scale', '0.88');
     accessory.append(momentPhoto('pentagon', PROMO_MOMENT_CARD_KINDS.length), momentMeta(PROMO_MOMENT_CARD_KINDS.length), momentAdd());
-    accessory.appendChild(momentKept());
     board.appendChild(accessory);
     const orbits = [
       ['1', '11.2rem', '-0.4s'],
