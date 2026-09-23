@@ -16,6 +16,8 @@ const VIEWPORT = {
   height: Number(process.env.PROMO_FRAMES_HEIGHT || 900),
 };
 
+const REST_PAD_MS = 100;
+
 const FRAMES = [
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.', 40],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
@@ -33,12 +35,23 @@ const FRAMES = [
   ['12-to', 'Only to, same type size.', 40],
   ['13-sell', 'Only sell. in Bizmis orange, same type size.', 40],
   ['14-sell-wave', 'sell. hold. Clerk is already in on the right.', 180],
-  ['14b-moments-catalog', 'Moments. Catalog end. Triangle, circle, and square in a row. Circle is in the middle. No title. Clerk idle.', 800],
-  ['14c-moments-choice', 'Moments. Choice. All three stay. Middle circle is selected, with attribute rows and an orange ring. Triangle and square sit beside it. Clerk idle.', 500],
-  ['14d-moments-doubt', 'Moments. Questions. Four large ? bubbles around the chosen circle, inside a wide browser window. Clerk idle.', 500],
-  ['14e-moments-extra', 'Moments. Extra. Circle and a pentagon add-on side by side inside the browser. Header cart shows 2. Clerk idle.', 500],
-  ['14f-moments-salesperson', 'Moments. Wrap-up. Browser has faded. No spoken line. Clerk nods once.', 1600],
-  ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 80],
+  ['14b1-moments-grid', 'Beat 1, before the clerk narrows. Full 12-tile catalog, settled.', 0],
+  ['14b2-moments-collapse', 'Beat 1, mid-collapse. Chosen tiles are traveling into the row. The other nine are fading.', 0],
+  ['14b3-moments-row', 'Beat 1, settled. Triangle, circle, and square remain. Circle is in the middle.', 0],
+  ['14c0-moments-choice-vo', 'Beat 2, before the clerk starts. The three tiles hold while the line plays.', 0],
+  ['14c1-moments-choice-before-ticks', 'Beat 2. Side cards are out and the spec rows are up, before the ticks land.', 0],
+  ['14c2-moments-choice', 'Beat 2, settled. Rows are ticked and the selected circle is lifted.', 0],
+  ['14d0-moments-doubt-vo', 'Beat 3, before the clerk starts. Choice layout holds while the line plays.', 0],
+  ['14d1-moments-doubt', 'Beat 3. Question bubbles orbit the chosen card.', 0],
+  ['14d2-moments-vapor', 'Beat 3. Question bubbles are vaporizing. The cart has not counted an item yet.', 0],
+  ['14d3-moments-close', 'Beat 3, settled. Card has a check. Cart count is 1.', 0],
+  ['14e0-moments-extra-vo', 'Beat 4, before the clerk starts. Closed card and cart count 1 hold while the line plays.', 0],
+  ['14e1-moments-addon', 'Beat 4. Plus sits between the main card and the arriving pentagon.', 0],
+  ['14e2-moments-bundle', 'Beat 4, settled. Pentagon is docked with its outline. Cart count is 2.', 0],
+  ['14f1-moments-contract', 'Wrap-up. The store is fading and the dot is forming where the products were.', 0],
+  ['14f2-moments-dot', 'Wrap-up. The dot is reaching the clerk.', 0],
+  ['14f3-moments-nod', 'Wrap-up, settled. Stage is empty. Clerk nods.', 0],
+  ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 0],
   ['16-see-stores', 'See for yourself. has left. Three store cards are fully on screen. Clerk stays in the moments seat, clear of the cards.', 2500],
   ['17-see-roulette', 'Carousel on a mid-list store. Side cards are fully visible. Clerk has morphed and has not moved seats.', 2500],
   ['18-see-meridian', 'Landed on Meridian. Name, sector, and both side cards are fully visible. Clerk stays clear of them.', 2500],
@@ -152,33 +165,43 @@ async function main() {
   );
 
   for (const [id, , waitMs] of FRAMES) {
-    await page.evaluate((frameId) => {
-      window.__promoOpeningFrames.showExportFrame(frameId);
-      if (frameId === '02b-toggle-gone' || frameId === '02c-agentic-scaled') {
-        document.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
-          node.style.transition = 'none';
-          node.style.opacity = '0';
-        });
-      }
-      if (frameId === '10-sales-agent') {
-        const word = document.querySelector('.promo-opening__word--salesperson');
-        const from = document.querySelector('.promo-opening__from');
-        const to = document.querySelector('.promo-opening__to');
-        [word, from, to].forEach((node) => {
-          if (node) node.style.transition = 'none';
-        });
-        if (from) {
-          from.style.width = '0px';
-          from.style.opacity = '0';
+    const mode = await Promise.race([
+      page.evaluate(async (frameId) => {
+        const result = window.__promoOpeningFrames.showExportFrame(frameId);
+        if (result && typeof result.then === 'function') {
+          await result;
+          return 'rest';
         }
-        if (to) {
-          to.style.width = 'auto';
-          to.style.opacity = '1';
+        if (frameId === '02b-toggle-gone' || frameId === '02c-agentic-scaled') {
+          document.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+            node.style.transition = 'none';
+            node.style.opacity = '0';
+          });
         }
-      }
-    }, id);
+        if (frameId === '10-sales-agent') {
+          const word = document.querySelector('.promo-opening__word--salesperson');
+          const from = document.querySelector('.promo-opening__from');
+          const to = document.querySelector('.promo-opening__to');
+          [word, from, to].forEach((node) => {
+            if (node) node.style.transition = 'none';
+          });
+          if (from) {
+            from.style.width = '0px';
+            from.style.opacity = '0';
+          }
+          if (to) {
+            to.style.width = 'auto';
+            to.style.opacity = '1';
+          }
+        }
+        return 'timer';
+      }, id),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`Frame ${id} did not settle`)), 8000);
+      }),
+    ]);
     await revealForcedFaces(page);
-    if (waitMs) await page.waitForTimeout(waitMs);
+    await page.waitForTimeout(mode === 'rest' ? REST_PAD_MS : waitMs);
     await page.screenshot({
       path: path.join(OUT_DIR, `${id}.png`),
       type: 'png',

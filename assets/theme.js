@@ -189,12 +189,8 @@
   const PROMO_WHEEL_MAX_YAW_DEG = 56;
   const PROMO_WHEEL_DEPTH_PX = 140;
   const PROMO_WHEEL_MAX_DEPTH_PX = 220;
-  const PROMO_WHEEL_TUCK_PX = 28;
   const PROMO_WHEEL_NEIGHBOR_SCALE = 0.42;
-  const PROMO_WHEEL_NEIGHBOR_PULL = 0.44;
   const PROMO_WHEEL_FAR_SCALE = 0.72;
-  const PROMO_WHEEL_SEPARATION_SLOPE = 24;
-  const PROMO_WHEEL_SEPARATION_PULL = 248;
   const PROMO_WHEEL_SELECT_AT = 0.5;
   const PROMO_WHEEL_SELECT_SPAN = 0.2;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
@@ -713,6 +709,82 @@
     }
   }
 
+  function momentHostOf(stage) {
+    return stage?.closest('[data-promo-moments]') || stage;
+  }
+
+  function momentMotions(stage) {
+    const host = momentHostOf(stage);
+    if (!host) return [];
+    return [host, ...host.querySelectorAll('*')].flatMap((node) => node.getAnimations());
+  }
+
+  function motionSpan(anim) {
+    const timing = anim.effect && anim.effect.getTiming ? anim.effect.getTiming() : {};
+    const duration = Number(timing.duration) || 0;
+    const delay = Number(timing.delay) || 0;
+    return { delay, duration, total: delay + duration, iterations: timing.iterations };
+  }
+
+  function restartMomentPose(stage, pose) {
+    const board = ensureMomentBoard(stage);
+    if (!board) return null;
+    const host = momentHostOf(stage);
+    board.dataset.pose = '';
+    board.classList.remove('is-settled', 'is-reduced', 'is-instant');
+    host?.classList.remove('is-settled', 'is-reduced', 'is-instant', 'is-vignette-gone');
+    PROMO_MOMENT_POSES.forEach((name) => {
+      board.classList.remove(`is-pose-${name}`);
+      host?.classList.remove(`is-pose-${name}`);
+    });
+    applyMomentPose(stage, pose);
+    return board;
+  }
+
+  function whenMomentsRest(stage) {
+    return new Promise((resolve) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          const pending = momentMotions(stage).filter((anim) => {
+            const span = motionSpan(anim);
+            if (span.iterations === Infinity) return false;
+            return anim.playState === 'running' || anim.playState === 'pending';
+          });
+          if (!pending.length) {
+            resolve();
+            return;
+          }
+          Promise.all(pending.map((anim) => anim.finished.catch(() => {}))).then(() => resolve());
+        });
+      });
+    });
+  }
+
+  function scrubMoment(stage, pose, timeOf) {
+    restartMomentPose(stage, pose);
+    return new Promise((resolve) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          momentMotions(stage).forEach((anim) => {
+            const span = motionSpan(anim);
+            const time = timeOf(anim, span);
+            if (Number.isFinite(time)) {
+              const cap = span.total > 0 ? span.total : time;
+              anim.currentTime = Math.max(0, Math.min(cap, time));
+            }
+            anim.pause();
+          });
+          resolve();
+        });
+      });
+    });
+  }
+
+  function playMomentPose(stage, pose) {
+    restartMomentPose(stage, pose);
+    return whenMomentsRest(stage);
+  }
+
   const PROMO_MOMENT_BEATS = [
     {
       line: '[fast pace] [bursting with energy, huge smile, thrilled] I narrow it down to the best few.',
@@ -866,16 +938,6 @@
     return PROMO_WHEEL_NEIGHBOR_SCALE * (1 - (1 - PROMO_WHEEL_FAR_SCALE) * far);
   }
 
-  function wheelNeighborPull(abs, width) {
-    const amount = width * PROMO_WHEEL_NEIGHBOR_PULL;
-    if (abs <= 1) return amount * smoothstep(abs);
-    return amount;
-  }
-
-  function wheelTuck(abs) {
-    return PROMO_WHEEL_TUCK_PX * smoothstep(Math.min(1, abs));
-  }
-
   function wheelFade(abs) {
     const start = 1;
     const end = 1.4;
@@ -890,12 +952,6 @@
     if (abs <= start) return 1;
     if (abs >= end) return 0;
     return 1 - smoothstep((abs - start) / (end - start));
-  }
-
-  function wheelSeparation(abs) {
-    if (abs <= 1) return -PROMO_WHEEL_SEPARATION_SLOPE * abs * (1 - abs);
-    const along = abs - 1;
-    return PROMO_WHEEL_SEPARATION_SLOPE * along + PROMO_WHEEL_SEPARATION_PULL * along * along;
   }
 
   function storeImageUrls(store) {
@@ -1464,16 +1520,13 @@
       return slide.offsetLeft - targetLeft;
     }
 
-    wheelTransform(distance, shift, width) {
+    wheelTransform(distance, shift) {
       const abs = Math.abs(distance);
       const sign = Math.sign(distance) || 1;
       const yaw = sign * wheelYaw(abs);
       const depth = wheelDepth(abs);
-      const tuck = -sign * wheelTuck(abs);
-      const separation = -sign * wheelSeparation(abs);
-      const pull = -sign * wheelNeighborPull(abs, width);
       const scale = wheelScale(abs);
-      return `translate3d(${shift + tuck + separation + pull}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
+      return `translate3d(${shift}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
@@ -1487,7 +1540,7 @@
         const distance = loopDistance(index, activeIndex, count);
         const shift = stride * (distance - layout);
         const abs = Math.abs(distance);
-        slide.style.transform = this.wheelTransform(distance, shift, slide.offsetWidth);
+        slide.style.transform = this.wheelTransform(distance, shift);
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(1000 - Math.round(abs * 100));
         slide.style.setProperty('--promo-wheel-fade', String(wheelFade(abs)));
@@ -2125,6 +2178,13 @@
         resetText();
       };
 
+      const openMoments = () => {
+        showHero(2);
+        root.classList.add('is-moments');
+        setOpeningAvatarAction('idle_neutral');
+        return this.momentStage();
+      };
+
       const frames = {
         '01-toggle-rest': () => {
           rest();
@@ -2253,45 +2313,89 @@
           showHero(2);
           return 180;
         },
-        '14b-moments-catalog': () => {
-          showHero(2);
-          root.classList.add('is-moments');
-          setOpeningAvatarAction('idle_neutral');
-          this.showMoment(PROMO_MOMENT_BEATS[0], true);
-          return 180;
+        '14b1-moments-grid': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'grid');
         },
-        '14c-moments-choice': () => {
-          showHero(2);
-          root.classList.add('is-moments');
-          setOpeningAvatarAction('idle_neutral');
-          this.showMoment(PROMO_MOMENT_BEATS[1], true);
-          return 180;
+        '14b2-moments-collapse': () => {
+          const stage = openMoments();
+          return scrubMoment(stage, 'row', (anim, span) => {
+            const name = anim.animationName || '';
+            if (name === 'promo-moments-select' || name === 'promo-moments-catalog-out') {
+              return span.delay + span.duration * 0.5;
+            }
+            return 0;
+          });
         },
-        '14d-moments-doubt': () => {
-          showHero(2);
-          root.classList.add('is-moments');
-          setOpeningAvatarAction('idle_neutral');
-          this.showMoment(PROMO_MOMENT_BEATS[2], false);
-          applyMomentPose(this.momentStage(), 'doubt', { instant: true });
-          return 180;
+        '14b3-moments-row': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'row');
         },
-        '14e-moments-extra': () => {
-          showHero(2);
-          root.classList.add('is-moments');
-          setOpeningAvatarAction('idle_neutral');
-          this.showMoment(PROMO_MOMENT_BEATS[3], true);
-          return 180;
+        '14c0-moments-choice-vo': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'row');
         },
-        '14f-moments-salesperson': () => {
-          showHero(2);
-          root.classList.add('is-moments');
-          applyMomentPose(this.momentStage(), 'gone', { instant: true });
+        '14c1-moments-choice-before-ticks': () => {
+          const stage = openMoments();
+          return scrubMoment(stage, 'choice', (anim) => {
+            const name = anim.animationName || '';
+            if (name === 'promo-moments-tick' || name === 'promo-moments-ring') return 0;
+            return 1000;
+          });
+        },
+        '14c2-moments-choice': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'choice');
+        },
+        '14d0-moments-doubt-vo': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'choice');
+        },
+        '14d1-moments-doubt': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'doubt');
+        },
+        '14d2-moments-vapor': () => {
+          const stage = openMoments();
+          return scrubMoment(stage, 'close', (anim, span) => {
+            if ((anim.animationName || '') === 'promo-moments-vapor') {
+              return span.delay + span.duration * 0.55;
+            }
+            return 0;
+          });
+        },
+        '14d3-moments-close': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'close');
+        },
+        '14e0-moments-extra-vo': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'close');
+        },
+        '14e1-moments-addon': () => {
+          const stage = openMoments();
+          return scrubMoment(stage, 'extra', () => 520);
+        },
+        '14e2-moments-bundle': () => {
+          const stage = openMoments();
+          return playMomentPose(stage, 'bundle');
+        },
+        '14f1-moments-contract': () => {
+          const stage = openMoments();
+          return scrubMoment(stage, 'fly', () => 140);
+        },
+        '14f2-moments-dot': () => {
+          const stage = openMoments();
+          return scrubMoment(stage, 'fly', () => 608);
+        },
+        '14f3-moments-nod': () => {
+          const stage = openMoments();
           setOpeningAvatarAction('nod');
-          return 180;
+          return playMomentPose(stage, 'gone');
         },
         '15-see-yourself': () => {
           showSee('hero');
-          return 180;
+          return Promise.resolve();
         },
         '16-see-stores': () => {
           showSee('row');
