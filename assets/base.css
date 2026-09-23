@@ -1996,16 +1996,102 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(12rem, 0.4rem, 0) scale(0.8);
 }
 
-.is-pose-extra .promo-moments__card.is-pick,
-.is-pose-bundle .promo-moments__card.is-pick {
-  transform: translate3d(calc(-50% - 129px), -50%, 0);
+.promo-moments__board.is-pose-doubt .promo-moments__card.is-pick,
+.promo-moments__board.is-pose-close .promo-moments__card.is-pick,
+.promo-moments__board.is-pose-extra .promo-moments__card.is-pick,
+.promo-moments__board.is-pose-bundle .promo-moments__card.is-pick {
+  --card-w: 760px;
+  --card-h: 430px;
+  padding: 22px 28px;
+  border-radius: 28px;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+.promo-moments__board.is-pose-doubt .promo-moments__card.is-pick::after,
+.promo-moments__board.is-pose-close .promo-moments__card.is-pick::after,
+.promo-moments__board.is-pose-extra .promo-moments__card.is-pick::after,
+.promo-moments__board.is-pose-bundle .promo-moments__card.is-pick::after,
+.promo-moments__board.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
+  opacity: 0;
+  animation: none;
+}
+
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__photo,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__photo,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__photo,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__photo {
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  bottom: 22px;
+  width: 46%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+}
+
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__meta,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__meta,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__meta,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__meta {
+  position: absolute;
+  left: 54%;
+  right: 32px;
+  top: 18%;
+  margin: 0;
+}
+
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__meta::before,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__meta::before,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__meta::before,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__meta::before {
+  content: "";
+  display: block;
+  width: 38%;
+  height: 8px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__title,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__title,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__title,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__title {
+  width: 78%;
+  margin-bottom: 10px;
+}
+
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__specs,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__specs,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__specs,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__specs {
+  opacity: 0;
+}
+
+.is-pose-doubt .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-close .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__add,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add {
+  position: absolute;
+  left: 54%;
+  right: 32px;
+  bottom: 28px;
+  width: auto;
+  margin: 0;
+}
+
+.is-pose-doubt:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
+  animation: promo-moments-page-in 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .is-pose-extra .promo-moments__card.is-extra,
 .is-pose-bundle .promo-moments__card.is-extra {
   z-index: 6;
   opacity: 1;
-  transform: translate3d(calc(-50% + 174px), calc(-50% + 60px), 0);
+  --card-w: 120px;
+  --card-h: 120px;
+  transform: translate3d(calc(-50% + 290px), calc(-50% + 213px), 0);
 }
 
 .is-pose-extra .promo-moments__card.is-extra::after {
@@ -2062,7 +2148,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__celebrate {
   opacity: 1;
-  transform: translate3d(174px, 60px, 0);
+  transform: translate3d(290px, 213px, 0);
 }
 
 .promo-moments__bloom {
@@ -2154,11 +2240,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: none;
 }
 
-.is-pose-doubt .promo-moments__orbit,
-.is-pose-close .promo-moments__orbit {
-  opacity: 1;
-  animation: promo-moments-orbit 14s linear infinite;
-  animation-delay: var(--orbit-delay, 0s);
+.promo-moments__board.is-pose-doubt .promo-moments__orbit,
+.promo-moments__board.is-pose-close .promo-moments__orbit,
+.promo-moments__board.is-pose-extra .promo-moments__orbit,
+.promo-moments__board.is-pose-bundle .promo-moments__orbit {
+  opacity: 0;
+  animation: none;
 }
 
 .is-pose-close .promo-moments__orbit {
@@ -2787,9 +2874,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   100% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1); }
 }
 
+@keyframes promo-moments-page-in {
+  from {
+    --card-w: 280px;
+    --card-h: 340px;
+  }
+  to {
+    --card-w: 760px;
+    --card-h: 430px;
+  }
+}
+
 @keyframes promo-moments-addon-in {
-  0% { opacity: 0; transform: translate3d(calc(-50% + 294px), calc(-50% + 80px), 0); }
-  100% { opacity: 1; transform: translate3d(calc(-50% + 174px), calc(-50% + 60px), 0); }
+  0% { opacity: 0; transform: translate3d(calc(-50% + 340px), calc(-50% + 250px), 0) scale(0.92); }
+  100% { opacity: 1; transform: translate3d(calc(-50% + 290px), calc(-50% + 213px), 0) scale(1); }
 }
 
 @keyframes promo-moments-plus-in {
@@ -2799,9 +2897,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-addon-pop {
-  0% { transform: translate3d(calc(-50% + 174px), calc(-50% + 60px), 0) scale(1); }
-  42% { transform: translate3d(calc(-50% + 174px), calc(-50% + 36px), 0) scale(1.18); }
-  100% { transform: translate3d(calc(-50% + 174px), calc(-50% + 60px), 0) scale(1); }
+  0% { transform: translate3d(calc(-50% + 290px), calc(-50% + 213px), 0) scale(1); }
+  42% { transform: translate3d(calc(-50% + 290px), calc(-50% + 192px), 0) scale(1.08); }
+  100% { transform: translate3d(calc(-50% + 290px), calc(-50% + 213px), 0) scale(1); }
 }
 
 @keyframes promo-moments-celebrate {
