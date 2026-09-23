@@ -630,11 +630,11 @@
       yes.appendChild(momentMark('yes'));
       bubble.append(ask, yes);
       orbit.appendChild(bubble);
-      for (let bit = 0; bit < 6; bit += 1) {
+      for (let bit = 0; bit < 4; bit += 1) {
         const particle = document.createElement('span');
         particle.className = 'promo-moments__vapor-bit';
-        const angle = (bit / 6) * Math.PI * 2 + Number(slot) * 0.65;
-        const dist = 2.6 + (bit % 3) * 0.9;
+        const angle = (bit / 4) * Math.PI * 2 + Number(slot) * 0.8;
+        const dist = 1.15 + (bit % 2) * 0.45;
         particle.style.setProperty('--dx', `${Math.cos(angle) * dist}rem`);
         particle.style.setProperty('--dy', `${Math.sin(angle) * dist}rem`);
         particle.style.setProperty('--bit-delay', `${bit * 40}ms`);
@@ -994,16 +994,6 @@
     return PROMO_WHEEL_NEIGHBOR_SCALE * (1 - (1 - PROMO_WHEEL_FAR_SCALE) * far);
   }
 
-  function wheelNeighborPull(abs, width) {
-    const amount = width * PROMO_WHEEL_NEIGHBOR_PULL;
-    if (abs <= 1) return amount * smoothstep(abs);
-    return amount;
-  }
-
-  function wheelTuck(abs) {
-    return PROMO_WHEEL_TUCK_PX * smoothstep(Math.min(1, abs));
-  }
-
   function wheelFade(abs) {
     const start = 1;
     const end = 1.4;
@@ -1087,6 +1077,10 @@
     viewport.className = 'promo-opening__carousel';
     const track = document.createElement('div');
     track.className = 'promo-opening__carousel-track';
+    track.style.setProperty(
+      '--promo-wheel-overlap',
+      `calc(${PROMO_WHEEL_NEIGHBOR_PULL} * min(36rem, 62vw) + ${PROMO_WHEEL_TUCK_PX}px)`,
+    );
     (stores || []).forEach((store) => {
       const accent = store.accent || '#1d1d1f';
       const slide = document.createElement('article');
@@ -1586,15 +1580,13 @@
       return slide.offsetLeft - targetLeft;
     }
 
-    wheelTransform(distance, shift, width) {
+    wheelTransform(distance, shift) {
       const abs = Math.abs(distance);
       const sign = Math.sign(distance) || 1;
       const yaw = sign * wheelYaw(abs);
       const depth = wheelDepth(abs);
-      const tuck = -sign * wheelTuck(abs);
-      const pull = -sign * wheelNeighborPull(abs, width);
       const scale = wheelScale(abs);
-      return `translate3d(${shift + tuck + pull}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
+      return `translate3d(${shift}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
@@ -1608,7 +1600,7 @@
         const distance = loopDistance(index, activeIndex, count);
         const shift = stride * (distance - layout);
         const abs = Math.abs(distance);
-        slide.style.transform = this.wheelTransform(distance, shift, slide.offsetWidth);
+        slide.style.transform = this.wheelTransform(distance, shift);
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(1000 - Math.round(abs * 100));
         slide.style.setProperty('--promo-wheel-fade', String(wheelFade(abs)));
@@ -1860,7 +1852,6 @@
         const board = stage.querySelector('.promo-moments__board');
         board?.classList.add('is-shortlist');
         this.momentTimers.push(window.setTimeout(() => {
-          board?.classList.add('is-narrowed');
           board?.classList.remove('is-shortlist');
           applyMomentPose(stage, 'row');
         }, PROMO_MOMENTS_SHORTLIST_MS));
@@ -2400,10 +2391,11 @@
         },
         '14b2-moments-collapse': () => {
           const stage = openMoments();
-          ensureMomentBoard(stage)?.classList.add('is-narrowed');
           return scrubMoment(stage, 'row', (anim, span) => {
             const name = anim.animationName || '';
-            if (name === 'promo-moments-select') return span.delay + span.duration * 0.45;
+            if (name === 'promo-moments-select' || name === 'promo-moments-catalog-out') {
+              return span.delay + span.duration * 0.45;
+            }
             return 0;
           });
         },
