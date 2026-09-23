@@ -665,29 +665,30 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   align-items: center;
   justify-content: flex-start;
   padding-left: 2.5cqw;
-  padding-right: 36cqw;
+  padding-right: 2.5cqw;
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
   flex: 0 0 auto;
-  width: min(54rem, 100%);
-  height: min(43.5rem, 84cqh);
+  width: 100%;
+  height: min(46rem, 92cqh);
   max-height: none;
   aspect-ratio: auto;
-  transform: translateY(-0.75rem);
+  transform: translateY(-0.4rem);
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
-  transform: translate(-50%, -50%);
+  --promo-board-x: -15rem;
+  transform: translate(calc(-50% + var(--promo-board-x)), -50%);
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board.is-pose-grid {
-  --promo-grid-fit: min(0.84, calc((84cqh - 11.5rem) / 38.5rem));
-  transform: translate(-50%, -50%) scale(var(--promo-grid-fit));
+  --promo-grid-fit: min(0.84, calc((92cqh - 12rem) / 38.5rem));
+  transform: translate(calc(-50% + var(--promo-board-x)), -50%) scale(var(--promo-grid-fit));
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-moments__board.is-pose-choice {
-  transform: translate(-50%, calc(-50% - 3.25rem));
+  transform: translate(calc(-50% + var(--promo-board-x)), calc(-50% - 1.5rem));
 }
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
@@ -1204,8 +1205,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 500px;
-  margin: 0 0 0 -250px;
+  width: 780px;
+  margin: 0 0 0 -390px;
   padding: 0.42rem 0.2rem;
   display: grid;
   gap: 0.22rem;
@@ -1226,7 +1227,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__compare-row {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
   min-height: 1.15rem;
 }
@@ -1235,7 +1236,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   left: 0.45rem;
   top: 50%;
-  width: var(--bar, 16%);
+  width: min(var(--bar, 16%), 4.5rem);
   height: 6px;
   margin-top: -3px;
   border-radius: 999px;
@@ -1497,16 +1498,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick {
-  transform: translate3d(calc(-50% + 130px), calc(-50% - 18px), 0);
+  transform: translate3d(-50%, calc(-50% - 18px), 0);
 }
 
 .is-pose-choice .promo-moments__card.is-go {
-  transform: translate3d(calc(-50% - 130px), -50%, 0);
+  transform: translate3d(calc(-50% - 260px), -50%, 0);
 }
 
 .is-pose-choice .promo-moments__card.is-other {
-  opacity: 0;
-  transform: translate3d(calc(-50% + 420px), -50%, 0) scale(0.55);
+  opacity: 1;
+  transform: translate3d(calc(-50% + 260px), -50%, 0);
 }
 
 .is-pose-choice .promo-moments__card.is-pick::after,
@@ -1615,7 +1616,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-bundle .promo-moments__card.is-extra::after {
-  opacity: 0;
+  opacity: 1;
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra::after {
+  animation: promo-moments-ring 320ms var(--promo-spring) 180ms both;
 }
 
 .is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
@@ -2351,22 +2356,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-pair-go {
   from { opacity: 1; transform: translate3d(calc(-50% - 256px), -50%, 0); }
-  to { opacity: 1; transform: translate3d(calc(-50% - 130px), -50%, 0); }
+  to { opacity: 1; transform: translate3d(calc(-50% - 260px), -50%, 0); }
 }
 
 @keyframes promo-moments-pair-pick {
   from { transform: translate3d(-50%, -50%, 0); }
-  to { transform: translate3d(calc(-50% + 130px), -50%, 0); }
+  to { transform: translate3d(-50%, -50%, 0); }
 }
 
 @keyframes promo-moments-pair-lift {
-  from { transform: translate3d(calc(-50% + 130px), -50%, 0); }
-  to { transform: translate3d(calc(-50% + 130px), calc(-50% - 18px), 0); }
+  from { transform: translate3d(-50%, -50%, 0); }
+  to { transform: translate3d(-50%, calc(-50% - 18px), 0); }
 }
 
 @keyframes promo-moments-pair-other {
   from { opacity: 1; transform: translate3d(calc(-50% + 256px), -50%, 0); }
-  to { opacity: 0; transform: translate3d(calc(-50% + 420px), -50%, 0) scale(0.55); }
+  to { opacity: 1; transform: translate3d(calc(-50% + 260px), -50%, 0); }
 }
 
 @keyframes promo-moments-compare-in {

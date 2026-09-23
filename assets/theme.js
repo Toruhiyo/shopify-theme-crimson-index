@@ -618,13 +618,16 @@
       const bar = document.createElement('i');
       bar.className = 'promo-moments__compare-bar';
       bar.style.setProperty('--bar', `${bars[row]}%`);
-      const loser = document.createElement('span');
-      loser.className = 'promo-moments__compare-cell';
-      loser.appendChild(momentMark(row === 2 ? 'no' : 'yes'));
+      const go = document.createElement('span');
+      go.className = 'promo-moments__compare-cell';
+      go.appendChild(momentMark(row === 2 ? 'no' : 'yes'));
       const winner = document.createElement('span');
       winner.className = 'promo-moments__compare-cell';
       winner.appendChild(momentMark('yes'));
-      line.append(bar, loser, winner);
+      const other = document.createElement('span');
+      other.className = 'promo-moments__compare-cell';
+      other.appendChild(momentMark(row === 1 ? 'no' : 'yes'));
+      line.append(bar, go, winner, other);
       panel.appendChild(line);
     }
     return panel;
@@ -1071,7 +1074,7 @@
       const watch = (attempt) => {
         const motions = momentMotions(stage);
         const ticks = motions.filter((anim) => (anim.animationName || '') === 'promo-moments-tick');
-        const ticksDone = ticks.length >= 6 && ticks.every((anim) => anim.playState === 'finished');
+        const ticksDone = ticks.length >= 9 && ticks.every((anim) => anim.playState === 'finished');
         if (!ticksDone) {
           window.requestAnimationFrame(() => watch(attempt + 1));
           return;
