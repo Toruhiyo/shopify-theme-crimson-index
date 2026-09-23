@@ -183,13 +183,13 @@
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 9;
   const PROMO_SEE_STAIN_BODY_COUNT = 5;
-  const PROMO_WHEEL_YAW_DEG = 12;
-  const PROMO_WHEEL_MAX_YAW_DEG = 28;
-  const PROMO_WHEEL_DEPTH_PX = 90;
+  const PROMO_WHEEL_YAW_DEG = 42;
+  const PROMO_WHEEL_MAX_YAW_DEG = 56;
+  const PROMO_WHEEL_DEPTH_PX = 140;
   const PROMO_WHEEL_MAX_DEPTH_PX = 220;
   const PROMO_WHEEL_TUCK_PX = 28;
   const PROMO_WHEEL_NEIGHBOR_SCALE = 0.42;
-  const PROMO_WHEEL_NEIGHBOR_PULL = 0.36;
+  const PROMO_WHEEL_NEIGHBOR_PULL = 0.44;
   const PROMO_WHEEL_FAR_SCALE = 0.72;
   const PROMO_WHEEL_SEPARATION_SLOPE = 24;
   const PROMO_WHEEL_SEPARATION_PULL = 248;
@@ -874,8 +874,8 @@
   }
 
   function wheelFade(abs) {
-    const start = 1.05;
-    const end = 1.9;
+    const start = 1;
+    const end = 1.4;
     if (abs <= start) return 1;
     if (abs >= end) return 0;
     return 1 - smoothstep((abs - start) / (end - start));

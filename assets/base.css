@@ -2509,7 +2509,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening__carousel {
   width: 100%;
   overflow: visible;
-  perspective: 1800px;
+  perspective: 1100px;
   perspective-origin: center center;
 }
 
@@ -2517,7 +2517,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
-  transform-style: preserve-3d;
 }
 
 .promo-opening__slide {
@@ -2528,7 +2527,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   background: none;
   opacity: var(--promo-wheel-fade, 1);
   transform-origin: center center;
-  transform-style: preserve-3d;
 }
 
 
