@@ -630,6 +630,30 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transition: none;
 }
 
+.promo-opening.is-clerk-moving.is-pitch .promo-opening__widget,
+.promo-opening.is-clerk-moving.is-moments .promo-opening__widget {
+  transition:
+    top 1080ms cubic-bezier(0.22, 1, 0.36, 1),
+    right 1080ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1080ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.promo-opening.is-clerk-corner.is-moments .promo-opening__widget {
+  top: var(--promo-clerk-top, 50%);
+  right: var(--promo-clerk-right, 6.25cqw);
+  transform: none;
+}
+
+.promo-opening.is-clerk-corner #bizmis-avatar-embed.is-promo-widget-parked {
+  --promo-avatar-scale: 0.92;
+  --promo-avatar-lift: 0px;
+}
+
+.promo-opening.is-clerk-instant .promo-opening__widget,
+.promo-opening.is-clerk-instant #bizmis-avatar-embed.is-promo-widget-parked {
+  transition: none !important;
+}
+
 .promo-opening.is-see-row .promo-opening__stage {
   width: min(1400px, 100%);
   grid-template-columns: minmax(0, 1fr) 24rem;
@@ -3117,15 +3141,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening__face--to .promo-opening__word--hero.is-in {
-  animation: promo-pitch-hero-in 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-pitch-hero-in 140ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .promo-opening__face--to .promo-opening__word--hero.is-out {
-  animation: promo-pitch-hero-out 340ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: promo-pitch-hero-out 110ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .promo-opening__face--to .promo-opening__word--sell.is-out {
-  animation: promo-pitch-sell-out 900ms cubic-bezier(0.85, 0, 1, 1) forwards;
+  animation: promo-pitch-sell-out 380ms cubic-bezier(0.85, 0, 1, 1) forwards;
 }
 
 .promo-opening__face--to .promo-opening__word--sell {
@@ -3660,10 +3684,22 @@ html.is-promo-ready .promo-opening__boot {
   }
 }
 
+@property --promo-avatar-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 2.15;
+}
+
+@property --promo-avatar-lift {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: -120px;
+}
+
 #bizmis-avatar-embed.is-promo-widget-parked {
   --promo-avatar-w: 440px;
   --promo-avatar-h: 340px;
-  --promo-avatar-scale: 2.15 !important;
+  --promo-avatar-scale: 2.15;
   --promo-avatar-lift: -120px;
   position: relative !important;
   top: auto !important;
@@ -3677,7 +3713,9 @@ html.is-promo-ready .promo-opening__boot {
   transform: none !important;
   margin: 0 !important;
   z-index: 1 !important;
-  transition: none !important;
+  transition:
+    --promo-avatar-scale 1080ms cubic-bezier(0.22, 1, 0.36, 1),
+    --promo-avatar-lift 1080ms cubic-bezier(0.22, 1, 0.36, 1) !important;
   overflow: hidden !important;
 }
 

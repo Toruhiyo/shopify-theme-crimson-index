@@ -170,14 +170,21 @@
   const PROMO_PITCH_WORD_OUT_MS = 400;
   const PROMO_PITCH_WORD_OUT_STAGGER_MS = [0, 140, 70];
   const PROMO_AVATAR_MAX_SCALE = 2.15;
+  const PROMO_AVATAR_BOX_W = 440;
+  const PROMO_AVATAR_BOX_H = 340;
+  const PROMO_AVATAR_LIFT_PX = -120;
+  const PROMO_CLERK_CORNER_MS = 1080;
+  const PROMO_CLERK_CORNER_SCALE = 0.92;
+  const PROMO_CLERK_CORNER_INSET_X = 22;
+  const PROMO_CLERK_CORNER_INSET_Y = 52;
   const PROMO_AVATAR_CANVAS_WIDTH_PX = 720;
   const PROMO_PITCH_REPLACE_GAP_MS = 180;
-  const PROMO_PITCH_HERO_IN_MS = 400;
-  const PROMO_PITCH_HERO_HOLD_MS = 240;
-  const PROMO_PITCH_HERO_OUT_MS = 340;
-  const PROMO_PITCH_HERO_OVERLAP_MS = 160;
-  const PROMO_PITCH_SELL_HOLD_MS = 2000;
-  const PROMO_SELL_OUT_MS = 900;
+  const PROMO_PITCH_HERO_IN_MS = 140;
+  const PROMO_PITCH_HERO_HOLD_MS = 30;
+  const PROMO_PITCH_HERO_OUT_MS = 110;
+  const PROMO_PITCH_HERO_OVERLAP_MS = 60;
+  const PROMO_PITCH_SELL_HOLD_MS = 240;
+  const PROMO_SELL_OUT_MS = 380;
   const PROMO_PAIN_EASE = 'cubic-bezier(0.45, 0.05, 0.2, 1)';
   const PROMO_PAIN_POOL = 48;
   const PROMO_PAIN_CARD_W = 150;
@@ -1729,9 +1736,11 @@
     }
 
     fitClerk() {
+      if (this.clerkCornerActive) return;
       const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
       if (!embed || !embed.classList.contains('is-promo-widget-parked')) return;
       embed.style.setProperty('--promo-avatar-scale', String(PROMO_AVATAR_MAX_SCALE));
+      embed.style.setProperty('--promo-avatar-lift', `${PROMO_AVATAR_LIFT_PX}px`);
     }
 
     fitOpeningLayout() {
@@ -2044,6 +2053,84 @@
         widget.style.transformOrigin = '';
       }
       if (animation) animation.cancel();
+    }
+
+    playClerkScale(fromScale, fromLift, toScale, toLift) {
+      const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
+      if (!embed) return;
+      window.cancelAnimationFrame(this.clerkScaleFrame);
+      if (prefersReducedMotion()) {
+        embed.style.setProperty('--promo-avatar-scale', String(toScale));
+        embed.style.setProperty('--promo-avatar-lift', `${toLift}px`);
+        return;
+      }
+      const started = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - started) / PROMO_CLERK_CORNER_MS);
+        const eased = 1 - (1 - t) ** 3;
+        const scale = fromScale + (toScale - fromScale) * eased;
+        const lift = fromLift + (toLift - fromLift) * eased;
+        embed.style.setProperty('--promo-avatar-scale', scale.toFixed(4));
+        embed.style.setProperty('--promo-avatar-lift', `${lift.toFixed(2)}px`);
+        if (t < 1) this.clerkScaleFrame = window.requestAnimationFrame(step);
+      };
+      step(started);
+    }
+
+    seatClerkInStore(instant) {
+      const embed = this.parkedEmbed || document.getElementById('bizmis-avatar-embed');
+      const widget = this.root.querySelector('[data-promo-widget]');
+      const canvas = this.root.querySelector('[data-promo-canvas]');
+      const store = this.root.querySelector('.promo-opening__store');
+      this.root.classList.add('is-moments');
+      if (!embed || !widget || !canvas || !store) return;
+      this.settleClerkRow();
+      this.clerkCornerActive = true;
+      const snap = instant || prefersReducedMotion();
+      this.root.classList.toggle('is-clerk-instant', snap);
+      if (!snap) this.root.classList.add('is-clerk-moving');
+      canvas.getBoundingClientRect();
+      const storeBox = store.getBoundingClientRect();
+      const canvasBox = canvas.getBoundingClientRect();
+      if (storeBox.width < 40 || canvasBox.width < 40) return;
+      const height = PROMO_AVATAR_BOX_H * PROMO_CLERK_CORNER_SCALE;
+      const right = canvasBox.right - (storeBox.right - PROMO_CLERK_CORNER_INSET_X);
+      const top = storeBox.bottom - PROMO_CLERK_CORNER_INSET_Y - height - canvasBox.top;
+      this.root.style.setProperty('--promo-clerk-top', `${top.toFixed(1)}px`);
+      this.root.style.setProperty('--promo-clerk-right', `${right.toFixed(1)}px`);
+      if (snap) {
+        embed.style.setProperty('--promo-avatar-scale', String(PROMO_CLERK_CORNER_SCALE));
+        embed.style.setProperty('--promo-avatar-lift', '0px');
+        this.root.classList.add('is-clerk-corner');
+        return;
+      }
+      embed.style.setProperty('--promo-avatar-scale', String(PROMO_AVATAR_MAX_SCALE));
+      embed.style.setProperty('--promo-avatar-lift', `${PROMO_AVATAR_LIFT_PX}px`);
+      window.requestAnimationFrame(() => {
+        this.root.classList.add('is-clerk-corner');
+        this.playClerkScale(PROMO_AVATAR_MAX_SCALE, PROMO_AVATAR_LIFT_PX, PROMO_CLERK_CORNER_SCALE, 0);
+      });
+    }
+
+    restoreClerkSeat() {
+      if (!this.clerkCornerActive && !this.root.classList.contains('is-clerk-corner')) return;
+      if (prefersReducedMotion()) {
+        this.root.classList.remove('is-clerk-corner', 'is-clerk-instant', 'is-clerk-moving');
+        this.clerkCornerActive = false;
+        this.fitClerk();
+        return;
+      }
+      this.root.classList.remove('is-clerk-instant');
+      this.root.classList.add('is-clerk-moving');
+      window.requestAnimationFrame(() => {
+        this.root.classList.remove('is-clerk-corner');
+        this.playClerkScale(PROMO_CLERK_CORNER_SCALE, 0, PROMO_AVATAR_MAX_SCALE, PROMO_AVATAR_LIFT_PX);
+      });
+      window.setTimeout(() => {
+        this.clerkCornerActive = false;
+        this.root.classList.remove('is-clerk-moving');
+        this.fitClerk();
+      }, PROMO_CLERK_CORNER_MS + 80);
     }
 
     glideClerkIntoRow(positionClass = 'is-see-row') {
@@ -2388,13 +2475,13 @@
 
     async playMoments(onDone) {
       const sell = this.root.querySelector('.promo-opening__word--sell');
+      const reduced = prefersReducedMotion();
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
-      if (!prefersReducedMotion()) await waitMs(PROMO_SELL_OUT_MS);
-      this.glideClerkIntoRow('is-moments');
-      if (!prefersReducedMotion()) await waitMs(PROMO_CLERK_ROW_MS);
+      if (!reduced) await waitMs(PROMO_SELL_OUT_MS);
+      this.seatClerkInStore(reduced);
+      if (!reduced) await waitMs(PROMO_CLERK_CORNER_MS);
 
-      const reduced = prefersReducedMotion();
       for (const beat of PROMO_MOMENT_BEATS) {
       this.showMoment(beat, reduced);
       if (!reduced && beat.lookMs) await waitMs(beat.lookMs);
@@ -2423,6 +2510,7 @@
 
     playSeeForYourself() {
       endOpeningAgent();
+      this.restoreClerkSeat();
       if (!this.stores.length) {
         window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
         return;
@@ -3153,6 +3241,7 @@
       const openMoments = () => {
         showHero(2);
         root.classList.add('is-moments');
+        this.seatClerkInStore(true);
         setOpeningAvatarAction('idle_neutral');
         return this.momentStage();
       };
