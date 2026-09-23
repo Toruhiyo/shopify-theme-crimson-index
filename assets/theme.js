@@ -687,13 +687,12 @@
   function momentCompare() {
     const panel = document.createElement('div');
     panel.className = 'promo-moments__compare';
-    const bars = [18, 12, 22];
-    for (let row = 0; row < PROMO_MOMENT_SPEC_KINDS.length; row += 1) {
+    PROMO_MOMENT_SPEC_KINDS.forEach((kind, row) => {
       const line = document.createElement('div');
       line.className = 'promo-moments__compare-row';
-      const bar = document.createElement('i');
-      bar.className = 'promo-moments__compare-bar';
-      bar.style.setProperty('--bar', `${bars[row]}%`);
+      const icon = document.createElement('span');
+      icon.className = 'promo-moments__spec-icon';
+      icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${PROMO_MOMENT_ICONS[kind]}</svg>`;
       const go = document.createElement('span');
       go.className = 'promo-moments__compare-cell';
       go.appendChild(momentMark(row === 2 ? 'no' : 'yes'));
@@ -703,9 +702,9 @@
       const other = document.createElement('span');
       other.className = 'promo-moments__compare-cell';
       other.appendChild(momentMark(row === 1 ? 'no' : 'yes'));
-      line.append(bar, go, winner, other);
+      line.append(icon, go, winner, other);
       panel.appendChild(line);
-    }
+    });
     return panel;
   }
 

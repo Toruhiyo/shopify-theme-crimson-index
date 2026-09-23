@@ -679,10 +679,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate(calc(-50% + var(--promo-board-x)), -50%) scale(var(--promo-grid-fit));
 }
 
-.promo-opening.is-moments:not(.is-see) .promo-moments__board.is-pose-choice {
-  transform: translate(calc(-50% + var(--promo-board-x)), calc(-50% - 1.5rem));
-}
-
 .promo-opening.is-moments:not(.is-see) .promo-opening__moments-field {
   -webkit-mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, var(--color-fg) 18%, transparent 68%);
   mask-image: radial-gradient(ellipse 62% 78% at 36% 48%, var(--color-fg) 18%, transparent 68%);
@@ -1474,15 +1470,17 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   min-height: 1.15rem;
 }
 
-.promo-moments__compare-bar {
+.promo-moments__compare-row .promo-moments__spec-icon {
   position: absolute;
-  left: 0.45rem;
+  left: 0.55rem;
   top: 50%;
-  width: min(var(--bar, 16%), 4.5rem);
-  height: 6px;
-  margin-top: -3px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-fg) 8%, transparent);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: -0.525rem;
+}
+
+.promo-moments__compare-row .promo-moments__spec-icon svg {
+  stroke-width: 1.75;
 }
 
 .promo-moments__compare-cell {
@@ -1847,12 +1845,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-go {
-  transform: translate3d(calc(-50% - 260px), -50%, 0);
+  transform: translate3d(calc(-50% - 256px), -50%, 0);
 }
 
 .is-pose-choice .promo-moments__card.is-other {
   opacity: 1;
-  transform: translate3d(calc(-50% + 260px), -50%, 0);
+  transform: translate3d(calc(-50% + 256px), -50%, 0);
 }
 
 .is-pose-choice .promo-moments__card.is-pick::after,
@@ -1892,18 +1890,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-choice .promo-moments__mark { opacity: 1; transform: scale(1); }
 
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go {
-  animation: promo-moments-pair-go 480ms var(--promo-spring) both;
-}
-
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
   animation:
     promo-moments-pair-pick 480ms var(--promo-spring) both,
     promo-moments-pair-lift 280ms var(--promo-spring) 1820ms forwards;
-}
-
-.is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
-  animation: promo-moments-pair-other 420ms var(--promo-spring) both;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
@@ -2642,11 +2632,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: none !important;
 }
 
-@keyframes promo-moments-pair-go {
-  from { opacity: 1; transform: translate3d(calc(-50% - 256px), -50%, 0); }
-  to { opacity: 1; transform: translate3d(calc(-50% - 260px), -50%, 0); }
-}
-
 @keyframes promo-moments-pair-pick {
   from { transform: translate3d(-50%, -50%, 0); }
   to { transform: translate3d(-50%, -50%, 0); }
@@ -2655,11 +2640,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 @keyframes promo-moments-pair-lift {
   from { transform: translate3d(-50%, -50%, 0); }
   to { transform: translate3d(-50%, calc(-50% - 18px), 0); }
-}
-
-@keyframes promo-moments-pair-other {
-  from { opacity: 1; transform: translate3d(calc(-50% + 256px), -50%, 0); }
-  to { opacity: 1; transform: translate3d(calc(-50% + 260px), -50%, 0); }
 }
 
 @keyframes promo-moments-compare-in {
