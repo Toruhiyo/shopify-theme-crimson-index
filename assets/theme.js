@@ -806,6 +806,21 @@
     });
   }
 
+  function placeExportFly(stage, progress) {
+    const host = momentHostOf(stage);
+    const fly = host?.querySelector('.promo-moments__fly');
+    const store = host?.querySelector('.promo-opening__store');
+    const travel = Math.min(1, Math.max(0, (progress - 0.28) / 0.72));
+    const scale = progress < 0.28
+      ? 0.2 + 0.8 * (progress / 0.28)
+      : 1 + (0.12 - 1) * travel;
+    const opacity = progress < 0.28 ? 1 : 1 - travel;
+    if (store) store.style.opacity = progress < 0.4 ? String(1 - progress / 0.4) : '0';
+    if (!fly) return;
+    fly.style.opacity = String(opacity);
+    fly.style.transform = `translate3d(calc(-50% + ${22 * travel}rem), calc(-50% + ${1.2 * travel}rem), 0) scale(${scale})`;
+  }
+
   function playMomentPose(stage, pose) {
     restartMomentPose(stage, pose);
     return whenMomentsRest(stage);
@@ -2390,6 +2405,11 @@
             return 0;
           }).then(() => {
             const host = momentHostOf(stage);
+            host?.querySelectorAll('.promo-moments__bubble').forEach((node) => {
+              node.style.opacity = '0.55';
+              node.style.filter = 'blur(7px)';
+              node.style.transform = 'scale(1.35)';
+            });
             host?.querySelectorAll('.promo-moments__count').forEach((node) => {
               node.style.opacity = '0';
             });
@@ -2419,11 +2439,11 @@
         },
         '14f1-moments-contract': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'fly', () => 200);
+          return scrubMoment(stage, 'fly', () => 200).then(() => placeExportFly(stage, 0.2));
         },
         '14f2-moments-dot': () => {
           const stage = openMoments();
-          return scrubMoment(stage, 'fly', () => 430);
+          return scrubMoment(stage, 'fly', () => 430).then(() => placeExportFly(stage, 0.62));
         },
         '14f3-moments-nod': () => {
           const stage = openMoments();
