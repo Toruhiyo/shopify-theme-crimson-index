@@ -640,8 +640,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-moments:not(.is-see) .promo-opening__store {
   flex: 0 0 auto;
-  width: min(66rem, 74vw);
-  height: min(40rem, 72vh);
+  width: min(70rem, 78vw);
+  height: min(43.5rem, 76vh);
   max-height: none;
   aspect-ratio: auto;
   transform: translateY(-2.5rem);
@@ -1152,8 +1152,50 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-row .promo-moments__card.is-pick { --tx: 0rem; --ts: 1.28; transform: translate3d(0, 0, 0) scale(1.28); }
 .is-pose-row .promo-moments__card.is-other { --tx: 10.8rem; --ts: 1.28; transform: translate3d(10.8rem, 0, 0) scale(1.28); }
 
+.is-pose-grid.is-shortlist .promo-moments__card.is-drop {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translate3d(var(--gx), var(--gy), 0) scale(0.82);
+}
+
+.promo-moments__board.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card:not(.is-extra) {
+  animation: none;
+}
+
+.is-pose-grid.is-shortlist .promo-moments__card.is-go,
+.is-pose-grid.is-shortlist .promo-moments__card.is-pick,
+.is-pose-grid.is-shortlist .promo-moments__card.is-other {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+    0 0 0 2px rgba(249, 163, 83, 0.9),
+    0 10px 28px rgba(249, 163, 83, 0.22);
+}
+
+.is-pose-grid.is-shortlist .promo-moments__card.is-go::after,
+.is-pose-grid.is-shortlist .promo-moments__card.is-pick::after,
+.is-pose-grid.is-shortlist .promo-moments__card.is-other::after,
+.is-pose-row .promo-moments__card.is-go::after,
+.is-pose-row .promo-moments__card.is-pick::after,
+.is-pose-row .promo-moments__card.is-other::after {
+  opacity: 1;
+  transition: opacity 420ms var(--promo-spring);
+}
+
+.is-pose-choice .promo-moments__card.is-go::after,
+.is-pose-choice .promo-moments__card.is-other::after {
+  opacity: 0;
+}
+
 .is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-drop {
   animation: promo-moments-catalog-out 900ms var(--promo-spring) both;
+}
+
+.is-pose-row.is-narrowed:not(.is-settled):not(.is-reduced) .promo-moments__card.is-drop {
+  animation: none;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translate3d(var(--gx), var(--gy), 0) scale(0.12);
 }
 
 .is-pose-row:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go,
@@ -1237,7 +1279,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
-  animation: promo-moments-pick 1400ms var(--promo-spring) forwards;
+  animation: promo-moments-pick 2800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
@@ -1246,7 +1288,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after {
   opacity: 0;
-  animation: promo-moments-ring 380ms var(--promo-spring) 1800ms forwards;
+  animation: promo-moments-ring 380ms var(--promo-spring) 2200ms both;
 }
 
 .is-pose-choice:not(.is-settled):not(.is-reduced) .promo-moments__specs {
@@ -1305,6 +1347,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-extra .promo-moments__card.is-extra,
 .is-pose-bundle .promo-moments__card.is-extra {
+  z-index: 6;
   opacity: 1;
   transform: translate3d(8.6rem, 0, 0) scale(1.55);
 }
@@ -1426,8 +1469,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-moments-spark 700ms var(--promo-spring) calc(var(--promo-close-cart-at, 1280ms) + var(--sd, 0ms)) forwards;
 }
 
-.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__burst-check {
-  animation: promo-moments-burst-check 760ms var(--promo-spring) calc(var(--promo-close-cart-at, 1280ms) + 60ms) forwards;
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__burst-check,
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__burst-check {
+  animation: none;
+  opacity: 0;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__bloom {
@@ -1444,9 +1489,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-moments-spark-soft 560ms var(--promo-spring) var(--sd, 0ms) forwards;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__burst-check {
-  animation: promo-moments-burst-check-soft 620ms var(--promo-spring) forwards;
-}
+.is-pose-close .is-bubble-1 { --vapor-stagger: 0ms; }
+.is-pose-close .is-bubble-2 { --vapor-stagger: 90ms; }
+.is-pose-close .is-bubble-3 { --vapor-stagger: 160ms; }
+.is-pose-close .is-bubble-4 { --vapor-stagger: 50ms; }
 
 .is-pose-fly .promo-moments__card,
 .is-pose-gone .promo-moments__card {
@@ -1561,7 +1607,25 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__bubble {
-  animation: promo-moments-vapor var(--promo-moments-vapor, 480ms) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: promo-moments-vapor var(--promo-moments-vapor, 480ms) cubic-bezier(0.22, 1, 0.36, 1) var(--vapor-stagger, 0ms) forwards;
+}
+
+.promo-moments__vapor-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 7;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: -0.475rem 0 0 -0.475rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd0a4 0%, #f9a353 58%, rgba(249, 163, 83, 0) 74%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__vapor-bit {
+  animation: promo-moments-vapor-bit 760ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--vapor-stagger, 0ms) + var(--bit-delay, 0ms)) forwards;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
@@ -1971,7 +2035,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
-  animation: promo-moments-count-in 380ms var(--promo-spring) var(--promo-close-cart-at, 1280ms) both;
+  opacity: 0;
+  animation: promo-moments-count-in 380ms var(--promo-spring) calc(var(--promo-close-cart-at, 1280ms) + 80ms) both;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
@@ -1987,7 +2052,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-two {
-  animation: promo-moments-count-in 380ms var(--promo-spring) 180ms forwards;
+  opacity: 0;
+  animation: promo-moments-count-in 380ms var(--promo-spring) 170ms both;
 }
 
 .is-pose-bundle.is-settled .promo-moments__count.is-two,
@@ -2040,8 +2106,39 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-pick {
-  0% { transform: translate3d(0, 0, 0) scale(1.28); }
-  100% { transform: translate3d(0, -0.45rem, 0) scale(1.7); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+      0 4px 12px rgba(0, 0, 0, 0.05),
+      0 28px 70px rgba(0, 0, 0, 0.09);
+  }
+  46% {
+    transform: translate3d(0, 0, 0) scale(1.38);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+      0 4px 12px rgba(0, 0, 0, 0.05),
+      0 28px 70px rgba(0, 0, 0, 0.09);
+  }
+  75% {
+    transform: translate3d(0, 0, 0) scale(1.38);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+      0 4px 12px rgba(0, 0, 0, 0.05),
+      0 28px 70px rgba(0, 0, 0, 0.09);
+  }
+  100% {
+    transform: translate3d(0, -0.45rem, 0) scale(1.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+      0 0 0 4px rgba(249, 163, 83, 0.22),
+      0 4px 12px rgba(0, 0, 0, 0.05),
+      0 28px 70px rgba(0, 0, 0, 0.09);
+  }
 }
 
 @keyframes promo-moments-other {
@@ -2050,6 +2147,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-ring {
+  from { opacity: 0; }
   to { opacity: 1; }
 }
 
@@ -2071,8 +2169,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-vapor {
-  0% { opacity: 1; filter: blur(0); transform: scale(1); }
-  100% { opacity: 0; filter: blur(16px); transform: scale(1.85); }
+  0% { opacity: 1; filter: blur(0); transform: scale(1); background: rgba(255, 255, 255, 0.45); color: #7c8593; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06); }
+  30% { opacity: 1; filter: blur(0); transform: scale(1.2); background: #f9a353; color: #fff; box-shadow: 0 0 28px rgba(249, 163, 83, 0.9); }
+  100% { opacity: 0; filter: blur(18px); transform: scale(2.2); background: rgba(249, 163, 83, 0.12); box-shadow: 0 0 40px rgba(249, 163, 83, 0); }
+}
+
+@keyframes promo-moments-vapor-bit {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.3); filter: blur(0); }
+  16% { opacity: 1; transform: translate3d(calc(var(--dx) * 0.22), calc(var(--dy) * 0.22), 0) scale(1.15); filter: blur(0); }
+  100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) scale(2.4); filter: blur(9px); }
 }
 
 @keyframes promo-moments-orbit {

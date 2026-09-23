@@ -169,6 +169,7 @@
   const PROMO_MOMENTS_CART_GAP_MS = 800;
   const PROMO_MOMENTS_ACCESSORY_MS = 350;
   const PROMO_MOMENTS_COLLAPSE_MS = 720;
+  const PROMO_MOMENTS_SHORTLIST_MS = 880;
   const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
@@ -189,7 +190,9 @@
   const PROMO_WHEEL_MAX_YAW_DEG = 56;
   const PROMO_WHEEL_DEPTH_PX = 140;
   const PROMO_WHEEL_MAX_DEPTH_PX = 220;
+  const PROMO_WHEEL_TUCK_PX = 28;
   const PROMO_WHEEL_NEIGHBOR_SCALE = 0.42;
+  const PROMO_WHEEL_NEIGHBOR_PULL = 0.44;
   const PROMO_WHEEL_FAR_SCALE = 0.72;
   const PROMO_WHEEL_SELECT_AT = 0.5;
   const PROMO_WHEEL_SELECT_SPAN = 0.2;
@@ -627,6 +630,16 @@
       yes.appendChild(momentMark('yes'));
       bubble.append(ask, yes);
       orbit.appendChild(bubble);
+      for (let bit = 0; bit < 6; bit += 1) {
+        const particle = document.createElement('span');
+        particle.className = 'promo-moments__vapor-bit';
+        const angle = (bit / 6) * Math.PI * 2 + Number(slot) * 0.65;
+        const dist = 2.6 + (bit % 3) * 0.9;
+        particle.style.setProperty('--dx', `${Math.cos(angle) * dist}rem`);
+        particle.style.setProperty('--dy', `${Math.sin(angle) * dist}rem`);
+        particle.style.setProperty('--bit-delay', `${bit * 40}ms`);
+        orbit.appendChild(particle);
+      }
       board.appendChild(orbit);
     });
     const added = document.createElement('span');
@@ -685,6 +698,8 @@
     if (options.instant) board.classList.add('is-instant');
     if (options.instant) board.classList.add('is-settled');
     else if (!samePose) board.classList.remove('is-settled');
+    board.classList.remove('is-shortlist');
+    if (pose !== 'row') board.classList.remove('is-narrowed');
     if (board.dataset.pose !== pose) {
       PROMO_MOMENT_POSES.forEach((name) => {
         board.classList.toggle(`is-pose-${name}`, name === pose);
@@ -977,6 +992,16 @@
     if (abs <= 1) return 1 - drop * smoothstep(abs);
     const far = smoothstep(Math.min(1, abs - 1));
     return PROMO_WHEEL_NEIGHBOR_SCALE * (1 - (1 - PROMO_WHEEL_FAR_SCALE) * far);
+  }
+
+  function wheelNeighborPull(abs, width) {
+    const amount = width * PROMO_WHEEL_NEIGHBOR_PULL;
+    if (abs <= 1) return amount * smoothstep(abs);
+    return amount;
+  }
+
+  function wheelTuck(abs) {
+    return PROMO_WHEEL_TUCK_PX * smoothstep(Math.min(1, abs));
   }
 
   function wheelFade(abs) {
@@ -1561,13 +1586,15 @@
       return slide.offsetLeft - targetLeft;
     }
 
-    wheelTransform(distance, shift) {
+    wheelTransform(distance, shift, width) {
       const abs = Math.abs(distance);
       const sign = Math.sign(distance) || 1;
       const yaw = sign * wheelYaw(abs);
       const depth = wheelDepth(abs);
+      const tuck = -sign * wheelTuck(abs);
+      const pull = -sign * wheelNeighborPull(abs, width);
       const scale = wheelScale(abs);
-      return `translate3d(${shift}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
+      return `translate3d(${shift + tuck + pull}px, 0, ${-depth}px) rotateY(${yaw}deg) scale(${scale})`;
     }
 
     applyWheel(activeIndex) {
@@ -1581,7 +1608,7 @@
         const distance = loopDistance(index, activeIndex, count);
         const shift = stride * (distance - layout);
         const abs = Math.abs(distance);
-        slide.style.transform = this.wheelTransform(distance, shift);
+        slide.style.transform = this.wheelTransform(distance, shift, slide.offsetWidth);
         slide.style.transformOrigin = 'center center';
         slide.style.zIndex = String(1000 - Math.round(abs * 100));
         slide.style.setProperty('--promo-wheel-fade', String(wheelFade(abs)));
@@ -1622,14 +1649,9 @@
       glow.style.setProperty('--promo-clerk-glow', mixAccent(stores[base].accent, stores[next].accent, amount));
     }
 
-    syncWheelPerspective(index) {
-      const track = this.carouselTrack;
-      const view = track?.parentElement;
-      const focusIndex = Math.max(0, Math.round(index));
-      const focus = track?.children[focusIndex];
-      if (!view || !focus) return;
-      const originX = focus.offsetLeft - this.carouselOffset(focusIndex) + focus.offsetWidth / 2;
-      view.style.perspectiveOrigin = `${originX}px 46%`;
+    syncWheelPerspective() {
+      const view = this.carouselTrack?.parentElement;
+      if (view) view.style.perspectiveOrigin = 'center center';
     }
 
     placeCarousel(index, snap) {
@@ -1637,7 +1659,7 @@
       if (!track) return;
       if (snap) track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(index)}px, 0, 0)`;
-      this.syncWheelPerspective(index);
+      this.syncWheelPerspective();
       this.applyWheel(index);
       if (snap) {
         track.getBoundingClientRect();
@@ -1834,7 +1856,17 @@
     playMoment(beat) {
       const stage = this.momentStage();
       if (!stage) return;
-      applyMomentPose(stage, beat.playPose);
+      if (beat.playPose === 'row' && !prefersReducedMotion()) {
+        const board = stage.querySelector('.promo-moments__board');
+        board?.classList.add('is-shortlist');
+        this.momentTimers.push(window.setTimeout(() => {
+          board?.classList.add('is-narrowed');
+          board?.classList.remove('is-shortlist');
+          applyMomentPose(stage, 'row');
+        }, PROMO_MOMENTS_SHORTLIST_MS));
+      } else {
+        applyMomentPose(stage, beat.playPose);
+      }
       if (beat.nod) setOpeningAvatarAction('nod');
       else if (beat.wave) setOpeningAvatarAction('waving');
       if (typeof beat.closeAt === 'number' || typeof beat.bundleAt === 'number') {
@@ -1923,7 +1955,7 @@
       this.stopGlide();
       track.style.transition = 'none';
       track.style.transform = `translate3d(${-this.carouselOffset(0)}px, 0, 0)`;
-      this.syncWheelPerspective(0);
+      this.syncWheelPerspective();
       this.applyWheel(0);
       this.setActiveSlide(0, land <= 0);
       const first = this.stores[0];
@@ -1956,7 +1988,7 @@
         const offset = this.carouselOffset(base)
           + (this.carouselOffset(next) - this.carouselOffset(base)) * frac;
         track.style.transform = `translate3d(${-offset}px, 0, 0)`;
-        this.syncWheelPerspective(index);
+        this.syncWheelPerspective();
         this.applyWheel(index);
         const centered = Math.round(index);
         if (centered > arrived) {
@@ -2358,13 +2390,20 @@
           const stage = openMoments();
           return playMomentPose(stage, 'grid');
         },
+        '14b1s-moments-shortlist': () => {
+          const stage = openMoments();
+          const board = restartMomentPose(stage, 'grid');
+          return whenMomentsRest(stage).then(() => {
+            board?.classList.add('is-shortlist');
+            return waitMs(520);
+          });
+        },
         '14b2-moments-collapse': () => {
           const stage = openMoments();
+          ensureMomentBoard(stage)?.classList.add('is-narrowed');
           return scrubMoment(stage, 'row', (anim, span) => {
             const name = anim.animationName || '';
-            if (name === 'promo-moments-select' || name === 'promo-moments-catalog-out') {
-              return span.delay + span.duration * 0.2;
-            }
+            if (name === 'promo-moments-select') return span.delay + span.duration * 0.45;
             return 0;
           });
         },
@@ -2399,17 +2438,13 @@
         '14d2-moments-vapor': () => {
           const stage = openMoments();
           return scrubMoment(stage, 'close', (anim, span) => {
-            if ((anim.animationName || '') === 'promo-moments-vapor') {
-              return span.delay + span.duration * 0.22;
+            const name = anim.animationName || '';
+            if (name === 'promo-moments-vapor' || name === 'promo-moments-vapor-bit') {
+              return span.delay + span.duration * 0.42;
             }
             return 0;
           }).then(() => {
             const host = momentHostOf(stage);
-            host?.querySelectorAll('.promo-moments__bubble').forEach((node) => {
-              node.style.opacity = '0.55';
-              node.style.filter = 'blur(7px)';
-              node.style.transform = 'scale(1.35)';
-            });
             host?.querySelectorAll('.promo-moments__count').forEach((node) => {
               node.style.opacity = '0';
             });
