@@ -159,12 +159,14 @@
   const PROMO_MOMENTS_VO_MS = 600;
   const PROMO_MOMENTS_SALESPERSON_VO_MS = 1200;
   const PROMO_MOMENTS_CATALOG_MS = 3000;
+  const PROMO_MOMENTS_CATALOG_LOOK_MS = 2800;
   const PROMO_MOMENTS_CHOICE_MS = 4000;
-  const PROMO_MOMENTS_DOUBT_MS = 5200;
+  const PROMO_MOMENTS_DOUBT_MS = 6600;
   const PROMO_MOMENTS_EXTRA_MS = 5000;
   const PROMO_MOMENTS_SALESPERSON_MS = 800;
   const PROMO_MOMENTS_HOLD_MS = 700;
-  const PROMO_MOMENTS_VAPOR_MS = 250;
+  const PROMO_MOMENTS_VAPOR_MS = 480;
+  const PROMO_MOMENTS_CART_GAP_MS = 800;
   const PROMO_MOMENTS_ACCESSORY_MS = 350;
   const PROMO_MOMENTS_COLLAPSE_MS = 720;
   const PROMO_MOMENTS_FLY_MS = 780;
@@ -716,6 +718,7 @@
       line: '[fast pace] [bursting with energy, huge smile, thrilled] I narrow it down to the best few.',
       voMs: PROMO_MOMENTS_VO_MS,
       speakMs: PROMO_MOMENTS_CATALOG_MS,
+      lookMs: PROMO_MOMENTS_CATALOG_LOOK_MS,
       holdPose: 'grid',
       playPose: 'row',
       endPose: 'row',
@@ -1711,6 +1714,7 @@
       this.root.style.setProperty('--promo-moments-accessory', `${PROMO_MOMENTS_ACCESSORY_MS}ms`);
       this.root.style.setProperty('--promo-moments-orbit', `${PROMO_MOMENTS_ORBIT_MS}ms`);
       this.root.style.setProperty('--promo-moments-vapor', `${PROMO_MOMENTS_VAPOR_MS}ms`);
+      this.root.style.setProperty('--promo-close-cart-at', `${PROMO_MOMENTS_VAPOR_MS + PROMO_MOMENTS_CART_GAP_MS}ms`);
       this.root.style.setProperty('--promo-moments-collapse', `${PROMO_MOMENTS_COLLAPSE_MS}ms`);
       this.root.style.setProperty('--promo-moments-fly', `${PROMO_MOMENTS_FLY_MS}ms`);
       this.root.style.setProperty('--promo-moments-tick', `${PROMO_MOMENTS_BADGE_TICK_MS}ms`);
@@ -1756,8 +1760,9 @@
 
       const reduced = prefersReducedMotion();
       for (const beat of PROMO_MOMENT_BEATS) {
-        this.showMoment(beat, reduced);
-        await waitMs(beat.voMs);
+      this.showMoment(beat, reduced);
+      if (!reduced && beat.lookMs) await waitMs(beat.lookMs);
+      await waitMs(beat.voMs);
         if (reduced) {
           await waitMs(beat.speakMs);
         } else {
