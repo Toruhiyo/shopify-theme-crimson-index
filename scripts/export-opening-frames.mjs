@@ -13,7 +13,7 @@ const BASE_URL = process.env.PROMO_FRAMES_URL
   || 'https://meridian-consumer-electronics.myshopify.com/';
 const VIEWPORT = {
   width: Number(process.env.PROMO_FRAMES_WIDTH || 1440),
-  height: Number(process.env.PROMO_FRAMES_HEIGHT || 900),
+  height: Number(process.env.PROMO_FRAMES_HEIGHT || 810),
 };
 
 const REST_PAD_MS = 100;

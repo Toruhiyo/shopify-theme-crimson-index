@@ -1323,7 +1323,7 @@
     track.className = 'promo-opening__carousel-track';
     track.style.setProperty(
       '--promo-wheel-overlap',
-      `calc(${PROMO_WHEEL_NEIGHBOR_PULL} * min(36rem, 62vw) + ${PROMO_WHEEL_TUCK_PX}px)`,
+      `calc(${PROMO_WHEEL_NEIGHBOR_PULL} * min(36rem, 62cqw) + ${PROMO_WHEEL_TUCK_PX}px)`,
     );
     (stores || []).forEach((store) => {
       const accent = store.accent || '#1d1d1f';
@@ -1421,11 +1421,18 @@
       this.autoTimer = window.setTimeout(() => this.flip(), autoMs);
     }
 
+    canvasFrame() {
+      const frame = this.root.querySelector('[data-promo-canvas]');
+      if (!frame) return { left: 0, top: 0 };
+      return frame.getBoundingClientRect();
+    }
+
     pinKnobOrigin() {
       if (!this.knob) return;
       const rect = this.knob.getBoundingClientRect();
-      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
-      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+      const frame = this.canvasFrame();
+      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2 - frame.left}px`);
+      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2 - frame.top}px`);
     }
 
     fitOpeningType() {
@@ -1451,9 +1458,10 @@
 
       const to = target.getBoundingClientRect();
       if (to.width < 4 || to.height < 4) return;
+      const frame = this.canvasFrame();
 
-      this.root.style.setProperty('--promo-logo-left', `${to.left + to.width / 2}px`);
-      this.root.style.setProperty('--promo-logo-top', `${to.top + to.height / 2}px`);
+      this.root.style.setProperty('--promo-logo-left', `${to.left + to.width / 2 - frame.left}px`);
+      this.root.style.setProperty('--promo-logo-top', `${to.top + to.height / 2 - frame.top}px`);
       this.root.style.setProperty('--promo-logo-w', `${to.width}px`);
       this.root.style.setProperty('--promo-logo-h', `${to.height}px`);
       this.root.classList.add('is-logo-docked');
@@ -1507,7 +1515,8 @@
       node.className = 'promo-opening__clock';
       node.setAttribute('data-promo-clock', '');
       node.setAttribute('aria-hidden', 'true');
-      this.root.appendChild(node);
+      const frame = this.root.querySelector('[data-promo-canvas]') || this.root;
+      frame.appendChild(node);
       const started = performance.now();
       const paint = () => {
         if (!node.isConnected || node.hidden) return;
@@ -1583,8 +1592,9 @@
         return;
       }
       const rect = label.getBoundingClientRect();
-      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2}px`);
-      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2}px`);
+      const frame = this.canvasFrame();
+      this.root.style.setProperty('--promo-knob-x', `${rect.left + rect.width / 2 - frame.left}px`);
+      this.root.style.setProperty('--promo-knob-y', `${rect.top + rect.height / 2 - frame.top}px`);
     }
 
     burst() {

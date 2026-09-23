@@ -157,6 +157,7 @@
 
   {%- assign promo_logo_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
   <div class="promo-opening" id="promo-opening" data-promo-opening role="dialog" aria-modal="true" aria-label="Bizmis intro">
+    <div class="promo-opening__canvas" data-promo-canvas>
     <div class="promo-opening__boot" data-promo-loader>
       <p class="promo-opening__boot-label">Loading</p>
     </div>
@@ -254,6 +255,8 @@
     </div>
     <div class="promo-opening__store-logo" aria-hidden="true">
       <img src="{{ 'logo-white.png' | asset_url }}" alt="" class="promo-mark" width="933" height="205">
+    </div>
+    <div class="promo-opening__guide" aria-hidden="true"></div>
     </div>
   </div>
   <script type="application/json" id="promo-opening-stores">
