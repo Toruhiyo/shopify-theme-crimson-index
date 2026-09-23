@@ -578,10 +578,10 @@
   }
 
   const PROMO_MOMENT_POSES = ['grid', 'row', 'choice', 'doubt', 'close', 'extra', 'bundle', 'fly', 'gone'];
-  const PROMO_MOMENT_GRID_COLS = 5;
+  const PROMO_MOMENT_GRID_COLS = 4;
   const PROMO_MOMENT_CARD_COUNT = 12;
   const PROMO_CATALOG_SEED = 40721;
-  const PROMO_CATALOG_COLS = 5;
+  const PROMO_CATALOG_COLS = 4;
   const PROMO_CATALOG_GUTTER = 20;
   const PROMO_CATALOG_ROW_GAP = 18;
   const PROMO_CATALOG_VISIBLE_ROWS = 2.2;
