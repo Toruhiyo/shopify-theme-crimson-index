@@ -1034,8 +1034,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1em solid color-mix(in srgb, var(--bizmis-orange) 60%, transparent);
-  box-shadow: 0 0 6em color-mix(in srgb, var(--bizmis-orange) 12%, transparent);
+  border: 3.5em solid color-mix(in srgb, var(--bizmis-orange) 88%, transparent);
+  box-shadow:
+    0 0 0 2em color-mix(in srgb, var(--bizmis-orange) 55%, transparent),
+    0 0 28em color-mix(in srgb, var(--bizmis-orange) 50%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity 380ms var(--promo-spring);
@@ -1457,8 +1459,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--color-bg) 80%, transparent),
     inset 0 -1px 0 color-mix(in srgb, var(--color-fg) 4%, transparent),
-    0 0 0 2px color-mix(in srgb, var(--bizmis-orange) 90%, transparent),
-    0 10px 28px color-mix(in srgb, var(--bizmis-orange) 22%, transparent);
+    0 0 0 3px color-mix(in srgb, var(--bizmis-orange) 95%, transparent),
+    0 14px 40px color-mix(in srgb, var(--bizmis-orange) 42%, transparent);
 }
 
 .is-pose-grid.is-shortlist .promo-moments__card.is-go::after,
@@ -1495,7 +1497,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-choice .promo-moments__card.is-pick {
-  transform: translate3d(calc(-50% + 130px), calc(-50% - 8px), 0);
+  transform: translate3d(calc(-50% + 130px), calc(-50% - 18px), 0);
 }
 
 .is-pose-choice .promo-moments__card.is-go {
@@ -1657,32 +1659,32 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__bloom {
-  width: 18rem;
-  height: 18rem;
-  margin: -9rem 0 0 -9rem;
+  width: 28rem;
+  height: 28rem;
+  margin: -14rem 0 0 -14rem;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--bizmis-orange) 55%, transparent);
-  filter: blur(28px);
+  background: color-mix(in srgb, var(--bizmis-orange) 72%, transparent);
+  filter: blur(36px);
   opacity: 0;
 }
 
 .promo-moments__halo {
-  width: 7.5rem;
-  height: 7.5rem;
-  margin: -3.75rem 0 0 -3.75rem;
+  width: 14rem;
+  height: 14rem;
+  margin: -7rem 0 0 -7rem;
   border-radius: 50%;
-  border: 2.5px solid color-mix(in srgb, var(--bizmis-orange) 95%, transparent);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--bizmis-orange) 45%, transparent);
+  border: 3px solid color-mix(in srgb, var(--bizmis-orange) 95%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--bizmis-orange) 70%, transparent);
   opacity: 0;
 }
 
 .promo-moments__spark {
-  width: 0.62rem;
-  height: 0.62rem;
-  margin: -0.31rem 0 0 -0.31rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: -0.45rem 0 0 -0.45rem;
   border-radius: 50%;
   background: var(--bizmis-orange);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--bizmis-orange) 90%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--bizmis-orange) 95%, transparent);
   opacity: 0;
 }
 
@@ -2054,15 +2056,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__wash {
-  animation: promo-moments-wash 760ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
+  animation: promo-moments-wash 1200ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__wash {
-  animation: promo-moments-wash-soft 700ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+  animation: promo-moments-wash-soft 1000ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring {
-  animation: promo-moments-fest-ring 680ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
+  animation: promo-moments-fest-ring 1200ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring.is-fr-2 { animation-delay: calc(var(--promo-close-cart-at, 1280ms) + 70ms); }
@@ -2070,7 +2072,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring.is-fr-4 { animation-delay: calc(var(--promo-close-cart-at, 1280ms) + 210ms); }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring {
-  animation: promo-moments-fest-ring-soft 640ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+  animation: promo-moments-fest-ring-soft 1000ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring.is-fr-2 { animation-delay: 140ms; }
@@ -2078,11 +2080,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__fest-ring.is-fr-4 { animation-delay: 260ms; }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__to-cart {
-  animation: promo-moments-to-cart 560ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
+  animation: promo-moments-to-cart 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__to-cart {
-  animation: promo-moments-to-cart-soft 520ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+  animation: promo-moments-to-cart-soft 800ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
 }
 
 .promo-moments__cart-piece {
@@ -2123,17 +2125,18 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   right: 22em;
   top: 22em;
   z-index: 4;
-  width: 12em;
-  height: 12em;
+  width: 18em;
+  height: 18em;
   color: var(--bizmis-orange);
+  filter: drop-shadow(0 0 8em color-mix(in srgb, var(--bizmis-orange) 80%, transparent));
   opacity: 0;
   transform: none;
   pointer-events: none;
 }
 
 .promo-moments__kept .promo-moments__mark {
-  width: 12em;
-  height: 12em;
+  width: 18em;
+  height: 18em;
   opacity: 1;
   transform: none;
 }
@@ -2288,11 +2291,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate 520ms var(--promo-spring) var(--promo-close-cart-at, 1280ms) both;
+  animation: promo-moments-cart-celebrate 1400ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate-soft 520ms var(--promo-spring) 80ms both;
+  animation: promo-moments-cart-celebrate-soft 1200ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
@@ -2358,7 +2361,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-pair-lift {
   from { transform: translate3d(calc(-50% + 130px), -50%, 0); }
-  to { transform: translate3d(calc(-50% + 130px), calc(-50% - 8px), 0); }
+  to { transform: translate3d(calc(-50% + 130px), calc(-50% - 18px), 0); }
 }
 
 @keyframes promo-moments-pair-other {
@@ -2457,7 +2460,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-shortlist {
   0% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1); }
-  46% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1.06); }
+  46% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1.14); }
   100% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1); }
 }
 
@@ -2467,25 +2470,26 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-plus-in {
-  0% { opacity: 0; transform: translate3d(45px, 30px, 0) scale(0.4); }
+  0% { opacity: 0; transform: translate3d(45px, 30px, 0) scale(0.2); }
+  55% { opacity: 1; transform: translate3d(45px, 30px, 0) scale(1.45); }
   100% { opacity: 1; transform: translate3d(45px, 30px, 0) scale(1); }
 }
 
 @keyframes promo-moments-addon-pop {
   0% { transform: translate3d(calc(-50% + 160px), calc(-50% + 60px), 0) scale(1); }
-  42% { transform: translate3d(calc(-50% + 160px), calc(-50% + 46px), 0) scale(1.07); }
+  42% { transform: translate3d(calc(-50% + 160px), calc(-50% + 36px), 0) scale(1.18); }
   100% { transform: translate3d(calc(-50% + 160px), calc(-50% + 60px), 0) scale(1); }
 }
 
 @keyframes promo-moments-celebrate {
   0% { transform: translate3d(-50%, -50%, 0) scale(1); }
-  36% { transform: translate3d(-50%, calc(-50% - 22px), 0) scale(1.08); }
+  36% { transform: translate3d(-50%, calc(-50% - 36px), 0) scale(1.22); }
   100% { transform: translate3d(-50%, -50%, 0) scale(1); }
 }
 
 @keyframes promo-moments-item-pop {
   0% { transform: translate(-50%, -50%) scale(1); }
-  38% { transform: translate(-50%, -50%) scale(1.28); }
+  38% { transform: translate(-50%, -50%) scale(1.45); }
   100% { transform: translate(-50%, -50%) scale(1); }
 }
 
@@ -2502,7 +2506,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-burst {
   0% { opacity: 0.35; transform: scale(0.94); }
-  40% { opacity: 1; transform: scale(1.08); }
+  40% { opacity: 1; transform: scale(1.16); }
   100% { opacity: 1; transform: scale(1); }
 }
 
@@ -2567,13 +2571,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-cart-celebrate {
   0% { transform: scale(1); color: var(--color-muted-fg); filter: none; }
-  40% { transform: scale(1.28); color: var(--bizmis-orange); filter: none; }
+  18% { transform: scale(2.8); color: var(--bizmis-orange); filter: drop-shadow(0 0 22px color-mix(in srgb, var(--bizmis-orange) 80%, transparent)); }
+  62% { transform: scale(2.8); color: var(--bizmis-orange); filter: drop-shadow(0 0 22px color-mix(in srgb, var(--bizmis-orange) 80%, transparent)); }
   100% { transform: scale(1.16); color: var(--bizmis-orange); filter: none; }
 }
 
 @keyframes promo-moments-cart-celebrate-soft {
   0% { transform: scale(1.16); color: var(--bizmis-orange); filter: none; }
-  40% { transform: scale(1.28); color: var(--bizmis-orange); filter: none; }
+  18% { transform: scale(2.4); color: var(--bizmis-orange); filter: drop-shadow(0 0 18px color-mix(in srgb, var(--bizmis-orange) 75%, transparent)); }
+  58% { transform: scale(2.4); color: var(--bizmis-orange); filter: drop-shadow(0 0 18px color-mix(in srgb, var(--bizmis-orange) 75%, transparent)); }
   100% { transform: scale(1.16); color: var(--bizmis-orange); filter: none; }
 }
 
@@ -2627,19 +2633,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-bloom {
   0% { opacity: 0; transform: scale(0.35); }
-  28% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(1.55); }
+  28% { opacity: 1; transform: scale(1.35); }
+  100% { opacity: 0; transform: scale(1.7); }
 }
 
 @keyframes promo-moments-bloom-soft {
   0% { opacity: 0; transform: scale(0.4); }
-  34% { opacity: 0.85; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.25); }
+  34% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.5); }
 }
 
 @keyframes promo-moments-halo {
   0% { opacity: 1; transform: scale(0.3); }
-  100% { opacity: 0; transform: scale(3.6); }
+  100% { opacity: 0; transform: scale(2.6); }
 }
 
 @keyframes promo-moments-halo-soft {
@@ -2649,14 +2655,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-moments-spark {
   0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.3); }
-  16% { opacity: 1; transform: translate3d(calc(var(--sx) * 2.2rem), calc(var(--sy) * 2.2rem), 0) scale(1.15); }
-  100% { opacity: 0; transform: translate3d(calc(var(--sx) * 8rem), calc(var(--sy) * 8rem), 0) scale(0.25); }
+  16% { opacity: 1; transform: translate3d(calc(var(--sx) * 2.4rem), calc(var(--sy) * 2.4rem), 0) scale(1.2); }
+  100% { opacity: 0; transform: translate3d(calc(var(--sx) * 14rem), calc(var(--sy) * 14rem), 0) scale(0.25); }
 }
 
 @keyframes promo-moments-spark-soft {
   0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.4); }
   20% { opacity: 1; transform: translate3d(calc(var(--sx) * 1.2rem), calc(var(--sy) * 1.2rem), 0) scale(1); }
-  100% { opacity: 0; transform: translate3d(calc(var(--sx) * 6.5rem), calc(var(--sy) * 6.5rem), 0) scale(0.3); }
+  100% { opacity: 0; transform: translate3d(calc(var(--sx) * 10rem), calc(var(--sy) * 10rem), 0) scale(0.3); }
 }
 
 @keyframes promo-moments-burst-check {
