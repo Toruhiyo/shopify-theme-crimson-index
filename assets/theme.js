@@ -191,7 +191,7 @@
   const PROMO_PAIN_CARD_H = 200;
   const PROMO_STORE_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M3.6 10.2 6.1 4.8h11.8l2.5 5.4"/><path d="M4.4 10.2h15.2V19.6H4.4z"/><path d="M10.1 19.6V14h3.8v5.6"/></svg>';
   const PROMO_PAIN_PAD = 24;
-  const PROMO_PAIN_SCROLL_MS = 1800;
+  const PROMO_PAIN_SCROLL_MS = 860;
   const PROMO_PAIN_TYPE_CHAR_MS = 16;
   const PROMO_PAIN_EXIT_MS = 420;
   const PROMO_WINDOW_AIM_MS = 820;
@@ -209,15 +209,15 @@
   const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
-    ['grid', 600],
-    ['enter', 500],
-    ['open', 800],
-    ['back', 500],
+    ['grid', 480],
+    ['enter', 380],
+    ['open', 640],
+    ['back', 320],
     ['scroll-1', PROMO_PAIN_SCROLL_MS],
+    ['open-2', 640],
+    ['back-2', 280],
     ['scroll-2', PROMO_PAIN_SCROLL_MS],
-    ['scroll-3', PROMO_PAIN_SCROLL_MS],
-    ['scroll-4', PROMO_PAIN_SCROLL_MS],
-    ['leave', 500],
+    ['leave', 360],
   ];
   const PROMO_PAIN_B = [
     ['launcher', 600],
@@ -626,10 +626,9 @@
     'sepia(0.2) hue-rotate(78deg) saturate(0.28)',
     'sepia(0.1) hue-rotate(18deg) saturate(0.16)',
   ];
-  const PROMO_GRID_STAGGER_MS = 40;
   const PROMO_GRID_LIFE_MS = 4000;
   const PROMO_GRID_LIFT_MS = 600;
-  const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'scroll-2', 'scroll-3', 'scroll-4', 'leave'];
+  const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'open-2', 'back-2', 'scroll-2', 'scroll-3', 'scroll-4', 'leave'];
   let gridLifeTimer = 0;
 
   const PROMO_SHELF_AT = [
@@ -752,11 +751,6 @@
   function armGridEntrance(board) {
     if (!board || board.dataset.entered || prefersReducedMotion()) return;
     board.dataset.entered = '1';
-    board.classList.add('is-entering');
-    const count = board.querySelectorAll('.promo-moments__card:not(.is-extra)').length;
-    window.setTimeout(() => {
-      board.classList.remove('is-entering');
-    }, count * PROMO_GRID_STAGGER_MS + 520);
   }
 
   function stopGridLife() {
@@ -990,14 +984,14 @@
     board.append(added, plus, outline, celebrate);
     board.querySelector('.promo-moments__cart')?.remove();
     board.querySelector('.promo-moments__fly')?.remove();
+    board.classList.add('is-instant');
     stage.replaceChildren(board);
-    layoutStoreGrid(board);
     return board;
   }
 
   function layoutStoreGrid(board) {
     const stage = board?.parentElement;
-    if (!stage || stage.clientWidth < 240 || stage.clientHeight < 160) return;
+    if (!stage || stage.clientWidth < 240 || stage.clientHeight < 160) return false;
     const shiftRaw = getComputedStyle(board).getPropertyValue('--promo-board-x').trim();
     const shift = shiftRaw.endsWith('rem') ? parseFloat(shiftRaw) * 16 : (parseFloat(shiftRaw) || 0);
     const contentWidth = stage.clientWidth;
@@ -1038,6 +1032,7 @@
     board.dataset.painCols = String(cols);
     board.dataset.painPitch = String(pitchY);
     paintCatalogClay(board);
+    return true;
   }
 
   function applyMomentPose(stage, pose, options = {}) {
@@ -1068,7 +1063,19 @@
       });
     }
     if (label) label.textContent = '';
-    if (pose === 'grid' || pose === 'row' || pose === 'choice') layoutStoreGrid(board);
+    const snapGrid = !board.dataset.gridLaid && (pose === 'grid' || pose === 'row' || pose === 'choice');
+    if (snapGrid) board.classList.add('is-instant');
+    if (pose === 'grid' || pose === 'row' || pose === 'choice') {
+      const laid = layoutStoreGrid(board);
+      if (snapGrid && laid) {
+        board.dataset.gridLaid = '1';
+        void board.offsetWidth;
+        if (!options.instant) {
+          board.classList.remove('is-instant');
+          host?.classList.remove('is-instant');
+        }
+      }
+    }
     if (pose === 'grid') {
       armGridEntrance(board);
       startGridLife(board);
@@ -1126,8 +1133,16 @@
     });
     clearMomentInline(stage);
     board.dataset.pose = '';
-    board.classList.remove('is-settled', 'is-reduced', 'is-instant');
-    host?.classList.remove('is-settled', 'is-reduced', 'is-instant', 'is-vignette-gone');
+    const firstGrid = pose === 'grid' && !board.dataset.gridLaid;
+    board.classList.remove('is-settled', 'is-reduced');
+    host?.classList.remove('is-settled', 'is-reduced', 'is-vignette-gone');
+    if (firstGrid) {
+      board.classList.add('is-instant');
+      host?.classList.add('is-instant');
+    } else {
+      board.classList.remove('is-instant');
+      host?.classList.remove('is-instant');
+    }
     PROMO_MOMENT_POSES.forEach((name) => {
       board.classList.remove(`is-pose-${name}`);
       host?.classList.remove(`is-pose-${name}`);
@@ -1785,7 +1800,7 @@
       this.fitClerk();
       this.dockLogo();
       const board = this.root.querySelector('.promo-moments__board.is-pose-grid');
-      if (board) layoutStoreGrid(board);
+      if (board && this.root.classList.contains('is-moments')) layoutStoreGrid(board);
     }
 
     dockLogo() {
@@ -2120,6 +2135,13 @@
       const canvas = this.root.querySelector('[data-promo-canvas]');
       const store = this.root.querySelector('.promo-opening__store');
       this.root.classList.add('is-moments');
+      const stage = this.momentStage();
+      void stage?.offsetWidth;
+      const laid = stage?.querySelector('.promo-moments__board');
+      if (laid) {
+        delete laid.dataset.gridLaid;
+        applyMomentPose(stage, 'grid', { instant: true });
+      }
       if (!embed || !widget || !canvas || !store) return;
       this.settleClerkRow();
       this.clerkCornerActive = true;
@@ -2808,10 +2830,11 @@
       this.root.style.setProperty('--promo-pain-card', '720ms');
       this.root.style.setProperty('--promo-pain-exit', `${PROMO_PAIN_EXIT_MS}ms`);
       this.ensureMoments();
+      this.root.classList.add('is-pain', 'is-moments');
       const stage = this.momentStage();
+      void stage?.offsetWidth;
       applyMomentPose(stage, 'grid', { instant: true });
       this.ensurePainChrome();
-      this.root.classList.add('is-pain', 'is-moments');
       this.root.classList.remove('is-pain-zoom');
       const host = this.painHost();
       host?.setAttribute('data-promo-pain', '');
@@ -2824,8 +2847,6 @@
       }
       this.root.querySelector('[data-promo-pain-chat]')?.setAttribute('hidden', '');
       this.lockPainChatBox();
-      const laid = stage?.querySelector('.promo-moments__board');
-      if (laid) layoutStoreGrid(laid);
     }
 
     painCols() {
@@ -2955,17 +2976,19 @@
       if (PROMO_PAIN_LIFE_HOLD.includes(beat)) board.dataset.life = 'hold';
       else delete board.dataset.life;
       const browseSlot = beat === 'enter' || beat === 'open' || beat === 'back' ? 0
-        : beat === 'scroll-1' ? 1
+        : beat === 'scroll-1' || beat === 'open-2' || beat === 'back-2' ? 1
           : beat === 'scroll-2' ? 2
             : beat === 'scroll-3' ? 3
               : beat === 'scroll-4' ? 4
                 : -1;
-      const scrollSlot = browseSlot >= 0 ? browseSlot : beat === 'leave' ? 4 : -1;
+      const scrollSlot = browseSlot >= 0 ? browseSlot : beat === 'leave' ? 2 : -1;
       const scrollTarget = scrollSlot < 0 ? 0 : this.painBrowseScroll(scrollSlot);
       const scrollDelta = scene === 'unattended' ? this.setPainScroll(scrollTarget) : 0;
       if (instant && scene === 'unattended') board.offsetWidth;
       host.classList.remove('is-pain-dim');
-      const opened = beat === 'open' ? this.painBrowseCard(0) : null;
+      const opened = beat === 'open' ? this.painBrowseCard(0)
+        : beat === 'open-2' ? this.painBrowseCard(1)
+          : null;
       this.painCards().forEach((card) => {
         card.classList.remove('is-pain-add');
         card.classList.toggle('is-pain-open', card === opened);

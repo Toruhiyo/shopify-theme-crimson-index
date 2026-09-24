@@ -1429,7 +1429,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   pointer-events: none;
 }
@@ -1868,6 +1868,15 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0);
 }
 
+.promo-moments__board.is-pose-grid .promo-moments__photo {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1;
+  background: #F7F6F4;
+}
+
 .promo-moments__card.is-drop { z-index: 1; }
 .promo-moments__card.is-go { z-index: 2; }
 .promo-moments__card.is-other { z-index: 3; }
@@ -2136,6 +2145,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   margin: 0;
   aspect-ratio: auto;
   border-radius: 22px;
+  background: #F7F6F4;
 }
 
 .is-pose-doubt .promo-moments__card.is-pick .promo-moments__meta,
