@@ -876,6 +876,16 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 0.2;
 }
 
+.promo-opening.is-corridor .promo-scale__floor {
+  color: var(--ad-line);
+  opacity: 0.2;
+}
+
+.promo-opening.is-corridor .promo-scale__lane,
+.promo-opening.is-corridor .promo-scale__tile {
+  filter: none;
+}
+
 .promo-scale__floor svg {
   display: block;
   width: 100%;

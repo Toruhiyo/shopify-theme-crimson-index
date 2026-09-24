@@ -244,7 +244,10 @@
     intervalEnd: 1200,
     intervalEaseMs: 12000,
     zSpawn: -6000,
+    zJoin: -2500,
     zExit: 150,
+    floorY: 0.72,
+    laneStaggerMs: 250,
     zEventMin: -200,
     zEventMax: 50,
     zOpaque: -2000,
@@ -1758,23 +1761,27 @@
     return { width, lanes };
   }
 
-  function corridorLaneBorn(id) {
+  function corridorLaneOpenAt(id) {
+    const seen = new Set();
     for (const step of PROMO_CORRIDOR.lanes) {
-      if (step.lanes.some((lane) => lane.id === id)) return step.at;
+      const fresh = step.lanes.filter((lane) => !seen.has(lane.id));
+      step.lanes.forEach((lane) => seen.add(lane.id));
+      const index = fresh.findIndex((lane) => lane.id === id);
+      if (index >= 0) return step.at + index * PROMO_CORRIDOR.laneStaggerMs;
     }
     return 0;
   }
 
+  function corridorLaneBorn(id) {
+    return corridorLaneOpenAt(id);
+  }
+
   function corridorLanePhase(id) {
     if (id === 'c') return 0;
-    const interval = corridorIntervalAt(corridorLaneBorn(id));
-    const order = ['l', 'r', 'll', 'rr', 'ol', 'or'];
-    const slot = Math.max(0, order.indexOf(id));
+    const interval = corridorIntervalAt(corridorLaneOpenAt(id));
     let salt = 17;
     for (let i = 0; i < id.length; i += 1) salt += id.charCodeAt(i) * (i + 3);
-    const jitter = (wallSeededUnit(salt, 29) - 0.5) * 0.1;
-    const unit = (slot + 0.5) / (order.length + 1) + jitter;
-    return Math.min(0.92, Math.max(0.08, unit)) * interval;
+    return wallSeededUnit(salt, 29) * interval;
   }
 
   function corridorEventZ(id, index) {
@@ -1797,6 +1804,7 @@
         born,
         approachMs: corridorApproachAt(born),
         eventZ: corridorEventZ(id, index),
+        startZ: index === 0 ? PROMO_CORRIDOR.zJoin : PROMO_CORRIDOR.zSpawn,
         lead: id === 'c' && index === 0,
       });
       born += corridorIntervalAt(born);
@@ -1815,25 +1823,40 @@
     return ids;
   }
 
+  function corridorStartZ(spawn) {
+    if (Number.isFinite(spawn.startZ)) return spawn.startZ;
+    return spawn.index === 0 ? PROMO_CORRIDOR.zJoin : PROMO_CORRIDOR.zSpawn;
+  }
+
+  function corridorTravelMs(spawn) {
+    const full = PROMO_CORRIDOR.zExit - PROMO_CORRIDOR.zSpawn;
+    const distance = PROMO_CORRIDOR.zExit - corridorStartZ(spawn);
+    return (spawn.approachMs || PROMO_CORRIDOR.approachStart) * distance / full;
+  }
+
   function corridorArriveAt(spawn) {
-    const span = PROMO_CORRIDOR.zExit - PROMO_CORRIDOR.zSpawn;
-    const along = (spawn.eventZ - PROMO_CORRIDOR.zSpawn) / span;
-    return spawn.born + (spawn.approachMs || PROMO_CORRIDOR.approachStart) * along;
+    const start = corridorStartZ(spawn);
+    const span = PROMO_CORRIDOR.zExit - start;
+    const along = (spawn.eventZ - start) / span;
+    return spawn.born + corridorTravelMs(spawn) * along;
   }
 
   function corridorDeathAt(spawn, mode) {
     const arrive = corridorArriveAt(spawn);
-    if (spawn.lead && mode !== 'pitch') return arrive + PROMO_CORRIDOR.arriveHoldMs;
+    if (spawn.lead && mode !== 'pitch') {
+      const nextSecond = Math.ceil((arrive + 1000) / 1000) * 1000;
+      return nextSecond - 1;
+    }
     return arrive;
   }
 
   function corridorZOf(spawn, timeMs) {
-    if (timeMs <= spawn.born) return PROMO_CORRIDOR.zSpawn;
-    const duration = spawn.approachMs || PROMO_CORRIDOR.approachStart;
+    const start = corridorStartZ(spawn);
+    if (timeMs <= spawn.born) return start;
     const arrive = corridorArriveAt(spawn);
     if (timeMs >= arrive) return spawn.eventZ;
-    const along = (timeMs - spawn.born) / duration;
-    return PROMO_CORRIDOR.zSpawn + (PROMO_CORRIDOR.zExit - PROMO_CORRIDOR.zSpawn) * along;
+    const along = (timeMs - spawn.born) / corridorTravelMs(spawn);
+    return start + (PROMO_CORRIDOR.zExit - start) * along;
   }
 
   function corridorHitOf(spawn) {
@@ -1848,20 +1871,28 @@
     return corridorLayout(timeMs).width / PROMO_CORRIDOR.nearWidth;
   }
 
-  function corridorLaneX(id, timeMs, frameWidth) {
-    const lane = corridorLayout(timeMs).lanes.find((item) => item.id === id);
+  function corridorLaneX(id, frameWidth) {
+    const lanes = PROMO_CORRIDOR.lanes[PROMO_CORRIDOR.lanes.length - 1].lanes;
+    const lane = lanes.find((item) => item.id === id);
     return (lane ? lane.x : 0) * frameWidth;
   }
 
-  function corridorOpacity(z) {
-    if (z >= PROMO_CORRIDOR.zOpaque) return 1;
-    const along = (z - PROMO_CORRIDOR.zSpawn) / (PROMO_CORRIDOR.zOpaque - PROMO_CORRIDOR.zSpawn);
-    const unit = Math.min(1, Math.max(0, along));
+  function corridorOpacity(spawn, z) {
+    const start = corridorStartZ(spawn);
+    const span = PROMO_CORRIDOR.zExit - start;
+    const traveled = span ? (z - start) / span : 1;
+    if (traveled >= 1 / 3) return 1;
+    const unit = Math.min(1, Math.max(0, traveled / (1 / 3)));
     return PROMO_CORRIDOR.opacitySpawn + (1 - PROMO_CORRIDOR.opacitySpawn) * unit;
   }
 
   function corridorGroundY(frameHeight) {
-    return frameHeight * (1 - PROMO_CORRIDOR.originY);
+    return frameHeight * (PROMO_CORRIDOR.floorY - PROMO_CORRIDOR.originY);
+  }
+
+  function corridorFloorY(frameHeight, z) {
+    const depth = PROMO_CORRIDOR.perspective / (PROMO_CORRIDOR.perspective - z);
+    return frameHeight * PROMO_CORRIDOR.originY + corridorGroundY(frameHeight) * depth;
   }
 
   function corridorTransform(x, y, z, scale) {
@@ -3701,6 +3732,7 @@
         wall.style.transition = '';
         wall.style.removeProperty('--wall-n');
         wall.style.removeProperty('--wall-scale');
+        delete wall.dataset.cameraLocked;
         wall.replaceChildren();
       }
       const center = this.root.querySelector('.promo-opening__center');
@@ -3993,13 +4025,45 @@
         floor.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>';
         scale.insertBefore(floor, wall);
       }
+      this.lockCorridorCamera(wall);
       let lane = wall.querySelector('[data-promo-lane]');
-      if (lane) return lane;
-      lane = document.createElement('div');
-      lane.className = 'promo-scale__lane';
-      lane.dataset.promoLane = 'true';
-      wall.append(lane);
+      if (!lane) {
+        lane = document.createElement('div');
+        lane.className = 'promo-scale__lane';
+        lane.dataset.promoLane = 'true';
+        wall.append(lane);
+      }
+      this.paintCorridorFloor();
       return lane;
+    }
+
+    lockCorridorCamera(wall) {
+      if (!wall || wall.dataset.cameraLocked === '1') return;
+      wall.style.perspective = `${PROMO_CORRIDOR.perspective}px`;
+      wall.style.perspectiveOrigin = '50% 42%';
+      wall.style.transform = 'none';
+      const computed = getComputedStyle(wall);
+      wall.dataset.cameraPerspective = computed.perspective;
+      wall.dataset.cameraOrigin = computed.perspectiveOrigin;
+      wall.dataset.cameraTransform = computed.transform;
+      wall.dataset.cameraLocked = '1';
+    }
+
+    assertCorridorCamera() {
+      const wall = this.root.querySelector('[data-promo-scale-wall]');
+      if (!wall || wall.dataset.cameraLocked !== '1') return;
+      const computed = getComputedStyle(wall);
+      const moved = computed.perspective !== wall.dataset.cameraPerspective
+        || computed.perspectiveOrigin !== wall.dataset.cameraOrigin
+        || computed.transform !== wall.dataset.cameraTransform;
+      if (moved) {
+        console.error(
+          'Corridor camera moved',
+          computed.perspective,
+          computed.perspectiveOrigin,
+          computed.transform,
+        );
+      }
     }
 
     corridorVideo() {
@@ -4040,10 +4104,10 @@
       };
     }
 
-    paintCorridorFloor(timeMs) {
+    paintCorridorFloor() {
       const svg = this.root.querySelector('.promo-scale__floor svg');
-      if (!svg) return;
-      const layout = corridorLayout(timeMs);
+      if (!svg || svg.dataset.floorLocked === '1') return;
+      const layout = PROMO_CORRIDOR.lanes[PROMO_CORRIDOR.lanes.length - 1];
       const lines = layout.lanes.map((lane) => {
         const center = 50 + lane.x * 100;
         const half = (layout.width * 100) / 2;
@@ -4052,18 +4116,19 @@
         return `<line x1="${left.toFixed(2)}" y1="100" x2="50" y2="42" /><line x1="${right.toFixed(2)}" y1="100" x2="50" y2="42" />`;
       }).join('');
       svg.innerHTML = lines;
+      svg.dataset.floorLocked = '1';
     }
 
     placeAvenueWindow(tile, spawn, state, timeMs, frame) {
       const fit = corridorFit(timeMs);
-      const x = corridorLaneX(spawn.id, timeMs, frame.width);
+      const x = corridorLaneX(spawn.id, frame.width);
       const y = corridorGroundY(frame.height);
       const windowEl = tile.querySelector('.promo-scale__window');
       tile.dataset.z = String(Math.round(state.z));
       tile.dataset.lane = spawn.id;
       tile.dataset.phase = state.phase;
       tile.style.opacity = '1';
-      if (windowEl) windowEl.style.opacity = corridorOpacity(state.z).toFixed(3);
+      if (windowEl) windowEl.style.opacity = corridorOpacity(spawn, state.z).toFixed(3);
       tile.classList.remove('is-shut', 'is-dot', 'is-exit', 'is-husk', 'is-lit');
       if (state.phase === 'travel') {
         tile.classList.remove('is-sold');
@@ -4137,7 +4202,7 @@
       const lane = this.corridorLane();
       lane.innerHTML = '';
       const frame = this.corridorFrame();
-      this.paintCorridorFloor(timeMs);
+      this.assertCorridorCamera();
       corridorLaneIds().forEach((id) => {
         corridorSpawns(id).forEach((spawn) => {
           if (spawn.born > timeMs) return;
@@ -4160,7 +4225,6 @@
       const lane = this.corridorLane();
       lane.innerHTML = '';
       const frame = this.corridorFrame();
-      this.paintCorridorFloor(0);
       const spawn = corridorSpawns('c')[0];
       [-6000, -3200, -800].forEach((z, index) => {
         const copy = { ...spawn, index, lead: index === 0 };
@@ -4185,7 +4249,7 @@
       const step = (now) => {
         if (this.scaleGeneration !== generation) return;
         const elapsed = now - started;
-        this.paintCorridorFloor(elapsed);
+        this.assertCorridorCamera();
         corridorLaneIds().forEach((id) => {
           corridorSpawns(id).forEach((spawn) => {
             if (spawn.born > elapsed) return;
@@ -4247,7 +4311,7 @@
       if (store) store.style.visibility = 'hidden';
       built.tile.getBoundingClientRect();
       built.tile.style.transition = `transform ${PROMO_CORRIDOR.recedeMs}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${PROMO_CORRIDOR.recedeMs}ms linear`;
-      built.tile.style.transform = corridorTransform(0, corridorGroundY(frame.height), PROMO_CORRIDOR.zSpawn, 1);
+      built.tile.style.transform = corridorTransform(0, corridorGroundY(frame.height), PROMO_CORRIDOR.zJoin, 1);
       built.tile.style.opacity = String(PROMO_CORRIDOR.opacitySpawn);
       await waitMs(PROMO_CORRIDOR.recedeMs);
       built.tile.style.transition = 'none';
