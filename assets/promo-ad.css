@@ -830,6 +830,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening.is-scale-zero .promo-scale__wall,
 .promo-opening.is-scale-white .promo-scale__floor,
 .promo-opening.is-scale-zero .promo-scale__floor,
+.promo-opening.is-scale-white .promo-scale__walls,
+.promo-opening.is-scale-zero .promo-scale__walls,
+.promo-opening.is-scale-white .promo-scale__gauge,
+.promo-opening.is-scale-zero .promo-scale__gauge,
 .promo-opening.is-scale-white .promo-scale__residue,
 .promo-opening.is-scale-zero .promo-scale__residue {
   visibility: hidden;
@@ -884,6 +888,47 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   vector-effect: non-scaling-stroke;
 }
 
+.promo-scale__walls {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--bizmis-primary) 70%, transparent), transparent 24%),
+    linear-gradient(270deg, color-mix(in srgb, var(--bizmis-primary) 70%, transparent), transparent 24%);
+}
+
+.promo-opening.is-pitch .promo-scale__walls {
+  opacity: calc(var(--husk-glow, 0) * 0.42);
+}
+
+.promo-scale__gauge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 1px;
+  background: var(--ad-line);
+  pointer-events: none;
+}
+
+.promo-scale__gauge-fill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--ad-red);
+  transform: scaleY(var(--gauge, 0));
+  transform-origin: bottom center;
+}
+
+.promo-opening.is-pitch .promo-scale__gauge-fill {
+  background: var(--bizmis-primary);
+}
+
 .promo-scale__lane {
   position: absolute;
   left: 50%;
@@ -902,6 +947,18 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-scale__tile.is-shut .promo-scale__window {
   border-color: var(--ad-red);
+}
+
+.promo-scale__tile.is-husk .promo-scale__window {
+  border-color: var(--ad-red);
+  border-width: 1px;
+  box-shadow: none;
+  filter: grayscale(1);
+}
+
+.promo-scale__tile.is-husk.is-lit .promo-scale__window {
+  border-color: var(--bizmis-primary);
+  filter: none;
 }
 
 .promo-scale__tile.is-dot .promo-scale__window {
@@ -928,12 +985,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-scale__residue {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  display: none;
 }
 
 .promo-opening:not(.is-scale-still) .promo-scale__tile.is-travel {

@@ -221,6 +221,11 @@
     stroke: 2.5,
     spin: 0,
     readMs: 1100,
+    huskTilt: 82,
+    huskScale: 0.9,
+    huskOpacity: 0.45,
+    huskDrop: 0.46,
+    huskMs: 320,
     flashMs: 90,
     popScale: 1.04,
     dotScale: 0.07,
@@ -1717,17 +1722,24 @@
     return `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) scale(${scale.toFixed(4)})`;
   }
 
-  function corridorMarkPoint(index, frameWidth, frameHeight) {
-    const count = Math.max(2, PROMO_CORRIDOR.runCount);
-    const slot = index % count;
-    const windowW = frameWidth * PROMO_CORRIDOR.nearWidth;
-    const windowH = windowW / PROMO_CORRIDOR.aspect;
-    const left = frameWidth / 2 - windowW / 2;
-    const top = frameHeight * PROMO_CORRIDOR.originY - windowH / 2;
-    return {
-      x: left + (windowW * slot) / (count - 1),
-      y: Math.max(28, top - 42),
-    };
+  function corridorLieAt(index, mode) {
+    const flash = mode === 'pain' ? PROMO_CORRIDOR.flashMs : 0;
+    return corridorHitTime(index) + PROMO_CORRIDOR.readMs + flash;
+  }
+
+  function corridorHuskZ(diedAt, elapsed) {
+    const far = Math.abs(corridorFarZ());
+    const speed = far / Math.max(1, corridorStreamMs());
+    const traveled = Math.max(0, elapsed - diedAt) * speed;
+    return -(traveled + far * 0.06);
+  }
+
+  function corridorHuskTransform(index, frame, z, drop) {
+    const x = corridorStagger(index, frame.width);
+    const y = frame.height * PROMO_CORRIDOR.huskDrop * drop;
+    const tilt = PROMO_CORRIDOR.huskTilt * drop;
+    const scale = 1 + (PROMO_CORRIDOR.huskScale - 1) * drop;
+    return `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateX(${tilt.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
   }
 
   function corridorProject(index, z, frameWidth, frameHeight) {
@@ -1739,96 +1751,6 @@
       scale: projected,
     };
   }
-
-  function createGlassBoard(canvas, mode) {
-    const marks = [];
-    let write = 0;
-    let width = 0;
-    let height = 0;
-    let ink = mode === 'pitch' ? '#f9a353' : '#E5533D';
-
-    function readPaint() {
-      const token = mode === 'pitch' ? '--bizmis-primary' : '--ad-red';
-      const next = getComputedStyle(canvas).getPropertyValue(token).trim();
-      if (next) ink = next;
-    }
-
-    function resize() {
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      width = Math.max(1, Math.round(rect?.width || canvas.clientWidth || 1));
-      height = Math.max(1, Math.round(rect?.height || canvas.clientHeight || 1));
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      const ctx = canvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      readPaint();
-      return { width, height };
-    }
-
-    function release(x, y, index, at) {
-      if (!width) resize();
-      const mark = {
-        x,
-        y,
-        rot: (wallSeededUnit(index, 37) * 2 - 1) * PROMO_CORRIDOR.spin,
-        at,
-        size: PROMO_CORRIDOR.glyph,
-      };
-      if (marks.length < PROMO_CORRIDOR.glassCap) marks.push(mark);
-      else {
-        marks[write % PROMO_CORRIDOR.glassCap] = mark;
-        write += 1;
-      }
-      return mark;
-    }
-
-    function drawMark(ctx, mark, scale) {
-      ctx.strokeStyle = ink;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.lineWidth = PROMO_CORRIDOR.stroke;
-      const arm = mark.size * 0.36 * scale;
-      ctx.beginPath();
-      if (mode === 'pitch') {
-        ctx.moveTo(-arm * 0.72, arm * 0.02);
-        ctx.lineTo(-arm * 0.12, arm * 0.58);
-        ctx.lineTo(arm * 0.82, -arm * 0.52);
-      } else {
-        ctx.moveTo(-arm, -arm);
-        ctx.lineTo(arm, arm);
-        ctx.moveTo(arm, -arm);
-        ctx.lineTo(-arm, arm);
-      }
-      ctx.stroke();
-    }
-
-    function paint(now) {
-      const ctx = canvas.getContext('2d');
-      if (!ctx || !width) return;
-      ctx.clearRect(0, 0, width, height);
-      marks.forEach((mark) => {
-        const t = Math.min(1, Math.max(0, (now - mark.at) / PROMO_CORRIDOR.splatMs));
-        const eased = 1 - (1 - t) * (1 - t);
-        const scale = PROMO_CORRIDOR.splatFrom + (1 - PROMO_CORRIDOR.splatFrom) * eased;
-        ctx.save();
-        ctx.translate(mark.x, mark.y);
-        ctx.rotate((mark.rot * Math.PI) / 180);
-        drawMark(ctx, mark, scale);
-        ctx.restore();
-      });
-    }
-
-    function reset() {
-      marks.length = 0;
-      write = 0;
-      const ctx = canvas.getContext('2d');
-      if (ctx && width) ctx.clearRect(0, 0, width, height);
-    }
-
-    return { mode, marks, resize, release, paint, reset };
-  }
-
 
   function loadPromoStores() {
     const node = document.getElementById('promo-opening-stores');
@@ -3699,12 +3621,7 @@
         if (!caption.textContent) caption.textContent = 'Sold by the chatbot.';
         verdict.replaceChildren(hero, caption);
       }
-      if (!scale.querySelector('[data-promo-residue]')) {
-        const residue = document.createElement('canvas');
-        residue.className = 'promo-scale__residue';
-        residue.setAttribute('data-promo-residue', '');
-        scale.insertBefore(residue, verdict);
-      }
+      scale.querySelector('[data-promo-residue]')?.remove();
       scale.querySelector('.promo-scale__world')?.setAttribute('hidden', '');
       scale.querySelector('.promo-scale__readout')?.setAttribute('hidden', '');
       return wall;
@@ -3941,6 +3858,22 @@
         floor.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="7" y1="100" x2="50" y2="42" /><line x1="93" y1="100" x2="50" y2="42" /></svg>';
         scale.insertBefore(floor, wall);
       }
+      if (scale && !scale.querySelector('[data-promo-walls]')) {
+        const walls = document.createElement('div');
+        walls.className = 'promo-scale__walls';
+        walls.dataset.promoWalls = 'true';
+        scale.insertBefore(walls, wall);
+      }
+      if (scale && !scale.querySelector('[data-promo-gauge]')) {
+        const gauge = document.createElement('div');
+        gauge.className = 'promo-scale__gauge';
+        gauge.dataset.promoGauge = 'true';
+        const fill = document.createElement('span');
+        fill.className = 'promo-scale__gauge-fill';
+        fill.dataset.promoGaugeFill = 'true';
+        gauge.append(fill);
+        scale.append(gauge);
+      }
       let lane = wall.querySelector('[data-promo-lane]');
       if (lane) return lane;
       lane = document.createElement('div');
@@ -4013,6 +3946,10 @@
       ranked.forEach(({ tile }) => {
         const video = tile.querySelector('video');
         if (!video) return;
+        if (tile.classList.contains('is-husk')) {
+          video.pause?.();
+          return;
+        }
         if (playing < PROMO_CORRIDOR.liveCount && !tile.classList.contains('is-dot')) {
           video.loop = true;
           if (video.paused) video.play?.().catch(() => {});
@@ -4023,27 +3960,24 @@
       });
     }
 
-    ensureGlass(mode) {
-      const board = this.ensureResidue(mode);
-      if (board.mode !== mode) return this.ensureResidue(mode, true);
-      return board;
-    }
-
-    markGlass(mode, x, y, index, at) {
-      const board = this.ensureGlass(mode);
-      board.resize();
-      board.release(x, y, index, at);
-      board.paint(at + PROMO_CORRIDOR.splatMs);
+    setCorridorGauge(events) {
+      const scale = this.root.querySelector('[data-promo-scale]');
+      const fill = scale?.querySelector('[data-promo-gauge-fill]');
+      const ratio = Math.min(1, events / Math.max(1, PROMO_CORRIDOR.runCount));
+      if (fill) fill.style.setProperty('--gauge', ratio.toFixed(4));
+      scale?.style.setProperty('--husk-glow', ratio.toFixed(4));
     }
 
     poseCorridorWindow(tile, mode, z, elapsed, spawn) {
       const frame = tile.querySelector('.promo-scale__window');
       if (!frame) return;
       const hit = corridorHitTime(spawn.index);
-      const since = elapsed - hit - PROMO_CORRIDOR.readMs;
+      const lieAt = corridorLieAt(spawn.index, mode);
+      tile.classList.remove('is-shut', 'is-dot', 'is-exit', 'is-husk', 'is-lit');
+      tile.style.transformOrigin = '50% 50%';
       frame.style.transform = '';
-      tile.classList.remove('is-shut', 'is-dot', 'is-sold', 'is-exit');
-      if (since < 0) {
+      if (elapsed < hit + PROMO_CORRIDOR.readMs) {
+        tile.classList.remove('is-sold');
         if (mode === 'pitch' && elapsed >= hit) {
           tile.classList.add('is-sold');
           const cart = tile.querySelector('.promo-scale__cart');
@@ -4051,73 +3985,55 @@
         }
         return;
       }
-      const box = this.corridorFrame();
-      const x = corridorStagger(spawn.index, box.width);
-      if (mode === 'pitch') {
-        tile.classList.add('is-sold');
-        const cart = tile.querySelector('.promo-scale__cart');
-        if (cart) cart.textContent = '1';
-        const t = Math.min(1, since / PROMO_CORRIDOR.exitMs);
-        const eased = 1 - (1 - t) ** 3;
-        const past = z + (PROMO_CORRIDOR.perspective * 0.42 - z) * eased;
-        const sign = Math.sign(x || 1);
-        const drift = x + sign * box.width * 0.95 * eased;
-        tile.style.transform = corridorTransform(drift, past, 1);
-        tile.classList.add('is-exit');
-        const center = box.width / 2 + drift * (PROMO_CORRIDOR.perspective / (PROMO_CORRIDOR.perspective - past));
-        if (center < -box.width * 0.15 || center > box.width * 1.15 || t >= 1) tile.remove();
-        return;
-      }
-      if (since < PROMO_CORRIDOR.flashMs) {
+      if (elapsed < lieAt) {
         tile.classList.add('is-shut');
-        tile.style.transform = corridorTransform(x, z, 1);
         return;
       }
-      tile.remove();
+      const huskZ = corridorHuskZ(lieAt, elapsed);
+      if (huskZ < corridorFarZ()) {
+        tile.remove();
+        return;
+      }
+      const drop = Math.min(1, (elapsed - lieAt) / PROMO_CORRIDOR.huskMs);
+      const box = this.corridorFrame();
+      tile.classList.add('is-husk');
+      tile.classList.toggle('is-lit', mode === 'pitch');
+      if (mode === 'pitch') tile.classList.add('is-sold');
+      tile.dataset.husk = '1';
+      tile.dataset.z = String(huskZ);
+      tile.style.opacity = String(PROMO_CORRIDOR.huskOpacity);
+      tile.style.transformOrigin = '50% 100%';
+      tile.style.transform = corridorHuskTransform(spawn.index, box, huskZ, drop);
     }
 
-    paintCorridorAt(timeMs, mode = 'pain', markLimit) {
+    paintCorridorAt(timeMs, mode = 'pain') {
       const lane = this.corridorLane();
       lane.innerHTML = '';
-      const glass = this.ensureGlass(mode);
-      glass.reset();
-      glass.resize();
       const frame = this.corridorFrame();
-      const cap = markLimit ?? PROMO_CORRIDOR.glassCap;
-      let marks = 0;
+      let events = 0;
       const count = Math.floor(corridorDistanceAt(timeMs) / corridorGapZ()) + 3;
       for (let index = 0; index < count && index < PROMO_CORRIDOR.runCount; index += 1) {
         const born = corridorSpawnAt(index);
         if (born > timeMs) break;
         const spawn = this.corridorSpawn(index, mode);
-        const z = Math.min(spawn.eventZ, corridorZAt(index, timeMs));
         const hit = corridorHitTime(index);
-        const acted = hit + PROMO_CORRIDOR.readMs;
-        const gone = mode === 'pain'
-          ? timeMs > acted + PROMO_CORRIDOR.flashMs
-          : timeMs > acted + PROMO_CORRIDOR.exitMs * 0.85;
-        if (gone) {
-          if (marks < cap) {
-            const point = corridorMarkPoint(index, frame.width, frame.height);
-            glass.release(point.x, point.y, index, performance.now() - Math.max(0, timeMs - hit));
-            marks += 1;
-          }
-          continue;
-        }
+        const lieAt = corridorLieAt(index, mode);
+        if (timeMs >= lieAt) events += 1;
+        const huskZ = corridorHuskZ(lieAt, timeMs);
+        if (timeMs >= lieAt && huskZ < corridorFarZ()) continue;
         const built = this.buildConveyorWindow(spawn, frame.width, mode);
         lane.appendChild(built.tile);
-        const shownZ = timeMs >= hit ? spawn.eventZ : z;
+        const shownZ = timeMs >= hit ? spawn.eventZ : Math.min(spawn.eventZ, corridorZAt(index, timeMs));
         this.placeCorridorWindow(built.tile, index, shownZ, frame);
         this.poseCorridorWindow(built.tile, mode, shownZ, timeMs, spawn);
       }
-      glass.paint(performance.now());
+      this.setCorridorGauge(events);
       this.syncCorridorLoops(lane);
     }
 
     paintCorridorStatic(mode = 'pain') {
       const lane = this.corridorLane();
       lane.innerHTML = '';
-      this.ensureGlass(mode).reset();
       const frame = this.corridorFrame();
       [0.22, 0.55, 0.86].forEach((mix, index) => {
         const spawn = this.corridorSpawn(index, mode);
@@ -4126,63 +4042,50 @@
         lane.appendChild(built.tile);
         this.placeCorridorWindow(built.tile, index, z, frame);
       });
+      this.setCorridorGauge(0);
     }
 
     runCorridor(mode, leadTile) {
       const generation = this.scaleGeneration;
       const lane = this.corridorLane();
-      const glass = this.ensureGlass(mode);
-      glass.reset();
-      glass.resize();
       const frame = this.corridorFrame();
       const started = performance.now();
       const tiles = new Map();
-      const marked = new Set();
+      const clicked = new Set();
       if (leadTile) tiles.set(0, leadTile);
       const step = (now) => {
         if (this.scaleGeneration !== generation) return;
         const elapsed = now - started;
         const distance = corridorDistanceAt(elapsed);
         const visible = Math.floor(distance / corridorGapZ()) + 3;
+        let events = 0;
         for (let index = 0; index < visible && index < PROMO_CORRIDOR.runCount; index += 1) {
           if (corridorSpawnAt(index) > elapsed) continue;
           const spawn = this.corridorSpawn(index, mode);
           let tile = tiles.get(index);
           const hit = corridorHitTime(index);
+          const lieAt = corridorLieAt(index, mode);
           const z = elapsed >= hit ? spawn.eventZ : corridorZAt(index, elapsed);
+          if (elapsed >= lieAt) events += 1;
           if (!tile || !tile.isConnected) {
-            if (elapsed >= hit + PROMO_CORRIDOR.readMs + PROMO_CORRIDOR.flashMs && mode === 'pain') continue;
-            if (elapsed >= hit + PROMO_CORRIDOR.readMs + PROMO_CORRIDOR.exitMs && mode === 'pitch') continue;
+            if (elapsed >= lieAt) continue;
             tile = this.buildConveyorWindow(spawn, frame.width, mode).tile;
             lane.appendChild(tile);
             tiles.set(index, tile);
           }
-          const alive = tile.isConnected;
           this.placeCorridorWindow(tile, index, z, frame);
           this.poseCorridorWindow(tile, mode, z, elapsed, spawn);
-          if (alive && !tile.isConnected && !marked.has(index)) {
-            marked.add(index);
-            const point = corridorMarkPoint(index, frame.width, frame.height);
-            glass.release(point.x, point.y, index, now);
+          if (tile.dataset.husk === '1' && !clicked.has(index)) {
+            clicked.add(index);
             this.emitClick();
           }
           if (!tile.isConnected) tiles.delete(index);
         }
-        glass.paint(now);
+        this.setCorridorGauge(events);
         this.syncCorridorLoops(lane);
         if (elapsed < corridorStreamMs()) this.conveyorFrame = requestAnimationFrame(step);
       };
       this.conveyorFrame = requestAnimationFrame(step);
-    }
-
-    ensureResidue(mode) {
-      const canvas = this.root.querySelector('[data-promo-residue]');
-      if (!canvas) {
-        const noop = () => {};
-        return { mode, marks: [], resize: () => ({}), release: noop, paint: noop, reset: noop };
-      }
-      if (!this.residue || this.residue.mode !== mode) this.residue = createGlassBoard(canvas, mode);
-      return this.residue;
     }
 
     async recedeStageIntoCorridor(mode) {
@@ -4502,9 +4405,10 @@
       if (shot === 'event') this.paintCorridorAt(corridorHitTime(0) + PROMO_CORRIDOR.readMs + 16, mode);
       if (shot === 'mid') this.paintCorridorAt(corridorHitTime(PROMO_CORRIDOR.midWindows), mode);
       if (shot.startsWith('residue-')) {
-        let count = shot === 'residue-full' ? PROMO_CORRIDOR.glassCap : Number(shot.slice('residue-'.length));
+        let count = shot === 'residue-full' ? PROMO_CORRIDOR.runCount : Number(shot.slice('residue-'.length));
         if (shot === 'residue-10') count = 20;
-        this.paintCorridorAt(corridorHitTime(Math.max(0, count - 1)) + PROMO_CORRIDOR.splatMs, mode, count);
+        count = Math.min(PROMO_CORRIDOR.runCount, Math.max(1, count));
+        this.paintCorridorAt(corridorLieAt(count - 1, mode) + PROMO_CORRIDOR.huskMs, mode);
       }
       if (shot === 'white' || shot === 'end') this.root.classList.add('is-scale-white');
       if (shot === 'end') {
