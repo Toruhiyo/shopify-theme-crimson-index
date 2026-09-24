@@ -666,7 +666,32 @@
   const PROMO_ROW_CLERK_LANE = 220;
   const PROMO_COMPARE_RESERVE = 124;
   const PROMO_ROW_GAP = 20;
-  const PROMO_CLAY_KINDS = ['sphere', 'cube', 'rounded-cube', 'cylinder', 'low-cylinder', 'tall-box', 'cone', 'capsule', 'torus', 'dome'];
+  const PROMO_CLAY_KINDS = ['sphere', 'cube', 'rounded-cube', 'cylinder', 'low-cylinder', 'tall-box', 'cone', 'capsule', 'torus', 'dome', 'hemisphere', 'tall-prism', 'puck', 'octahedron', 'jar', 'tri-prism', 'squircle', 'ovoid', 'frustum', 'pyramid', 'sphere-disc', 'flat-torus'];
+  const PROMO_CLAY_SINGLE = new Set(['hemisphere', 'tall-prism', 'puck', 'octahedron', 'jar', 'tri-prism', 'squircle', 'ovoid', 'frustum', 'pyramid', 'sphere-disc', 'flat-torus']);
+  const PROMO_CLAY_TINT = {
+    sphere: 'stone',
+    cube: 'sand',
+    'rounded-cube': 'warm-grey',
+    cylinder: 'sage',
+    'low-cylinder': 'off-white',
+    'tall-box': 'blush',
+    cone: 'sand',
+    capsule: 'stone',
+    torus: 'stone',
+    dome: 'warm-grey',
+    hemisphere: 'sand',
+    'tall-prism': 'sage',
+    puck: 'off-white',
+    octahedron: 'warm-grey',
+    jar: 'blush',
+    'tri-prism': 'stone',
+    squircle: 'sand',
+    ovoid: 'sage',
+    frustum: 'off-white',
+    pyramid: 'warm-grey',
+    'sphere-disc': 'blush',
+    'flat-torus': 'stone',
+  };
   const PROMO_CLAY_TURNS = ['m20', '0', 'p20'];
   const PROMO_CLAY_FINISHES = ['matte', 'satin'];
   const PROMO_CLAY_SCALES = [0.8, 0.86, 0.92, 0.98, 1.04, 1.1];
@@ -735,6 +760,37 @@
     return `${base}promo-product-${key}.png`;
   }
 
+  function clayTintOf(kind) {
+    return PROMO_CLAY_TINT[kind] || 'stone';
+  }
+
+  function tintsClash(left, right) {
+    if (!left || !right) return false;
+    if (left === right) return true;
+    return (left === 'blush' && right === 'sage') || (left === 'sage' && right === 'blush');
+  }
+
+  function catalogNeighbors(index, cols, count) {
+    const neighbors = [];
+    if (index % cols) neighbors.push(index - 1);
+    if (index % cols < cols - 1 && index + 1 < count) neighbors.push(index + 1);
+    if (index >= cols) neighbors.push(index - cols);
+    if (index + cols < count) neighbors.push(index + cols);
+    return neighbors;
+  }
+
+  function makeCatalogLook(kind, rand) {
+    const single = PROMO_CLAY_SINGLE.has(kind);
+    return {
+      kind,
+      turn: single ? '0' : PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
+      finish: PROMO_CLAY_FINISHES[Math.floor(rand() * PROMO_CLAY_FINISHES.length)],
+      scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
+      tint: clayTintOf(kind),
+      file: single ? kind : undefined,
+    };
+  }
+
   function catalogLooks(count, cols) {
     const rand = mulberry32(PROMO_CATALOG_SEED);
     const heroes = [PROMO_MOMENT_GO_INDEX, PROMO_MOMENT_OTHER_INDEX, PROMO_MOMENT_PICK_INDEX];
@@ -742,27 +798,48 @@
     const looks = [];
     for (let index = 0; index < count; index += 1) {
       const column = index % cols;
-      const blocked = new Set();
-      if (column > 0) blocked.add(kinds[index - 1]);
-      if (index >= cols) blocked.add(kinds[index - cols]);
+      const blockedKinds = new Set();
+      const blockedTints = new Set();
+      const note = (other) => {
+        if (other == null || other < 0) return;
+        blockedKinds.add(kinds[other]);
+        blockedTints.add(clayTintOf(kinds[other]));
+        if (clayTintOf(kinds[other]) === 'blush') blockedTints.add('sage');
+        if (clayTintOf(kinds[other]) === 'sage') blockedTints.add('blush');
+      };
+      if (column > 0) note(index - 1);
+      if (index >= cols) note(index - cols);
       if (heroes.includes(index)) {
         heroes.forEach((hero) => {
-          if (hero < index) blocked.add(kinds[hero]);
+          if (hero < index) blockedKinds.add(kinds[hero]);
         });
       }
-      const options = PROMO_CLAY_KINDS.filter((kind) => !blocked.has(kind));
-      const kind = options[Math.floor(rand() * options.length)];
+      const tinted = PROMO_CLAY_KINDS.filter((kind) => !blockedKinds.has(kind) && !blockedTints.has(clayTintOf(kind)));
+      const pool = tinted.length ? tinted : PROMO_CLAY_KINDS.filter((kind) => !blockedKinds.has(kind));
+      const kind = pool[Math.floor(rand() * pool.length)];
       kinds.push(kind);
-      looks.push({
-        kind,
-        turn: PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
-        finish: PROMO_CLAY_FINISHES[Math.floor(rand() * PROMO_CLAY_FINISHES.length)],
-        scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
-      });
+      looks.push(makeCatalogLook(kind, rand));
     }
     looks[PROMO_MOMENT_GO_INDEX] = lookForTint(PROMO_COMPARE_SHAPES.go, PROMO_COMPARE_TINT);
     looks[PROMO_MOMENT_PICK_INDEX] = lookForTint(PROMO_COMPARE_SHAPES.pick, PROMO_COMPARE_TINT);
     looks[PROMO_MOMENT_OTHER_INDEX] = lookForTint(PROMO_COMPARE_SHAPES.other, PROMO_COMPARE_TINT);
+    kinds[PROMO_MOMENT_GO_INDEX] = looks[PROMO_MOMENT_GO_INDEX].kind;
+    kinds[PROMO_MOMENT_PICK_INDEX] = looks[PROMO_MOMENT_PICK_INDEX].kind;
+    kinds[PROMO_MOMENT_OTHER_INDEX] = looks[PROMO_MOMENT_OTHER_INDEX].kind;
+    const locked = new Set(heroes);
+    for (let pass = 0; pass < 8; pass += 1) {
+      for (let index = 0; index < count; index += 1) {
+        if (locked.has(index)) continue;
+        const neighbors = catalogNeighbors(index, cols, count);
+        const clash = neighbors.some((other) => looks[other].kind === looks[index].kind || tintsClash(looks[other].tint, looks[index].tint));
+        if (!clash) continue;
+        const options = PROMO_CLAY_KINDS.filter((kind) => neighbors.every((other) => looks[other].kind !== kind && !tintsClash(looks[other].tint, clayTintOf(kind))));
+        if (!options.length) continue;
+        const kind = options[index % options.length];
+        looks[index] = makeCatalogLook(kind, () => 0);
+        kinds[index] = kind;
+      }
+    }
     return looks;
   }
 
