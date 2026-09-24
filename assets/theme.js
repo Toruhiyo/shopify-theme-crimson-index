@@ -227,7 +227,7 @@
     splatMs: 120,
     splatFrom: 1.3,
     aspect: 8 / 5,
-    followScale: 0.62,
+    followScale: 0.34,
     recedeMs: 820,
     holdMs: 420,
     midWindows: 6,
@@ -1713,6 +1713,17 @@
 
   function corridorTransform(x, z, scale) {
     return `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) scale(${scale.toFixed(4)})`;
+  }
+
+  function corridorMarkPoint(index, frameWidth, frameHeight) {
+    const projected = corridorProject(index, corridorEventZ(index), frameWidth, frameHeight);
+    const windowH = frameWidth * PROMO_CORRIDOR.nearWidth / PROMO_CORRIDOR.aspect;
+    const jitterX = (wallSeededUnit(index, 53) * 2 - 1) * frameWidth * 0.025;
+    const jitterY = (wallSeededUnit(index, 71) * 2 - 1) * 12;
+    return {
+      x: projected.x + jitterX,
+      y: projected.y - windowH / 2 - 26 + jitterY,
+    };
   }
 
   function corridorProject(index, z, frameWidth, frameHeight) {
@@ -3839,7 +3850,7 @@
       const height = Math.round(width / PROMO_CONVEYOR.aspect);
       const naturalW = this.neutralStageWidth;
       const naturalH = this.neutralStageHeight || Math.round(naturalW / PROMO_CONVEYOR.aspect);
-      const scale = Math.max(width / naturalW, height / naturalH);
+      const scale = Math.min(width / naturalW, height / naturalH);
       const clone = this.neutralStage.cloneNode(true);
       clone.classList.add('is-belt-stage');
       clone.style.position = 'absolute';
@@ -3903,7 +3914,7 @@
     mountCorridorStore(frame, clone, width, height) {
       const naturalW = Number(clone.dataset.naturalW) || width;
       const naturalH = Number(clone.dataset.naturalH) || height;
-      const scale = Math.max(width / naturalW, height / naturalH);
+      const scale = Math.min(width / naturalW, height / naturalH);
       clone.classList.add('is-belt-stage');
       clone.style.position = 'absolute';
       clone.style.width = `${naturalW}px`;
@@ -4055,8 +4066,7 @@
       const eased = 1 - (1 - collapse) ** 5;
       const scale = PROMO_CORRIDOR.popScale + (PROMO_CORRIDOR.dotScale - PROMO_CORRIDOR.popScale) * eased;
       tile.style.transform = corridorTransform(x, z, scale);
-      tile.classList.add(scale < 0.22 ? 'is-dot' : 'is-shut');
-      if (scale < 0.12) tile.remove();
+      if (scale < 0.55) tile.remove();
     }
 
     paintCorridorAt(timeMs, mode = 'pain', markLimit) {
@@ -4075,15 +4085,16 @@
         const spawn = this.corridorSpawn(index, mode);
         const z = Math.min(spawn.eventZ, corridorZAt(index, timeMs));
         const hit = corridorHitTime(index);
-        const markedAt = hit + PROMO_CORRIDOR.flashMs;
-        if (timeMs >= markedAt) {
+        const gone = mode === 'pain'
+          ? timeMs > hit + PROMO_CORRIDOR.flashMs + PROMO_CORRIDOR.collapseMs * 0.45
+          : timeMs > hit + PROMO_CORRIDOR.exitMs * 0.4;
+        if (gone) {
           if (marks < cap) {
-            const point = corridorProject(index, spawn.eventZ, frame.width, frame.height);
-            glass.release(point.x, point.y, index, performance.now() - Math.max(0, timeMs - markedAt));
+            const point = corridorMarkPoint(index, frame.width, frame.height);
+            glass.release(point.x, point.y, index, performance.now() - Math.max(0, timeMs - hit));
             marks += 1;
           }
-          if (mode === 'pain' && timeMs > hit + PROMO_CORRIDOR.flashMs + PROMO_CORRIDOR.collapseMs) continue;
-          if (mode === 'pitch' && timeMs > hit + PROMO_CORRIDOR.exitMs) continue;
+          continue;
         }
         const built = this.buildConveyorWindow(spawn, frame.width, mode);
         lane.appendChild(built.tile);
@@ -4138,14 +4149,15 @@
             lane.appendChild(tile);
             tiles.set(index, tile);
           }
-          if (!marked.has(index) && elapsed >= hit + PROMO_CORRIDOR.flashMs) {
+          const alive = tile.isConnected;
+          this.placeCorridorWindow(tile, index, z, frame);
+          this.poseCorridorWindow(tile, mode, z, elapsed, spawn);
+          if (alive && !tile.isConnected && !marked.has(index)) {
             marked.add(index);
-            const point = corridorProject(index, spawn.eventZ, frame.width, frame.height);
+            const point = corridorMarkPoint(index, frame.width, frame.height);
             glass.release(point.x, point.y, index, now);
             this.emitClick();
           }
-          this.placeCorridorWindow(tile, index, z, frame);
-          this.poseCorridorWindow(tile, mode, z, elapsed, spawn);
           if (!tile.isConnected) tiles.delete(index);
         }
         glass.paint(now);
