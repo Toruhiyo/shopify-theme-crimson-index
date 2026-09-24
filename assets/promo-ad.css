@@ -942,6 +942,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening.is-corridor .promo-scale__tile {
   top: 0;
   left: 0;
+  transform-origin: 50% 100%;
   will-change: transform;
 }
 
@@ -963,6 +964,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-scale__tile.is-dot .promo-scale__window {
   border-color: var(--ad-red);
+  border-radius: 50%;
+  background: var(--ad-red);
+  box-shadow: none;
+}
+
+.promo-scale__tile.is-dot .promo-scale__window > * {
+  visibility: hidden;
+}
+
+.promo-opening.is-corridor .promo-scale__window,
+.promo-opening.is-corridor .promo-scale__window video,
+.promo-opening.is-corridor .promo-scale__window img {
+  filter: none;
 }
 
 .promo-opening.is-scale-white .promo-opening__widget,
