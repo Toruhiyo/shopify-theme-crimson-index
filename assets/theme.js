@@ -197,9 +197,9 @@
   const PROMO_PAIN_SCROLL_MS = 860;
   const PROMO_PAIN_TYPE_CHAR_MS = 16;
   const PROMO_PAIN_EXIT_MS = 420;
-  const PROMO_WINDOW_AIM_MS = 820;
+  const PROMO_WINDOW_AIM_MS = 1600;
   const PROMO_WINDOW_LEAVE_MS = 400;
-  const PROMO_WINDOW_HOLD_MS = 600;
+  const PROMO_WINDOW_HOLD_MS = 560;
   const PROMO_WINDOW_CLOSE_MS = 760;
   const PROMO_SCALE_SNAP_CLASS_MS = 50;
   const PROMO_SCALE_WHITE_MS = 200;
@@ -210,7 +210,8 @@
     travelLine: 0.45,
     sizeStart: 0.4,
     sizeEnd: 0.18,
-    intervals: [4000, 2800, 2000, 1400, 1000, 720],
+    intervals: [11000, 7800, 5600, 4000, 2900, 2100, 1600, 1200],
+    leadEdge: 0.4,
     gap: 0.03,
     eventJitter: 0.06,
     glyphSize: 18,
@@ -224,15 +225,15 @@
     fallMax: 700,
     riseMs: 600,
     flashMs: 33,
-    puffMs: 180,
-    burstMs: 300,
+    puffMs: 520,
+    burstMs: 680,
     aspect: 8 / 5,
     liveCount: 4,
-    painStreamMs: 12000,
+    painStreamMs: 16000,
     pitchStreamMs: 18000,
-    midMs: 8800,
+    midMs: 19000,
     stillSec: 1.15,
-    glideMs: 1200,
+    glideMs: 1100,
     ringMs: 200,
   };
   const PROMO_CONVEYOR_INTERVALS = PROMO_CONVEYOR.intervals;
@@ -3541,12 +3542,15 @@
       cursor.style.transitionDuration = '';
     }
 
-    async closePainWindow() {
+    async dismissPainStage() {
+      if (!this.root.classList.contains('is-pain')) return;
       const store = this.painStore();
       const cursor = this.root.querySelector('[data-promo-pain-cursor]');
       const dot = store?.querySelector('[data-promo-window-close]');
       if (!store || !cursor || !dot || prefersReducedMotion()) {
-        if (store) store.style.visibility = 'hidden';
+        this.root.classList.add('is-pain-out');
+        if (!prefersReducedMotion()) await waitMs(PROMO_PAIN_EXIT_MS);
+        this.releasePainStage();
         return;
       }
       cursor.hidden = false;
@@ -3560,7 +3564,6 @@
       this.root.style.setProperty('--promo-window-close', `${PROMO_WINDOW_CLOSE_MS}ms`);
       cursor.style.transitionDuration = '';
       const aim = this.painCursorPoint(dot);
-      if (!aim) return;
       cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
       cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
       cursor.style.opacity = '1';
@@ -3575,11 +3578,6 @@
       }, Math.round(PROMO_WINDOW_CLOSE_MS * 0.62));
       await waitMs(PROMO_WINDOW_CLOSE_MS);
       store.style.visibility = 'hidden';
-    }
-
-    async dismissPainStage() {
-      if (!this.root.classList.contains('is-pain')) return;
-      await this.closePainWindow();
       this.releasePainStage();
     }
 
@@ -3934,8 +3932,8 @@
       if (!wall) return;
       const stream = conveyorStreamMs(mode);
       const preview = conveyorSpawns(stream);
-      const handoff = stageTile && preview[0]
-        ? conveyorHit(preview, preview[0], PROMO_CONVEYOR.sizeStart)
+      const handoff = preview[0]
+        ? conveyorHit(preview, preview[0], PROMO_CONVEYOR.leadEdge)
         : 0;
       const horizon = handoff + stream;
       const spawns = conveyorSpawns(horizon);
@@ -3943,6 +3941,13 @@
       if (stageTile) tiles.set(0, stageTile);
       const board = this.ensureResidue(mode);
       board?.resize();
+      if (mode === 'pain') {
+        this.releaseConveyorGlyph(
+          { index: 9001, eventX: 0.5 },
+          mode,
+          this.openingResidueAt || performance.now(),
+        );
+      }
       const started = performance.now() - handoff;
       const life = PROMO_CONVEYOR_PUFF_LIFE_MS;
       const tick = () => {
@@ -4122,14 +4127,50 @@
       }
     }
 
+    async aimCursorAtWindowClose() {
+      const store = this.painStore();
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const dot = store?.querySelector('[data-promo-window-close]');
+      if (!store || !cursor || !dot) return;
+      cursor.hidden = false;
+      cursor.style.transitionDuration = '0ms';
+      cursor.style.opacity = '0';
+      cursor.style.setProperty('--pain-x', `${Math.round(store.clientWidth * 0.42)}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(store.clientHeight * 0.58)}px`);
+      cursor.getBoundingClientRect();
+      cursor.style.transitionDuration = '';
+      cursor.style.opacity = '1';
+      await waitMs(320);
+      this.root.style.setProperty('--promo-pain-ease', 'cubic-bezier(0.45, 0, 0.2, 1)');
+      this.root.style.setProperty('--promo-pain-open', `${PROMO_WINDOW_AIM_MS}ms`);
+      const aim = this.painCursorPoint(dot);
+      if (!aim) return;
+      cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
+      cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
+      this.pinWindowCloseOrigin();
+      this.root.classList.add('is-window-aim');
+      await waitMs(PROMO_WINDOW_AIM_MS + PROMO_WINDOW_HOLD_MS);
+      this.emitClick();
+    }
+
     async playScaleTimeline() {
       const generation = this.scaleGeneration;
-      await this.closePainWindow();
+      await this.aimCursorAtWindowClose();
+      if (generation !== this.scaleGeneration) return;
+      const started = performance.now();
+      const until = async (mark) => {
+        const wait = mark - (performance.now() - started);
+        if (wait > 0) await waitMs(wait);
+      };
+      this.puffPainStore();
+      await until(PROMO_CONVEYOR_PUFF_LIFE_MS);
       if (generation !== this.scaleGeneration) return;
       this.hideScaleStore();
       this.revealScaleLayer();
-      this.runConveyor(generation, this.conveyorFrameWidth());
-      await waitMs(PROMO_CONVEYOR.painStreamMs);
+      const frameWidth = this.conveyorFrameWidth();
+      this.runConveyor(generation, frameWidth);
+      const cut = PROMO_CONVEYOR_PUFF_LIFE_MS + PROMO_CONVEYOR_STREAM_MS;
+      await until(cut);
       if (generation !== this.scaleGeneration) return;
       await this.playConveyorEnd('pain');
     }
@@ -4270,7 +4311,7 @@
       const spawns = conveyorSpawns(conveyorStreamMs(mode));
       const first = spawns[0];
       const shot = kind === 'puff' ? 'event' : (kind === 'stream' ? 'residue-full' : (kind === 'zero' ? 'end' : kind));
-      if (shot === 'travel') this.paintConveyorAt(conveyorHit(spawns, first, 0.22), mode);
+      if (shot === 'travel') this.paintConveyorAt(conveyorHit(spawns, first, PROMO_CONVEYOR.leadEdge), mode);
       if (shot === 'event') {
         const at = mode === 'pitch'
           ? first.death + 180

@@ -982,7 +982,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening:not(.is-scale-still) .promo-puff__host.is-puff .promo-puff__body {
   animation:
     promo-scale-flash var(--promo-puff-flash, 33ms) linear,
-    promo-scale-puff var(--promo-puff-ms, 180ms) linear var(--promo-puff-flash, 33ms) both;
+    promo-scale-puff var(--promo-puff-ms, 520ms) linear var(--promo-puff-flash, 33ms) both;
   transition: none;
   transform-origin: center center;
 }
@@ -992,7 +992,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening:not(.is-scale-still) .promo-puff__host.is-puff .promo-scale__speck {
-  animation: promo-scale-speck var(--promo-puff-burst, 300ms) linear var(--promo-puff-flash, 33ms) forwards;
+  animation: promo-scale-speck var(--promo-puff-burst, 680ms) linear var(--promo-puff-flash, 33ms) forwards;
 }
 
 .promo-opening.is-scale-still .promo-scale__tile {
