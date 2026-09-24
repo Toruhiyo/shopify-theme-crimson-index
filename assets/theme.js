@@ -201,28 +201,23 @@
   const PROMO_WINDOW_LEAVE_MS = 400;
   const PROMO_WINDOW_HOLD_MS = 600;
   const PROMO_WINDOW_CLOSE_MS = 760;
-  const PROMO_SCALE_SNAP_MS = 60;
-  const PROMO_SCALE_COLLAPSE_MS = 120;
   const PROMO_SCALE_SNAP_CLASS_MS = 50;
-  const PROMO_SCALE_STACK_START_MS = 300;
-  const PROMO_SCALE_SCENE_MS = 5000;
-  const PROMO_SCALE_ZERO_LAG_MS = 300;
+  const PROMO_SCALE_SHRINK_MS = 400;
+  const PROMO_SCALE_STEP_MS = 500;
+  const PROMO_SCALE_BUILD_MS = 2600;
+  const PROMO_SCALE_FREEZE_MS = 1000;
+  const PROMO_SCALE_WHITE_MS = 200;
+  const PROMO_SCALE_HOLD_MS = 1000;
   const PROMO_SCALE_FADE_MS = 250;
-  const PROMO_SCALE_COUNT = 61;
-  const PROMO_SCALE_REVEAL_AT = 19;
-  const PROMO_SCALE_FADE_BY = 60;
-  const PROMO_SCALE_LOST = 1240;
-  const PROMO_SCALE_INTERVAL_START_MS = 220;
-  const PROMO_SCALE_INTERVAL_END_MS = 20;
-  const PROMO_SCALE_GAP_POWER = 3.5;
-  const PROMO_SCALE_Z_PX = 28;
-  const PROMO_SCALE_Y_PX = 6;
-  const PROMO_SCALE_THUMB_W = 160;
-  const PROMO_SCALE_THUMB_H = 110;
-  const PROMO_SCALE_PERSPECTIVE_PX = 900;
-  const PROMO_SCALE_ROTATE_Y = -6;
-  const PROMO_SCALE_IMPACT_PX = 1;
-  const PROMO_SCALE_TILES = 8;
+  const PROMO_SCALE_DOT_GAP_MS = 60;
+  const PROMO_SCALE_LOOP_MS = 3000;
+  const PROMO_SCALE_TILES = 16;
+  const PROMO_SCALE_GUTTER_PX = 8;
+  const PROMO_WALL_SEED = 40721;
+  const PROMO_WALL_DOT_X = 0.028;
+  const PROMO_WALL_DOT_Y = 0.044;
+  const PROMO_WALL_DOT_D = 0.0156;
+  const PROMO_WALL_VIDEO_ASPECT = 16 / 10;
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -1566,47 +1561,30 @@
     return raw;
   }
 
-  function scaleLandingOffsets(count, firstGap, lastGap) {
-    const steps = Math.max(1, count - 1);
-    const offsets = [0];
-    let elapsed = 0;
-    for (let step = 0; step < steps; step += 1) {
-      const along = steps === 1 ? 1 : step / (steps - 1);
-      const gap = lastGap + (firstGap - lastGap) * (1 - along) ** PROMO_SCALE_GAP_POWER;
-      elapsed += gap;
-      offsets.push(elapsed);
+  function wallSeededUnit(index, salt) {
+    let seed = (PROMO_WALL_SEED + index * 7919 + salt) % 2147483647;
+    if (seed <= 0) seed += 2147483646;
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  }
+
+  function wallOffsetSeconds(index) {
+    return wallSeededUnit(index, 3) * (PROMO_SCALE_LOOP_MS / 1000);
+  }
+
+  function wallDotOrder(count) {
+    const items = Array.from({ length: count }, (_, index) => index);
+    for (let index = items.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(wallSeededUnit(index, 11) * (index + 1));
+      const held = items[index];
+      items[index] = items[swap];
+      items[swap] = held;
     }
-    return offsets;
+    return items;
   }
 
-  function scaleCopyPose(index) {
-    return {
-      y: index * -PROMO_SCALE_Y_PX,
-      z: index * -PROMO_SCALE_Z_PX,
-    };
-  }
-
-  function scaleCopyOpacity(index) {
-    if (index >= PROMO_SCALE_FADE_BY) return 0;
-    return 1 - index / PROMO_SCALE_FADE_BY;
-  }
-
-  function scaleLostAt(index) {
-    const last = PROMO_SCALE_COUNT - 1;
-    const start = Math.min(PROMO_SCALE_REVEAL_AT, last - 1);
-    if (index <= start) return 1;
-    if (index >= last) return PROMO_SCALE_LOST;
-    const progress = Math.min(1, (index - start) / (last - start));
-    const eased = 1 - (1 - progress) ** 3;
-    return Math.max(1, Math.min(PROMO_SCALE_LOST - 1, Math.round(1 + (PROMO_SCALE_LOST - 1) * eased)));
-  }
-
-  function scaleZeroAt(offsets) {
-    return PROMO_SCALE_STACK_START_MS + offsets[offsets.length - 1] + PROMO_SCALE_ZERO_LAG_MS;
-  }
-
-  function formatScaleCount(value) {
-    return String(Math.max(0, Math.round(value))).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  function wallZeroAt() {
+    return PROMO_SCALE_BUILD_MS + PROMO_SCALE_FREEZE_MS + PROMO_SCALE_WHITE_MS;
   }
 
   function loadPromoStores() {
@@ -2884,7 +2862,22 @@
     releasePainStage() {
       this.clearPainTimers();
       this.resetScaleScene();
-      this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-pain-out', 'is-moments', 'is-window-aim', 'is-window-shut');
+      this.root.classList.remove(
+        'is-pain',
+        'is-pain-loop',
+        'is-pain-zoom',
+        'is-pain-out',
+        'is-moments',
+        'is-window-aim',
+        'is-window-shut',
+        'is-scale-shrink',
+      );
+      const store = this.painStore();
+      if (store) {
+        store.style.transform = '';
+        store.style.transition = '';
+        store.style.transformOrigin = '';
+      }
       const host = this.painHost();
       host?.querySelector('.promo-moments__board')?.style.removeProperty('--pain-scroll');
       host?.classList.remove('is-pain-dim');
@@ -3214,6 +3207,59 @@
       if (hold > 0 && !prefersReducedMotion()) await waitMs(hold);
     }
 
+    seekPainLoop(ms) {
+      const span = PROMO_SCALE_LOOP_MS;
+      const t = ((ms % span) + span) % span;
+      this.openPainStage();
+      this.root.classList.add('is-pain-loop');
+      const store = this.painStore();
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      if (!store || !cursor) return;
+      cursor.hidden = false;
+      cursor.style.transition = 'none';
+      store.style.transition = 'none';
+      const point = (target) => this.painCursorPoint(target);
+      const place = (x, y) => {
+        cursor.style.setProperty('--pain-x', `${Math.round(x)}px`);
+        cursor.style.setProperty('--pain-y', `${Math.round(y)}px`);
+        cursor.style.opacity = '1';
+      };
+      const cards = this.painCards();
+      const wander = [cards[0], cards[1], cards[2]].map(point).filter(Boolean);
+      this.root.classList.remove('is-window-aim');
+      if (t < 700 && wander.length) {
+        this.applyPainBeat('grid', true);
+        this.setPainScroll(0);
+        const u = t / 700;
+        const slot = u * (wander.length - 1);
+        const from = wander[Math.floor(slot)];
+        const to = wander[Math.min(wander.length - 1, Math.floor(slot) + 1)];
+        const mix = slot - Math.floor(slot);
+        place(from.x + (to.x - from.x) * mix, from.y + (to.y - from.y) * mix);
+      } else if (t < 1100) {
+        this.applyPainBeat('panel', true);
+        const chat = this.root.querySelector('[data-promo-pain-chat]');
+        const at = point(chat) || { x: store.clientWidth * 0.72, y: store.clientHeight * 0.7 };
+        place(at.x, at.y);
+      } else if (t < 1900) {
+        this.applyPainBeat(t < 1500 ? 'answer-1' : 'answer-2', true);
+        const chat = this.root.querySelector('[data-promo-pain-chat]');
+        const at = point(chat) || { x: store.clientWidth * 0.72, y: store.clientHeight * 0.62 };
+        place(at.x, at.y);
+      } else {
+        this.applyPainBeat('answer-2', true);
+        const dot = store.querySelector('[data-promo-window-close]');
+        const aim = point(dot) || { x: 32, y: 32 };
+        const from = { x: store.clientWidth * 0.62, y: store.clientHeight * 0.7 };
+        const u = Math.min(1, (t - 1900) / 500);
+        place(from.x + (aim.x - from.x) * u, from.y + (aim.y - from.y) * u);
+        if (t >= 2500) this.root.classList.add('is-window-aim');
+      }
+      const shaking = t >= 2500 && t < 2560;
+      const kick = shaking ? Math.sin(((t - 2500) / 60) * Math.PI * 2) * 3 : 0;
+      store.style.transform = `translate3d(${kick.toFixed(2)}px, calc(-0.4rem + ${(-kick * 0.35).toFixed(2)}px), 0)`;
+    }
+
     async playPain() {
       if (this.painPlayed) return;
       this.painPlayed = true;
@@ -3306,25 +3352,19 @@
 
     prepareScaleScene() {
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
-      this.root.style.setProperty('--promo-scale-snap', `${PROMO_SCALE_SNAP_MS}ms`);
-      this.root.style.setProperty('--promo-scale-collapse', `${PROMO_SCALE_COLLAPSE_MS}ms`);
       this.root.style.setProperty('--promo-scale-fade', `${PROMO_SCALE_FADE_MS}ms`);
-      this.root.style.setProperty('--promo-scale-perspective', `${PROMO_SCALE_PERSPECTIVE_PX}px`);
-      this.root.style.setProperty('--promo-scale-thumb-w', `${PROMO_SCALE_THUMB_W}px`);
-      this.root.style.setProperty('--promo-scale-thumb-h', `${PROMO_SCALE_THUMB_H}px`);
-      this.root.style.setProperty('--promo-scale-rotate', `${PROMO_SCALE_ROTATE_Y}deg`);
-      this.root.style.setProperty('--promo-scale-impact', `${PROMO_SCALE_IMPACT_PX}px`);
+      this.ensureWall();
     }
 
     resetScaleScene() {
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
+      this.wallClock = 0;
       window.clearTimeout(this.snapTimer);
       window.clearTimeout(this.thudTimer);
       this.root.classList.remove(
         'is-scale',
-        'is-scale-squash',
-        'is-scale-collapse',
-        'is-scale-count',
+        'is-scale-shrink',
+        'is-scale-white',
         'is-scale-zero',
         'is-scale-still',
         'is-scale-out',
@@ -3333,13 +3373,16 @@
       );
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = true;
-      const deck = this.root.querySelector('[data-promo-scale-deck]');
-      if (deck) {
-        deck.replaceChildren();
-        deck.style.transition = '';
+      const wall = this.root.querySelector('[data-promo-scale-wall]');
+      if (wall) {
+        wall.querySelectorAll('video').forEach((video) => {
+          video.pause();
+        });
+        wall.classList.remove('is-one');
+        wall.style.transition = '';
+        wall.style.removeProperty('--wall-n');
+        wall.style.removeProperty('--wall-scale');
       }
-      const figure = this.root.querySelector('[data-promo-scale-figure]');
-      if (figure) figure.textContent = '1';
       const center = this.root.querySelector('.promo-opening__center');
       if (center) {
         center.style.transition = '';
@@ -3351,60 +3394,220 @@
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = false;
       this.root.classList.add('is-scale');
-      this.alignScaleSold();
     }
 
-    alignScaleSold() {
-      const sold = this.root.querySelector('.promo-scale__sold');
-      const zero = sold?.querySelector('.promo-scale__zero');
-      if (!sold || !zero) return;
-      sold.style.marginLeft = '0px';
-      const delta = zero.getBoundingClientRect().left - sold.getBoundingClientRect().left;
-      if (delta > 0) sold.style.marginLeft = `${-delta}px`;
+    wallSources() {
+      const scale = this.root.querySelector('[data-promo-scale]');
+      return {
+        webm: scale?.dataset.promoWallWebm || '',
+        mp4: scale?.dataset.promoWallMp4 || '',
+      };
     }
 
-    scaleThumbNode(index) {
-      const pose = scaleCopyPose(index);
-      const thumb = document.createElement('span');
-      thumb.className = 'promo-scale__thumb';
-      thumb.style.zIndex = String(PROMO_SCALE_COUNT - index);
-      thumb.style.setProperty('--sy', `${pose.y.toFixed(2)}px`);
-      thumb.style.setProperty('--sz', `${pose.z.toFixed(2)}px`);
-      thumb.style.setProperty('--so', scaleCopyOpacity(index).toFixed(3));
-      const chrome = document.createElement('span');
-      chrome.className = 'promo-scale__chrome';
-      for (let dot = 0; dot < 3; dot += 1) {
-        const pip = document.createElement('i');
-        if (dot === 0) pip.className = 'is-close';
-        chrome.appendChild(pip);
+    ensureWall() {
+      const scale = this.root.querySelector('[data-promo-scale]');
+      if (!scale) return null;
+      let wall = scale.querySelector('[data-promo-scale-wall]');
+      if (!wall) {
+        wall = document.createElement('div');
+        wall.className = 'promo-scale__wall';
+        wall.setAttribute('data-promo-scale-wall', '');
+        scale.prepend(wall);
       }
-      thumb.appendChild(chrome);
-      const tiles = document.createElement('span');
-      tiles.className = 'promo-scale__tiles';
-      for (let tile = 0; tile < PROMO_SCALE_TILES; tile += 1) {
-        tiles.appendChild(document.createElement('i'));
+      let verdict = scale.querySelector('[data-promo-scale-verdict]');
+      if (!verdict) {
+        verdict = document.createElement('div');
+        verdict.className = 'promo-scale__verdict';
+        verdict.setAttribute('data-promo-scale-verdict', '');
+        verdict.innerHTML = '<p class="promo-scale__zero">0</p><p class="promo-scale__sold">Sold by the chatbot.</p>';
+        scale.append(verdict);
       }
-      thumb.appendChild(tiles);
-      return thumb;
+      scale.querySelector('.promo-scale__world')?.setAttribute('hidden', '');
+      scale.querySelector('.promo-scale__readout')?.setAttribute('hidden', '');
+      return wall;
     }
 
-    placeScaleCopy(index) {
-      const deck = this.root.querySelector('[data-promo-scale-deck]');
-      if (!deck) return;
-      deck.appendChild(this.scaleThumbNode(index));
+    mountWallTiles() {
+      const wall = this.ensureWall();
+      if (!wall || wall.childElementCount === PROMO_SCALE_TILES) return wall;
+      const sources = this.wallSources();
+      wall.replaceChildren();
+      for (let index = 0; index < PROMO_SCALE_TILES; index += 1) {
+        const tile = document.createElement('div');
+        tile.className = 'promo-scale__tile';
+        tile.dataset.wallIndex = String(index);
+        const video = document.createElement('video');
+        video.muted = true;
+        video.defaultMuted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.autoplay = false;
+        video.preload = 'auto';
+        video.setAttribute('playsinline', '');
+        video.dataset.offset = wallOffsetSeconds(index).toFixed(3);
+        if (sources.webm) {
+          const source = document.createElement('source');
+          source.src = sources.webm;
+          source.type = 'video/webm';
+          video.append(source);
+        }
+        if (sources.mp4) {
+          const source = document.createElement('source');
+          source.src = sources.mp4;
+          source.type = 'video/mp4';
+          video.append(source);
+        }
+        const dot = document.createElement('i');
+        dot.className = 'promo-scale__dot';
+        tile.append(video, dot);
+        tile.hidden = true;
+        wall.append(tile);
+      }
+      return wall;
     }
 
-    impactFrontCard() {
-      const front = this.root.querySelector('[data-promo-scale-deck] .promo-scale__thumb');
-      if (!front) return;
-      front.classList.remove('is-impact');
-      void front.offsetWidth;
-      front.classList.add('is-impact');
+    placeWallDots() {
+      const wall = this.root.querySelector('[data-promo-scale-wall]');
+      const tile = wall?.querySelector('.promo-scale__tile:not([hidden])');
+      if (!wall || !tile) return;
+      const tileAspect = tile.clientWidth / Math.max(1, tile.clientHeight);
+      const videoAspect = PROMO_WALL_VIDEO_ASPECT;
+      let x = PROMO_WALL_DOT_X;
+      let y = PROMO_WALL_DOT_Y;
+      let diameter = PROMO_WALL_DOT_D;
+      if (tileAspect > videoAspect) {
+        y = PROMO_WALL_DOT_Y * (videoAspect / tileAspect);
+      } else {
+        x = 0.5 + (PROMO_WALL_DOT_X - 0.5) * (videoAspect / tileAspect);
+        diameter = PROMO_WALL_DOT_D * (videoAspect / tileAspect);
+      }
+      wall.style.setProperty('--dot-x', `${(x * 100).toFixed(2)}%`);
+      wall.style.setProperty('--dot-y', `${(y * 100).toFixed(2)}%`);
+      wall.style.setProperty('--dot-d', `${(diameter * 100).toFixed(2)}%`);
     }
 
-    paintScaleFigure(value) {
-      const figure = this.root.querySelector('[data-promo-scale-figure]');
-      if (figure) figure.textContent = formatScaleCount(value);
+    seekWallVideos() {
+      const videos = [...this.root.querySelectorAll('[data-promo-scale-wall] video')];
+      return Promise.all(videos.map((video) => new Promise((resolve) => {
+        const offset = Number(video.dataset.offset) || 0;
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          video.pause();
+          resolve();
+        };
+        const apply = () => {
+          if (Math.abs((video.currentTime || 0) - offset) < 0.08) {
+            finish();
+            return;
+          }
+          video.addEventListener('seeked', finish, { once: true });
+          try { video.currentTime = offset; } catch (error) { finish(); }
+        };
+        if (video.readyState >= 1) apply();
+        else video.addEventListener('loadedmetadata', apply, { once: true });
+        window.setTimeout(finish, 2000);
+      })));
+    }
+
+    playWallVideos() {
+      this.wallClock = performance.now();
+      this.syncWallClock();
+      const wall = this.root.querySelector('[data-promo-scale-wall]');
+      wall?.querySelectorAll('video').forEach((video) => {
+        video.play().catch(() => {});
+      });
+    }
+
+    syncWallClock() {
+      if (!this.wallClock) return;
+      const elapsed = (performance.now() - this.wallClock) / 1000;
+      this.root.querySelectorAll('[data-promo-scale-wall] video').forEach((video) => {
+        const offset = Number(video.dataset.offset) || 0;
+        const next = (offset + elapsed) % (PROMO_SCALE_LOOP_MS / 1000);
+        const apply = () => {
+          try { video.currentTime = next; } catch (error) { /* metadata not ready */ }
+          if (video.paused) video.play().catch(() => {});
+        };
+        if (video.readyState >= 1) apply();
+        else video.addEventListener('loadedmetadata', apply, { once: true });
+      });
+    }
+
+    pauseWallVideos() {
+      this.root.querySelectorAll('[data-promo-scale-wall] video').forEach((video) => {
+        video.pause();
+      });
+    }
+
+    showWall(across) {
+      const wall = this.mountWallTiles();
+      if (!wall) return;
+      const count = across * across;
+      const from = across === 1 ? 1 : across === 2 ? 0.5 : 2;
+      wall.querySelectorAll('.promo-scale__tile').forEach((tile, index) => {
+        tile.hidden = index >= count;
+        tile.style.gridColumn = '';
+        tile.style.gridRow = '';
+      });
+      if (across === 4) {
+        const spots = [
+          [1, 1], [2, 1], [1, 2], [2, 2],
+          [3, 1], [4, 1], [3, 2], [4, 2],
+          [1, 3], [2, 3], [3, 3], [4, 3],
+          [1, 4], [2, 4], [3, 4], [4, 4],
+        ];
+        wall.querySelectorAll('.promo-scale__tile').forEach((tile, index) => {
+          const spot = spots[index];
+          if (!spot) return;
+          tile.style.gridColumn = String(spot[0]);
+          tile.style.gridRow = String(spot[1]);
+        });
+      }
+      wall.classList.toggle('is-one', across === 1);
+      wall.style.transition = 'none';
+      wall.style.setProperty('--wall-n', String(across));
+      wall.style.setProperty('--wall-scale', String(from));
+      wall.getBoundingClientRect();
+      this.placeWallDots();
+      if (this.wallClock) this.syncWallClock();
+      if (this.root.classList.contains('is-scale-still') || across === 1) {
+        wall.style.transition = 'none';
+        wall.style.setProperty('--wall-scale', '1');
+        return;
+      }
+      wall.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+      wall.style.setProperty('--wall-scale', '1');
+    }
+
+    reddenTile(index) {
+      const tile = this.root.querySelector(`[data-promo-scale-wall] .promo-scale__tile[data-wall-index="${index}"]`);
+      tile?.classList.add('is-red');
+    }
+
+    reddenWall() {
+      this.root.querySelectorAll('[data-promo-scale-wall] .promo-scale__tile').forEach((tile) => {
+        tile.classList.add('is-red');
+      });
+    }
+
+    shrinkStoreToTile() {
+      const store = this.painStore();
+      const canvas = this.root.querySelector('[data-promo-canvas]');
+      if (!store || !canvas) return;
+      const canvasBox = canvas.getBoundingClientRect();
+      const tile = (canvasBox.width - PROMO_SCALE_GUTTER_PX * 3) / 4;
+      store.style.transition = 'none';
+      store.style.transformOrigin = '0 0';
+      store.style.transform = 'none';
+      const base = store.getBoundingClientRect();
+      const scale = tile / Math.max(1, base.width);
+      store.style.transform = 'translateY(-0.4rem)';
+      store.getBoundingClientRect();
+      this.root.classList.add('is-pain-loop', 'is-scale-shrink');
+      store.style.transition = `transform ${PROMO_SCALE_SHRINK_MS}ms cubic-bezier(0.3, 0, 1, 1)`;
+      store.style.transform = `translate(${canvasBox.left - base.left}px, ${canvasBox.top - base.top}px) scale(${scale})`;
     }
 
     emitSnap() {
@@ -3460,17 +3663,6 @@
       if (cursor) cursor.style.opacity = '0';
     }
 
-    mountScaleStill(count, figure, showZero) {
-      this.hideScaleStore();
-      this.revealScaleLayer();
-      const deck = this.root.querySelector('[data-promo-scale-deck]');
-      if (deck) deck.replaceChildren();
-      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index);
-      this.root.classList.add('is-scale-count', 'is-scale-still');
-      if (showZero) this.root.classList.add('is-scale-zero');
-      this.paintScaleFigure(figure);
-    }
-
     async fadeScaleToSwitch() {
       const center = this.root.querySelector('.promo-opening__center');
       this.root.classList.add('is-scale-out');
@@ -3489,15 +3681,20 @@
       if (!this.root.classList.contains('is-pain')) return;
       if (!this.root.querySelector('[data-promo-scale]')) return;
       this.prepareScaleScene();
+      this.mountWallTiles();
       if (prefersReducedMotion()) {
-        const offsets = scaleLandingOffsets(
-          PROMO_SCALE_COUNT,
-          PROMO_SCALE_INTERVAL_START_MS,
-          PROMO_SCALE_INTERVAL_END_MS,
-        );
-        const stillMs = Math.max(0, PROMO_SCALE_SCENE_MS - scaleZeroAt(offsets));
-        this.mountScaleStill(PROMO_SCALE_COUNT, PROMO_SCALE_LOST, true);
-        await waitMs(stillMs + promoHoldMs());
+        this.hideScaleStore();
+        this.revealScaleLayer();
+        this.showWall(4);
+        this.seekWallVideos();
+        this.pauseWallVideos();
+        this.reddenWall();
+        this.root.classList.add('is-scale-still');
+        await waitMs(400);
+        this.root.classList.add('is-scale-white');
+        await waitMs(PROMO_SCALE_WHITE_MS);
+        this.root.classList.add('is-scale-zero');
+        await waitMs(PROMO_SCALE_HOLD_MS + promoHoldMs());
         if (marketingPart() === 'full') {
           await this.fadeScaleToSwitch();
           await waitMs(PROMO_TOGGLE_REST_MS);
@@ -3515,63 +3712,44 @@
 
     async playScaleTimeline() {
       const generation = this.scaleGeneration;
-      const store = this.painStore();
-      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
-      const dot = store?.querySelector('[data-promo-window-close]');
-      const aim = this.painCursorPoint(dot);
-      if (cursor && aim) {
-        cursor.hidden = false;
-        cursor.style.transition = 'none';
-        cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
-        cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
-        cursor.style.opacity = '1';
-      }
-      this.pinWindowCloseOrigin();
-      this.root.classList.add('is-window-aim');
       const started = performance.now();
       const until = async (mark) => {
         const wait = mark - (performance.now() - started);
         if (wait > 0) await waitMs(wait);
       };
-      this.emitSnap();
-      this.root.classList.add('is-scale-squash');
-      await until(PROMO_SCALE_SNAP_MS);
-      if (generation !== this.scaleGeneration) return;
-      this.root.classList.add('is-scale-collapse');
-      await until(PROMO_SCALE_SNAP_MS + PROMO_SCALE_COLLAPSE_MS);
+      const delayUntil = (mark) => Math.max(0, mark - (performance.now() - started));
+      this.mountWallTiles();
+      this.shrinkStoreToTile();
+      await until(PROMO_SCALE_SHRINK_MS);
       if (generation !== this.scaleGeneration) return;
       this.hideScaleStore();
       this.revealScaleLayer();
-      const deck = this.root.querySelector('[data-promo-scale-deck]');
-      if (deck) deck.replaceChildren();
-      this.placeScaleCopy(0);
-
-      const offsets = scaleLandingOffsets(
-        PROMO_SCALE_COUNT,
-        PROMO_SCALE_INTERVAL_START_MS,
-        PROMO_SCALE_INTERVAL_END_MS,
-      );
-      const delayUntil = (mark) => Math.max(0, mark - (performance.now() - started));
-      for (let index = 1; index < PROMO_SCALE_COUNT; index += 1) {
-        const at = PROMO_SCALE_STACK_START_MS + offsets[index];
+      this.showWall(1);
+      this.playWallVideos();
+      await until(PROMO_SCALE_STEP_MS);
+      if (generation !== this.scaleGeneration) return;
+      this.showWall(2);
+      await until(PROMO_SCALE_STEP_MS * 2);
+      if (generation !== this.scaleGeneration) return;
+      this.showWall(4);
+      await until(PROMO_SCALE_BUILD_MS);
+      if (generation !== this.scaleGeneration) return;
+      this.pauseWallVideos();
+      wallDotOrder(PROMO_SCALE_TILES).forEach((index, step) => {
         this.armScaleTimer(() => {
           if (generation !== this.scaleGeneration) return;
-          this.placeScaleCopy(index);
-          this.impactFrontCard();
+          this.reddenTile(index);
           this.emitSnap();
-          if (index >= PROMO_SCALE_REVEAL_AT) {
-            this.root.classList.add('is-scale-count');
-            this.paintScaleFigure(scaleLostAt(index));
-          }
-        }, delayUntil(at));
-      }
-      this.armScaleTimer(() => {
-        if (generation !== this.scaleGeneration) return;
-        this.paintScaleFigure(PROMO_SCALE_LOST);
-        this.root.classList.add('is-scale-zero');
-        this.emitThud();
-      }, delayUntil(scaleZeroAt(offsets)));
-      await until(PROMO_SCALE_SCENE_MS + promoHoldMs());
+        }, delayUntil(PROMO_SCALE_BUILD_MS + step * PROMO_SCALE_DOT_GAP_MS));
+      });
+      await until(PROMO_SCALE_BUILD_MS + PROMO_SCALE_FREEZE_MS);
+      if (generation !== this.scaleGeneration) return;
+      this.root.classList.add('is-scale-white');
+      await until(wallZeroAt());
+      if (generation !== this.scaleGeneration) return;
+      this.root.classList.add('is-scale-zero');
+      this.emitThud();
+      await until(wallZeroAt() + PROMO_SCALE_HOLD_MS + promoHoldMs());
     }
 
     showScaleExport(kind) {
@@ -3579,50 +3757,39 @@
       this.prepareScaleScene();
       this.openPainStage();
       this.applyPainBeat('answer-2', true);
-      const store = this.painStore();
-      if (kind === 'snap') {
-        const cursor = this.root.querySelector('[data-promo-pain-cursor]');
-        const dot = store?.querySelector('[data-promo-window-close]');
-        const aim = this.painCursorPoint(dot);
-        if (cursor && aim) {
-          cursor.hidden = false;
-          cursor.style.transition = 'none';
-          cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
-          cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
-          cursor.style.opacity = '1';
-        }
-        this.pinWindowCloseOrigin();
-        if (store) store.style.transition = 'none';
-        this.root.classList.add('is-window-aim', 'is-scale-squash', 'snap');
-        return this.whenPainRest(this.painHost());
-      }
       this.hideScaleStore();
       this.revealScaleLayer();
-      let count = PROMO_SCALE_COUNT;
-      let figure = null;
-      let showZero = false;
-      if (kind === 'copies-10') count = 10;
-      if (kind === 'counter-mid') {
-        let nearest = Infinity;
-        count = PROMO_SCALE_REVEAL_AT + 1;
-        for (let index = PROMO_SCALE_REVEAL_AT; index < PROMO_SCALE_COUNT; index += 1) {
-          const delta = Math.abs(scaleLostAt(index) - PROMO_SCALE_LOST / 2);
-          if (delta < nearest) {
-            nearest = delta;
-            count = index + 1;
-            figure = scaleLostAt(index);
-          }
-        }
+      this.mountWallTiles();
+      this.root.querySelectorAll('.promo-scale__tile.is-red').forEach((tile) => tile.classList.remove('is-red'));
+      this.root.classList.add('is-scale-still');
+      const still = () => {
+        this.wallClock = 0;
+        return this.seekWallVideos();
+      };
+      let ready = Promise.resolve();
+      if (kind === 'tile-1') {
+        this.showWall(1);
+        ready = still();
+      } else if (kind === 'tile-4') {
+        this.showWall(2);
+        ready = still();
+      } else if (kind === 'tile-16') {
+        this.showWall(4);
+        ready = still();
+      } else if (kind === 'frozen') {
+        this.showWall(4);
+        ready = still();
+        this.reddenWall();
+      } else if (kind === 'white') {
+        this.showWall(4);
+        ready = still();
+        this.root.classList.add('is-scale-white');
+      } else if (kind === 'zero') {
+        this.showWall(4);
+        ready = still();
+        this.root.classList.add('is-scale-white', 'is-scale-zero');
       }
-      if (kind === 'copies-120' || kind === 'counter-final') figure = PROMO_SCALE_LOST;
-      if (kind === 'counter-final') showZero = true;
-      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index);
-      if (figure != null) {
-        this.root.classList.add('is-scale-count', 'is-scale-still');
-        if (showZero) this.root.classList.add('is-scale-zero');
-        this.paintScaleFigure(figure);
-      }
-      return this.whenPainRest(this.painHost());
+      return ready.then(() => this.whenPainRest(this.painHost()));
     }
 
     paintFloodStill(warmth) {
@@ -4175,11 +4342,12 @@
         'pain-b-answer-1': () => this.showPainExport('answer-1'),
         'pain-b-typed-2': () => this.showPainExport('typed-2'),
         'pain-b-answer-2': () => this.showPainExport('answer-2'),
-        'pain-c-snap': () => this.showScaleExport('snap'),
-        'pain-c-copies-10': () => this.showScaleExport('copies-10'),
-        'pain-c-copies-120': () => this.showScaleExport('copies-120'),
-        'pain-c-counter-mid': () => this.showScaleExport('counter-mid'),
-        'pain-c-counter-final': () => this.showScaleExport('counter-final'),
+        'pain-c-tile-1': () => this.showScaleExport('tile-1'),
+        'pain-c-tile-4': () => this.showScaleExport('tile-4'),
+        'pain-c-tile-16': () => this.showScaleExport('tile-16'),
+        'pain-c-frozen': () => this.showScaleExport('frozen'),
+        'pain-c-white': () => this.showScaleExport('white'),
+        'pain-c-zero': () => this.showScaleExport('zero'),
         'pain-c-aim': () => this.showPainCloseAim(),
         'pain-b-zoom': () => this.showPainExport('answer-2'),
       };
