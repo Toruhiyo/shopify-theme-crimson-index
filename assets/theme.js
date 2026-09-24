@@ -230,19 +230,16 @@
   const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
-    ['grid', 400],
-    ['enter', 320],
-    ['open', 520],
-    ['back', 260],
-    ['scroll-1', PROMO_PAIN_SCROLL_MS],
-    ['open-2', 520],
-    ['back-2', 220],
-    ['scroll-2', PROMO_PAIN_SCROLL_MS],
-    ['leave', 240],
+    ['grid', 280],
+    ['enter', 220],
+    ['open', 380],
+    ['back', 140],
+    ['scroll-1', 640],
+    ['open-2', 360],
   ];
   const PROMO_PAIN_B = [
-    ['launcher', 380],
-    ['panel', 480],
+    ['launcher', 120],
+    ['panel', 200],
     ['typed-1', PROMO_PAIN_LINE_1.length * PROMO_PAIN_TYPE_CHAR_MS],
     ['think-1', 340],
     ['answer-1', 1800],
@@ -264,9 +261,12 @@
   const PROMO_MOMENTS_CART_GAP_MS = 420;
   const PROMO_MOMENTS_ACCESSORY_MS = 350;
   const PROMO_MOMENTS_COLLAPSE_MS = 560;
-  const PROMO_MOMENTS_SHORTLIST_MS = 800;
-  const PROMO_MOMENTS_SETTLE_DELAY_MS = 900;
-  const PROMO_MOMENTS_SETTLE_MS = 420;
+  const PROMO_MOMENT_RING_GAP_MS = 300;
+  const PROMO_MOMENT_SEEK_AT_MS = 600;
+  const PROMO_MOMENT_SEEK_MS = 680;
+  const PROMO_MOMENT_OTHER_RING_MS = 1280;
+  const PROMO_MOMENTS_SHORTLIST_MS = 1680;
+  const PROMO_MOMENTS_DOCK_MS = 820;
   const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
@@ -630,15 +630,14 @@
   const PROMO_CLAY_FINISHES = ['matte', 'satin'];
   const PROMO_CLAY_SCALES = [0.8, 0.86, 0.92, 0.98, 1.04, 1.1];
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
-  const PROMO_MOMENT_PICK_INDEX = 1;
   const PROMO_MOMENT_GO_INDEX = 0;
-  const PROMO_MOMENT_OTHER_INDEX = 2;
+  const PROMO_MOMENT_PICK_INDEX = 5;
+  const PROMO_MOMENT_OTHER_INDEX = 10;
   const PROMO_COMPARE_TINT = 'stone';
   const PROMO_COMPARE_SHAPES = { go: 'capsule', pick: 'sphere', other: 'rounded-cube' };
   const PROMO_ACCESSORY_SHAPE = 'torus';
   const PROMO_ACCESSORY_TINT = 'stone';
-  const PROMO_SPHERE_SETTLE_PX = 6;
-  const PROMO_BASE_WIDTH = 0.55;
+  const PROMO_ACCESSORY_OBJECT_SCALE = 1.51;
   const PROMO_TINT_FILE = {
     sphere: { stone: 'sphere-b' },
     capsule: { stone: 'capsule' },
@@ -763,10 +762,7 @@
     const pick = looks[PROMO_MOMENT_PICK_INDEX];
     const accessory = accessoryLook();
     if (extra && pick) applyClayLook(extra, accessory);
-    const base = board.querySelector('.promo-moments__card.is-pick .promo-moments__base img');
-    if (base) base.src = claySrc(accessory);
-    board.style.setProperty('--promo-sphere-settle', `${PROMO_SPHERE_SETTLE_PX}px`);
-    board.style.setProperty('--promo-base-width', String(PROMO_BASE_WIDTH));
+    board.style.setProperty('--promo-accessory-object', String(PROMO_ACCESSORY_OBJECT_SCALE));
     board.dataset.clayReady = '1';
   }
 
@@ -839,21 +835,10 @@
     return pill;
   }
 
-  function momentBase() {
-    const base = document.createElement('span');
-    base.className = 'promo-moments__base';
-    const img = document.createElement('img');
-    img.alt = '';
-    img.draggable = false;
-    base.appendChild(img);
-    return base;
-  }
-
   function momentPhoto(index) {
     const photo = document.createElement('span');
     photo.className = 'promo-moments__photo';
     photo.appendChild(momentGlyph());
-    if (index === PROMO_MOMENT_PICK_INDEX) photo.appendChild(momentBase());
     const badge = momentBadge(index);
     if (badge) photo.appendChild(badge);
     return photo;
@@ -1075,8 +1060,32 @@
     });
     board.dataset.painCols = String(cols);
     board.dataset.painPitch = String(pitchY);
+    stampMomentRoles(board);
     paintCatalogClay(board);
     return true;
+  }
+
+  function stampMomentRoles(board) {
+    board.querySelectorAll('.promo-moments__card:not(.is-extra)').forEach((card, index) => {
+      card.classList.remove('is-go', 'is-pick', 'is-other', 'is-drop');
+      card.classList.add(`is-${momentShapeRole(index)}`);
+      if (momentShapeRole(index) === 'pick' && !card.querySelector('.promo-moments__kept')) {
+        card.appendChild(momentKept());
+      }
+    });
+  }
+
+  function momentCatalogSeek(board) {
+    const card = board?.querySelector('.promo-moments__card.is-other');
+    const store = board?.closest('.promo-opening__store');
+    if (!card || !store) return 0;
+    const pitch = Number.parseFloat(board.dataset.painPitch) || 0;
+    const gy = Number.parseFloat(card.style.getPropertyValue('--gy')) || 0;
+    const cardH = card.getBoundingClientRect().height || pitch || 200;
+    const limit = store.clientHeight / 2 - 28;
+    const needed = Math.min(0, limit - cardH * 0.45 - gy);
+    if (!pitch) return needed;
+    return Math.max(needed, -pitch * 0.72);
   }
 
   function applyMomentPose(stage, pose, options = {}) {
@@ -1088,7 +1097,7 @@
     if (options.instant) board.classList.add('is-instant');
     if (options.instant) board.classList.add('is-settled');
     else if (!samePose) board.classList.remove('is-settled');
-    board.classList.remove('is-shortlist');
+    board.classList.remove('is-shortlist', 'is-catalog-seek');
     if (pose !== 'row') board.classList.remove('is-narrowed');
     if (board.dataset.pose !== pose) {
       PROMO_MOMENT_POSES.forEach((name) => {
@@ -1176,6 +1185,8 @@
       }
     });
     clearMomentInline(stage);
+    board.style.removeProperty('--moment-scroll');
+    board.classList.remove('is-catalog-seek', 'is-shortlist');
     board.dataset.pose = '';
     const firstGrid = pose === 'grid' && !board.dataset.gridLaid;
     board.classList.remove('is-settled', 'is-reduced');
@@ -2614,9 +2625,10 @@
       this.root.style.setProperty('--promo-moments-tick', `${PROMO_MOMENTS_BADGE_TICK_MS}ms`);
       this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
       this.root.style.setProperty('--promo-compare-fold', `${PROMO_MOMENTS_CHOICE_MS - 200}ms`);
-      this.root.style.setProperty('--promo-settle-delay', `${PROMO_MOMENTS_SETTLE_DELAY_MS}ms`);
-      this.root.style.setProperty('--promo-settle', `${PROMO_MOMENTS_SETTLE_MS}ms`);
-      this.root.style.setProperty('--promo-settle-end', `${PROMO_MOMENTS_SETTLE_DELAY_MS + PROMO_MOMENTS_SETTLE_MS}ms`);
+      this.root.style.setProperty('--promo-settle-end', `${PROMO_MOMENTS_DOCK_MS}ms`);
+      this.root.style.setProperty('--promo-ring-gap', `${PROMO_MOMENT_RING_GAP_MS}ms`);
+      this.root.style.setProperty('--promo-other-ring', `${PROMO_MOMENT_OTHER_RING_MS}ms`);
+      this.root.style.setProperty('--promo-catalog-seek', `${PROMO_MOMENT_SEEK_MS}ms`);
       return host;
     }
 
@@ -2640,9 +2652,14 @@
       if (!stage) return;
       if (beat.playPose === 'row' && !prefersReducedMotion()) {
         const board = stage.querySelector('.promo-moments__board');
+        const seek = momentCatalogSeek(board);
         board?.classList.add('is-shortlist');
         this.momentTimers.push(window.setTimeout(() => {
-          board?.classList.remove('is-shortlist');
+          board?.style.setProperty('--moment-scroll', `${seek}px`);
+          board?.classList.add('is-catalog-seek');
+        }, PROMO_MOMENT_SEEK_AT_MS));
+        this.momentTimers.push(window.setTimeout(() => {
+          board?.classList.remove('is-catalog-seek', 'is-shortlist');
           applyMomentPose(stage, 'row');
         }, PROMO_MOMENTS_SHORTLIST_MS));
       } else {
@@ -2653,7 +2670,7 @@
       if (beat.playPose === 'extra' && !prefersReducedMotion()) {
         this.momentTimers.push(window.setTimeout(() => {
           this.emitClick();
-        }, PROMO_MOMENTS_SETTLE_DELAY_MS + PROMO_MOMENTS_SETTLE_MS));
+        }, PROMO_MOMENTS_DOCK_MS));
       }
       if (typeof beat.closeAt === 'number' || typeof beat.bundleAt === 'number') {
         const at = beat.closeAt ?? beat.bundleAt;
@@ -4200,7 +4217,8 @@
           const stage = openMoments();
           const board = restartMomentPose(stage, 'grid');
           return whenMomentsRest(stage).then(() => {
-            board?.classList.add('is-shortlist');
+            board?.style.setProperty('--moment-scroll', `${momentCatalogSeek(board)}px`);
+            board?.classList.add('is-catalog-seek', 'is-shortlist');
             return whenMomentsRest(stage);
           });
         },

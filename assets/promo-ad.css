@@ -588,6 +588,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate(calc(-50% + var(--promo-board-x)), -50%) scale(var(--promo-grid-fit));
 }
 
+.promo-opening.is-moments:not(.is-see):not(.is-pain) .promo-moments__board.is-pose-grid.is-catalog-seek {
+  animation: promo-moments-catalog-seek var(--promo-catalog-seek, 680ms) cubic-bezier(0.45, 0.05, 0.2, 1) both;
+}
+
 .promo-opening.is-pain.is-moments:not(.is-see) .promo-moments__board.is-pose-grid {
   transform: translate(calc(-50% + var(--promo-board-x)), calc(-50% + var(--pain-scroll, 0px))) scale(var(--promo-grid-fit));
   transition: transform var(--promo-pain-open, 640ms) var(--promo-pain-ease, cubic-bezier(0.45, 0.05, 0.2, 1));
@@ -1521,45 +1525,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   pointer-events: none;
 }
 
-.promo-moments__base {
-  position: absolute;
-  left: 50%;
-  top: 45%;
-  z-index: 2;
-  width: calc(var(--promo-base-width, 0.55) * 100%);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-50%);
-}
-
-.promo-moments__base img {
-  display: block;
-  width: 100%;
-  height: auto;
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 34%);
-  mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 34%);
-}
-
-.is-pose-extra .promo-moments__card.is-pick .promo-moments__base,
-.is-pose-bundle .promo-moments__card.is-pick .promo-moments__base {
-  opacity: 1;
-}
-
-.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__base {
-  animation: promo-moments-base-in var(--promo-settle, 420ms) cubic-bezier(0.22, 1, 0.36, 1) var(--promo-settle-delay, 900ms) both;
-}
-
-@keyframes promo-moments-base-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%);
-  }
-}
-
 .promo-moments__spec-icon svg,
 .promo-moments__mark svg,
 .promo-moments__yes svg {
@@ -2034,15 +1999,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   --card-h: var(--row-card-h, var(--catalog-h, 200px));
 }
 
+.promo-moments__board.is-pose-grid.is-shortlist .promo-moments__card.is-go { --ring-at: 0ms; }
+.promo-moments__board.is-pose-grid.is-shortlist .promo-moments__card.is-pick { --ring-at: var(--promo-ring-gap, 300ms); }
+.promo-moments__board.is-pose-grid.is-shortlist .promo-moments__card.is-other { --ring-at: var(--promo-other-ring, 1280ms); }
+
 .promo-moments__board.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go,
 .promo-moments__board.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick,
 .promo-moments__board.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other {
-  animation: promo-moments-shortlist 520ms var(--promo-spring) both;
+  animation: promo-moments-shortlist 520ms var(--promo-spring) var(--ring-at, 0ms) both;
 }
 
-.is-pose-grid.is-shortlist .promo-moments__card.is-go,
-.is-pose-grid.is-shortlist .promo-moments__card.is-pick,
-.is-pose-grid.is-shortlist .promo-moments__card.is-other {
+.is-pose-grid.is-shortlist.is-settled .promo-moments__card.is-go,
+.is-pose-grid.is-shortlist.is-settled .promo-moments__card.is-pick,
+.is-pose-grid.is-shortlist.is-settled .promo-moments__card.is-other,
+.is-pose-grid.is-shortlist.is-reduced .promo-moments__card.is-go,
+.is-pose-grid.is-shortlist.is-reduced .promo-moments__card.is-pick,
+.is-pose-grid.is-shortlist.is-reduced .promo-moments__card.is-other {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--ad-white) 80%, transparent),
     inset 0 -1px 0 color-mix(in srgb, var(--ad-ink) 4%, transparent),
@@ -2050,11 +2022,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     0 14px 40px var(--bizmis-primary-glow);
 }
 
-.is-pose-grid.is-shortlist .promo-moments__card.is-go::after,
-.is-pose-grid.is-shortlist .promo-moments__card.is-pick::after,
-.is-pose-grid.is-shortlist .promo-moments__card.is-other::after {
+.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card.is-go::after,
+.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick::after,
+.is-pose-grid.is-shortlist:not(.is-settled):not(.is-reduced) .promo-moments__card.is-other::after {
+  animation: promo-moments-ring-in 420ms var(--promo-spring) var(--ring-at, 0ms) both;
+}
+
+.is-pose-grid.is-shortlist.is-settled .promo-moments__card.is-go::after,
+.is-pose-grid.is-shortlist.is-settled .promo-moments__card.is-pick::after,
+.is-pose-grid.is-shortlist.is-settled .promo-moments__card.is-other::after,
+.is-pose-grid.is-shortlist.is-reduced .promo-moments__card.is-go::after,
+.is-pose-grid.is-shortlist.is-reduced .promo-moments__card.is-pick::after,
+.is-pose-grid.is-shortlist.is-reduced .promo-moments__card.is-other::after {
   opacity: 1;
-  transition: opacity 420ms var(--promo-spring);
 }
 
 .is-pose-row .promo-moments__card.is-go::after,
@@ -2323,13 +2303,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__board.is-pose-extra .promo-moments__card.is-pick,
 .promo-moments__board.is-pose-bundle .promo-moments__card.is-pick {
-  left: calc(50% - 250px);
+  left: calc(50% - 210px);
 }
 
 .promo-moments__board.is-pose-extra .promo-moments__card.is-extra,
 .promo-moments__board.is-pose-bundle .promo-moments__card.is-extra {
   z-index: 6;
-  left: calc(50% + 36px);
+  left: calc(50% + 100px);
   --card-w: 196px;
   --card-h: 308px;
   opacity: 1;
@@ -2452,16 +2432,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph img,
 .is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph img {
-  transform: none;
+  transform: scale(var(--promo-accessory-object, 1.51));
 }
 
-.is-pose-extra .promo-moments__card.is-pick .promo-moments__glyph,
-.is-pose-bundle .promo-moments__card.is-pick .promo-moments__glyph {
-  transform: translateY(var(--promo-sphere-settle, 6px));
-}
-
-.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__glyph {
-  animation: promo-moments-sphere-settle var(--promo-settle, 420ms) cubic-bezier(0.22, 1, 0.36, 1) var(--promo-settle-delay, 900ms) both;
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
+  animation: promo-moments-dock-tilt 820ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra::after,
@@ -2811,7 +2786,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-extra .promo-moments__plus,
 .is-pose-bundle .promo-moments__plus {
-  left: calc(50% - 90px);
+  left: calc(50% - 34px);
   top: 50%;
   margin: 0;
   transform: translate3d(-50%, -50%, 0);
@@ -2850,10 +2825,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-bundle .promo-moments__outline {
   z-index: 3;
-  left: calc(50% - 128px);
+  left: calc(50% - 76px);
   top: 50%;
-  width: 560px;
-  height: 476px;
+  width: 588px;
+  height: 492px;
   margin: 0;
   border-radius: 32px;
   border: 1px solid var(--bizmis-primary-ring);
@@ -2957,6 +2932,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-close .promo-moments__cart-piece.is-main,
 .is-pose-extra .promo-moments__cart-piece.is-main,
 .is-pose-bundle .promo-moments__cart-piece.is-main,
+.is-pose-extra .promo-moments__cart-piece.is-addon,
 .is-pose-bundle .promo-moments__cart-piece.is-addon {
   opacity: 1;
   transform: scale(1);
@@ -3103,8 +3079,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-moments-piece-in 520ms var(--promo-spring) calc(var(--promo-close-cart-at, 1280ms) + 580ms) both;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__cart-piece.is-addon {
-  animation: promo-moments-piece-in 480ms var(--promo-spring) 700ms both;
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__cart-piece.is-addon {
+  animation: promo-moments-piece-in 480ms var(--promo-spring) var(--promo-settle-end, 820ms) both;
 }
 
 .promo-moments__count {
@@ -3276,16 +3252,21 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   to { transform: rotate(360deg) translate3d(var(--orbit), 0, 0) rotate(-360deg); }
 }
 
+@keyframes promo-moments-catalog-seek {
+  from { transform: translate(calc(-50% + var(--promo-board-x)), -50%) scale(var(--promo-grid-fit, 1)); }
+  to { transform: translate(calc(-50% + var(--promo-board-x)), calc(-50% + var(--moment-scroll, 0px))) scale(var(--promo-grid-fit, 1)); }
+}
+
 @keyframes promo-moments-catalog-out {
-  0% { opacity: 1; filter: none; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0); }
-  100% { opacity: 0; filter: blur(8px); transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(0.5); }
+  0% { opacity: 1; filter: none; transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy) + var(--moment-scroll, 0px)), 0); }
+  100% { opacity: 0; filter: blur(8px); transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy) + var(--moment-scroll, 0px)), 0) scale(0.5); }
 }
 
 @keyframes promo-moments-select {
   0% {
     opacity: 1;
     filter: none;
-    transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0);
+    transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy) + var(--moment-scroll, 0px)), 0);
   }
   100% {
     opacity: 1;
@@ -3295,9 +3276,37 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 @keyframes promo-moments-shortlist {
-  0% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1); }
-  46% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1.14); }
-  100% { transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1); }
+  0% {
+    transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--ad-white) 80%, transparent),
+      0 2px 6px color-mix(in srgb, var(--ad-ink) 4%, transparent);
+  }
+  46% {
+    transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1.14);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--ad-white) 80%, transparent),
+      0 0 0 3px var(--bizmis-primary),
+      0 14px 40px var(--bizmis-primary-glow);
+  }
+  100% {
+    transform: translate3d(calc(-50% + var(--gx)), calc(-50% + var(--gy)), 0) scale(1);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--ad-white) 80%, transparent),
+      0 0 0 3px var(--bizmis-primary),
+      0 14px 40px var(--bizmis-primary-glow);
+  }
+}
+
+@keyframes promo-moments-ring-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes promo-moments-dock-tilt {
+  0% { transform: translate3d(-50%, -50%, 0) rotate(0deg); }
+  40% { transform: translate3d(-50%, -50%, 0) rotate(2deg); }
+  100% { transform: translate3d(-50%, -50%, 0) rotate(0deg); }
 }
 
 @keyframes promo-moments-page-in {
@@ -3309,11 +3318,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     --card-w: 980px;
     --card-h: 640px;
   }
-}
-
-@keyframes promo-moments-sphere-settle {
-  from { transform: translateY(0); }
-  to { transform: translateY(var(--promo-sphere-settle, 6px)); }
 }
 
 @keyframes promo-moments-addon-in {
