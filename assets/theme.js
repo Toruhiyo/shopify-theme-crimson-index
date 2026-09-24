@@ -235,24 +235,24 @@
   const PROMO_PAIN_ANSWER_2 = 'Recommendations vary by preference. Check each product page for details, or I can open a support ticket.';
   const PROMO_PAIN_CHIPS = ['Track order', 'Returns', 'Contact us'];
   const PROMO_PAIN_A = [
-    ['grid', 480],
-    ['enter', 380],
-    ['open', 640],
-    ['back', 320],
+    ['grid', 400],
+    ['enter', 320],
+    ['open', 520],
+    ['back', 260],
     ['scroll-1', PROMO_PAIN_SCROLL_MS],
-    ['open-2', 640],
-    ['back-2', 280],
+    ['open-2', 520],
+    ['back-2', 220],
     ['scroll-2', PROMO_PAIN_SCROLL_MS],
-    ['leave', 360],
+    ['leave', 240],
   ];
   const PROMO_PAIN_B = [
-    ['launcher', 600],
-    ['panel', 700],
+    ['launcher', 380],
+    ['panel', 480],
     ['typed-1', PROMO_PAIN_LINE_1.length * PROMO_PAIN_TYPE_CHAR_MS],
-    ['think-1', 500],
+    ['think-1', 340],
     ['answer-1', 1800],
     ['typed-2', PROMO_PAIN_LINE_2.length * PROMO_PAIN_TYPE_CHAR_MS],
-    ['think-2', 450],
+    ['think-2', 300],
     ['answer-2', 2000],
   ];
   const PROMO_PITCH_SETTLE_MS = 700;
@@ -270,6 +270,8 @@
   const PROMO_MOMENTS_ACCESSORY_MS = 350;
   const PROMO_MOMENTS_COLLAPSE_MS = 560;
   const PROMO_MOMENTS_SHORTLIST_MS = 800;
+  const PROMO_MOMENTS_SETTLE_DELAY_MS = 900;
+  const PROMO_MOMENTS_SETTLE_MS = 420;
   const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
@@ -633,15 +635,15 @@
   const PROMO_CLAY_FINISHES = ['matte', 'satin'];
   const PROMO_CLAY_SCALES = [0.8, 0.86, 0.92, 0.98, 1.04, 1.1];
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
-  const PROMO_MOMENT_PICK_INDEX = 5;
+  const PROMO_MOMENT_PICK_INDEX = 1;
   const PROMO_MOMENT_GO_INDEX = 0;
-  const PROMO_MOMENT_OTHER_INDEX = 3;
+  const PROMO_MOMENT_OTHER_INDEX = 2;
   const PROMO_COMPARE_TINT = 'stone';
   const PROMO_COMPARE_SHAPES = { go: 'capsule', pick: 'sphere', other: 'rounded-cube' };
   const PROMO_ACCESSORY_SHAPE = 'torus';
   const PROMO_ACCESSORY_TINT = 'stone';
-  const PROMO_ACCESSORY_SCALE = 0.6;
   const PROMO_SPHERE_SETTLE_PX = 6;
+  const PROMO_BASE_WIDTH = 0.55;
   const PROMO_TINT_FILE = {
     sphere: { stone: 'sphere-b' },
     capsule: { stone: 'capsule' },
@@ -764,9 +766,12 @@
     cards.forEach((card, index) => applyClayLook(card, looks[index]));
     const extra = board.querySelector('.promo-moments__card.is-extra');
     const pick = looks[PROMO_MOMENT_PICK_INDEX];
-    if (extra && pick) applyClayLook(extra, accessoryLook());
-    board.style.setProperty('--promo-accessory-scale', String(PROMO_ACCESSORY_SCALE));
+    const accessory = accessoryLook();
+    if (extra && pick) applyClayLook(extra, accessory);
+    const base = board.querySelector('.promo-moments__card.is-pick .promo-moments__base img');
+    if (base) base.src = claySrc(accessory);
     board.style.setProperty('--promo-sphere-settle', `${PROMO_SPHERE_SETTLE_PX}px`);
+    board.style.setProperty('--promo-base-width', String(PROMO_BASE_WIDTH));
     board.dataset.clayReady = '1';
   }
 
@@ -839,10 +844,21 @@
     return pill;
   }
 
+  function momentBase() {
+    const base = document.createElement('span');
+    base.className = 'promo-moments__base';
+    const img = document.createElement('img');
+    img.alt = '';
+    img.draggable = false;
+    base.appendChild(img);
+    return base;
+  }
+
   function momentPhoto(index) {
     const photo = document.createElement('span');
     photo.className = 'promo-moments__photo';
     photo.appendChild(momentGlyph());
+    if (index === PROMO_MOMENT_PICK_INDEX) photo.appendChild(momentBase());
     const badge = momentBadge(index);
     if (badge) photo.appendChild(badge);
     return photo;
@@ -2620,6 +2636,9 @@
       this.root.style.setProperty('--promo-moments-tick', `${PROMO_MOMENTS_BADGE_TICK_MS}ms`);
       this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
       this.root.style.setProperty('--promo-compare-fold', `${PROMO_MOMENTS_CHOICE_MS - 200}ms`);
+      this.root.style.setProperty('--promo-settle-delay', `${PROMO_MOMENTS_SETTLE_DELAY_MS}ms`);
+      this.root.style.setProperty('--promo-settle', `${PROMO_MOMENTS_SETTLE_MS}ms`);
+      this.root.style.setProperty('--promo-settle-end', `${PROMO_MOMENTS_SETTLE_DELAY_MS + PROMO_MOMENTS_SETTLE_MS}ms`);
       return host;
     }
 
@@ -2653,6 +2672,11 @@
       }
       if (beat.nod) setOpeningAvatarAction('nod');
       else if (beat.wave) setOpeningAvatarAction('waving');
+      if (beat.playPose === 'extra' && !prefersReducedMotion()) {
+        this.momentTimers.push(window.setTimeout(() => {
+          this.emitClick();
+        }, PROMO_MOMENTS_SETTLE_DELAY_MS + PROMO_MOMENTS_SETTLE_MS));
+      }
       if (typeof beat.closeAt === 'number' || typeof beat.bundleAt === 'number') {
         const at = beat.closeAt ?? beat.bundleAt;
         this.momentTimers.push(window.setTimeout(() => {
@@ -3394,6 +3418,19 @@
       }, PROMO_SCALE_SNAP_CLASS_MS);
       this.painTimers = this.painTimers || [];
       this.painTimers.push(this.snapTimer);
+    }
+
+    emitClick() {
+      const root = this.root;
+      window.clearTimeout(this.clickTimer);
+      root.classList.remove('click');
+      void root.offsetWidth;
+      root.classList.add('click');
+      this.clickTimer = window.setTimeout(() => {
+        root.classList.remove('click');
+      }, PROMO_SCALE_SNAP_CLASS_MS);
+      this.momentTimers = this.momentTimers || [];
+      this.momentTimers.push(this.clickTimer);
     }
 
     emitThud() {

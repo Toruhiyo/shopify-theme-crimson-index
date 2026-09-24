@@ -759,6 +759,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   --promo-thud: 1;
 }
 
+.promo-opening.click {
+  --promo-click: 1;
+}
+
 .promo-opening.is-pain.is-scale-squash:not(.is-see) .promo-opening__store,
 .promo-opening.is-pain.is-scale-collapse:not(.is-see) .promo-opening__store {
   transform-origin: var(--window-close-x, 36px) var(--window-close-y, 32px);
@@ -1558,6 +1562,45 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   pointer-events: none;
 }
 
+.promo-moments__base {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  z-index: 2;
+  width: calc(var(--promo-base-width, 0.55) * 100%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.promo-moments__base img {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 34%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 22%, transparent 34%);
+}
+
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__base,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__base {
+  opacity: 1;
+}
+
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__base {
+  animation: promo-moments-base-in var(--promo-settle, 420ms) cubic-bezier(0.22, 1, 0.36, 1) var(--promo-settle-delay, 900ms) both;
+}
+
+@keyframes promo-moments-base-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
 .promo-moments__spec-icon svg,
 .promo-moments__mark svg,
 .promo-moments__yes svg {
@@ -1836,8 +1879,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   pointer-events: auto;
 }
 
-.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add {
-  animation: promo-moments-add-reveal 420ms var(--promo-spring) 640ms both;
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-label {
+  animation: promo-moments-addon-label 480ms cubic-bezier(0.22, 1, 0.36, 1) 640ms both;
+}
+
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-done {
+  animation: promo-moments-addon-check 480ms cubic-bezier(0.22, 1, 0.36, 1) 640ms both;
+}
+
+@keyframes promo-moments-addon-label {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes promo-moments-addon-check {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .promo-moments__add-label,
@@ -1919,8 +1976,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-close .promo-moments__card.is-pick .promo-moments__add,
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__add,
-.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add,
-.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add {
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add {
   background: var(--bizmis-primary);
   border-color: var(--bizmis-primary);
   color: var(--ad-white);
@@ -1929,15 +1985,13 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-close .promo-moments__card.is-pick .promo-moments__add-label,
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__add-label,
-.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add-label,
-.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-label {
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add-label {
   opacity: 0;
 }
 
 .is-pose-close .promo-moments__card.is-pick .promo-moments__add-done,
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__add-done,
-.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add-done,
-.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-done {
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__add-done {
   opacity: 1;
 }
 
@@ -1953,31 +2007,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-moments-add-tick 460ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--promo-close-cart-at, 1280ms) + 180ms) both;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-label {
-  animation: promo-moments-add-out 320ms cubic-bezier(0.22, 1, 0.36, 1) 170ms both;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-done {
-  animation: promo-moments-add-in 520ms cubic-bezier(0.22, 1, 0.36, 1) 260ms both;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add-done .promo-moments__mark {
-  animation: promo-moments-add-tick 460ms cubic-bezier(0.22, 1, 0.36, 1) 350ms both;
-}
-
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__add {
   animation-name: promo-moments-add-fill;
   animation-duration: 620ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   animation-delay: var(--promo-close-cart-at, 1280ms);
-  animation-fill-mode: both;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add {
-  animation-name: promo-moments-add-fill;
-  animation-duration: 620ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  animation-delay: 170ms;
   animation-fill-mode: both;
 }
 
@@ -2301,11 +2335,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   right: auto;
   top: 61%;
   bottom: auto;
-  width: 200px;
-  height: 50px;
+  width: 240px;
+  height: 54px;
   margin: 0;
   border-radius: 14px;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .is-pose-doubt:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
@@ -2336,7 +2370,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__board.is-pose-extra .promo-moments__card.is-extra,
 .promo-moments__board.is-pose-bundle .promo-moments__card.is-extra {
   z-index: 6;
-  left: calc(50% + 70px);
+  left: calc(50% + 36px);
+  --card-w: 196px;
+  --card-h: 308px;
   opacity: 1;
 }
 
@@ -2384,6 +2420,68 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   font-size: 16px;
 }
 
+.promo-moments__board.is-pose-extra .promo-moments__card.is-extra .promo-moments__add,
+.promo-moments__board.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--bizmis-primary);
+  border-color: var(--bizmis-primary);
+  color: var(--ad-white);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.promo-moments__board.is-pose-extra .promo-moments__card.is-extra .promo-moments__add-label,
+.promo-moments__board.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-label {
+  opacity: 0;
+}
+
+.promo-moments__board.is-pose-extra .promo-moments__card.is-extra .promo-moments__add-done,
+.promo-moments__board.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-done {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  font-size: 0;
+}
+
+.promo-moments__board.is-pose-extra .promo-moments__card.is-extra .promo-moments__add-done .promo-moments__mark,
+.promo-moments__board.is-pose-bundle .promo-moments__card.is-extra .promo-moments__add-done .promo-moments__mark {
+  width: 14px;
+  height: 14px;
+  color: var(--ad-white);
+}
+
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__add {
+  animation: promo-moments-addon-badge 480ms cubic-bezier(0.22, 1, 0.36, 1) 640ms both;
+}
+
+@keyframes promo-moments-addon-badge {
+  from {
+    top: 248px;
+    right: 16px;
+    width: 164px;
+    height: 46px;
+    border-radius: 14px;
+  }
+  to {
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+  }
+}
+
 .is-pose-extra .promo-moments__card.is-extra::after {
   opacity: 0;
 }
@@ -2395,7 +2493,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph img,
 .is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph img {
-  transform: scale(var(--promo-accessory-scale, 0.6));
+  transform: none;
 }
 
 .is-pose-extra .promo-moments__card.is-pick .promo-moments__glyph,
@@ -2404,27 +2502,18 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__glyph {
-  animation: promo-moments-sphere-settle 420ms cubic-bezier(0.22, 1, 0.36, 1) 900ms both;
+  animation: promo-moments-sphere-settle var(--promo-settle, 420ms) cubic-bezier(0.22, 1, 0.36, 1) var(--promo-settle-delay, 900ms) both;
 }
 
-.is-pose-bundle .promo-moments__card.is-extra::after {
-  opacity: 1;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra::after {
-  animation: promo-moments-ring 320ms var(--promo-spring) 180ms both;
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra::after,
+.is-pose-bundle .promo-moments__card.is-extra::after,
+.is-pose-extra .promo-moments__card.is-extra::after {
+  animation: none;
+  opacity: 0;
 }
 
 .is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
   animation: promo-moments-addon-in 820ms var(--promo-spring) both;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra {
-  animation: promo-moments-addon-pop 720ms var(--promo-spring) 40ms both;
-}
-
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__card.is-extra .promo-moments__glyph {
-  animation: promo-moments-item-pop 720ms var(--promo-spring) 40ms both;
 }
 
 .promo-moments__celebrate,
@@ -2796,9 +2885,32 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     opacity 380ms var(--promo-spring);
 }
 
-.is-pose-bundle .promo-moments__outline,
 .is-pose-extra .promo-moments__outline {
   opacity: 0;
+}
+
+.is-pose-bundle .promo-moments__outline {
+  z-index: 3;
+  left: calc(50% - 128px);
+  top: 50%;
+  width: 560px;
+  height: 476px;
+  margin: 0;
+  border-radius: 32px;
+  border: 1px solid var(--bizmis-primary-ring);
+  box-shadow: none;
+  background: none;
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__outline {
+  animation: promo-moments-bundle-outline 420ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+}
+
+@keyframes promo-moments-bundle-outline {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 .promo-opening__store-bar .promo-moments__cart {
@@ -2853,8 +2965,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-moments-cart-burst 720ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-close-cart-at, 900ms) both;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__cart-burst {
-  animation: promo-moments-cart-burst-soft 640ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__cart-burst {
+  animation: promo-moments-cart-burst-soft 640ms cubic-bezier(0.22, 1, 0.36, 1) var(--promo-settle-end, 1320ms) both;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__wash,
@@ -3057,9 +3169,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .is-pose-close .promo-moments__count.is-one,
-.is-pose-extra .promo-moments__count.is-one,
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
+  display: grid;
+}
+
+.is-pose-extra.is-settled .promo-moments__count.is-two,
+.is-pose-extra.is-reduced .promo-moments__count.is-two,
 .is-pose-bundle .promo-moments__count.is-two {
   display: grid;
+}
+
+.is-pose-extra.is-settled .promo-moments__count.is-one,
+.is-pose-extra.is-reduced .promo-moments__count.is-one,
+.is-pose-bundle .promo-moments__count.is-one {
+  display: none;
 }
 
 .is-pose-close:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
@@ -3074,19 +3197,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   animation: promo-moments-cart-celebrate 780ms cubic-bezier(0.22, 1.35, 0.36, 1) var(--promo-close-cart-at, 1280ms) both;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
-  animation: promo-moments-cart-celebrate-soft 700ms cubic-bezier(0.22, 1.35, 0.36, 1) 80ms both;
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-opening__store-bar .promo-moments__cart {
+  animation: promo-moments-cart-celebrate-soft 700ms cubic-bezier(0.22, 1.35, 0.36, 1) var(--promo-settle-end, 1320ms) both;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
-  animation: promo-moments-count-out 380ms cubic-bezier(0.22, 1.35, 0.36, 1) 180ms forwards;
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__count.is-one {
+  animation: promo-moments-count-out 380ms cubic-bezier(0.22, 1.35, 0.36, 1) var(--promo-settle-end, 1320ms) forwards;
 }
 
-.is-pose-bundle:not(.is-settled):not(.is-reduced) .promo-moments__count.is-two {
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__count.is-two {
+  display: grid;
   animation-name: promo-moments-count-in;
   animation-duration: 420ms;
   animation-timing-function: cubic-bezier(0.22, 1.35, 0.36, 1);
-  animation-delay: 260ms;
+  animation-delay: var(--promo-settle-end, 1320ms);
   animation-fill-mode: both;
 }
 
