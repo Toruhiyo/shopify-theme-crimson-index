@@ -660,12 +660,21 @@
     };
   }
 
-  function claySrc(kind) {
-    const listed = promoClayUrls()[kind];
+  function clayVariantKey(look) {
+    const kind = typeof look === 'string' ? look : look.kind;
+    const turn = typeof look === 'string' ? '0' : look.turn;
+    if (turn === 'm20') return `${kind}-b`;
+    if (turn === 'p20') return `${kind}-c`;
+    return kind;
+  }
+
+  function claySrc(look) {
+    const key = clayVariantKey(look);
+    const listed = promoClayUrls()[key];
     if (listed) return listed;
     const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
     const base = stamp.replace(/[^/]+(\?.*)?$/, '');
-    return `${base}promo-product-${kind}.png`;
+    return `${base}promo-product-${key}.png`;
   }
 
   function catalogLooks(count, cols) {
@@ -715,7 +724,7 @@
     card.dataset.clayFinish = look.finish;
     card.style.setProperty('--clay-scale', String(look.scale));
     const img = card.querySelector('.promo-moments__glyph img');
-    const src = claySrc(look.kind);
+    const src = claySrc(look);
     if (img && img.getAttribute('src') !== src) img.src = src;
   }
 
@@ -1017,7 +1026,7 @@
     board.style.setProperty('--row-card-h', `${rowCardH.toFixed(1)}px`);
     board.style.setProperty('--row-seat', `${rowSeat.toFixed(1)}px`);
     board.style.setProperty('--row-nudge', `${rowNudge.toFixed(1)}px`);
-    board.style.setProperty('--row-compare-y', `${(rowCardH / 2 + 22).toFixed(1)}px`);
+    board.style.setProperty('--row-compare-y', `${(rowCardH / 2 + 40).toFixed(1)}px`);
     board.style.setProperty('--row-lift', `${(PROMO_COMPARE_RESERVE / 2).toFixed(1)}px`);
     stage.closest('.promo-opening__store')?.style.setProperty('--catalog-inset', `${Math.max(inset, 0).toFixed(1)}px`);
     board.querySelectorAll('.promo-moments__card:not(.is-extra)').forEach((card, index) => {
@@ -2537,8 +2546,10 @@
       setOpeningAvatarAction('nod');
       if (reduced) {
         applyMomentPose(this.momentStage(), 'gone', { instant: true });
+        this.restoreClerkSeat();
       } else {
         applyMomentPose(this.momentStage(), 'fly');
+        this.restoreClerkSeat();
         await waitMs(PROMO_MOMENTS_FLY_MS + 220);
       }
       onDone();
@@ -2546,7 +2557,6 @@
 
     playSeeForYourself() {
       endOpeningAgent();
-      this.restoreClerkSeat();
       if (!this.stores.length) {
         window.setTimeout(() => this.depart(), PROMO_PITCH_SETTLE_MS);
         return;
