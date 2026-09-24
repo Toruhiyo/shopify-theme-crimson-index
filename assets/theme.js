@@ -201,6 +201,26 @@
   const PROMO_WINDOW_LEAVE_MS = 400;
   const PROMO_WINDOW_HOLD_MS = 600;
   const PROMO_WINDOW_CLOSE_MS = 760;
+  const PROMO_SCALE_SNAP_MS = 60;
+  const PROMO_SCALE_COLLAPSE_MS = 120;
+  const PROMO_SCALE_SNAP_CLASS_MS = 50;
+  const PROMO_SCALE_STACK_START_MS = 300;
+  const PROMO_SCALE_PULL_START_MS = 2400;
+  const PROMO_SCALE_PULL_MS = 600;
+  const PROMO_SCALE_HOLD_START_MS = 4000;
+  const PROMO_SCALE_HOLD_MS = 1000;
+  const PROMO_SCALE_FADE_MS = 250;
+  const PROMO_SCALE_COUNT = 120;
+  const PROMO_SCALE_REDUCED_COUNT = 12;
+  const PROMO_SCALE_LOST = 1240;
+  const PROMO_SCALE_INTERVAL_START_MS = 220;
+  const PROMO_SCALE_STEP_PX = 12;
+  const PROMO_SCALE_THUMB_PX = 180;
+  const PROMO_SCALE_PERSPECTIVE_PX = 1200;
+  const PROMO_SCALE_PULL_SCALE = 0.7;
+  const PROMO_SCALE_ROTATE_Y = 2.6;
+  const PROMO_SCALE_SLAM_MS = 140;
+  const PROMO_SCALE_FADE_FROM = 18;
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -1523,6 +1543,54 @@
     return raw;
   }
 
+  function scaleLandingOffsets(count, duration, firstGap) {
+    const steps = Math.max(1, count - 1);
+    const safeFirst = Math.min(Math.max(firstGap, 1), duration * 0.5);
+    const fraction = safeFirst / duration;
+    const power = Math.log(fraction) / Math.log(1 / steps);
+    const offsets = [0];
+    for (let index = 1; index <= steps; index += 1) {
+      offsets.push(duration * (index / steps) ** power);
+    }
+    return offsets;
+  }
+
+  function scaleCopyPose(index) {
+    const along = index * PROMO_SCALE_STEP_PX;
+    return {
+      x: along * 0.62,
+      y: along * -0.78,
+      z: index * -PROMO_SCALE_STEP_PX,
+    };
+  }
+
+  function scaleCopyOpacity(index) {
+    if (index <= PROMO_SCALE_FADE_FROM) return 1;
+    const span = Math.max(1, PROMO_SCALE_COUNT - PROMO_SCALE_FADE_FROM);
+    return Math.max(0.05, 1 - (index - PROMO_SCALE_FADE_FROM) / span);
+  }
+
+  function scaleIndexAt(sceneMs, offsets) {
+    let found = 0;
+    offsets.forEach((offset, index) => {
+      if (PROMO_SCALE_STACK_START_MS + offset <= sceneMs) found = index;
+    });
+    return found;
+  }
+
+  function scaleLostAt(index, pullIndex) {
+    const last = PROMO_SCALE_COUNT - 1;
+    if (index <= pullIndex) return 1;
+    const span = Math.max(1, last - pullIndex);
+    const progress = Math.min(1, (index - pullIndex) / span);
+    const eased = 1 - (1 - progress) ** 3;
+    return Math.max(1, Math.round(1 + (PROMO_SCALE_LOST - 1) * eased));
+  }
+
+  function formatScaleCount(value) {
+    return String(Math.max(0, Math.round(value))).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   function loadPromoStores() {
     const node = document.getElementById('promo-opening-stores');
     if (!node) return [];
@@ -2789,6 +2857,7 @@
 
     releasePainStage() {
       this.clearPainTimers();
+      this.resetScaleScene();
       this.root.classList.remove('is-pain', 'is-pain-zoom', 'is-pain-out', 'is-moments', 'is-window-aim', 'is-window-shut');
       const host = this.painHost();
       host?.querySelector('.promo-moments__board')?.style.removeProperty('--pain-scroll');
@@ -3126,16 +3195,12 @@
       this.openPainStage();
       if (prefersReducedMotion()) {
         this.applyPainBeat('answer-2', true);
-        if (marketingPart() === 'full') this.flip();
+        await this.playScaleScene();
         return;
       }
       await this.playPainSteps(PROMO_PAIN_A, 'unattended');
       await this.playPainSteps(PROMO_PAIN_B, 'chat');
-      await this.dismissPainStage();
-      if (marketingPart() === 'full') {
-        await waitMs(PROMO_TOGGLE_REST_MS);
-        this.flip();
-      }
+      await this.playScaleScene();
     }
 
     painCursorPoint(target) {
@@ -3211,6 +3276,268 @@
       await waitMs(PROMO_WINDOW_CLOSE_MS);
       store.style.visibility = 'hidden';
       this.releasePainStage();
+    }
+
+    prepareScaleScene() {
+      this.scaleGeneration = (this.scaleGeneration || 0) + 1;
+      this.root.style.setProperty('--promo-scale-snap', `${PROMO_SCALE_SNAP_MS}ms`);
+      this.root.style.setProperty('--promo-scale-collapse', `${PROMO_SCALE_COLLAPSE_MS}ms`);
+      this.root.style.setProperty('--promo-scale-pull', `${PROMO_SCALE_PULL_MS}ms`);
+      this.root.style.setProperty('--promo-scale-fade', `${PROMO_SCALE_FADE_MS}ms`);
+      this.root.style.setProperty('--promo-scale-perspective', `${PROMO_SCALE_PERSPECTIVE_PX}px`);
+      this.root.style.setProperty('--promo-scale-thumb', `${PROMO_SCALE_THUMB_PX}px`);
+      this.root.style.setProperty('--promo-scale-pull-scale', String(PROMO_SCALE_PULL_SCALE));
+      this.root.style.setProperty('--promo-scale-rotate', `${PROMO_SCALE_ROTATE_Y}deg`);
+      this.root.style.setProperty('--promo-scale-slam', `${PROMO_SCALE_SLAM_MS}ms`);
+    }
+
+    resetScaleScene() {
+      this.scaleGeneration = (this.scaleGeneration || 0) + 1;
+      window.clearTimeout(this.snapTimer);
+      this.root.classList.remove(
+        'is-scale',
+        'is-scale-squash',
+        'is-scale-collapse',
+        'is-scale-pull',
+        'is-scale-count',
+        'is-scale-held',
+        'is-scale-out',
+        'snap',
+      );
+      const scale = this.root.querySelector('[data-promo-scale]');
+      if (scale) scale.hidden = true;
+      const deck = this.root.querySelector('[data-promo-scale-deck]');
+      if (deck) {
+        deck.replaceChildren();
+        deck.style.transition = '';
+      }
+      const figure = this.root.querySelector('[data-promo-scale-figure]');
+      if (figure) figure.textContent = '1';
+      const center = this.root.querySelector('.promo-opening__center');
+      if (center) {
+        center.style.transition = '';
+        center.style.opacity = '';
+      }
+    }
+
+    revealScaleLayer() {
+      const scale = this.root.querySelector('[data-promo-scale]');
+      if (scale) scale.hidden = false;
+      this.root.classList.add('is-scale');
+    }
+
+    scaleThumbNode(index, slam) {
+      const pose = scaleCopyPose(index);
+      const thumb = document.createElement('span');
+      thumb.className = slam ? 'promo-scale__thumb is-slam' : 'promo-scale__thumb';
+      thumb.style.zIndex = String(PROMO_SCALE_COUNT - index);
+      thumb.style.setProperty('--sx', `${pose.x.toFixed(2)}px`);
+      thumb.style.setProperty('--sy', `${pose.y.toFixed(2)}px`);
+      thumb.style.setProperty('--sz', `${pose.z.toFixed(2)}px`);
+      thumb.style.setProperty('--so', scaleCopyOpacity(index).toFixed(3));
+      const chrome = document.createElement('span');
+      chrome.className = 'promo-scale__chrome';
+      for (let dot = 0; dot < 3; dot += 1) {
+        const pip = document.createElement('i');
+        if (dot === 0) pip.className = 'is-close';
+        chrome.appendChild(pip);
+      }
+      thumb.appendChild(chrome);
+      return thumb;
+    }
+
+    placeScaleCopy(index, slam) {
+      const deck = this.root.querySelector('[data-promo-scale-deck]');
+      if (!deck) return;
+      deck.appendChild(this.scaleThumbNode(index, slam));
+    }
+
+    paintScaleFigure(value) {
+      const figure = this.root.querySelector('[data-promo-scale-figure]');
+      if (figure) figure.textContent = formatScaleCount(value);
+    }
+
+    emitSnap() {
+      const root = this.root;
+      window.clearTimeout(this.snapTimer);
+      root.classList.remove('snap');
+      void root.offsetWidth;
+      root.classList.add('snap');
+      this.snapTimer = window.setTimeout(() => {
+        root.classList.remove('snap');
+      }, PROMO_SCALE_SNAP_CLASS_MS);
+      this.painTimers = this.painTimers || [];
+      this.painTimers.push(this.snapTimer);
+    }
+
+    armScaleTimer(fn, ms) {
+      const timer = window.setTimeout(fn, ms);
+      this.painTimers = this.painTimers || [];
+      this.painTimers.push(timer);
+      return timer;
+    }
+
+    hideScaleStore() {
+      const store = this.painStore();
+      if (store) store.style.visibility = 'hidden';
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      if (cursor) cursor.style.opacity = '0';
+    }
+
+    mountScaleStill(count, figure, held) {
+      this.hideScaleStore();
+      this.revealScaleLayer();
+      const deck = this.root.querySelector('[data-promo-scale-deck]');
+      if (deck) {
+        deck.replaceChildren();
+        deck.style.transition = 'none';
+      }
+      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index, false);
+      this.root.classList.add('is-scale-pull', 'is-scale-count');
+      if (held) this.root.classList.add('is-scale-held');
+      this.paintScaleFigure(figure);
+    }
+
+    async fadeScaleToSwitch() {
+      const center = this.root.querySelector('.promo-opening__center');
+      this.root.classList.add('is-scale-out');
+      if (center) {
+        center.style.transition = 'none';
+        center.style.opacity = '0';
+        center.getBoundingClientRect();
+        center.style.transition = `opacity ${PROMO_SCALE_FADE_MS}ms linear`;
+        center.style.opacity = '1';
+      }
+      await waitMs(PROMO_SCALE_FADE_MS);
+      this.releasePainStage();
+    }
+
+    async playScaleScene() {
+      if (!this.root.classList.contains('is-pain')) return;
+      if (!this.root.querySelector('[data-promo-scale]')) return;
+      this.prepareScaleScene();
+      if (prefersReducedMotion()) {
+        this.mountScaleStill(PROMO_SCALE_REDUCED_COUNT, PROMO_SCALE_LOST, true);
+        await waitMs(PROMO_SCALE_HOLD_MS + promoHoldMs());
+        if (marketingPart() === 'full') {
+          await this.fadeScaleToSwitch();
+          await waitMs(PROMO_TOGGLE_REST_MS);
+          this.flip();
+        }
+        return;
+      }
+      await this.playScaleTimeline();
+      if (marketingPart() === 'full') {
+        await this.fadeScaleToSwitch();
+        await waitMs(PROMO_TOGGLE_REST_MS);
+        this.flip();
+      }
+    }
+
+    async playScaleTimeline() {
+      const generation = this.scaleGeneration;
+      const store = this.painStore();
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const dot = store?.querySelector('[data-promo-window-close]');
+      const aim = this.painCursorPoint(dot);
+      if (cursor && aim) {
+        cursor.hidden = false;
+        cursor.style.transition = 'none';
+        cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
+        cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
+        cursor.style.opacity = '1';
+      }
+      this.pinWindowCloseOrigin();
+      this.root.classList.add('is-window-aim');
+      const started = performance.now();
+      const until = async (mark) => {
+        const wait = mark - (performance.now() - started);
+        if (wait > 0) await waitMs(wait);
+      };
+      this.emitSnap();
+      this.root.classList.add('is-scale-squash');
+      await until(PROMO_SCALE_SNAP_MS);
+      if (generation !== this.scaleGeneration) return;
+      this.root.classList.add('is-scale-collapse');
+      await until(PROMO_SCALE_SNAP_MS + PROMO_SCALE_COLLAPSE_MS);
+      if (generation !== this.scaleGeneration) return;
+      this.hideScaleStore();
+      this.revealScaleLayer();
+      this.placeScaleCopy(0, false);
+
+      const landSpan = PROMO_SCALE_HOLD_START_MS - PROMO_SCALE_STACK_START_MS;
+      const offsets = scaleLandingOffsets(PROMO_SCALE_COUNT, landSpan, PROMO_SCALE_INTERVAL_START_MS);
+      const pullIndex = scaleIndexAt(PROMO_SCALE_PULL_START_MS, offsets);
+      const delayUntil = (mark) => Math.max(0, mark - (performance.now() - started));
+      this.armScaleTimer(() => {
+        if (generation !== this.scaleGeneration) return;
+        this.root.classList.add('is-scale-pull', 'is-scale-count');
+        this.paintScaleFigure(1);
+      }, delayUntil(PROMO_SCALE_PULL_START_MS));
+      for (let index = 1; index < PROMO_SCALE_COUNT; index += 1) {
+        const at = PROMO_SCALE_STACK_START_MS + offsets[index];
+        this.armScaleTimer(() => {
+          if (generation !== this.scaleGeneration) return;
+          this.placeScaleCopy(index, true);
+          this.emitSnap();
+          if (index > pullIndex) this.paintScaleFigure(scaleLostAt(index, pullIndex));
+        }, delayUntil(at));
+      }
+      this.armScaleTimer(() => {
+        if (generation !== this.scaleGeneration) return;
+        this.paintScaleFigure(PROMO_SCALE_LOST);
+        this.root.classList.add('is-scale-held');
+      }, delayUntil(PROMO_SCALE_HOLD_START_MS));
+      await until(PROMO_SCALE_HOLD_START_MS + PROMO_SCALE_HOLD_MS + promoHoldMs());
+    }
+
+    showScaleExport(kind) {
+      this.resetScaleScene();
+      this.prepareScaleScene();
+      this.openPainStage();
+      this.applyPainBeat('answer-2', true);
+      const store = this.painStore();
+      if (kind === 'snap') {
+        const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+        const dot = store?.querySelector('[data-promo-window-close]');
+        const aim = this.painCursorPoint(dot);
+        if (cursor && aim) {
+          cursor.hidden = false;
+          cursor.style.transition = 'none';
+          cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
+          cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
+          cursor.style.opacity = '1';
+        }
+        this.pinWindowCloseOrigin();
+        if (store) store.style.transition = 'none';
+        this.root.classList.add('is-window-aim', 'is-scale-squash', 'snap');
+        return this.whenPainRest(this.painHost());
+      }
+      this.hideScaleStore();
+      this.revealScaleLayer();
+      const deck = this.root.querySelector('[data-promo-scale-deck]');
+      if (deck) deck.style.transition = 'none';
+      const count = kind === 'copies-10' ? 10 : PROMO_SCALE_COUNT;
+      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index, false);
+      if (kind === 'counter-mid' || kind === 'counter-final') {
+        const landSpan = PROMO_SCALE_HOLD_START_MS - PROMO_SCALE_STACK_START_MS;
+        const offsets = scaleLandingOffsets(PROMO_SCALE_COUNT, landSpan, PROMO_SCALE_INTERVAL_START_MS);
+        const pullIndex = scaleIndexAt(PROMO_SCALE_PULL_START_MS, offsets);
+        let midIndex = pullIndex + 1;
+        let nearest = Infinity;
+        for (let index = pullIndex + 1; index < PROMO_SCALE_COUNT; index += 1) {
+          const delta = Math.abs(scaleLostAt(index, pullIndex) - PROMO_SCALE_LOST / 2);
+          if (delta < nearest) {
+            nearest = delta;
+            midIndex = index;
+          }
+        }
+        const figure = kind === 'counter-final' ? PROMO_SCALE_LOST : scaleLostAt(midIndex, pullIndex);
+        this.root.classList.add('is-scale-pull', 'is-scale-count');
+        if (kind === 'counter-final') this.root.classList.add('is-scale-held');
+        this.paintScaleFigure(figure);
+      }
+      return this.whenPainRest(this.painHost());
     }
 
     paintFloodStill(warmth) {
@@ -3763,6 +4090,11 @@
         'pain-b-answer-1': () => this.showPainExport('answer-1'),
         'pain-b-typed-2': () => this.showPainExport('typed-2'),
         'pain-b-answer-2': () => this.showPainExport('answer-2'),
+        'pain-c-snap': () => this.showScaleExport('snap'),
+        'pain-c-copies-10': () => this.showScaleExport('copies-10'),
+        'pain-c-copies-120': () => this.showScaleExport('copies-120'),
+        'pain-c-counter-mid': () => this.showScaleExport('counter-mid'),
+        'pain-c-counter-final': () => this.showScaleExport('counter-final'),
         'pain-c-aim': () => this.showPainCloseAim(),
         'pain-b-zoom': () => this.showPainExport('answer-2'),
       };
