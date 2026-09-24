@@ -11,6 +11,25 @@
   const promoBootParams = new URLSearchParams(location.search);
   const legacyPromoVideo = promoBootParams.get(PROMO_VIDEO_PARAM);
   const marketingValue = promoBootParams.get(PROMO_MARKETING_PARAM);
+  const PROMO_END_CTA = {
+    demo: { scarcity: '', label: 'See it in action', url: 'bizmis.ai/demo' },
+    install: { scarcity: '', label: 'Install on Shopify', url: '' },
+    ea: { scarcity: 'First 50 stores. Free to run live.', label: 'Join Early Access', url: 'bizmis.ai/early-access' },
+    none: null,
+  };
+  let promoCtaFallbackLogged = false;
+  function readPromoCta() {
+    const raw = (promoBootParams.get('cta') || 'demo').trim().toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(PROMO_END_CTA, raw)) return raw;
+    if (!promoCtaFallbackLogged) {
+      promoCtaFallbackLogged = true;
+      const host = location.hostname;
+      const dev = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.myshopify.com');
+      if (dev) console.warn(`Unknown cta "${raw}". Using demo.`);
+    }
+    return 'demo';
+  }
+  const promoVideoConfig = { cta: readPromoCta() };
   const isMarketingAd = marketingValue === PROMO_MARKETING_AD || legacyPromoVideo === 'opening';
   const promoVideo = isMarketingAd ? 'opening' : legacyPromoVideo;
   if (isMarketingAd) {
@@ -29,7 +48,7 @@
     if (source.get(PROMO_MARKETING_PARAM)) keys.push(PROMO_MARKETING_PARAM);
     if (source.get(PROMO_VIDEO_PARAM)) keys.push(PROMO_VIDEO_PARAM);
     if (!keys.length) return;
-    const carry = ['part', 'hold', 'store', 'auto', 'nocover', 'lighting', 'moments'];
+    const carry = ['part', 'hold', 'cta', 'store', 'auto', 'nocover', 'lighting', 'moments'];
 
     const updateLink = (link) => {
       const href = link.getAttribute('href');
@@ -204,6 +223,8 @@
   const PROMO_SCALE_SNAP_CLASS_MS = 50;
   const PROMO_SCALE_WHITE_MS = 200;
   const PROMO_SCALE_HOLD_MS = 1000;
+  const PROMO_END_CTA_DELAY_MS = 400;
+  const PROMO_END_CTA_HOLD_MS = 3000;
   const PROMO_SCALE_FADE_MS = 250;
   const PROMO_SCALE_LOOP_MS = 3000;
   const PROMO_CORRIDOR = {
@@ -4392,11 +4413,46 @@
       this.residue = null;
     }
 
-    setConveyorEnd(mode) {
+    mountEndCta(value) {
+      const verdict = this.root.querySelector('[data-promo-scale-verdict]');
+      if (!verdict) return;
+      const key = Object.prototype.hasOwnProperty.call(PROMO_END_CTA, value) ? value : promoVideoConfig.cta;
+      const copy = PROMO_END_CTA[key];
+      this.root.classList.toggle('is-cta-none', !copy);
+      this.root.dataset.promoCta = key;
+      let slot = verdict.querySelector('[data-promo-end-cta]');
+      if (!slot) {
+        slot = document.createElement('div');
+        slot.className = 'promo-scale__cta';
+        slot.setAttribute('data-promo-end-cta', '');
+        verdict.append(slot);
+      }
+      slot.replaceChildren();
+      if (!copy) return;
+      if (copy.scarcity) {
+        const scarcity = document.createElement('p');
+        scarcity.className = 'promo-scale__cta-note';
+        scarcity.textContent = copy.scarcity;
+        slot.append(scarcity);
+      }
+      const button = document.createElement('span');
+      button.className = 'promo-scale__cta-button';
+      button.textContent = copy.label;
+      slot.append(button);
+      if (copy.url) {
+        const url = document.createElement('p');
+        url.className = 'promo-scale__cta-url';
+        url.textContent = copy.url;
+        slot.append(url);
+      }
+    }
+
+    setConveyorEnd(mode, ctaKey) {
       const caption = this.root.querySelector('[data-promo-end-caption]');
       if (caption) caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
       this.root.classList.toggle('is-end-pitch', mode === 'pitch');
       this.root.classList.toggle('is-end-pain', mode !== 'pitch');
+      this.mountEndCta(mode === 'pitch' ? (ctaKey || promoVideoConfig.cta) : 'none');
     }
 
     async playConveyorEnd(mode) {
@@ -4406,7 +4462,9 @@
       await waitMs(PROMO_SCALE_WHITE_MS);
       this.root.classList.add('is-scale-zero');
       this.emitThud();
-      await waitMs(PROMO_SCALE_HOLD_MS + promoHoldMs());
+      const cta = mode === 'pitch' ? promoVideoConfig.cta : 'none';
+      const visible = cta === 'none' ? PROMO_SCALE_HOLD_MS : PROMO_END_CTA_DELAY_MS + PROMO_END_CTA_HOLD_MS;
+      await waitMs(visible + promoHoldMs());
     }
 
     seatClerkOnBelt(instant) {
@@ -4464,7 +4522,7 @@
       this.playSeeForYourself();
     }
 
-    async showScaleExport(kind, mode = 'pain') {
+    async showScaleExport(kind, mode = 'pain', ctaKey) {
       this.resetScaleScene();
       this.prepareScaleScene();
       if (mode === 'pitch') {
@@ -4501,7 +4559,7 @@
       if (avenueAt[shot] != null) this.paintCorridorAt(avenueAt[shot], mode);
       if (shot === 'white' || shot === 'end') this.root.classList.add('is-scale-white');
       if (shot === 'end') {
-        this.setConveyorEnd(mode);
+        this.setConveyorEnd(mode, ctaKey);
         this.root.classList.add('is-scale-zero');
       }
       return this.whenPainRest(this.painHost());
@@ -5087,6 +5145,10 @@
         'pitch-c-residue-full': () => this.showScaleExport('lanes-7', 'pitch'),
         'pitch-c-white': () => this.showScaleExport('white', 'pitch'),
         'pitch-c-end': () => this.showScaleExport('end', 'pitch'),
+        'pitch-c-end-demo': () => this.showScaleExport('end', 'pitch', 'demo'),
+        'pitch-c-end-install': () => this.showScaleExport('end', 'pitch', 'install'),
+        'pitch-c-end-ea': () => this.showScaleExport('end', 'pitch', 'ea'),
+        'pitch-c-end-none': () => this.showScaleExport('end', 'pitch', 'none'),
         'pain-c-aim': () => this.showPainCloseAim(),
         'pain-b-zoom': () => this.showPainExport('answer-2'),
       };

@@ -93,7 +93,10 @@ const FRAMES = [
   ['pitch-c-lanes-5', 'Pitch avenue. Five lanes. No red.', 0],
   ['pitch-c-lanes-7', 'Pitch avenue. Seven lanes. The outer two sit partly off the frame. No red.', 0],
   ['pitch-c-white', 'Pitch avenue. Hard cut to empty white. The mark has not landed.', 0],
-  ['pitch-c-end', 'Pitch avenue end frame. Bizmis mark in the primary colour, same slot as the zero. Built to sell. sits 16px below it.', 0],
+  ['pitch-c-end-demo', 'Pitch end frame, cta=demo. Mark and Built to sell. Button See it in action, then bizmis.ai/demo.', 0],
+  ['pitch-c-end-install', 'Pitch end frame, cta=install. Mark and Built to sell. Button Install on Shopify. No URL line.', 0],
+  ['pitch-c-end-ea', 'Pitch end frame, cta=ea. Scarcity line, button Join Early Access, then bizmis.ai/early-access.', 0],
+  ['pitch-c-end-none', 'Pitch end frame, cta=none. Mark and Built to sell. only. No button.', 0],
 ];
 
 async function loadPlaywright() {
