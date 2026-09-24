@@ -3845,7 +3845,7 @@
       this.revealScaleLayer();
       const frameWidth = this.conveyorFrameWidth();
       this.runConveyor(generation, frameWidth);
-      const cut = origin + PROMO_CONVEYOR_STREAM_MS;
+      const cut = PROMO_SCALE_SHRINK_MS + PROMO_CONVEYOR_STREAM_MS;
       await until(cut);
       if (generation !== this.scaleGeneration) return;
       this.root.classList.add('is-scale-white');
