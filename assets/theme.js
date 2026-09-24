@@ -622,50 +622,6 @@
     'spec-shield': '<path d="M12 2.4 20.2 5.6v6.2c0 4.4-3 7.6-8.2 9.8-5.2-2.2-8.2-5.4-8.2-9.8V5.6z"/>',
   };
 
-  const PROMO_NEUTRAL_KEY = {
-    cone: 'cone-c',
-    sphere: 'sphere',
-    cube: 'cube-b',
-    'rounded-cube': 'rounded-cube',
-    cylinder: 'cylinder-c',
-    'low-cylinder': 'low-cylinder',
-    'tall-box': 'tall-box',
-    capsule: 'capsule-c',
-    torus: 'torus-b',
-    dome: 'dome',
-  };
-  const PROMO_LOOK_TINT = {
-    cone: 'blush',
-    'cone-b': 'sand',
-    'cone-c': 'grey',
-    sphere: 'grey',
-    'sphere-b': 'stone',
-    'sphere-c': 'white',
-    cube: 'sand',
-    'cube-b': 'grey',
-    'cube-c': 'blush',
-    'rounded-cube': 'stone',
-    'rounded-cube-b': 'sage',
-    'rounded-cube-c': 'sand',
-    cylinder: 'sage',
-    'cylinder-b': 'stone',
-    'cylinder-c': 'grey',
-    'low-cylinder': 'white',
-    'low-cylinder-b': 'sand',
-    'low-cylinder-c': 'sage',
-    'tall-box': 'grey',
-    'tall-box-b': 'stone',
-    'tall-box-c': 'blush',
-    capsule: 'sage',
-    'capsule-b': 'blush',
-    'capsule-c': 'white',
-    torus: 'sand',
-    'torus-b': 'stone',
-    'torus-c': 'sage',
-    dome: 'stone',
-    'dome-b': 'grey',
-    'dome-c': 'blush',
-  };
   const PROMO_GRID_LIFE_MS = 4000;
   const PROMO_GRID_LIFT_MS = 600;
   const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'open-2', 'back-2', 'scroll-2', 'scroll-3', 'scroll-4', 'leave'];
@@ -696,14 +652,8 @@
     return kind;
   }
 
-  function clayTint(look) {
-    const name = PROMO_LOOK_TINT[clayVariantKey(look)] || 'stone';
-    return `var(--tint-${name})`;
-  }
-
   function claySrc(look) {
-    const kind = typeof look === 'string' ? look : look.kind;
-    const key = PROMO_NEUTRAL_KEY[kind] || kind;
+    const key = clayVariantKey(look);
     const listed = promoClayUrls()[key];
     if (listed) return listed;
     const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
@@ -757,7 +707,7 @@
     card.dataset.clayTurn = look.turn;
     card.dataset.clayFinish = look.finish;
     card.style.setProperty('--clay-scale', String(look.scale));
-    card.style.setProperty('--tint', clayTint(look));
+    card.style.removeProperty('--tint');
     const img = card.querySelector('.promo-moments__glyph img');
     const src = claySrc(look);
     if (img && img.getAttribute('src') !== src) img.src = src;
@@ -1035,7 +985,8 @@
     const gutter = PROMO_CATALOG_GUTTER;
     const rowGapY = PROMO_CATALOG_ROW_GAP;
     const cardW = (contentWidth - PROMO_CATALOG_PAD_X * 2 - (cols - 1) * gutter) / cols;
-    const cardH = (stage.clientHeight - PROMO_CATALOG_PAD_Y * 2 - rowGapY) / PROMO_CATALOG_VISIBLE_ROWS;
+    const cardFooter = 92;
+    const cardH = cardW + cardFooter;
     const pitchX = cardW + gutter;
     const pitchY = cardH + rowGapY;
     const inset = PROMO_CATALOG_PAD_X;
@@ -2866,6 +2817,8 @@
       this.root.style.setProperty('--promo-pain-card', '720ms');
       this.root.style.setProperty('--promo-pain-exit', `${PROMO_PAIN_EXIT_MS}ms`);
       this.ensureMoments();
+      const openingStore = this.painStore();
+      if (openingStore) openingStore.style.visibility = '';
       this.root.classList.add('is-pain', 'is-moments');
       const stage = this.momentStage();
       void stage?.offsetWidth;
@@ -2892,8 +2845,9 @@
 
     painBrowseCard(slot) {
       const cols = this.painCols();
-      const base = cols + 1;
-      const index = base + Math.max(0, slot) * cols;
+      const row = 1 + Math.max(0, slot);
+      const column = slot === 0 ? 1 : 2;
+      const index = row * cols + column;
       return this.painCards()[index] || null;
     }
 
@@ -3180,16 +3134,17 @@
       cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
       cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
       cursor.style.opacity = '1';
+      this.pinWindowCloseOrigin();
       this.root.classList.add('is-window-aim');
       await waitMs(PROMO_WINDOW_AIM_MS);
       this.pinWindowCloseOrigin();
       await waitMs(PROMO_WINDOW_HOLD_MS);
-      this.parkPainCursor();
       this.root.classList.add('is-window-shut');
       window.setTimeout(() => {
         cursor.style.opacity = '0';
       }, Math.round(PROMO_WINDOW_CLOSE_MS * 0.62));
       await waitMs(PROMO_WINDOW_CLOSE_MS);
+      store.style.visibility = 'hidden';
       this.releasePainStage();
     }
 

@@ -721,9 +721,19 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
+.promo-opening.is-window-aim .promo-opening__store,
 .promo-opening.is-window-shut .promo-opening__store {
   transform-origin: var(--window-close-x, 36px) var(--window-close-y, 32px);
-  animation: promo-window-close var(--promo-window-close, 760ms) cubic-bezier(0.4, 0, 0.15, 1) forwards;
+}
+
+.promo-opening.is-window-shut .promo-opening__store {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  animation: promo-window-close var(--promo-window-close, 760ms) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.promo-opening.is-window-shut .promo-opening__store::before {
+  animation: none;
 }
 
 .promo-opening.is-pain.is-window-shut:not(.is-on) .promo-opening__center {
@@ -735,17 +745,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
     opacity: 1;
     transform: translateY(-0.4rem) scale(1);
   }
-  16% {
-    opacity: 1;
-    transform: translateY(-0.4rem) scale(0.96);
-  }
-  68% {
-    opacity: 0.88;
-    transform: translateY(-0.4rem) scale(0.4);
-  }
   100% {
     opacity: 0;
-    transform: translateY(-0.4rem) scale(0.1);
+    transform: translateY(-0.4rem) scale(0.08);
   }
 }
 
@@ -930,10 +932,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-opening.is-pain .promo-moments__card.is-pain-open .promo-moments__photo {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
   height: auto;
-  aspect-ratio: auto;
+  aspect-ratio: 1;
 }
 
 .promo-opening.is-pain .promo-moments__card.is-pain-open .promo-moments__add {
@@ -1312,10 +1314,9 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   pointer-events: none;
-  filter: var(--tint, var(--tint-stone));
 }
 
 .promo-moments__spec-icon svg,
@@ -1748,11 +1749,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__board.is-pose-grid .promo-moments__photo {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   width: 100%;
   height: auto;
   min-height: 0;
-  aspect-ratio: auto;
+  aspect-ratio: 1;
   background: var(--ad-surface);
 }
 
@@ -1863,11 +1864,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-choice .promo-moments__card.is-go .promo-moments__photo,
 .is-pose-choice .promo-moments__card.is-pick .promo-moments__photo,
 .is-pose-choice .promo-moments__card.is-other .promo-moments__photo {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   width: 100%;
   height: auto;
   min-height: 0;
-  aspect-ratio: auto;
+  max-height: calc(100% - 88px);
+  aspect-ratio: 4 / 5;
 }
 
 .is-pose-choice .promo-moments__card.is-go .promo-moments__add,
@@ -2012,12 +2014,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   left: 8px;
   top: 8px;
-  bottom: 8px;
-  width: 44%;
+  bottom: auto;
+  width: 46%;
   height: auto;
   min-height: 0;
   margin: 0;
-  aspect-ratio: auto;
+  aspect-ratio: 1;
   border-radius: 22px;
   background: var(--ad-surface);
 }
@@ -2077,7 +2079,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__board.is-pose-bundle .promo-moments__card.is-extra {
   z-index: 4;
   --card-w: 280px;
-  --card-h: 400px;
+  --card-h: 440px;
   top: 50%;
   width: var(--card-w);
   height: var(--card-h);
@@ -2108,12 +2110,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   top: auto;
   right: auto;
   bottom: auto;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   width: 100%;
   height: auto;
   min-height: 0;
   margin: 0;
-  aspect-ratio: auto;
+  aspect-ratio: 1;
   border-radius: 16px;
 }
 
@@ -2311,7 +2313,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-moments__board.is-pose-doubt .promo-moments__orbit,
 .promo-moments__board.is-pose-close .promo-moments__orbit {
-  left: calc(22% + 8px);
+  left: calc(23% + 8px);
   top: 50%;
   opacity: 1;
   animation: promo-moments-orbit var(--promo-moments-orbit, 14s) linear infinite;
