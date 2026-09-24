@@ -205,22 +205,24 @@
   const PROMO_SCALE_COLLAPSE_MS = 120;
   const PROMO_SCALE_SNAP_CLASS_MS = 50;
   const PROMO_SCALE_STACK_START_MS = 300;
-  const PROMO_SCALE_PULL_START_MS = 2400;
-  const PROMO_SCALE_PULL_MS = 600;
-  const PROMO_SCALE_HOLD_START_MS = 4000;
-  const PROMO_SCALE_HOLD_MS = 1000;
+  const PROMO_SCALE_SCENE_MS = 5000;
+  const PROMO_SCALE_ZERO_LAG_MS = 300;
   const PROMO_SCALE_FADE_MS = 250;
-  const PROMO_SCALE_COUNT = 120;
-  const PROMO_SCALE_REDUCED_COUNT = 12;
+  const PROMO_SCALE_COUNT = 61;
+  const PROMO_SCALE_REVEAL_AT = 19;
+  const PROMO_SCALE_FADE_BY = 60;
   const PROMO_SCALE_LOST = 1240;
   const PROMO_SCALE_INTERVAL_START_MS = 220;
-  const PROMO_SCALE_STEP_PX = 12;
-  const PROMO_SCALE_THUMB_PX = 180;
-  const PROMO_SCALE_PERSPECTIVE_PX = 1200;
-  const PROMO_SCALE_PULL_SCALE = 0.7;
-  const PROMO_SCALE_ROTATE_Y = 2.6;
-  const PROMO_SCALE_SLAM_MS = 140;
-  const PROMO_SCALE_FADE_FROM = 18;
+  const PROMO_SCALE_INTERVAL_END_MS = 20;
+  const PROMO_SCALE_GAP_POWER = 3.5;
+  const PROMO_SCALE_Z_PX = 28;
+  const PROMO_SCALE_Y_PX = 6;
+  const PROMO_SCALE_THUMB_W = 160;
+  const PROMO_SCALE_THUMB_H = 110;
+  const PROMO_SCALE_PERSPECTIVE_PX = 900;
+  const PROMO_SCALE_ROTATE_Y = -6;
+  const PROMO_SCALE_IMPACT_PX = 1;
+  const PROMO_SCALE_TILES = 8;
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -1548,48 +1550,43 @@
     return raw;
   }
 
-  function scaleLandingOffsets(count, duration, firstGap) {
+  function scaleLandingOffsets(count, firstGap, lastGap) {
     const steps = Math.max(1, count - 1);
-    const safeFirst = Math.min(Math.max(firstGap, 1), duration * 0.5);
-    const fraction = safeFirst / duration;
-    const power = Math.log(fraction) / Math.log(1 / steps);
     const offsets = [0];
-    for (let index = 1; index <= steps; index += 1) {
-      offsets.push(duration * (index / steps) ** power);
+    let elapsed = 0;
+    for (let step = 0; step < steps; step += 1) {
+      const along = steps === 1 ? 1 : step / (steps - 1);
+      const gap = lastGap + (firstGap - lastGap) * (1 - along) ** PROMO_SCALE_GAP_POWER;
+      elapsed += gap;
+      offsets.push(elapsed);
     }
     return offsets;
   }
 
   function scaleCopyPose(index) {
-    const along = index * PROMO_SCALE_STEP_PX;
     return {
-      x: along * 0.62,
-      y: along * -0.78,
-      z: index * -PROMO_SCALE_STEP_PX,
+      y: index * -PROMO_SCALE_Y_PX,
+      z: index * -PROMO_SCALE_Z_PX,
     };
   }
 
   function scaleCopyOpacity(index) {
-    if (index <= PROMO_SCALE_FADE_FROM) return 1;
-    const span = Math.max(1, PROMO_SCALE_COUNT - PROMO_SCALE_FADE_FROM);
-    return Math.max(0.05, 1 - (index - PROMO_SCALE_FADE_FROM) / span);
+    if (index >= PROMO_SCALE_FADE_BY) return 0;
+    return 1 - index / PROMO_SCALE_FADE_BY;
   }
 
-  function scaleIndexAt(sceneMs, offsets) {
-    let found = 0;
-    offsets.forEach((offset, index) => {
-      if (PROMO_SCALE_STACK_START_MS + offset <= sceneMs) found = index;
-    });
-    return found;
-  }
-
-  function scaleLostAt(index, pullIndex) {
+  function scaleLostAt(index) {
     const last = PROMO_SCALE_COUNT - 1;
-    if (index <= pullIndex) return 1;
-    const span = Math.max(1, last - pullIndex);
-    const progress = Math.min(1, (index - pullIndex) / span);
+    const start = Math.min(PROMO_SCALE_REVEAL_AT, last - 1);
+    if (index <= start) return 1;
+    if (index >= last) return PROMO_SCALE_LOST;
+    const progress = Math.min(1, (index - start) / (last - start));
     const eased = 1 - (1 - progress) ** 3;
-    return Math.max(1, Math.round(1 + (PROMO_SCALE_LOST - 1) * eased));
+    return Math.max(1, Math.min(PROMO_SCALE_LOST - 1, Math.round(1 + (PROMO_SCALE_LOST - 1) * eased)));
+  }
+
+  function scaleZeroAt(offsets) {
+    return PROMO_SCALE_STACK_START_MS + offsets[offsets.length - 1] + PROMO_SCALE_ZERO_LAG_MS;
   }
 
   function formatScaleCount(value) {
@@ -3287,27 +3284,28 @@
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
       this.root.style.setProperty('--promo-scale-snap', `${PROMO_SCALE_SNAP_MS}ms`);
       this.root.style.setProperty('--promo-scale-collapse', `${PROMO_SCALE_COLLAPSE_MS}ms`);
-      this.root.style.setProperty('--promo-scale-pull', `${PROMO_SCALE_PULL_MS}ms`);
       this.root.style.setProperty('--promo-scale-fade', `${PROMO_SCALE_FADE_MS}ms`);
       this.root.style.setProperty('--promo-scale-perspective', `${PROMO_SCALE_PERSPECTIVE_PX}px`);
-      this.root.style.setProperty('--promo-scale-thumb', `${PROMO_SCALE_THUMB_PX}px`);
-      this.root.style.setProperty('--promo-scale-pull-scale', String(PROMO_SCALE_PULL_SCALE));
+      this.root.style.setProperty('--promo-scale-thumb-w', `${PROMO_SCALE_THUMB_W}px`);
+      this.root.style.setProperty('--promo-scale-thumb-h', `${PROMO_SCALE_THUMB_H}px`);
       this.root.style.setProperty('--promo-scale-rotate', `${PROMO_SCALE_ROTATE_Y}deg`);
-      this.root.style.setProperty('--promo-scale-slam', `${PROMO_SCALE_SLAM_MS}ms`);
+      this.root.style.setProperty('--promo-scale-impact', `${PROMO_SCALE_IMPACT_PX}px`);
     }
 
     resetScaleScene() {
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
       window.clearTimeout(this.snapTimer);
+      window.clearTimeout(this.thudTimer);
       this.root.classList.remove(
         'is-scale',
         'is-scale-squash',
         'is-scale-collapse',
-        'is-scale-pull',
         'is-scale-count',
-        'is-scale-held',
+        'is-scale-zero',
+        'is-scale-still',
         'is-scale-out',
         'snap',
+        'thud',
       );
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = true;
@@ -3329,14 +3327,23 @@
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = false;
       this.root.classList.add('is-scale');
+      this.alignScaleSold();
     }
 
-    scaleThumbNode(index, slam) {
+    alignScaleSold() {
+      const sold = this.root.querySelector('.promo-scale__sold');
+      const zero = sold?.querySelector('.promo-scale__zero');
+      if (!sold || !zero) return;
+      sold.style.marginLeft = '0px';
+      const delta = zero.getBoundingClientRect().left - sold.getBoundingClientRect().left;
+      if (delta > 0) sold.style.marginLeft = `${-delta}px`;
+    }
+
+    scaleThumbNode(index) {
       const pose = scaleCopyPose(index);
       const thumb = document.createElement('span');
-      thumb.className = slam ? 'promo-scale__thumb is-slam' : 'promo-scale__thumb';
+      thumb.className = 'promo-scale__thumb';
       thumb.style.zIndex = String(PROMO_SCALE_COUNT - index);
-      thumb.style.setProperty('--sx', `${pose.x.toFixed(2)}px`);
       thumb.style.setProperty('--sy', `${pose.y.toFixed(2)}px`);
       thumb.style.setProperty('--sz', `${pose.z.toFixed(2)}px`);
       thumb.style.setProperty('--so', scaleCopyOpacity(index).toFixed(3));
@@ -3348,13 +3355,27 @@
         chrome.appendChild(pip);
       }
       thumb.appendChild(chrome);
+      const tiles = document.createElement('span');
+      tiles.className = 'promo-scale__tiles';
+      for (let tile = 0; tile < PROMO_SCALE_TILES; tile += 1) {
+        tiles.appendChild(document.createElement('i'));
+      }
+      thumb.appendChild(tiles);
       return thumb;
     }
 
-    placeScaleCopy(index, slam) {
+    placeScaleCopy(index) {
       const deck = this.root.querySelector('[data-promo-scale-deck]');
       if (!deck) return;
-      deck.appendChild(this.scaleThumbNode(index, slam));
+      deck.appendChild(this.scaleThumbNode(index));
+    }
+
+    impactFrontCard() {
+      const front = this.root.querySelector('[data-promo-scale-deck] .promo-scale__thumb');
+      if (!front) return;
+      front.classList.remove('is-impact');
+      void front.offsetWidth;
+      front.classList.add('is-impact');
     }
 
     paintScaleFigure(value) {
@@ -3375,6 +3396,19 @@
       this.painTimers.push(this.snapTimer);
     }
 
+    emitThud() {
+      const root = this.root;
+      window.clearTimeout(this.thudTimer);
+      root.classList.remove('thud');
+      void root.offsetWidth;
+      root.classList.add('thud');
+      this.thudTimer = window.setTimeout(() => {
+        root.classList.remove('thud');
+      }, PROMO_SCALE_SNAP_CLASS_MS);
+      this.painTimers = this.painTimers || [];
+      this.painTimers.push(this.thudTimer);
+    }
+
     armScaleTimer(fn, ms) {
       const timer = window.setTimeout(fn, ms);
       this.painTimers = this.painTimers || [];
@@ -3389,17 +3423,14 @@
       if (cursor) cursor.style.opacity = '0';
     }
 
-    mountScaleStill(count, figure, held) {
+    mountScaleStill(count, figure, showZero) {
       this.hideScaleStore();
       this.revealScaleLayer();
       const deck = this.root.querySelector('[data-promo-scale-deck]');
-      if (deck) {
-        deck.replaceChildren();
-        deck.style.transition = 'none';
-      }
-      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index, false);
-      this.root.classList.add('is-scale-pull', 'is-scale-count');
-      if (held) this.root.classList.add('is-scale-held');
+      if (deck) deck.replaceChildren();
+      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index);
+      this.root.classList.add('is-scale-count', 'is-scale-still');
+      if (showZero) this.root.classList.add('is-scale-zero');
       this.paintScaleFigure(figure);
     }
 
@@ -3422,8 +3453,14 @@
       if (!this.root.querySelector('[data-promo-scale]')) return;
       this.prepareScaleScene();
       if (prefersReducedMotion()) {
-        this.mountScaleStill(PROMO_SCALE_REDUCED_COUNT, PROMO_SCALE_LOST, true);
-        await waitMs(PROMO_SCALE_HOLD_MS + promoHoldMs());
+        const offsets = scaleLandingOffsets(
+          PROMO_SCALE_COUNT,
+          PROMO_SCALE_INTERVAL_START_MS,
+          PROMO_SCALE_INTERVAL_END_MS,
+        );
+        const stillMs = Math.max(0, PROMO_SCALE_SCENE_MS - scaleZeroAt(offsets));
+        this.mountScaleStill(PROMO_SCALE_COUNT, PROMO_SCALE_LOST, true);
+        await waitMs(stillMs + promoHoldMs());
         if (marketingPart() === 'full') {
           await this.fadeScaleToSwitch();
           await waitMs(PROMO_TOGGLE_REST_MS);
@@ -3468,32 +3505,36 @@
       if (generation !== this.scaleGeneration) return;
       this.hideScaleStore();
       this.revealScaleLayer();
-      this.placeScaleCopy(0, false);
+      const deck = this.root.querySelector('[data-promo-scale-deck]');
+      if (deck) deck.replaceChildren();
+      this.placeScaleCopy(0);
 
-      const landSpan = PROMO_SCALE_HOLD_START_MS - PROMO_SCALE_STACK_START_MS;
-      const offsets = scaleLandingOffsets(PROMO_SCALE_COUNT, landSpan, PROMO_SCALE_INTERVAL_START_MS);
-      const pullIndex = scaleIndexAt(PROMO_SCALE_PULL_START_MS, offsets);
+      const offsets = scaleLandingOffsets(
+        PROMO_SCALE_COUNT,
+        PROMO_SCALE_INTERVAL_START_MS,
+        PROMO_SCALE_INTERVAL_END_MS,
+      );
       const delayUntil = (mark) => Math.max(0, mark - (performance.now() - started));
-      this.armScaleTimer(() => {
-        if (generation !== this.scaleGeneration) return;
-        this.root.classList.add('is-scale-pull', 'is-scale-count');
-        this.paintScaleFigure(1);
-      }, delayUntil(PROMO_SCALE_PULL_START_MS));
       for (let index = 1; index < PROMO_SCALE_COUNT; index += 1) {
         const at = PROMO_SCALE_STACK_START_MS + offsets[index];
         this.armScaleTimer(() => {
           if (generation !== this.scaleGeneration) return;
-          this.placeScaleCopy(index, true);
+          this.placeScaleCopy(index);
+          this.impactFrontCard();
           this.emitSnap();
-          if (index > pullIndex) this.paintScaleFigure(scaleLostAt(index, pullIndex));
+          if (index >= PROMO_SCALE_REVEAL_AT) {
+            this.root.classList.add('is-scale-count');
+            this.paintScaleFigure(scaleLostAt(index));
+          }
         }, delayUntil(at));
       }
       this.armScaleTimer(() => {
         if (generation !== this.scaleGeneration) return;
         this.paintScaleFigure(PROMO_SCALE_LOST);
-        this.root.classList.add('is-scale-held');
-      }, delayUntil(PROMO_SCALE_HOLD_START_MS));
-      await until(PROMO_SCALE_HOLD_START_MS + PROMO_SCALE_HOLD_MS + promoHoldMs());
+        this.root.classList.add('is-scale-zero');
+        this.emitThud();
+      }, delayUntil(scaleZeroAt(offsets)));
+      await until(PROMO_SCALE_SCENE_MS + promoHoldMs());
     }
 
     showScaleExport(kind) {
@@ -3520,26 +3561,28 @@
       }
       this.hideScaleStore();
       this.revealScaleLayer();
-      const deck = this.root.querySelector('[data-promo-scale-deck]');
-      if (deck) deck.style.transition = 'none';
-      const count = kind === 'copies-10' ? 10 : PROMO_SCALE_COUNT;
-      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index, false);
-      if (kind === 'counter-mid' || kind === 'counter-final') {
-        const landSpan = PROMO_SCALE_HOLD_START_MS - PROMO_SCALE_STACK_START_MS;
-        const offsets = scaleLandingOffsets(PROMO_SCALE_COUNT, landSpan, PROMO_SCALE_INTERVAL_START_MS);
-        const pullIndex = scaleIndexAt(PROMO_SCALE_PULL_START_MS, offsets);
-        let midIndex = pullIndex + 1;
+      let count = PROMO_SCALE_COUNT;
+      let figure = null;
+      let showZero = false;
+      if (kind === 'copies-10') count = 10;
+      if (kind === 'counter-mid') {
         let nearest = Infinity;
-        for (let index = pullIndex + 1; index < PROMO_SCALE_COUNT; index += 1) {
-          const delta = Math.abs(scaleLostAt(index, pullIndex) - PROMO_SCALE_LOST / 2);
+        count = PROMO_SCALE_REVEAL_AT + 1;
+        for (let index = PROMO_SCALE_REVEAL_AT; index < PROMO_SCALE_COUNT; index += 1) {
+          const delta = Math.abs(scaleLostAt(index) - PROMO_SCALE_LOST / 2);
           if (delta < nearest) {
             nearest = delta;
-            midIndex = index;
+            count = index + 1;
+            figure = scaleLostAt(index);
           }
         }
-        const figure = kind === 'counter-final' ? PROMO_SCALE_LOST : scaleLostAt(midIndex, pullIndex);
-        this.root.classList.add('is-scale-pull', 'is-scale-count');
-        if (kind === 'counter-final') this.root.classList.add('is-scale-held');
+      }
+      if (kind === 'copies-120' || kind === 'counter-final') figure = PROMO_SCALE_LOST;
+      if (kind === 'counter-final') showZero = true;
+      for (let index = 0; index < count; index += 1) this.placeScaleCopy(index);
+      if (figure != null) {
+        this.root.classList.add('is-scale-count', 'is-scale-still');
+        if (showZero) this.root.classList.add('is-scale-zero');
         this.paintScaleFigure(figure);
       }
       return this.whenPainRest(this.painHost());
