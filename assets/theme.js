@@ -687,32 +687,19 @@
   const PROMO_ROW_CLERK_LANE = 220;
   const PROMO_COMPARE_RESERVE = 124;
   const PROMO_ROW_GAP = 20;
-  const PROMO_CLAY_KINDS = ['sphere', 'cube', 'rounded-cube', 'cylinder', 'low-cylinder', 'tall-box', 'cone', 'capsule', 'torus', 'dome', 'hemisphere', 'tall-prism', 'puck', 'octahedron', 'jar', 'tri-prism', 'squircle', 'ovoid', 'frustum', 'pyramid', 'sphere-disc', 'flat-torus'];
-  const PROMO_CLAY_SINGLE = new Set(['hemisphere', 'tall-prism', 'puck', 'octahedron', 'jar', 'tri-prism', 'squircle', 'ovoid', 'frustum', 'pyramid', 'sphere-disc', 'flat-torus']);
-  const PROMO_CLAY_TINT = {
-    sphere: 'stone',
-    cube: 'sand',
-    'rounded-cube': 'warm-grey',
-    cylinder: 'sage',
-    'low-cylinder': 'off-white',
-    'tall-box': 'blush',
-    cone: 'sand',
-    capsule: 'stone',
-    torus: 'stone',
-    dome: 'warm-grey',
-    hemisphere: 'sand',
-    'tall-prism': 'sage',
-    puck: 'off-white',
-    octahedron: 'warm-grey',
-    jar: 'blush',
-    'tri-prism': 'stone',
-    squircle: 'sand',
-    ovoid: 'sage',
-    frustum: 'off-white',
-    pyramid: 'warm-grey',
-    'sphere-disc': 'blush',
-    'flat-torus': 'stone',
+  // Only product images used in pain and pitch. Files live in assets/ as promo-product-<key>.png.
+  const PROMO_CATALOG = {
+    capsule: { tint: 'stone' },
+    sphere: { tint: 'stone' },
+    'rounded-cube': { tint: 'warm-grey' },
+    cone: { tint: 'sand' },
+    torus: { tint: 'stone' },
+    'tall-box': { tint: 'blush' },
+    cylinder: { tint: 'sage' },
+    dome: { tint: 'warm-grey' },
+    slab: { tint: 'sand' },
   };
+  const PROMO_CLAY_KINDS = Object.keys(PROMO_CATALOG);
   const PROMO_CLAY_TURNS = ['m20', '0', 'p20'];
   const PROMO_CLAY_FINISHES = ['matte', 'satin'];
   const PROMO_CLAY_SCALES = [0.8, 0.86, 0.92, 0.98, 1.04, 1.1];
@@ -774,15 +761,11 @@
 
   function claySrc(look) {
     const key = look.file || clayVariantKey(look);
-    const listed = promoClayUrls()[key];
-    if (listed) return listed;
-    const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
-    const base = stamp.replace(/[^/]+(\?.*)?$/, '');
-    return `${base}promo-product-${key}.png`;
+    return promoClayUrls()[key] || '';
   }
 
   function clayTintOf(kind) {
-    return PROMO_CLAY_TINT[kind] || 'stone';
+    return PROMO_CATALOG[kind]?.tint || 'stone';
   }
 
   function tintsClash(left, right) {
@@ -801,14 +784,12 @@
   }
 
   function makeCatalogLook(kind, rand) {
-    const single = PROMO_CLAY_SINGLE.has(kind);
     return {
       kind,
-      turn: single ? '0' : PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
+      turn: PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
       finish: PROMO_CLAY_FINISHES[Math.floor(rand() * PROMO_CLAY_FINISHES.length)],
       scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
       tint: clayTintOf(kind),
-      file: single ? kind : undefined,
     };
   }
 
