@@ -202,13 +202,10 @@
   const PROMO_WINDOW_HOLD_MS = 600;
   const PROMO_WINDOW_CLOSE_MS = 760;
   const PROMO_SCALE_SNAP_CLASS_MS = 50;
-  const PROMO_SCALE_SHRINK_MS = 400;
   const PROMO_SCALE_WHITE_MS = 200;
   const PROMO_SCALE_HOLD_MS = 1000;
   const PROMO_SCALE_FADE_MS = 250;
   const PROMO_SCALE_LOOP_MS = 3000;
-  const PROMO_SCALE_GUTTER_PX = 24;
-  const PROMO_SCALE_PAD_PX = 24;
   const PROMO_CONVEYOR_INTERVALS = [2800, 2019, 1521, 1177, 925, 732, 579, 456];
   const PROMO_CONVEYOR_SIZE_START = 0.4;
   const PROMO_CONVEYOR_SIZE_END = 0.18;
@@ -217,6 +214,8 @@
   const PROMO_CONVEYOR_FLASH_MS = 33;
   const PROMO_CONVEYOR_PUFF_MS = 180;
   const PROMO_CONVEYOR_BURST_MS = 300;
+  const PROMO_CONVEYOR_PUFF_LIFE_MS = PROMO_CONVEYOR_FLASH_MS + PROMO_CONVEYOR_BURST_MS;
+  const PROMO_CONVEYOR_LEAD_EDGE = 0.4;
   const PROMO_CONVEYOR_ASPECT = 8 / 5;
   const PROMO_CONVEYOR_LIVE = 4;
   const PROMO_CONVEYOR_MID_MS = 7500;
@@ -1610,6 +1609,19 @@
     return edge;
   }
 
+  function conveyorLeadMs(spawns) {
+    const first = spawns[0];
+    if (!first) return 0;
+    let low = first.at;
+    let high = first.death;
+    for (let step = 0; step < 16; step += 1) {
+      const mid = (low + high) / 2;
+      if (conveyorEdge(spawns, first, mid) < PROMO_CONVEYOR_LEAD_EDGE) low = mid;
+      else high = mid;
+    }
+    return high;
+  }
+
   function conveyorDeath(spawns, spawn) {
     let edge = 0;
     let cursor = spawn.at;
@@ -2942,6 +2954,10 @@
       );
       const store = this.painStore();
       if (store) {
+        const host = store.parentElement;
+        if (host?.classList.contains('promo-puff__host')) host.replaceWith(store);
+        store.classList.remove('promo-puff__body');
+        store.style.visibility = '';
         store.style.transform = '';
         store.style.transition = '';
         store.style.transformOrigin = '';
@@ -3584,27 +3600,19 @@
       return video;
     }
 
-    buildConveyorWindow(spawn, frameWidth) {
-      const width = Math.round(frameWidth * spawn.size);
-      const fromX = -width;
-      const toX = Math.round(frameWidth / 2 - width);
-      const tile = document.createElement('div');
-      tile.className = 'promo-scale__tile';
-      tile.style.width = `${width}px`;
-      tile.style.height = `${Math.round(width / PROMO_CONVEYOR_ASPECT)}px`;
-      tile.style.setProperty('--from-x', `${fromX}px`);
-      tile.style.setProperty('--to-x', `${toX}px`);
-      const frame = document.createElement('div');
-      frame.className = 'promo-scale__window';
-      frame.appendChild(this.conveyorPicture(spawn.live));
+    mountPuff(host, index, basisWidth) {
+      if (host.querySelector('.promo-scale__burst')) return;
+      const width = host.getBoundingClientRect().width || parseFloat(host.style.width) || basisWidth;
+      const fit = Math.max(1, width / Math.max(1, basisWidth));
+      host.style.setProperty('--puff-fit', fit.toFixed(3));
       const burst = document.createElement('span');
       burst.className = 'promo-scale__burst';
-      const specks = 20 + Math.floor(wallSeededUnit(spawn.index, 5) * 11);
+      const specks = 20 + Math.floor(wallSeededUnit(index, 5) * 11);
       for (let bit = 0; bit < specks; bit += 1) {
         const speck = document.createElement('i');
         speck.className = 'promo-scale__speck';
-        const angle = wallSeededUnit(spawn.index, 20 + bit) * Math.PI * 2;
-        const dist = 18 + wallSeededUnit(spawn.index, 80 + bit) * 56;
+        const angle = wallSeededUnit(index, 20 + bit) * Math.PI * 2;
+        const dist = (18 + wallSeededUnit(index, 80 + bit) * 56) * fit;
         speck.style.setProperty('--dx', `${(Math.cos(angle) * dist).toFixed(1)}px`);
         speck.style.setProperty('--dy', `${(Math.sin(angle) * dist).toFixed(1)}px`);
         burst.appendChild(speck);
@@ -3612,7 +3620,24 @@
       const loss = document.createElement('span');
       loss.className = 'promo-scale__loss';
       loss.textContent = '$';
-      tile.append(frame, burst, loss);
+      host.append(burst, loss);
+    }
+
+    buildConveyorWindow(spawn, frameWidth) {
+      const width = Math.round(frameWidth * spawn.size);
+      const fromX = -width;
+      const toX = Math.round(frameWidth / 2 - width);
+      const tile = document.createElement('div');
+      tile.className = 'promo-scale__tile promo-puff__host';
+      tile.style.width = `${width}px`;
+      tile.style.height = `${Math.round(width / PROMO_CONVEYOR_ASPECT)}px`;
+      tile.style.setProperty('--from-x', `${fromX}px`);
+      tile.style.setProperty('--to-x', `${toX}px`);
+      const frame = document.createElement('div');
+      frame.className = 'promo-scale__window promo-puff__body';
+      frame.appendChild(this.conveyorPicture(spawn.live));
+      tile.appendChild(frame);
+      this.mountPuff(tile, spawn.index, width);
       return { tile, fromX, toX };
     }
 
@@ -3669,9 +3694,11 @@
     runConveyor(generation, frameWidth) {
       const wall = this.ensureWall();
       if (!wall) return;
-      const spawns = conveyorSpawns(PROMO_CONVEYOR_STREAM_MS);
+      const lead = conveyorLeadMs(conveyorSpawns(PROMO_CONVEYOR_STREAM_MS));
+      const horizon = lead + PROMO_CONVEYOR_STREAM_MS;
+      const spawns = conveyorSpawns(horizon);
       const tiles = new Map();
-      const started = performance.now();
+      const started = performance.now() - lead;
       const life = PROMO_CONVEYOR_FLASH_MS + PROMO_CONVEYOR_BURST_MS;
       const tick = () => {
         if (generation !== this.scaleGeneration) return;
@@ -3693,32 +3720,31 @@
           this.emitPuff();
           this.armScaleTimer(() => tile.remove(), life);
         });
-        if (elapsed < PROMO_CONVEYOR_STREAM_MS) {
+        if (elapsed < horizon) {
           this.conveyorFrame = window.requestAnimationFrame(tick);
         }
       };
       this.conveyorFrame = window.requestAnimationFrame(tick);
     }
 
-    shrinkStoreToTile() {
+    puffPainStore() {
       const store = this.painStore();
-      const canvas = this.root.querySelector('[data-promo-canvas]');
-      if (!store || !canvas) return;
-      const canvasBox = canvas.getBoundingClientRect();
-      const wallWidth = canvasBox.width - PROMO_SCALE_PAD_PX * 2;
-      const tile = (wallWidth - PROMO_SCALE_GUTTER_PX * 3) / 4;
+      if (!store) return;
+      store.style.transform = '';
       store.style.transition = 'none';
-      store.style.transformOrigin = '0 0';
-      store.style.transform = 'none';
-      const base = store.getBoundingClientRect();
-      const scale = tile / Math.max(1, base.width);
-      store.style.transform = 'translateY(-0.4rem)';
-      store.getBoundingClientRect();
-      this.root.classList.add('is-pain-loop', 'is-scale-shrink');
-      store.style.transition = `transform ${PROMO_SCALE_SHRINK_MS}ms cubic-bezier(0.3, 0, 1, 1)`;
-      const originX = canvasBox.left + PROMO_SCALE_PAD_PX - base.left;
-      const originY = canvasBox.top + PROMO_SCALE_PAD_PX - base.top;
-      store.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+      let host = store.parentElement;
+      if (!host?.classList.contains('promo-puff__host')) {
+        host = document.createElement('div');
+        host.className = 'promo-puff__host';
+        store.parentElement.insertBefore(host, store);
+        host.appendChild(store);
+      }
+      store.classList.add('promo-puff__body');
+      this.mountPuff(host, 0, this.conveyorFrameWidth() * PROMO_CONVEYOR_SIZE_START);
+      host.classList.remove('is-puff');
+      void host.offsetWidth;
+      host.classList.add('is-puff');
+      this.emitPuff();
     }
 
     emitSnap() {
@@ -3782,7 +3808,8 @@
 
     hideScaleStore() {
       const store = this.painStore();
-      if (store) store.style.visibility = 'hidden';
+      const host = store?.parentElement?.classList.contains('promo-puff__host') ? store.parentElement : store;
+      if (host) host.style.visibility = 'hidden';
       const cursor = this.root.querySelector('[data-promo-pain-cursor]');
       if (cursor) cursor.style.opacity = '0';
     }
@@ -3838,14 +3865,14 @@
         const wait = mark - (performance.now() - started);
         if (wait > 0) await waitMs(wait);
       };
-      this.shrinkStoreToTile();
-      await until(PROMO_SCALE_SHRINK_MS);
+      this.puffPainStore();
+      await until(PROMO_CONVEYOR_PUFF_LIFE_MS);
       if (generation !== this.scaleGeneration) return;
       this.hideScaleStore();
       this.revealScaleLayer();
       const frameWidth = this.conveyorFrameWidth();
       this.runConveyor(generation, frameWidth);
-      const cut = PROMO_SCALE_SHRINK_MS + PROMO_CONVEYOR_STREAM_MS;
+      const cut = PROMO_CONVEYOR_PUFF_LIFE_MS + PROMO_CONVEYOR_STREAM_MS;
       await until(cut);
       if (generation !== this.scaleGeneration) return;
       this.root.classList.add('is-scale-white');
@@ -3865,8 +3892,9 @@
       this.revealScaleLayer();
       this.root.classList.add('is-scale-still');
       await Promise.race([this.captureConveyorStill(), waitMs(1200)]);
-      const first = conveyorSpawns(PROMO_CONVEYOR_STREAM_MS)[0];
-      if (kind === 'travel') this.paintConveyorAt(first.at + (first.death - first.at) * 0.5);
+      const spawns = conveyorSpawns(PROMO_CONVEYOR_STREAM_MS);
+      const first = spawns[0];
+      if (kind === 'travel') this.paintConveyorAt(conveyorLeadMs(spawns));
       if (kind === 'puff') {
         this.paintConveyorAt(first.death + PROMO_CONVEYOR_FLASH_MS + PROMO_CONVEYOR_PUFF_MS * 0.55);
       }

@@ -578,6 +578,18 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   transform: translateY(-0.4rem);
 }
 
+.promo-opening.is-moments:not(.is-see) .promo-opening__moments > .promo-puff__host {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  overflow: visible;
+  transform: translateY(-0.4rem);
+}
+
+.promo-opening.is-moments:not(.is-see) .promo-puff__host > .promo-opening__store {
+  transform: none;
+}
+
 .promo-opening.is-moments:not(.is-see) .promo-moments__board {
   --promo-board-x: -12.5rem;
   transform: translate(calc(-50% + var(--promo-board-x)), -50%);
@@ -863,10 +875,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   filter: grayscale(1);
 }
 
-.promo-scale__window::after {
+.promo-puff__body::after {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background: color-mix(in srgb, var(--ad-red) 35%, transparent);
   opacity: 0;
   pointer-events: none;
@@ -885,8 +898,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   left: 0;
   top: 0;
-  width: 5px;
-  height: 5px;
+  width: calc(5px * var(--puff-fit, 1));
+  height: calc(5px * var(--puff-fit, 1));
   border-radius: 50%;
   background: var(--ad-red);
   opacity: 0;
@@ -899,7 +912,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   z-index: 2;
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 16px;
+  font-size: calc(16px * var(--puff-fit, 1));
   font-weight: 500;
   line-height: 1;
   color: var(--ad-ink-3);
@@ -908,47 +921,49 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   pointer-events: none;
 }
 
-.promo-scale__tile.is-puff .promo-scale__window,
-.promo-scale__tile.is-puff-hold .promo-scale__window {
+.promo-puff__host.is-puff .promo-puff__body,
+.promo-puff__host.is-puff-hold .promo-puff__body {
   border-color: var(--ad-red);
 }
 
-.promo-opening:not(.is-scale-still) .promo-scale__tile.is-puff .promo-scale__window {
+.promo-opening:not(.is-scale-still) .promo-puff__host.is-puff .promo-puff__body {
   animation: promo-scale-puff var(--promo-puff-ms, 180ms) linear var(--promo-puff-flash, 33ms) both;
+  transition: none;
+  transform-origin: center center;
 }
 
-.promo-opening:not(.is-scale-still) .promo-scale__tile.is-puff .promo-scale__window::after {
+.promo-opening:not(.is-scale-still) .promo-puff__host.is-puff .promo-puff__body::after {
   animation: promo-scale-tint var(--promo-puff-ms, 180ms) linear var(--promo-puff-flash, 33ms) forwards;
 }
 
-.promo-opening:not(.is-scale-still) .promo-scale__tile.is-puff .promo-scale__speck {
+.promo-opening:not(.is-scale-still) .promo-puff__host.is-puff .promo-scale__speck {
   animation: promo-scale-speck var(--promo-puff-burst, 300ms) linear var(--promo-puff-flash, 33ms) forwards;
 }
 
-.promo-opening:not(.is-scale-still) .promo-scale__tile.is-puff .promo-scale__loss {
-  animation: promo-scale-dollar 300ms linear var(--promo-puff-flash, 33ms) forwards;
+.promo-opening:not(.is-scale-still) .promo-puff__host.is-puff .promo-scale__loss {
+  animation: promo-scale-dollar var(--promo-puff-burst, 300ms) linear var(--promo-puff-flash, 33ms) forwards;
 }
 
 .promo-opening.is-scale-still .promo-scale__tile {
   animation: none;
 }
 
-.promo-opening.is-scale-still .promo-scale__tile.is-puff-hold .promo-scale__window {
+.promo-opening.is-scale-still .promo-puff__host.is-puff-hold .promo-puff__body {
   opacity: var(--puff-opacity, 0.45);
   transform: scale(var(--puff-scale, 1.03));
 }
 
-.promo-opening.is-scale-still .promo-scale__tile.is-puff-hold .promo-scale__window::after {
+.promo-opening.is-scale-still .promo-puff__host.is-puff-hold .promo-puff__body::after {
   opacity: var(--puff-tint, 0.7);
 }
 
-.promo-opening.is-scale-still .promo-scale__tile.is-puff-hold .promo-scale__speck {
+.promo-opening.is-scale-still .promo-puff__host.is-puff-hold .promo-scale__speck {
   opacity: var(--speck-opacity, 0.45);
   background: color-mix(in srgb, var(--ad-red) 70%, var(--ad-ink));
   transform: translate(var(--dx, 0px), var(--dy, 0px));
 }
 
-.promo-opening.is-scale-still .promo-scale__tile.is-puff-hold .promo-scale__loss {
+.promo-opening.is-scale-still .promo-puff__host.is-puff-hold .promo-scale__loss {
   opacity: var(--loss-opacity, 0.55);
   transform: translate(-50%, calc(-50% - var(--loss-rise, 12px)));
 }
@@ -978,7 +993,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @keyframes promo-scale-dollar {
   from { opacity: 1; transform: translate(-50%, -50%); }
-  to { opacity: 0; transform: translate(-50%, calc(-50% - 24px)); }
+  to { opacity: 0; transform: translate(-50%, calc(-50% - 24px * var(--puff-fit, 1))); }
 }
 
 .promo-scale__verdict {
@@ -3040,10 +3055,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   opacity: 1;
 }
 
-.is-pose-close .promo-moments__card.is-pick::after,
+.is-pose-close .promo-moments__card.is-pick::after {
+  opacity: 1;
+}
+
 .is-pose-extra .promo-moments__card.is-pick::after,
 .is-pose-bundle .promo-moments__card.is-pick::after {
-  opacity: 1;
+  opacity: 0;
+  animation: none;
 }
 
 .promo-moments__fest {
