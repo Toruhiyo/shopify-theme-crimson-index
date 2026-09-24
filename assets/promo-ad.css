@@ -828,6 +828,8 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-scale-white .promo-scale__wall,
 .promo-opening.is-scale-zero .promo-scale__wall,
+.promo-opening.is-scale-white .promo-scale__floor,
+.promo-opening.is-scale-zero .promo-scale__floor,
 .promo-opening.is-scale-white .promo-scale__residue,
 .promo-opening.is-scale-zero .promo-scale__residue {
   visibility: hidden;
@@ -843,6 +845,78 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   inset: 0;
   overflow: hidden;
   background: var(--ad-white);
+}
+
+.promo-opening.is-corridor .promo-scale__wall {
+  z-index: 1;
+  overflow: visible;
+  background: transparent;
+  perspective: var(--promo-perspective, 1100px);
+  perspective-origin: 50% var(--promo-origin-y, 42%);
+  transform-style: preserve-3d;
+}
+
+.promo-scale__floor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  color: var(--ad-line);
+  opacity: 0.3;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to top, #000 18%, transparent 42%);
+  mask-image: linear-gradient(to top, #000 18%, transparent 42%);
+}
+
+.promo-opening.is-pitch .promo-scale__floor {
+  color: var(--bizmis-primary);
+  opacity: 0.2;
+}
+
+.promo-scale__floor svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.promo-scale__floor line {
+  stroke: currentColor;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.promo-scale__lane {
+  position: absolute;
+  left: 50%;
+  top: var(--promo-origin-y, 42%);
+  width: 0;
+  height: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+}
+
+.promo-opening.is-corridor .promo-scale__tile {
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.promo-scale__tile.is-shut .promo-scale__window {
+  border-color: var(--ad-red);
+}
+
+.promo-scale__tile.is-dot .promo-scale__window {
+  border-color: var(--ad-red);
+  border-radius: 50%;
+  background: var(--ad-red);
+}
+
+.promo-scale__tile.is-dot .promo-scale__window > * {
+  opacity: 0;
+}
+
+.promo-opening.is-scale-white .promo-opening__widget,
+.promo-opening.is-scale-zero .promo-opening__widget {
+  visibility: hidden;
 }
 
 .promo-scale__tile {
