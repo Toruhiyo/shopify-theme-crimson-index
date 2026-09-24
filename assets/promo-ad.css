@@ -1753,8 +1753,12 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   width: 100%;
   height: auto;
   min-height: 0;
-  aspect-ratio: 1;
+  aspect-ratio: 3 / 2;
   background: var(--ad-surface);
+}
+
+.promo-moments__board.is-pose-grid .promo-moments__card:not(.is-pain-open) .promo-moments__glyph img {
+  object-position: center 58%;
 }
 
 .promo-moments__card.is-drop { z-index: 1; }

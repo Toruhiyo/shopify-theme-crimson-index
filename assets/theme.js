@@ -985,8 +985,10 @@
     const gutter = PROMO_CATALOG_GUTTER;
     const rowGapY = PROMO_CATALOG_ROW_GAP;
     const cardW = (contentWidth - PROMO_CATALOG_PAD_X * 2 - (cols - 1) * gutter) / cols;
-    const cardFooter = 92;
-    const cardH = cardW + cardFooter;
+    const em = cardW / 300;
+    const pad = 32 * em;
+    const photo = (cardW - pad) * (2 / 3);
+    const cardH = pad + photo + 66 * em;
     const pitchX = cardW + gutter;
     const pitchY = cardH + rowGapY;
     const inset = PROMO_CATALOG_PAD_X;
