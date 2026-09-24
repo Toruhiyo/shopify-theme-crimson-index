@@ -213,24 +213,26 @@
     farWidth: 0.08,
     stagger: 0.12,
     eventJitter: 0.06,
-    intervals: [1200, 600, 300, 150, 80, 60],
+    intervals: [2000, 1700, 1500],
     liveCount: 4,
+    runCount: 7,
     glassCap: 200,
-    glyph: 28,
-    stroke: 2,
-    spin: 16,
-    flashMs: 33,
+    glyph: 34,
+    stroke: 2.5,
+    spin: 0,
+    readMs: 1100,
+    flashMs: 90,
     popScale: 1.04,
     dotScale: 0.07,
     collapseMs: 120,
     exitMs: 300,
     splatMs: 120,
-    splatFrom: 1.3,
+    splatFrom: 1,
     aspect: 8 / 5,
-    followScale: 0.34,
+    followScale: 0.2,
     recedeMs: 820,
-    holdMs: 420,
-    midWindows: 6,
+    holdMs: 700,
+    midWindows: 3,
     stillSec: 1.15,
     ringMs: 200,
     travelLine: 0.42,
@@ -1696,8 +1698,8 @@
   }
 
   function corridorStreamMs() {
-    const last = PROMO_CORRIDOR.glassCap - 1;
-    return corridorHitTime(last) + PROMO_CORRIDOR.exitMs + PROMO_CORRIDOR.holdMs;
+    const last = PROMO_CORRIDOR.runCount - 1;
+    return corridorHitTime(last) + PROMO_CORRIDOR.readMs + PROMO_CORRIDOR.exitMs + PROMO_CORRIDOR.holdMs;
   }
 
   function corridorStagger(index, frameWidth) {
@@ -1716,13 +1718,15 @@
   }
 
   function corridorMarkPoint(index, frameWidth, frameHeight) {
-    const projected = corridorProject(index, corridorEventZ(index), frameWidth, frameHeight);
-    const windowH = frameWidth * PROMO_CORRIDOR.nearWidth / PROMO_CORRIDOR.aspect;
-    const jitterX = (wallSeededUnit(index, 53) * 2 - 1) * frameWidth * 0.025;
-    const jitterY = (wallSeededUnit(index, 71) * 2 - 1) * 12;
+    const count = Math.max(2, PROMO_CORRIDOR.runCount);
+    const slot = index % count;
+    const windowW = frameWidth * PROMO_CORRIDOR.nearWidth;
+    const windowH = windowW / PROMO_CORRIDOR.aspect;
+    const left = frameWidth / 2 - windowW / 2;
+    const top = frameHeight * PROMO_CORRIDOR.originY - windowH / 2;
     return {
-      x: projected.x + jitterX,
-      y: projected.y - windowH / 2 - 26 + jitterY,
+      x: left + (windowW * slot) / (count - 1),
+      y: Math.max(28, top - 42),
     };
   }
 
@@ -1787,9 +1791,9 @@
       const arm = mark.size * 0.36 * scale;
       ctx.beginPath();
       if (mode === 'pitch') {
-        ctx.moveTo(-arm, arm * 0.08);
-        ctx.lineTo(-arm * 0.15, arm * 0.78);
-        ctx.lineTo(arm * 1.05, -arm * 0.72);
+        ctx.moveTo(-arm * 0.72, arm * 0.02);
+        ctx.lineTo(-arm * 0.12, arm * 0.58);
+        ctx.lineTo(arm * 0.82, -arm * 0.52);
       } else {
         ctx.moveTo(-arm, -arm);
         ctx.lineTo(arm, arm);
@@ -4036,10 +4040,17 @@
       const frame = tile.querySelector('.promo-scale__window');
       if (!frame) return;
       const hit = corridorHitTime(spawn.index);
-      const since = elapsed - hit;
+      const since = elapsed - hit - PROMO_CORRIDOR.readMs;
       frame.style.transform = '';
       tile.classList.remove('is-shut', 'is-dot', 'is-sold', 'is-exit');
-      if (since < 0) return;
+      if (since < 0) {
+        if (mode === 'pitch' && elapsed >= hit) {
+          tile.classList.add('is-sold');
+          const cart = tile.querySelector('.promo-scale__cart');
+          if (cart) cart.textContent = '1';
+        }
+        return;
+      }
       const box = this.corridorFrame();
       const x = corridorStagger(spawn.index, box.width);
       if (mode === 'pitch') {
@@ -4059,14 +4070,10 @@
       }
       if (since < PROMO_CORRIDOR.flashMs) {
         tile.classList.add('is-shut');
-        tile.style.transform = corridorTransform(x, z, PROMO_CORRIDOR.popScale);
+        tile.style.transform = corridorTransform(x, z, 1);
         return;
       }
-      const collapse = Math.min(1, (since - PROMO_CORRIDOR.flashMs) / PROMO_CORRIDOR.collapseMs);
-      const eased = 1 - (1 - collapse) ** 5;
-      const scale = PROMO_CORRIDOR.popScale + (PROMO_CORRIDOR.dotScale - PROMO_CORRIDOR.popScale) * eased;
-      tile.style.transform = corridorTransform(x, z, scale);
-      if (scale < 0.55) tile.remove();
+      tile.remove();
     }
 
     paintCorridorAt(timeMs, mode = 'pain', markLimit) {
@@ -4079,15 +4086,16 @@
       const cap = markLimit ?? PROMO_CORRIDOR.glassCap;
       let marks = 0;
       const count = Math.floor(corridorDistanceAt(timeMs) / corridorGapZ()) + 3;
-      for (let index = 0; index < count; index += 1) {
+      for (let index = 0; index < count && index < PROMO_CORRIDOR.runCount; index += 1) {
         const born = corridorSpawnAt(index);
         if (born > timeMs) break;
         const spawn = this.corridorSpawn(index, mode);
         const z = Math.min(spawn.eventZ, corridorZAt(index, timeMs));
         const hit = corridorHitTime(index);
+        const acted = hit + PROMO_CORRIDOR.readMs;
         const gone = mode === 'pain'
-          ? timeMs > hit + PROMO_CORRIDOR.flashMs + PROMO_CORRIDOR.collapseMs * 0.45
-          : timeMs > hit + PROMO_CORRIDOR.exitMs * 0.4;
+          ? timeMs > acted + PROMO_CORRIDOR.flashMs
+          : timeMs > acted + PROMO_CORRIDOR.exitMs * 0.85;
         if (gone) {
           if (marks < cap) {
             const point = corridorMarkPoint(index, frame.width, frame.height);
@@ -4136,15 +4144,15 @@
         const elapsed = now - started;
         const distance = corridorDistanceAt(elapsed);
         const visible = Math.floor(distance / corridorGapZ()) + 3;
-        for (let index = 0; index < visible; index += 1) {
+        for (let index = 0; index < visible && index < PROMO_CORRIDOR.runCount; index += 1) {
           if (corridorSpawnAt(index) > elapsed) continue;
           const spawn = this.corridorSpawn(index, mode);
           let tile = tiles.get(index);
           const hit = corridorHitTime(index);
           const z = elapsed >= hit ? spawn.eventZ : corridorZAt(index, elapsed);
           if (!tile || !tile.isConnected) {
-            if (elapsed >= hit && mode === 'pain') continue;
-            if (elapsed >= hit + PROMO_CORRIDOR.exitMs && mode === 'pitch') continue;
+            if (elapsed >= hit + PROMO_CORRIDOR.readMs + PROMO_CORRIDOR.flashMs && mode === 'pain') continue;
+            if (elapsed >= hit + PROMO_CORRIDOR.readMs + PROMO_CORRIDOR.exitMs && mode === 'pitch') continue;
             tile = this.buildConveyorWindow(spawn, frame.width, mode).tile;
             lane.appendChild(tile);
             tiles.set(index, tile);
@@ -4491,7 +4499,7 @@
       if (mode !== 'pitch') await Promise.race([this.captureConveyorStill(), waitMs(1200)]);
       const shot = kind === 'puff' ? 'event' : (kind === 'stream' ? 'residue-full' : (kind === 'zero' ? 'end' : kind));
       if (shot === 'travel') this.paintCorridorAt(corridorNearTime(0), mode);
-      if (shot === 'event') this.paintCorridorAt(corridorHitTime(0) + 16, mode);
+      if (shot === 'event') this.paintCorridorAt(corridorHitTime(0) + PROMO_CORRIDOR.readMs + 16, mode);
       if (shot === 'mid') this.paintCorridorAt(corridorHitTime(PROMO_CORRIDOR.midWindows), mode);
       if (shot.startsWith('residue-')) {
         let count = shot === 'residue-full' ? PROMO_CORRIDOR.glassCap : Number(shot.slice('residue-'.length));
