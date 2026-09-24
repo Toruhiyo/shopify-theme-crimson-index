@@ -263,7 +263,7 @@
   const PROMO_MOMENT_RING_GAP_MS = 300;
   const PROMO_MOMENT_SEEK_AT_MS = 600;
   const PROMO_MOMENT_SEEK_MS = 680;
-  const PROMO_MOMENT_OTHER_RING_MS = 1280;
+  const PROMO_MOMENT_OTHER_RING_MS = 600;
   const PROMO_MOMENTS_SHORTLIST_MS = 1680;
   const PROMO_MOMENTS_DOCK_MS = 820;
   const PROMO_MOMENTS_FLY_MS = 780;
@@ -631,7 +631,7 @@
   const PROMO_MOMENT_SPEC_KINDS = ['spec-bolt', 'spec-gauge', 'spec-shield'];
   const PROMO_MOMENT_GO_INDEX = 0;
   const PROMO_MOMENT_PICK_INDEX = 5;
-  const PROMO_MOMENT_OTHER_INDEX = 10;
+  const PROMO_MOMENT_OTHER_INDEX = 3;
   const PROMO_COMPARE_TINT = 'stone';
   const PROMO_COMPARE_SHAPES = { go: 'capsule', pick: 'sphere', other: 'rounded-cube' };
   const PROMO_ACCESSORY_SHAPE = 'torus';
@@ -950,10 +950,10 @@
     board.appendChild(accessory);
     board.appendChild(momentCompare());
     const orbits = [
-      ['1', '11.2rem', '-0.4s'],
-      ['2', '13.4rem', '-4.1s'],
-      ['3', '10.3rem', '-7.6s'],
-      ['4', '12.5rem', '-10.8s'],
+      ['1', '14rem', '-0.4s'],
+      ['2', '16.5rem', '-4.1s'],
+      ['3', '13rem', '-7.6s'],
+      ['4', '15.5rem', '-10.8s'],
     ];
     orbits.forEach(([slot, radius, delay]) => {
       const orbit = document.createElement('span');
