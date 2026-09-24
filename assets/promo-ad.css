@@ -3762,11 +3762,12 @@ html.is-promo-ready .promo-opening__boot {
   transform: none;
   border-radius: 0;
   opacity: 1;
-  filter: blur(72px);
+  filter: blur(96px);
   background: radial-gradient(
-    ellipse 78% 68% at 50% 46%,
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 18%, transparent),
-    transparent 72%
+    ellipse 148% 124% at 50% 46%,
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 46%, transparent),
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 18%, transparent) 52%,
+    transparent 84%
   );
 }
 

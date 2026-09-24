@@ -2121,6 +2121,7 @@
       const widget = this.root.querySelector('[data-promo-widget]');
       const canvas = this.root.querySelector('[data-promo-canvas]');
       const store = this.root.querySelector('.promo-opening__store');
+      if (store) store.style.visibility = '';
       this.root.classList.add('is-moments');
       const stage = this.momentStage();
       void stage?.offsetWidth;
