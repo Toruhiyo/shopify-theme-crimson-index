@@ -2386,15 +2386,22 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 }
 
 .promo-moments__board.is-pose-doubt .promo-moments__orbit,
-.promo-moments__board.is-pose-close .promo-moments__orbit,
+.promo-moments__board.is-pose-close .promo-moments__orbit {
+  left: calc(22% + 8px);
+  top: 50%;
+  opacity: 1;
+  animation: promo-moments-orbit var(--promo-moments-orbit, 14s) linear infinite;
+  animation-delay: var(--orbit-delay, 0s);
+}
+
+.promo-moments__board.is-pose-close .promo-moments__orbit {
+  animation-play-state: paused;
+}
+
 .promo-moments__board.is-pose-extra .promo-moments__orbit,
 .promo-moments__board.is-pose-bundle .promo-moments__orbit {
   opacity: 0;
   animation: none;
-}
-
-.is-pose-close .promo-moments__orbit {
-  animation-play-state: paused;
 }
 
 .is-pose-extra .promo-moments__orbit,
