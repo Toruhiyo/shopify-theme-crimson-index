@@ -203,20 +203,25 @@
   const PROMO_WINDOW_CLOSE_MS = 760;
   const PROMO_SCALE_SNAP_CLASS_MS = 50;
   const PROMO_SCALE_SHRINK_MS = 400;
-  const PROMO_SCALE_STEP_MS = 500;
-  const PROMO_SCALE_WALL_MS = 1400;
-  const PROMO_SCALE_LOSS_GAP_MS = 120;
-  const PROMO_SCALE_LOSS_FLASH_MS = 80;
-  const PROMO_SCALE_LOSS_FALL_MS = 200;
   const PROMO_SCALE_WHITE_MS = 200;
   const PROMO_SCALE_HOLD_MS = 1000;
   const PROMO_SCALE_FADE_MS = 250;
   const PROMO_SCALE_LOOP_MS = 3000;
-  const PROMO_SCALE_TILES = 16;
   const PROMO_SCALE_GUTTER_PX = 24;
   const PROMO_SCALE_PAD_PX = 24;
+  const PROMO_CONVEYOR_INTERVALS = [1600, 800, 400, 200, 100, 60];
+  const PROMO_CONVEYOR_SIZE_START = 0.4;
+  const PROMO_CONVEYOR_SIZE_END = 0.18;
+  const PROMO_CONVEYOR_GAP = 0.03;
+  const PROMO_CONVEYOR_STREAM_MS = 4000;
+  const PROMO_CONVEYOR_FLASH_MS = 33;
+  const PROMO_CONVEYOR_PUFF_MS = 180;
+  const PROMO_CONVEYOR_BURST_MS = 300;
+  const PROMO_CONVEYOR_ASPECT = 8 / 5;
+  const PROMO_CONVEYOR_LIVE = 4;
+  const PROMO_CONVEYOR_MID_MS = 2600;
+  const PROMO_CONVEYOR_STILL_MS = 1.15;
   const PROMO_WALL_SEED = 40721;
-  const PROMO_WALL_CARDS = 8;
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -1572,32 +1577,76 @@
   }
 
   function wallSeededUnit(index, salt) {
-    let seed = (PROMO_WALL_SEED + index * 7919 + salt) % 2147483647;
-    if (seed <= 0) seed += 2147483646;
-    seed = (seed * 16807) % 2147483647;
-    return seed / 2147483647;
+    let seed = (PROMO_WALL_SEED + index * 7919 + salt * 104729) >>> 0;
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
   }
 
-  function wallLossOrder(count) {
-    const items = Array.from({ length: count }, (_, index) => index);
-    for (let index = items.length - 1; index > 0; index -= 1) {
-      const swap = Math.floor(wallSeededUnit(index, 11) * (index + 1));
-      const held = items[index];
-      items[index] = items[swap];
-      items[swap] = held;
+  function conveyorSize(stage) {
+    const last = PROMO_CONVEYOR_INTERVALS.length - 1;
+    const mix = Math.min(stage, last) / last;
+    return PROMO_CONVEYOR_SIZE_START + (PROMO_CONVEYOR_SIZE_END - PROMO_CONVEYOR_SIZE_START) * mix;
+  }
+
+  function conveyorBeltSpeed(spawn) {
+    return (spawn.size + PROMO_CONVEYOR_GAP) / spawn.interval;
+  }
+
+  function conveyorEdge(spawns, spawn, timeMs) {
+    if (timeMs <= spawn.at) return 0;
+    let edge = 0;
+    let cursor = spawn.at;
+    spawns.forEach((step) => {
+      if (cursor >= timeMs) return;
+      const segEnd = step.at + step.interval;
+      if (segEnd <= cursor) return;
+      const from = Math.max(cursor, step.at);
+      const to = Math.min(timeMs, segEnd);
+      if (to > from) edge += conveyorBeltSpeed(step) * (to - from);
+      cursor = Math.max(cursor, to);
+    });
+    const last = spawns[spawns.length - 1];
+    if (last && cursor < timeMs) edge += conveyorBeltSpeed(last) * (timeMs - cursor);
+    return edge;
+  }
+
+  function conveyorDeath(spawns, spawn) {
+    let edge = 0;
+    let cursor = spawn.at;
+    for (let index = 0; index < spawns.length; index += 1) {
+      const step = spawns[index];
+      const segEnd = step.at + step.interval;
+      if (segEnd <= cursor) continue;
+      const speed = conveyorBeltSpeed(step);
+      const room = segEnd - cursor;
+      if (edge + speed * room >= 0.5) return cursor + (0.5 - edge) / speed;
+      edge += speed * room;
+      cursor = segEnd;
     }
-    return items;
+    const last = spawns[spawns.length - 1];
+    return cursor + (0.5 - edge) / conveyorBeltSpeed(last);
   }
 
-  function wallLossEnd() {
-    return PROMO_SCALE_WALL_MS
-      + (PROMO_SCALE_TILES - 1) * PROMO_SCALE_LOSS_GAP_MS
-      + PROMO_SCALE_LOSS_FLASH_MS
-      + PROMO_SCALE_LOSS_FALL_MS;
-  }
-
-  function wallZeroAt() {
-    return wallLossEnd() + PROMO_SCALE_WHITE_MS;
+  function conveyorSpawns(limitMs) {
+    const spawns = [];
+    let time = 0;
+    let stage = 0;
+    while (time < limitMs) {
+      const interval = PROMO_CONVEYOR_INTERVALS[Math.min(stage, PROMO_CONVEYOR_INTERVALS.length - 1)];
+      spawns.push({
+        index: spawns.length,
+        at: time,
+        size: conveyorSize(stage),
+        interval,
+        live: spawns.length < PROMO_CONVEYOR_LIVE,
+      });
+      time += interval;
+      if (stage < PROMO_CONVEYOR_INTERVALS.length - 1) stage += 1;
+    }
+    spawns.forEach((spawn) => {
+      spawn.death = conveyorDeath(spawns, spawn);
+    });
+    return spawns;
   }
 
   function loadPromoStores() {
@@ -3372,16 +3421,20 @@
     prepareScaleScene() {
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
       this.root.style.setProperty('--promo-scale-fade', `${PROMO_SCALE_FADE_MS}ms`);
-      this.root.style.setProperty('--promo-loss-flash', `${PROMO_SCALE_LOSS_FLASH_MS}ms`);
-      this.root.style.setProperty('--promo-loss-fall', `${PROMO_SCALE_LOSS_FALL_MS}ms`);
+      this.root.style.setProperty('--promo-puff-flash', `${PROMO_CONVEYOR_FLASH_MS}ms`);
+      this.root.style.setProperty('--promo-puff-ms', `${PROMO_CONVEYOR_PUFF_MS}ms`);
+      this.root.style.setProperty('--promo-puff-burst', `${PROMO_CONVEYOR_BURST_MS}ms`);
       this.ensureWall();
+      this.captureConveyorStill();
     }
 
     resetScaleScene() {
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
       this.wallClock = 0;
+      window.cancelAnimationFrame(this.conveyorFrame);
       window.clearTimeout(this.snapTimer);
       window.clearTimeout(this.thudTimer);
+      window.clearTimeout(this.puffTimer);
       this.root.classList.remove(
         'is-scale',
         'is-scale-shrink',
@@ -3391,6 +3444,7 @@
         'is-scale-out',
         'snap',
         'thud',
+        'puff',
       );
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = true;
@@ -3400,9 +3454,7 @@
         wall.style.transition = '';
         wall.style.removeProperty('--wall-n');
         wall.style.removeProperty('--wall-scale');
-        wall.querySelectorAll('.promo-scale__tile.is-lost').forEach((tile) => {
-          tile.classList.remove('is-lost');
-        });
+        wall.replaceChildren();
       }
       const center = this.root.querySelector('.promo-opening__center');
       if (center) {
@@ -3440,89 +3492,212 @@
       return wall;
     }
 
-    mountWallTiles() {
+    conveyorFrameWidth() {
+      const canvas = this.root.querySelector('[data-promo-canvas]');
+      return canvas?.clientWidth || this.root.querySelector('[data-promo-scale]')?.clientWidth || 1440;
+    }
+
+    conveyorSources() {
+      const scale = this.root.querySelector('[data-promo-scale]');
+      return {
+        webm: scale?.getAttribute('data-promo-wall-webm') || '',
+        mp4: scale?.getAttribute('data-promo-wall-mp4') || '',
+      };
+    }
+
+    captureConveyorStill() {
+      if (this.conveyorStill) return Promise.resolve(this.conveyorStill);
+      if (this.conveyorStillTask) return this.conveyorStillTask;
+      const { mp4 } = this.conveyorSources();
+      if (!mp4) return Promise.resolve('');
+      this.conveyorStillTask = new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        video.src = mp4;
+        const finish = (still) => {
+          this.conveyorStill = still || '';
+          resolve(this.conveyorStill);
+        };
+        video.addEventListener('error', () => finish(''), { once: true });
+        video.addEventListener('loadeddata', () => {
+          const paint = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth || 480;
+              canvas.height = video.videoHeight || 300;
+              canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+              finish(canvas.toDataURL('image/jpeg', 0.72));
+            } catch {
+              finish('');
+            }
+          };
+          video.addEventListener('seeked', paint, { once: true });
+          try {
+            video.currentTime = Math.min(PROMO_CONVEYOR_STILL_MS, (video.duration || 3) * 0.4);
+          } catch {
+            paint();
+          }
+        }, { once: true });
+      });
+      return this.conveyorStillTask;
+    }
+
+    conveyorPicture(live) {
+      if (!live && this.conveyorStill) {
+        const img = document.createElement('img');
+        img.alt = '';
+        img.draggable = false;
+        img.src = this.conveyorStill;
+        return img;
+      }
+      const { webm, mp4 } = this.conveyorSources();
+      const video = document.createElement('video');
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute('playsinline', '');
+      video.preload = 'auto';
+      video.loop = live;
+      if (webm) {
+        const source = document.createElement('source');
+        source.src = webm;
+        source.type = 'video/webm';
+        video.append(source);
+      }
+      if (mp4) {
+        const source = document.createElement('source');
+        source.src = mp4;
+        source.type = 'video/mp4';
+        video.append(source);
+      }
+      if (live) {
+        video.autoplay = true;
+        video.play().catch(() => {});
+      } else {
+        video.addEventListener('loadeddata', () => {
+          try { video.currentTime = PROMO_CONVEYOR_STILL_MS; } catch { /* first frame */ }
+          video.pause();
+        }, { once: true });
+      }
+      return video;
+    }
+
+    buildConveyorWindow(spawn, frameWidth) {
+      const width = Math.round(frameWidth * spawn.size);
+      const fromX = -width;
+      const toX = Math.round(frameWidth / 2 - width);
+      const tile = document.createElement('div');
+      tile.className = 'promo-scale__tile';
+      tile.style.width = `${width}px`;
+      tile.style.height = `${Math.round(width / PROMO_CONVEYOR_ASPECT)}px`;
+      tile.style.setProperty('--from-x', `${fromX}px`);
+      tile.style.setProperty('--to-x', `${toX}px`);
+      const frame = document.createElement('div');
+      frame.className = 'promo-scale__window';
+      frame.appendChild(this.conveyorPicture(spawn.live));
+      const burst = document.createElement('span');
+      burst.className = 'promo-scale__burst';
+      const specks = 20 + Math.floor(wallSeededUnit(spawn.index, 5) * 11);
+      for (let bit = 0; bit < specks; bit += 1) {
+        const speck = document.createElement('i');
+        speck.className = 'promo-scale__speck';
+        const angle = wallSeededUnit(spawn.index, 20 + bit) * Math.PI * 2;
+        const dist = 18 + wallSeededUnit(spawn.index, 80 + bit) * 56;
+        speck.style.setProperty('--dx', `${(Math.cos(angle) * dist).toFixed(1)}px`);
+        speck.style.setProperty('--dy', `${(Math.sin(angle) * dist).toFixed(1)}px`);
+        burst.appendChild(speck);
+      }
+      const loss = document.createElement('span');
+      loss.className = 'promo-scale__loss';
+      loss.textContent = '$';
+      tile.append(frame, burst, loss);
+      return { tile, fromX, toX };
+    }
+
+    placeConveyorEdge(tile, frameWidth, edge) {
+      const width = tile.getBoundingClientRect().width || parseFloat(tile.style.width);
+      const x = edge * frameWidth - width;
+      tile.style.transform = `translate3d(${x.toFixed(1)}px, -50%, 0)`;
+    }
+
+    holdConveyorPuff(tile, puffAge) {
+      tile.classList.add('is-puff-hold');
+      const flash = PROMO_CONVEYOR_FLASH_MS;
+      const dissolve = puffAge <= flash ? 0 : Math.min(1, (puffAge - flash) / PROMO_CONVEYOR_PUFF_MS);
+      const burst = puffAge <= flash ? 0 : Math.min(1, (puffAge - flash) / PROMO_CONVEYOR_BURST_MS);
+      tile.style.setProperty('--puff-opacity', (1 - dissolve).toFixed(3));
+      tile.style.setProperty('--puff-scale', (1 + 0.05 * dissolve).toFixed(3));
+      tile.style.setProperty('--puff-tint', dissolve === 0 ? '0' : (1 - dissolve).toFixed(3));
+      tile.style.setProperty('--speck-opacity', (0.85 * (1 - burst * 0.7)).toFixed(3));
+      tile.style.setProperty('--loss-opacity', (1 - burst).toFixed(3));
+      tile.style.setProperty('--loss-rise', `${(24 * burst).toFixed(1)}px`);
+    }
+
+    paintConveyorAt(timeMs) {
       const wall = this.ensureWall();
-      if (!wall) return null;
-      if (wall.childElementCount === PROMO_SCALE_TILES && wall.querySelector('.promo-scale__window')) return wall;
-      wall.replaceChildren();
-      for (let index = 0; index < PROMO_SCALE_TILES; index += 1) {
-        const tile = document.createElement('div');
-        tile.className = 'promo-scale__tile';
-        tile.dataset.wallIndex = String(index);
-        const frame = document.createElement('div');
-        frame.className = 'promo-scale__window';
-        const bar = document.createElement('i');
-        bar.className = 'promo-scale__bar';
-        const stage = document.createElement('div');
-        stage.className = 'promo-scale__stage';
-        const grid = document.createElement('div');
-        grid.className = 'promo-scale__grid';
-        for (let card = 0; card < PROMO_WALL_CARDS; card += 1) {
-          const cell = document.createElement('i');
-          cell.className = 'promo-scale__card';
-          grid.append(cell);
-        }
-        const chat = document.createElement('i');
-        chat.className = 'promo-scale__chat';
-        stage.append(grid, chat);
-        frame.append(bar, stage);
-        const loss = document.createElement('span');
-        loss.className = 'promo-scale__loss';
-        loss.textContent = '$';
-        tile.append(frame, loss);
-        tile.hidden = true;
-        wall.append(tile);
-      }
-      return wall;
-    }
-
-    showWall(across) {
-      const wall = this.mountWallTiles();
       if (!wall) return;
-      const count = across * across;
-      const from = across === 1 ? 1 : across === 2 ? 0.5 : 2;
-      wall.querySelectorAll('.promo-scale__tile').forEach((tile, index) => {
-        tile.hidden = index >= count;
-        tile.style.gridColumn = '';
-        tile.style.gridRow = '';
+      const frameWidth = this.conveyorFrameWidth();
+      const spawns = conveyorSpawns(PROMO_CONVEYOR_STREAM_MS);
+      wall.replaceChildren();
+      const life = PROMO_CONVEYOR_FLASH_MS + PROMO_CONVEYOR_BURST_MS;
+      spawns.forEach((spawn) => {
+        if (timeMs < spawn.at || timeMs > spawn.death + life) return;
+        const built = this.buildConveyorWindow(spawn, frameWidth);
+        wall.append(built.tile);
+        const edge = Math.min(0.5, conveyorEdge(spawns, spawn, timeMs));
+        this.placeConveyorEdge(built.tile, frameWidth, edge);
+        if (timeMs >= spawn.death) this.holdConveyorPuff(built.tile, timeMs - spawn.death);
       });
-      if (across === 4) {
-        const spots = [
-          [1, 1], [2, 1], [1, 2], [2, 2],
-          [3, 1], [4, 1], [3, 2], [4, 2],
-          [1, 3], [2, 3], [3, 3], [4, 3],
-          [1, 4], [2, 4], [3, 4], [4, 4],
-        ];
-        wall.querySelectorAll('.promo-scale__tile').forEach((tile, index) => {
-          const spot = spots[index];
-          if (!spot) return;
-          tile.style.gridColumn = String(spot[0]);
-          tile.style.gridRow = String(spot[1]);
+    }
+
+    paintConveyorStatic() {
+      const wall = this.ensureWall();
+      if (!wall) return;
+      const frameWidth = this.conveyorFrameWidth();
+      wall.replaceChildren();
+      [0.22, 0.36, 0.5].forEach((edge, index) => {
+        const spawn = { index, size: 0.34 - index * 0.06, travel: 1, live: false };
+        const built = this.buildConveyorWindow(spawn, frameWidth);
+        const width = Math.round(frameWidth * spawn.size);
+        built.tile.style.transform = `translate3d(${Math.round(frameWidth * edge - width)}px, -50%, 0)`;
+        wall.append(built.tile);
+      });
+    }
+
+    runConveyor(generation, frameWidth) {
+      const wall = this.ensureWall();
+      if (!wall) return;
+      const spawns = conveyorSpawns(PROMO_CONVEYOR_STREAM_MS);
+      const tiles = new Map();
+      const started = performance.now();
+      const life = PROMO_CONVEYOR_FLASH_MS + PROMO_CONVEYOR_BURST_MS;
+      const tick = () => {
+        if (generation !== this.scaleGeneration) return;
+        const elapsed = performance.now() - started;
+        spawns.forEach((spawn) => {
+          if (elapsed < spawn.at || elapsed > spawn.death + life) return;
+          let tile = tiles.get(spawn.index);
+          if (!tile) {
+            tile = this.buildConveyorWindow(spawn, frameWidth).tile;
+            tiles.set(spawn.index, tile);
+            wall.append(tile);
+          }
+          if (tile.dataset.puffed === '1') return;
+          const edge = Math.min(0.5, conveyorEdge(spawns, spawn, elapsed));
+          this.placeConveyorEdge(tile, frameWidth, edge);
+          if (elapsed < spawn.death) return;
+          tile.dataset.puffed = '1';
+          tile.classList.add('is-puff');
+          this.emitPuff();
+          this.armScaleTimer(() => tile.remove(), life);
         });
-      }
-      wall.classList.toggle('is-one', across === 1);
-      wall.style.transition = 'none';
-      wall.style.setProperty('--wall-n', String(across));
-      wall.style.setProperty('--wall-scale', String(from));
-      wall.getBoundingClientRect();
-      if (this.root.classList.contains('is-scale-still') || across === 1) {
-        wall.style.transition = 'none';
-        wall.style.setProperty('--wall-scale', '1');
-        return;
-      }
-      wall.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
-      wall.style.setProperty('--wall-scale', '1');
-    }
-
-    loseTile(index) {
-      const tile = this.root.querySelector(`[data-promo-scale-wall] .promo-scale__tile[data-wall-index="${index}"]`);
-      tile?.classList.add('is-lost');
-    }
-
-    loseWall(count) {
-      wallLossOrder(PROMO_SCALE_TILES).slice(0, count).forEach((index) => {
-        this.loseTile(index);
-      });
+        if (elapsed < PROMO_CONVEYOR_STREAM_MS) {
+          this.conveyorFrame = window.requestAnimationFrame(tick);
+        }
+      };
+      this.conveyorFrame = window.requestAnimationFrame(tick);
     }
 
     shrinkStoreToTile() {
@@ -3572,6 +3747,19 @@
       this.momentTimers.push(this.clickTimer);
     }
 
+    emitPuff() {
+      const root = this.root;
+      window.clearTimeout(this.puffTimer);
+      root.classList.remove('puff');
+      void root.offsetWidth;
+      root.classList.add('puff');
+      this.puffTimer = window.setTimeout(() => {
+        root.classList.remove('puff');
+      }, PROMO_SCALE_SNAP_CLASS_MS);
+      this.painTimers = this.painTimers || [];
+      this.painTimers.push(this.puffTimer);
+    }
+
     emitThud() {
       const root = this.root;
       window.clearTimeout(this.thudTimer);
@@ -3617,13 +3805,12 @@
       if (!this.root.classList.contains('is-pain')) return;
       if (!this.root.querySelector('[data-promo-scale]')) return;
       this.prepareScaleScene();
-      this.mountWallTiles();
       if (prefersReducedMotion()) {
         this.hideScaleStore();
         this.revealScaleLayer();
-        this.showWall(4);
-        this.loseWall(PROMO_SCALE_TILES);
         this.root.classList.add('is-scale-still');
+        await this.captureConveyorStill();
+        this.paintConveyorStatic();
         await waitMs(400);
         this.root.classList.add('is-scale-white');
         await waitMs(PROMO_SCALE_WHITE_MS);
@@ -3651,55 +3838,40 @@
         const wait = mark - (performance.now() - started);
         if (wait > 0) await waitMs(wait);
       };
-      const delayUntil = (mark) => Math.max(0, mark - (performance.now() - started));
-      this.mountWallTiles();
       this.shrinkStoreToTile();
       await until(PROMO_SCALE_SHRINK_MS);
       if (generation !== this.scaleGeneration) return;
       this.hideScaleStore();
       this.revealScaleLayer();
-      this.showWall(1);
-      await until(PROMO_SCALE_STEP_MS);
-      if (generation !== this.scaleGeneration) return;
-      this.showWall(2);
-      await until(PROMO_SCALE_STEP_MS * 2);
-      if (generation !== this.scaleGeneration) return;
-      this.showWall(4);
-      await until(PROMO_SCALE_WALL_MS);
-      if (generation !== this.scaleGeneration) return;
-      wallLossOrder(PROMO_SCALE_TILES).forEach((index, step) => {
-        const at = PROMO_SCALE_WALL_MS + step * PROMO_SCALE_LOSS_GAP_MS;
-        this.armScaleTimer(() => {
-          if (generation !== this.scaleGeneration) return;
-          this.loseTile(index);
-        }, delayUntil(at));
-        this.armScaleTimer(() => {
-          if (generation !== this.scaleGeneration) return;
-          this.emitClick();
-        }, delayUntil(at + PROMO_SCALE_LOSS_FLASH_MS));
-      });
-      await until(wallLossEnd());
+      const frameWidth = this.conveyorFrameWidth();
+      this.runConveyor(generation, frameWidth);
+      const cut = origin + PROMO_CONVEYOR_STREAM_MS;
+      await until(cut);
       if (generation !== this.scaleGeneration) return;
       this.root.classList.add('is-scale-white');
-      await until(wallZeroAt());
+      await until(cut + PROMO_SCALE_WHITE_MS);
       if (generation !== this.scaleGeneration) return;
       this.root.classList.add('is-scale-zero');
       this.emitThud();
-      await until(wallZeroAt() + PROMO_SCALE_HOLD_MS + promoHoldMs());
+      await until(cut + PROMO_SCALE_WHITE_MS + PROMO_SCALE_HOLD_MS + promoHoldMs());
     }
 
-    showScaleExport(kind) {
+    async showScaleExport(kind) {
       this.resetScaleScene();
       this.prepareScaleScene();
       this.openPainStage();
       this.applyPainBeat('answer-2', true);
       this.hideScaleStore();
       this.revealScaleLayer();
-      this.mountWallTiles();
       this.root.classList.add('is-scale-still');
-      this.showWall(4);
-      if (kind === 'half') this.loseWall(PROMO_SCALE_TILES / 2);
-      if (kind === 'dead' || kind === 'white' || kind === 'zero') this.loseWall(PROMO_SCALE_TILES);
+      await Promise.race([this.captureConveyorStill(), waitMs(1200)]);
+      const first = conveyorSpawns(PROMO_CONVEYOR_STREAM_MS)[0];
+      if (kind === 'travel') this.paintConveyorAt(first.at + (first.death - first.at) * 0.5);
+      if (kind === 'puff') {
+        this.paintConveyorAt(first.death + PROMO_CONVEYOR_FLASH_MS + PROMO_CONVEYOR_PUFF_MS * 0.55);
+      }
+      if (kind === 'mid') this.paintConveyorAt(PROMO_CONVEYOR_MID_MS);
+      if (kind === 'stream') this.paintConveyorAt(PROMO_CONVEYOR_STREAM_MS - 80);
       if (kind === 'white' || kind === 'zero') this.root.classList.add('is-scale-white');
       if (kind === 'zero') this.root.classList.add('is-scale-zero');
       return this.whenPainRest(this.painHost());
@@ -4256,9 +4428,10 @@
         'pain-b-answer-1': () => this.showPainExport('answer-1'),
         'pain-b-typed-2': () => this.showPainExport('typed-2'),
         'pain-b-answer-2': () => this.showPainExport('answer-2'),
-        'pain-c-live': () => this.showScaleExport('live'),
-        'pain-c-half': () => this.showScaleExport('half'),
-        'pain-c-dead': () => this.showScaleExport('dead'),
+        'pain-c-travel': () => this.showScaleExport('travel'),
+        'pain-c-puff': () => this.showScaleExport('puff'),
+        'pain-c-mid': () => this.showScaleExport('mid'),
+        'pain-c-stream': () => this.showScaleExport('stream'),
         'pain-c-white': () => this.showScaleExport('white'),
         'pain-c-zero': () => this.showScaleExport('zero'),
         'pain-c-aim': () => this.showPainCloseAim(),
