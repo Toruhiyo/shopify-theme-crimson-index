@@ -1,24 +1,36 @@
 /* Ad colour tokens. The only hex in the ad styles. */
+@property --ad-warmth {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 html.is-promo-opening,
 html.is-promo-cover,
 .promo-opening {
+  --bizmis-primary: var(--bizmis-orange);
+  --bizmis-primary-glow: color-mix(in srgb, var(--bizmis-primary) 12%, transparent);
+  --bizmis-primary-ring: color-mix(in srgb, var(--bizmis-primary) 60%, transparent);
   --ad-white: #FFFFFF;
-  --ad-field: #FCFBFA;
-  --ad-surface: #F6F4F1;
-  --ad-line: #E8E5E0;
-  --ad-line-strong: #D9D4CD;
+  --ad-photo: #F7F3EE;
+  --ad-field: color-mix(in oklab, #FFFFFF, #FCFBFA calc(var(--ad-warmth) * 100%));
+  --ad-surface: color-mix(in oklab, #F6F6F6, #F6F4F1 calc(var(--ad-warmth) * 100%));
+  --ad-line: color-mix(in oklab, #E6E6E6, #E8E5E0 calc(var(--ad-warmth) * 100%));
+  --ad-line-strong: color-mix(in oklab, #D6D6D6, #D9D4CD calc(var(--ad-warmth) * 100%));
   --ad-ink: #1F1D1A;
-  --ad-ink-2: #5C5851;
-  --ad-ink-3: #9A948B;
-  --ad-orange: #F9A353;
-  --ad-orange-glow: rgba(249, 163, 83, 0.12);
-  --ad-orange-ring: rgba(249, 163, 83, 0.6);
+  --ad-ink-2: color-mix(in oklab, #595959, #5C5851 calc(var(--ad-warmth) * 100%));
+  --ad-ink-3: color-mix(in oklab, #969696, #9A948B calc(var(--ad-warmth) * 100%));
   --ad-shadow: rgba(30, 26, 20, 0.08);
   --ad-red: #E5533D;
-  --tint-stone: none;
-  --tint-sand: sepia(0.25) saturate(1.05) hue-rotate(-8deg);
-  --tint-blush: sepia(0.2) saturate(1.05) hue-rotate(-22deg);
-  --tint-sage: sepia(0.2) saturate(0.9) hue-rotate(40deg);
-  --tint-grey: saturate(0.5);
-  --tint-white: brightness(1.08) saturate(0.6);
+  --bot-surface: #EEF0F3;
+  --bot-line: #D8DCE2;
+  --bot-ink: #4A5160;
+}
+
+html.is-promo-opening {
+  --ad-warmth: 0;
+}
+
+html.is-promo-opening.is-promo-pitch {
+  --ad-warmth: 1;
 }

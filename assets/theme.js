@@ -14,6 +14,8 @@
   const isMarketingAd = marketingValue === PROMO_MARKETING_AD || legacyPromoVideo === 'opening';
   const promoVideo = isMarketingAd ? 'opening' : legacyPromoVideo;
   if (isMarketingAd) {
+    const openingPart = (promoBootParams.get('part') || 'full').trim().toLowerCase();
+    document.documentElement.style.setProperty('--ad-warmth', openingPart === 'pitch' ? '1' : '0');
     document.documentElement.classList.add('is-promo-opening');
     document.documentElement.classList.remove('is-promo-cover');
   }
@@ -156,6 +158,7 @@
   const PROMO_AGENTIC_FADE_AT_MS = 170;
   const PROMO_AGENTIC_FADE_MS = 380;
   const PROMO_FLIP_BURST_MS = 600;
+  const PROMO_FLOOD_MS = 600;
   const PROMO_FLIP_HOLD_MS = 1350;
   const PROMO_PITCH_LOGO_HOLD_MS = 900;
   const PROMO_LOGO_DOCK_MS = 720;
@@ -280,7 +283,7 @@
     return getComputedStyle(document.documentElement).getPropertyValue('--bizmis-orange').trim();
   }
 
-  const BIZMIS_ORANGE = readAdToken('--ad-orange');
+  const BIZMIS_ORANGE = readAdToken('--bizmis-primary');
   const PROMO_BIZMIS_MESH_COLORS = {
     UPPERBODY_Top: BIZMIS_ORANGE,
     HEAD_Hat: BIZMIS_ORANGE,
@@ -611,6 +614,15 @@
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
   const PROMO_MOMENT_OTHER_INDEX = 3;
+  const PROMO_COMPARE_SET = {
+    shape: 'sphere',
+    tints: { go: 'stone', pick: 'sand', other: 'grey' },
+  };
+  const PROMO_ACCESSORY_SHAPE = 'capsule';
+  const PROMO_TINT_FILE = {
+    sphere: { stone: 'sphere-b', sand: 'sphere-c', grey: 'sphere' },
+    capsule: { stone: 'capsule', sand: 'capsule-b', grey: 'capsule-c' },
+  };
   const PROMO_MOMENT_GRID_PITCH_X = 168;
   const PROMO_MOMENT_GRID_PITCH_Y = 208;
   const PROMO_MOMENT_TITLE_WIDTHS = [68, 54, 76, 48, 62, 72, 58, 80, 50, 66, 74, 60];
@@ -653,7 +665,7 @@
   }
 
   function claySrc(look) {
-    const key = clayVariantKey(look);
+    const key = look.file || clayVariantKey(look);
     const listed = promoClayUrls()[key];
     if (listed) return listed;
     const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
@@ -686,18 +698,25 @@
         scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
       });
     }
+    looks[PROMO_MOMENT_GO_INDEX] = lookForTint(PROMO_COMPARE_SET.shape, PROMO_COMPARE_SET.tints.go);
+    looks[PROMO_MOMENT_PICK_INDEX] = lookForTint(PROMO_COMPARE_SET.shape, PROMO_COMPARE_SET.tints.pick);
+    looks[PROMO_MOMENT_OTHER_INDEX] = lookForTint(PROMO_COMPARE_SET.shape, PROMO_COMPARE_SET.tints.other);
     return looks;
   }
 
-  function accessoryLook(blockedKind) {
-    const rand = mulberry32(PROMO_CATALOG_SEED + 17);
-    const options = PROMO_CLAY_KINDS.filter((kind) => kind !== blockedKind);
+  function lookForTint(shape, tint) {
     return {
-      kind: options[Math.floor(rand() * options.length)],
-      turn: PROMO_CLAY_TURNS[Math.floor(rand() * PROMO_CLAY_TURNS.length)],
-      finish: PROMO_CLAY_FINISHES[Math.floor(rand() * PROMO_CLAY_FINISHES.length)],
-      scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
+      kind: shape,
+      turn: '0',
+      finish: 'matte',
+      scale: 1,
+      tint,
+      file: PROMO_TINT_FILE[shape][tint],
     };
+  }
+
+  function accessoryLook(pick) {
+    return lookForTint(PROMO_ACCESSORY_SHAPE, pick?.tint || PROMO_COMPARE_SET.tints.pick);
   }
 
   function applyClayLook(card, look) {
@@ -720,7 +739,7 @@
     cards.forEach((card, index) => applyClayLook(card, looks[index]));
     const extra = board.querySelector('.promo-moments__card.is-extra');
     const pick = looks[PROMO_MOMENT_PICK_INDEX];
-    if (extra && pick) applyClayLook(extra, accessoryLook(pick.kind));
+    if (extra && pick) applyClayLook(extra, accessoryLook(pick));
     board.dataset.clayReady = '1';
   }
 
@@ -1446,6 +1465,47 @@
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  function floodEase(t) {
+    const x1 = 0.16;
+    const y1 = 1;
+    const x2 = 0.3;
+    const y2 = 1;
+    const cx = 3 * x1;
+    const bx = 3 * (x2 - x1) - cx;
+    const ax = 1 - cx - bx;
+    const cy = 3 * y1;
+    const by = 3 * (y2 - y1) - cy;
+    const ay = 1 - cy - by;
+    const sampleX = (u) => ((ax * u + bx) * u + cx) * u;
+    const sampleY = (u) => ((ay * u + by) * u + cy) * u;
+    const sampleDX = (u) => (3 * ax * u + 2 * bx) * u + cx;
+    let u = t;
+    for (let step = 0; step < 6; step += 1) {
+      const slope = sampleDX(u);
+      if (Math.abs(slope) < 1e-6) break;
+      u = Math.min(1, Math.max(0, u - (sampleX(u) - t) / slope));
+    }
+    return sampleY(u);
+  }
+
+  function tweenAdWarmth() {
+    const root = document.documentElement;
+    const from = Number.parseFloat(getComputedStyle(root).getPropertyValue('--ad-warmth'));
+    const startValue = Number.isFinite(from) ? from : 0;
+    if (startValue >= 1) {
+      root.style.setProperty('--ad-warmth', '1');
+      return;
+    }
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / PROMO_FLOOD_MS);
+      const value = startValue + (1 - startValue) * floodEase(t);
+      root.style.setProperty('--ad-warmth', t >= 1 ? '1' : value.toFixed(4));
+      if (t < 1) window.requestAnimationFrame(tick);
+    };
+    window.requestAnimationFrame(tick);
+  }
+
   function promoSearchParams() {
     return new URLSearchParams(window.location.search);
   }
@@ -1939,6 +1999,7 @@
     burst() {
       this.pinLabelOrigin();
       this.root.classList.add('is-bursting');
+      tweenAdWarmth();
       window.setTimeout(() => {
         this.root.classList.add('is-agentic-white');
       }, PROMO_AGENTIC_WHITE_AT_MS);
@@ -1958,6 +2019,7 @@
     }
 
     async pitch() {
+      document.documentElement.style.setProperty('--ad-warmth', '1');
       this.releasePainStage();
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-pitch');
@@ -2362,6 +2424,7 @@
     }
 
     showReducedSee() {
+      document.documentElement.style.setProperty('--ad-warmth', '1');
       this.releasePainStage();
       document.documentElement.classList.add('is-promo-pitch');
       this.root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch', 'is-logo-leaving');
@@ -2666,7 +2729,7 @@
       if (!host || prefersReducedMotion()) return;
       const burst = document.createElement('div');
       burst.className = 'promo-opening__stain-burst';
-      burst.style.setProperty('--promo-stain', accent || BIZMIS_ORANGE);
+      burst.style.setProperty('--promo-stain', accent || 'var(--ad-ink-3)');
       for (let index = 0; index < PROMO_SEE_STAIN_COUNT; index += 1) {
         const stain = document.createElement('span');
         stain.className = index < PROMO_SEE_STAIN_BODY_COUNT
@@ -2821,6 +2884,7 @@
       const openingStore = this.painStore();
       if (openingStore) openingStore.style.visibility = '';
       this.root.classList.add('is-pain', 'is-moments');
+      document.documentElement.style.setProperty('--ad-warmth', '0');
       const stage = this.momentStage();
       void stage?.offsetWidth;
       applyMomentPose(stage, 'grid', { instant: true });
@@ -3149,6 +3213,30 @@
       this.releasePainStage();
     }
 
+    paintFloodStill(warmth) {
+      const root = this.root;
+      document.documentElement.classList.add('is-promo-opening');
+      document.documentElement.classList.remove('is-promo-pitch', 'is-promo-depart');
+      root.classList.add('is-on', 'is-cleared', 'is-bursting');
+      this.openPainStage();
+      document.documentElement.style.setProperty('--ad-warmth', String(warmth));
+      const label = root.querySelector('.promo-opening__choice--right');
+      if (label) label.style.transition = 'none';
+      root.querySelectorAll('.promo-opening__choice--left, .promo-opening__switch').forEach((node) => {
+        node.style.transition = 'none';
+        node.style.opacity = '0';
+      });
+      this.centerAgenticSales();
+      this.scaleAgenticSales(2.25 + warmth * 2.35);
+      this.pinLabelOrigin();
+      const fill = root.querySelector('.promo-opening__fill--orange');
+      if (fill) {
+        fill.style.transition = 'none';
+        fill.style.transform = `scale(${(warmth * 0.42).toFixed(3)})`;
+      }
+      return 160;
+    }
+
     showPainExport(beat) {
       this.openPainStage();
       this.applyPainBeat(beat, false);
@@ -3239,6 +3327,7 @@
       };
 
       const enterPitch = () => {
+        document.documentElement.style.setProperty('--ad-warmth', '1');
         html.classList.add('is-promo-opening', 'is-promo-pitch', 'is-promo-clerk');
         root.classList.add('is-on', 'is-bursting', 'is-holding', 'is-pitch');
         root.classList.remove('is-logo-leaving', 'is-depart', 'is-moments');
@@ -3376,6 +3465,7 @@
           logo.style.visibility = '';
         }
         resetText();
+        document.documentElement.style.setProperty('--ad-warmth', '0');
       };
 
       const openMoments = () => {
@@ -3421,6 +3511,9 @@
           this.scaleAgenticSales(2.25);
           return 80;
         },
+        '03a-flood-warmth-0': () => this.paintFloodStill(0),
+        '03b-flood-warmth-05': () => this.paintFloodStill(0.5),
+        '03c-flood-warmth-1': () => this.paintFloodStill(1),
         '03-orange-burst': () => {
           rest();
           root.classList.add('is-on', 'is-cleared', 'is-bursting', 'is-agentic-white');
@@ -3436,6 +3529,12 @@
           this.centerAgenticSales();
           this.scaleAgenticSales(4.6);
           this.pinLabelOrigin();
+          document.documentElement.style.setProperty('--ad-warmth', '1');
+          const fill = root.querySelector('.promo-opening__fill--orange');
+          if (fill) {
+            fill.style.transition = 'none';
+            fill.style.transform = 'scale(1)';
+          }
           return 200;
         },
         '04-logo-docked': () => {
