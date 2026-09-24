@@ -128,6 +128,8 @@ function writeCaptions() {
 
 async function injectLocalOpeningCss(page) {
   await page.addStyleTag({ path: path.join(THEME_ROOT, 'assets/base.css') });
+  await page.addStyleTag({ path: path.join(THEME_ROOT, 'assets/promo-ad-tokens.css') });
+  await page.addStyleTag({ path: path.join(THEME_ROOT, 'assets/promo-ad.css') });
 }
 
 async function unlockStorefront(page) {

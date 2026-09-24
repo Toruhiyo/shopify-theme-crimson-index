@@ -195,7 +195,8 @@
   const PROMO_PAIN_TYPE_CHAR_MS = 16;
   const PROMO_PAIN_EXIT_MS = 420;
   const PROMO_WINDOW_AIM_MS = 820;
-  const PROMO_WINDOW_PRESS_MS = 200;
+  const PROMO_WINDOW_LEAVE_MS = 400;
+  const PROMO_WINDOW_HOLD_MS = 600;
   const PROMO_WINDOW_CLOSE_MS = 760;
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
@@ -272,7 +273,14 @@
   const PROMO_WHEEL_SELECT_SPAN = 0.2;
   const PROMO_SEE_REDUCED_HOLD_MS = 1000;
   const PROMO_DEPART_MS = 1100;
-  const BIZMIS_ORANGE = getComputedStyle(document.documentElement).getPropertyValue('--bizmis-orange').trim();
+  function readAdToken(name) {
+    const root = document.querySelector('.promo-opening') || document.documentElement;
+    const value = getComputedStyle(root).getPropertyValue(name).trim();
+    if (value) return value;
+    return getComputedStyle(document.documentElement).getPropertyValue('--bizmis-orange').trim();
+  }
+
+  const BIZMIS_ORANGE = readAdToken('--ad-orange');
   const PROMO_BIZMIS_MESH_COLORS = {
     UPPERBODY_Top: BIZMIS_ORANGE,
     HEAD_Hat: BIZMIS_ORANGE,
@@ -614,37 +622,58 @@
     'spec-shield': '<path d="M12 2.4 20.2 5.6v6.2c0 4.4-3 7.6-8.2 9.8-5.2-2.2-8.2-5.4-8.2-9.8V5.6z"/>',
   };
 
-  const PROMO_SHELF = [
-    { shelf: '#F4EFE7', deep: '#EDE8E0', shape: '#D9D4CC', shade: '#C9C4BC' },
-    { shelf: '#F5ECE8', deep: '#EEE5E1', shape: '#DAD1CD', shade: '#CAC1BD' },
-    { shelf: '#EEF1EA', deep: '#E7EAE3', shape: '#D3D6CF', shade: '#C3C6BF' },
-    { shelf: '#EFEEEA', deep: '#E8E7E3', shape: '#D4D3CF', shade: '#C4C3BF' },
-  ];
-  const PROMO_CLAY_TINT = [
-    'sepia(0.42) hue-rotate(12deg) saturate(0.3)',
-    'sepia(0.38) hue-rotate(336deg) saturate(0.34)',
-    'sepia(0.2) hue-rotate(78deg) saturate(0.28)',
-    'sepia(0.1) hue-rotate(18deg) saturate(0.16)',
-  ];
+  const PROMO_NEUTRAL_KEY = {
+    cone: 'cone-c',
+    sphere: 'sphere',
+    cube: 'cube-b',
+    'rounded-cube': 'rounded-cube',
+    cylinder: 'cylinder-c',
+    'low-cylinder': 'low-cylinder',
+    'tall-box': 'tall-box',
+    capsule: 'capsule-c',
+    torus: 'torus-b',
+    dome: 'dome',
+  };
+  const PROMO_LOOK_TINT = {
+    cone: 'blush',
+    'cone-b': 'sand',
+    'cone-c': 'grey',
+    sphere: 'grey',
+    'sphere-b': 'stone',
+    'sphere-c': 'white',
+    cube: 'sand',
+    'cube-b': 'grey',
+    'cube-c': 'blush',
+    'rounded-cube': 'stone',
+    'rounded-cube-b': 'sage',
+    'rounded-cube-c': 'sand',
+    cylinder: 'sage',
+    'cylinder-b': 'stone',
+    'cylinder-c': 'grey',
+    'low-cylinder': 'white',
+    'low-cylinder-b': 'sand',
+    'low-cylinder-c': 'sage',
+    'tall-box': 'grey',
+    'tall-box-b': 'stone',
+    'tall-box-c': 'blush',
+    capsule: 'sage',
+    'capsule-b': 'blush',
+    'capsule-c': 'white',
+    torus: 'sand',
+    'torus-b': 'stone',
+    'torus-c': 'sage',
+    dome: 'stone',
+    'dome-b': 'grey',
+    'dome-c': 'blush',
+  };
   const PROMO_GRID_LIFE_MS = 4000;
   const PROMO_GRID_LIFT_MS = 600;
   const PROMO_PAIN_LIFE_HOLD = ['open', 'back', 'scroll-1', 'open-2', 'back-2', 'scroll-2', 'scroll-3', 'scroll-4', 'leave'];
   let gridLifeTimer = 0;
 
-  const PROMO_SHELF_AT = [
-    1, 2, 2, 0, 2, 0, 3, 3, 1, 3, 1, 1,
-    2, 3, 3, 1, 3, 2, 2, 1, 3, 3, 3, 0,
-    2, 0, 0, 3, 1, 0, 0, 0, 1, 3, 2, 2,
-    2, 1, 1, 1, 0, 3, 0, 0, 3, 0, 1, 0,
-  ];
-
   function paintShelf(card, index) {
-    const toneIndex = PROMO_SHELF_AT[index % PROMO_SHELF_AT.length];
-    const tone = PROMO_SHELF[toneIndex];
-    card.style.setProperty('--shelf', tone.shelf);
-    card.style.setProperty('--shelf-deep', tone.deep);
-    card.style.setProperty('--shape', tone.shape);
-    card.style.setProperty('--clay', PROMO_CLAY_TINT[toneIndex]);
+    card.style.setProperty('--shelf', 'var(--ad-surface)');
+    card.style.setProperty('--shelf-deep', 'var(--ad-line)');
     card.style.setProperty('--enter', String(index));
   }
 
@@ -667,8 +696,14 @@
     return kind;
   }
 
+  function clayTint(look) {
+    const name = PROMO_LOOK_TINT[clayVariantKey(look)] || 'stone';
+    return `var(--tint-${name})`;
+  }
+
   function claySrc(look) {
-    const key = clayVariantKey(look);
+    const kind = typeof look === 'string' ? look : look.kind;
+    const key = PROMO_NEUTRAL_KEY[kind] || kind;
     const listed = promoClayUrls()[key];
     if (listed) return listed;
     const stamp = document.documentElement.getAttribute('data-promo-bizmis-stamp') || '';
@@ -722,6 +757,7 @@
     card.dataset.clayTurn = look.turn;
     card.dataset.clayFinish = look.finish;
     card.style.setProperty('--clay-scale', String(look.scale));
+    card.style.setProperty('--tint', clayTint(look));
     const img = card.querySelector('.promo-moments__glyph img');
     const src = claySrc(look);
     if (img && img.getAttribute('src') !== src) img.src = src;
@@ -3137,16 +3173,17 @@
       cursor.style.opacity = '0';
       cursor.getBoundingClientRect();
       this.root.style.setProperty('--promo-pain-open', `${PROMO_WINDOW_AIM_MS}ms`);
+      this.root.style.setProperty('--promo-window-leave', `${PROMO_WINDOW_LEAVE_MS}ms`);
       this.root.style.setProperty('--promo-window-close', `${PROMO_WINDOW_CLOSE_MS}ms`);
       cursor.style.transitionDuration = '';
       const aim = this.painCursorPoint(dot);
       cursor.style.setProperty('--pain-x', `${Math.round(aim.x)}px`);
       cursor.style.setProperty('--pain-y', `${Math.round(aim.y)}px`);
       cursor.style.opacity = '1';
+      this.root.classList.add('is-window-aim');
       await waitMs(PROMO_WINDOW_AIM_MS);
       this.pinWindowCloseOrigin();
-      this.root.classList.add('is-window-aim');
-      await waitMs(PROMO_WINDOW_PRESS_MS);
+      await waitMs(PROMO_WINDOW_HOLD_MS);
       this.parkPainCursor();
       this.root.classList.add('is-window-shut');
       window.setTimeout(() => {
