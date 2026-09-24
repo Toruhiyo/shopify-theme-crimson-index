@@ -963,12 +963,6 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-scale__tile.is-dot .promo-scale__window {
   border-color: var(--ad-red);
-  border-radius: 50%;
-  background: var(--ad-red);
-}
-
-.promo-scale__tile.is-dot .promo-scale__window > * {
-  opacity: 0;
 }
 
 .promo-opening.is-scale-white .promo-opening__widget,

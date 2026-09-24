@@ -236,18 +236,21 @@
     stagger: 0,
     intervals: [1200, 500],
     aspect: 8 / 5,
-    approachMs: 1400,
-    intervalStart: 1200,
-    intervalEnd: 500,
-    intervalEaseMs: 3000,
+    approachMs: 5200,
+    approachStart: 5200,
+    approachEnd: 2200,
+    accelMs: 12000,
+    intervalStart: 2800,
+    intervalEnd: 1200,
+    intervalEaseMs: 12000,
     eventJitter: 0.06,
     flashMs: 33,
     popScale: 1.04,
     dotScale: 0.07,
-    collapseMs: 120,
+    collapseMs: 520,
     exitMs: 300,
     splitMs: 400,
-    streamMs: 6000,
+    streamMs: 17000,
     phaseMax: 500,
     liveCount: 4,
     recedeMs: 820,
@@ -260,9 +263,9 @@
     blinkMs: 33,
     lanes: [
       { at: 0, width: 0.48, lanes: [{ id: 'c', x: 0 }] },
-      { at: 2000, width: 0.3, lanes: [{ id: 'l', x: -0.22 }, { id: 'c', x: 0 }, { id: 'r', x: 0.22 }] },
-      { at: 3500, width: 0.2, lanes: [{ id: 'll', x: -0.4 }, { id: 'l', x: -0.2 }, { id: 'c', x: 0 }, { id: 'r', x: 0.2 }, { id: 'rr', x: 0.4 }] },
-      { at: 5000, width: 0.14, lanes: [{ id: 'ol', x: -0.51 }, { id: 'll', x: -0.34 }, { id: 'l', x: -0.17 }, { id: 'c', x: 0 }, { id: 'r', x: 0.17 }, { id: 'rr', x: 0.34 }, { id: 'or', x: 0.51 }] },
+      { at: 6400, width: 0.3, lanes: [{ id: 'l', x: -0.22 }, { id: 'c', x: 0 }, { id: 'r', x: 0.22 }] },
+      { at: 10800, width: 0.2, lanes: [{ id: 'll', x: -0.4 }, { id: 'l', x: -0.2 }, { id: 'c', x: 0 }, { id: 'r', x: 0.2 }, { id: 'rr', x: 0.4 }] },
+      { at: 14800, width: 0.14, lanes: [{ id: 'ol', x: -0.51 }, { id: 'll', x: -0.34 }, { id: 'l', x: -0.17 }, { id: 'c', x: 0 }, { id: 'r', x: 0.17 }, { id: 'rr', x: 0.34 }, { id: 'or', x: 0.51 }] },
     ],
   };
   const PROMO_CONVEYOR = PROMO_CORRIDOR;
@@ -1707,8 +1710,9 @@
     return PROMO_CORRIDOR.perspective * (1 - 1 / PROMO_CORRIDOR.farScale);
   }
 
-  function corridorSpeed() {
-    return Math.abs(corridorFarZ()) / PROMO_CORRIDOR.approachMs;
+  function corridorApproachAt(timeMs) {
+    const along = corridorSmooth(timeMs / PROMO_CORRIDOR.accelMs);
+    return PROMO_CORRIDOR.approachStart + (PROMO_CORRIDOR.approachEnd - PROMO_CORRIDOR.approachStart) * along;
   }
 
   function corridorIntervalAt(timeMs) {
@@ -1771,12 +1775,13 @@
     const list = [];
     let born = corridorLaneBorn(id) + corridorLanePhase(id);
     let index = 0;
-    const limit = PROMO_CORRIDOR.streamMs + PROMO_CORRIDOR.approachMs;
+    const limit = PROMO_CORRIDOR.streamMs + PROMO_CORRIDOR.approachStart;
     while (born < limit && index < 16) {
       list.push({
         id,
         index,
         born,
+        approachMs: corridorApproachAt(born),
         eventZ: corridorEventZ(id, index),
         lead: id === 'c' && index === 0,
       });
@@ -1798,11 +1803,14 @@
 
   function corridorZOf(spawn, timeMs) {
     if (timeMs <= spawn.born) return corridorFarZ();
-    return corridorFarZ() + corridorSpeed() * (timeMs - spawn.born);
+    const duration = spawn.approachMs || PROMO_CORRIDOR.approachStart;
+    const t = Math.min(1, (timeMs - spawn.born) / duration);
+    const eased = 1 - (1 - t) ** 3;
+    return corridorFarZ() + (spawn.eventZ - corridorFarZ()) * eased;
   }
 
   function corridorHitOf(spawn) {
-    return spawn.born + (spawn.eventZ - corridorFarZ()) / corridorSpeed();
+    return spawn.born + (spawn.approachMs || PROMO_CORRIDOR.approachStart);
   }
 
   function corridorStreamMs() {
@@ -4031,7 +4039,7 @@
         const collapse = (state.since - PROMO_CORRIDOR.flashMs) / PROMO_CORRIDOR.collapseMs;
         const eased = 1 - (1 - Math.min(1, collapse)) ** 5;
         const scale = PROMO_CORRIDOR.popScale + (PROMO_CORRIDOR.dotScale - PROMO_CORRIDOR.popScale) * eased;
-        tile.classList.add(scale < 0.22 ? 'is-dot' : 'is-shut');
+        tile.classList.add('is-shut');
         tile.style.transform = corridorTransform(x, state.z, fit * scale);
         return;
       }
@@ -4528,14 +4536,14 @@
         travel: Math.max(80, firstHit - 180),
         'lane-1': Math.max(80, firstHit - 180),
         event: firstHit + 16,
-        mid: 2400,
-        'lanes-3': 2400,
-        'lanes-5': 3900,
-        'lanes-7': 5400,
-        'residue-10': 3900,
-        'residue-20': 3900,
-        'residue-100': 5400,
-        'residue-full': 5400,
+        mid: 8000,
+        'lanes-3': 8000,
+        'lanes-5': 12400,
+        'lanes-7': 16000,
+        'residue-10': 12400,
+        'residue-20': 12400,
+        'residue-100': 16000,
+        'residue-full': 16000,
       };
       if (avenueAt[shot] != null) this.paintCorridorAt(avenueAt[shot], mode);
       if (shot === 'white' || shot === 'end') this.root.classList.add('is-scale-white');
