@@ -4029,33 +4029,34 @@
       frame.style.transform = '';
       tile.classList.remove('is-shut', 'is-dot', 'is-sold', 'is-exit');
       if (since < 0) return;
+      const box = this.corridorFrame();
+      const x = corridorStagger(spawn.index, box.width);
       if (mode === 'pitch') {
         tile.classList.add('is-sold');
         const cart = tile.querySelector('.promo-scale__cart');
         if (cart) cart.textContent = '1';
-        if (since < PROMO_CORRIDOR.exitMs) {
-          const t = since / PROMO_CORRIDOR.exitMs;
-          const eased = 1 - (1 - t) * (1 - t);
-          const past = z + (PROMO_CORRIDOR.perspective * 0.72 - z) * eased;
-          const frameBox = this.corridorFrame();
-          const drift = corridorStagger(spawn.index, frameBox.width) + Math.sign(corridorStagger(spawn.index, frameBox.width) || 1) * frameBox.width * 0.55 * eased;
-          tile.style.transform = corridorTransform(drift, past, 1);
-          tile.classList.add('is-exit');
-        } else {
-          tile.remove();
-        }
+        const t = Math.min(1, since / PROMO_CORRIDOR.exitMs);
+        const eased = 1 - (1 - t) ** 3;
+        const past = z + (PROMO_CORRIDOR.perspective * 0.42 - z) * eased;
+        const sign = Math.sign(x || 1);
+        const drift = x + sign * box.width * 0.95 * eased;
+        tile.style.transform = corridorTransform(drift, past, 1);
+        tile.classList.add('is-exit');
+        const center = box.width / 2 + drift * (PROMO_CORRIDOR.perspective / (PROMO_CORRIDOR.perspective - past));
+        if (center < -box.width * 0.15 || center > box.width * 1.15 || t >= 1) tile.remove();
         return;
       }
       if (since < PROMO_CORRIDOR.flashMs) {
         tile.classList.add('is-shut');
-        frame.style.transform = `scale(${PROMO_CORRIDOR.popScale})`;
+        tile.style.transform = corridorTransform(x, z, PROMO_CORRIDOR.popScale);
         return;
       }
       const collapse = Math.min(1, (since - PROMO_CORRIDOR.flashMs) / PROMO_CORRIDOR.collapseMs);
-      const scale = PROMO_CORRIDOR.popScale + (PROMO_CORRIDOR.dotScale - PROMO_CORRIDOR.popScale) * collapse;
-      frame.style.transform = `scale(${scale.toFixed(4)})`;
+      const eased = 1 - (1 - collapse) ** 5;
+      const scale = PROMO_CORRIDOR.popScale + (PROMO_CORRIDOR.dotScale - PROMO_CORRIDOR.popScale) * eased;
+      tile.style.transform = corridorTransform(x, z, scale);
       tile.classList.add(scale < 0.22 ? 'is-dot' : 'is-shut');
-      if (collapse >= 1) tile.remove();
+      if (scale < 0.12) tile.remove();
     }
 
     paintCorridorAt(timeMs, mode = 'pain', markLimit) {
@@ -4074,10 +4075,11 @@
         const spawn = this.corridorSpawn(index, mode);
         const z = Math.min(spawn.eventZ, corridorZAt(index, timeMs));
         const hit = corridorHitTime(index);
-        if (timeMs >= hit) {
+        const markedAt = hit + PROMO_CORRIDOR.flashMs;
+        if (timeMs >= markedAt) {
           if (marks < cap) {
             const point = corridorProject(index, spawn.eventZ, frame.width, frame.height);
-            glass.release(point.x, point.y, index, performance.now() - Math.max(0, timeMs - hit));
+            glass.release(point.x, point.y, index, performance.now() - Math.max(0, timeMs - markedAt));
             marks += 1;
           }
           if (mode === 'pain' && timeMs > hit + PROMO_CORRIDOR.flashMs + PROMO_CORRIDOR.collapseMs) continue;
@@ -4136,7 +4138,7 @@
             lane.appendChild(tile);
             tiles.set(index, tile);
           }
-          if (!marked.has(index) && elapsed >= hit) {
+          if (!marked.has(index) && elapsed >= hit + PROMO_CORRIDOR.flashMs) {
             marked.add(index);
             const point = corridorProject(index, spawn.eventZ, frame.width, frame.height);
             glass.release(point.x, point.y, index, now);
