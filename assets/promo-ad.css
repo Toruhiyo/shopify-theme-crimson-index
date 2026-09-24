@@ -924,7 +924,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-opening.is-pain .promo-moments__card.is-pain-open {
   z-index: 6;
   --card-w: 300px;
-  --card-h: 460px;
+  --card-h: 416px;
   box-shadow:
     inset 0 1em 0 color-mix(in srgb, var(--ad-white) 80%, transparent),
     0 2em 6em color-mix(in srgb, var(--ad-ink) 4%, transparent),
@@ -3762,12 +3762,12 @@ html.is-promo-ready .promo-opening__boot {
   transform: none;
   border-radius: 0;
   opacity: 1;
-  filter: blur(96px);
+  filter: blur(84px);
   background: radial-gradient(
-    ellipse 148% 124% at 50% 46%,
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 46%, transparent),
-    color-mix(in srgb, var(--promo-clerk-glow, transparent) 18%, transparent) 52%,
-    transparent 84%
+    ellipse 112% 96% at 50% 46%,
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 30%, transparent),
+    color-mix(in srgb, var(--promo-clerk-glow, transparent) 10%, transparent) 50%,
+    transparent 76%
   );
 }
 
