@@ -634,14 +634,17 @@
   const PROMO_MOMENT_PICK_INDEX = 5;
   const PROMO_MOMENT_GO_INDEX = 0;
   const PROMO_MOMENT_OTHER_INDEX = 3;
-  const PROMO_COMPARE_SET = {
-    shape: 'sphere',
-    tints: { go: 'stone', pick: 'sand', other: 'grey' },
-  };
-  const PROMO_ACCESSORY_SHAPE = 'capsule';
+  const PROMO_COMPARE_TINT = 'stone';
+  const PROMO_COMPARE_SHAPES = { go: 'capsule', pick: 'sphere', other: 'rounded-cube' };
+  const PROMO_ACCESSORY_SHAPE = 'torus';
+  const PROMO_ACCESSORY_TINT = 'stone';
+  const PROMO_ACCESSORY_SCALE = 0.6;
+  const PROMO_SPHERE_SETTLE_PX = 6;
   const PROMO_TINT_FILE = {
-    sphere: { stone: 'sphere-b', sand: 'sphere-c', grey: 'sphere' },
-    capsule: { stone: 'capsule', sand: 'capsule-b', grey: 'capsule-c' },
+    sphere: { stone: 'sphere-b' },
+    capsule: { stone: 'capsule' },
+    'rounded-cube': { stone: 'rounded-cube' },
+    torus: { stone: 'torus-b' },
   };
   const PROMO_MOMENT_GRID_PITCH_X = 168;
   const PROMO_MOMENT_GRID_PITCH_Y = 208;
@@ -718,9 +721,9 @@
         scale: PROMO_CLAY_SCALES[Math.floor(rand() * PROMO_CLAY_SCALES.length)],
       });
     }
-    looks[PROMO_MOMENT_GO_INDEX] = lookForTint(PROMO_COMPARE_SET.shape, PROMO_COMPARE_SET.tints.go);
-    looks[PROMO_MOMENT_PICK_INDEX] = lookForTint(PROMO_COMPARE_SET.shape, PROMO_COMPARE_SET.tints.pick);
-    looks[PROMO_MOMENT_OTHER_INDEX] = lookForTint(PROMO_COMPARE_SET.shape, PROMO_COMPARE_SET.tints.other);
+    looks[PROMO_MOMENT_GO_INDEX] = lookForTint(PROMO_COMPARE_SHAPES.go, PROMO_COMPARE_TINT);
+    looks[PROMO_MOMENT_PICK_INDEX] = lookForTint(PROMO_COMPARE_SHAPES.pick, PROMO_COMPARE_TINT);
+    looks[PROMO_MOMENT_OTHER_INDEX] = lookForTint(PROMO_COMPARE_SHAPES.other, PROMO_COMPARE_TINT);
     return looks;
   }
 
@@ -735,8 +738,8 @@
     };
   }
 
-  function accessoryLook(pick) {
-    return lookForTint(PROMO_ACCESSORY_SHAPE, pick?.tint || PROMO_COMPARE_SET.tints.pick);
+  function accessoryLook() {
+    return lookForTint(PROMO_ACCESSORY_SHAPE, PROMO_ACCESSORY_TINT);
   }
 
   function applyClayLook(card, look) {
@@ -759,7 +762,9 @@
     cards.forEach((card, index) => applyClayLook(card, looks[index]));
     const extra = board.querySelector('.promo-moments__card.is-extra');
     const pick = looks[PROMO_MOMENT_PICK_INDEX];
-    if (extra && pick) applyClayLook(extra, accessoryLook(pick));
+    if (extra && pick) applyClayLook(extra, accessoryLook());
+    board.style.setProperty('--promo-accessory-scale', String(PROMO_ACCESSORY_SCALE));
+    board.style.setProperty('--promo-sphere-settle', `${PROMO_SPHERE_SETTLE_PX}px`);
     board.dataset.clayReady = '1';
   }
 

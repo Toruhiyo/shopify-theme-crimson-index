@@ -2000,14 +2000,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--ad-white) 80%, transparent),
     inset 0 -1px 0 color-mix(in srgb, var(--ad-ink) 4%, transparent),
-    0 0 0 3px var(--ad-line-strong),
-    0 14px 40px var(--ad-shadow);
+    0 0 0 3px var(--bizmis-primary),
+    0 14px 40px var(--bizmis-primary-glow);
 }
 
 .is-pose-grid.is-shortlist .promo-moments__card.is-go::after,
 .is-pose-grid.is-shortlist .promo-moments__card.is-pick::after,
 .is-pose-grid.is-shortlist .promo-moments__card.is-other::after {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 420ms var(--promo-spring);
 }
 
@@ -2245,14 +2245,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .promo-moments__board.is-pose-close .promo-moments__card.is-pick .promo-moments__add {
   position: absolute;
   left: 50%;
-  right: 220px;
+  right: auto;
   top: 61%;
   bottom: auto;
-  width: auto;
-  height: 58px;
+  width: 200px;
+  height: 50px;
   margin: 0;
-  border-radius: 16px;
-  font-size: 20px;
+  border-radius: 14px;
+  font-size: 17px;
 }
 
 .is-pose-doubt:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick {
@@ -2338,6 +2338,20 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 .is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph,
 .is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph {
   opacity: 1;
+}
+
+.is-pose-extra .promo-moments__card.is-extra .promo-moments__glyph img,
+.is-pose-bundle .promo-moments__card.is-extra .promo-moments__glyph img {
+  transform: scale(var(--promo-accessory-scale, 0.6));
+}
+
+.is-pose-extra .promo-moments__card.is-pick .promo-moments__glyph,
+.is-pose-bundle .promo-moments__card.is-pick .promo-moments__glyph {
+  transform: translateY(var(--promo-sphere-settle, 6px));
+}
+
+.is-pose-extra:not(.is-settled):not(.is-reduced) .promo-moments__card.is-pick .promo-moments__glyph {
+  animation: promo-moments-sphere-settle 420ms cubic-bezier(0.22, 1, 0.36, 1) 900ms both;
 }
 
 .is-pose-bundle .promo-moments__card.is-extra::after {
@@ -3161,6 +3175,11 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   }
 }
 
+@keyframes promo-moments-sphere-settle {
+  from { transform: translateY(0); }
+  to { transform: translateY(var(--promo-sphere-settle, 6px)); }
+}
+
 @keyframes promo-moments-addon-in {
   0% { opacity: 0; transform: translate3d(-50%, -36%, 0) scale(0.94); }
   100% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(1); }
@@ -3948,9 +3967,9 @@ html.is-promo-ready .promo-opening__boot {
   transform: none;
   border-radius: 0;
   opacity: 1;
-  filter: blur(84px);
+  filter: blur(56px);
   background: radial-gradient(
-    ellipse 112% 96% at 50% 46%,
+    ellipse 72% 58% at 50% 46%,
     color-mix(in srgb, var(--promo-clerk-glow, transparent) 30%, transparent),
     color-mix(in srgb, var(--promo-clerk-glow, transparent) 10%, transparent) 50%,
     transparent 76%
