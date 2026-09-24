@@ -782,7 +782,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   inset: 0;
   z-index: 6;
   overflow: hidden;
-  background: var(--ad-field);
+  background: var(--ad-white);
   color: var(--ad-ink);
   pointer-events: none;
   opacity: 1;
@@ -811,14 +811,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-scale__wall {
   position: absolute;
-  inset: 0;
+  inset: 24px;
   display: grid;
-  gap: 8px;
+  gap: 24px;
   grid-template-columns: repeat(var(--wall-n, 4), minmax(0, 1fr));
   grid-template-rows: repeat(var(--wall-n, 4), minmax(0, 1fr));
   transform: scale(var(--wall-scale, 1));
   transform-origin: 0 0;
-  background: var(--ad-field);
+  background: var(--ad-white);
 }
 
 .promo-scale__wall.is-one {
@@ -829,62 +829,122 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: absolute;
   left: 0;
   top: 0;
-  width: calc((100% - 24px) / 4);
-  height: calc((100% - 24px) / 4);
+  width: calc((100% - 72px) / 4);
+  height: calc((100% - 72px) / 4);
 }
 
 .promo-scale__tile {
   position: relative;
-  overflow: hidden;
-  background: var(--ad-field);
   min-width: 0;
   min-height: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--ad-line-strong);
+  border-radius: 12px;
+  background: var(--ad-white);
+  box-shadow: 0 8px 24px var(--ad-shadow);
+  transform-origin: center center;
 }
 
-.promo-scale__tile video {
-  display: block;
-  width: 100%;
+.promo-scale__window {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  background: var(--ad-field);
-}
-
-.promo-scale__dot {
-  position: absolute;
-  left: var(--dot-x, 4%);
-  top: var(--dot-y, 6%);
-  width: var(--dot-d, 2%);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--ad-red);
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(1.15);
-  pointer-events: none;
-}
-
-.promo-scale__dot::before,
-.promo-scale__dot::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 46%;
-  height: 8%;
-  border-radius: 1px;
+  padding: 6px;
+  overflow: hidden;
+  border-radius: 11px;
   background: var(--ad-white);
 }
 
-.promo-scale__dot::before {
-  transform: translate(-50%, -50%) rotate(45deg);
+.promo-scale__bar {
+  display: block;
+  flex: 0 0 7px;
+  width: 34%;
+  border-radius: 99px;
+  background: var(--ad-line);
 }
 
-.promo-scale__dot::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
+.promo-scale__stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.promo-scale__tile.is-red .promo-scale__dot {
-  opacity: 1;
+.promo-scale__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  height: 100%;
+}
+
+.promo-scale__card {
+  display: block;
+  border-radius: 2px;
+  background: var(--ad-surface);
+}
+
+.promo-scale__chat {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 42%;
+  height: 48%;
+  border-radius: 3px;
+  background: var(--ad-line);
+}
+
+.promo-scale__loss {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ad-ink-3);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.promo-scale__tile.is-lost {
+  border-color: var(--ad-red);
+  opacity: 0.4;
+  transform: scale(0.9);
+}
+
+.promo-scale__tile.is-lost .promo-scale__window {
+  filter: grayscale(1);
+}
+
+.promo-opening:not(.is-scale-still) .promo-scale__tile.is-lost {
+  animation: promo-scale-loss-fall var(--promo-loss-fall, 200ms) ease-in var(--promo-loss-flash, 80ms) both;
+}
+
+.promo-opening:not(.is-scale-still) .promo-scale__tile.is-lost .promo-scale__window {
+  animation: promo-scale-loss-grey var(--promo-loss-fall, 200ms) ease-in var(--promo-loss-flash, 80ms) both;
+}
+
+.promo-opening:not(.is-scale-still) .promo-scale__tile.is-lost .promo-scale__loss {
+  animation: promo-scale-dollar 300ms linear both;
+}
+
+@keyframes promo-scale-loss-fall {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0.4; transform: scale(0.9); }
+}
+
+@keyframes promo-scale-loss-grey {
+  from { filter: none; }
+  to { filter: grayscale(1); }
+}
+
+@keyframes promo-scale-dollar {
+  from { opacity: 1; transform: translate(-50%, -50%); }
+  to { opacity: 0; transform: translate(-50%, calc(-50% - 20px)); }
 }
 
 .promo-scale__verdict {
@@ -944,7 +1004,10 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 @media (prefers-reduced-motion: reduce) {
   .promo-opening.is-scale-zero .promo-scale__zero,
-  .promo-scale__wall {
+  .promo-scale__wall,
+  .promo-scale__tile,
+  .promo-scale__window,
+  .promo-scale__loss {
     animation: none;
     transition: none;
   }
