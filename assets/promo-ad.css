@@ -5108,19 +5108,8 @@ html.is-promo-cover .promo-cover,
   transition: opacity 200ms linear;
 }
 
-.promo-grid__cell.is-lost .promo-grid__mark,
-.promo-grid__cell.is-sold .promo-grid__mark {
-  opacity: 1;
-}
-
-.promo-grid__cell.is-lost .promo-grid__mark::before {
-  content: '×';
-  color: var(--ad-ink-3);
-}
-
-.promo-grid__cell.is-sold .promo-grid__mark::before {
-  content: '✓';
-  color: var(--bizmis-primary);
+.promo-grid__mark {
+  display: none;
 }
 
 .promo-grid__cart,

@@ -241,9 +241,9 @@
     gapRatio: 0.012,
     steps: [1, 2, 4, 8],
     devices: [
-      { id: 'desktop', ratio: 16 / 10, radius: 0 },
-      { id: 'phone', ratio: 9 / 19.5, radius: 0 },
-      { id: 'tablet', ratio: 4 / 3, radius: 0 },
+      { id: 'desktop', ratio: 16 / 10, frame: 800 },
+      { id: 'phone', ratio: 9 / 19.5, frame: 800 },
+      { id: 'tablet', ratio: 4 / 3, frame: 800 },
     ],
     variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
     burstMin: 4,
@@ -2015,22 +2015,12 @@
         const w = box.w * camera.s;
         const h = box.h * camera.s;
         if (x > width || y > height || x + w < 0 || y + h < 0) continue;
-        const radius = Math.min(device.radius * camera.s, w / 2, h / 2);
+        const radius = Math.min(gridMockupRadius(device, w), w / 2, h / 2);
         ctx.globalAlpha = wash;
         ctx.fillStyle = fill;
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, radius);
         ctx.fill();
-        if (h > 36) {
-          ctx.globalAlpha = wash * 0.4;
-          ctx.fillStyle = ink;
-          const dot = Math.max(1.5, h * 0.035);
-          for (let bit = 0; bit < 3; bit += 1) {
-            ctx.beginPath();
-            ctx.arc(x + w * (0.08 + bit * 0.045), y + h * 0.08, dot, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
         if (h > 28) {
           ctx.globalAlpha = 1;
           ctx.fillStyle = ink;
@@ -2079,6 +2069,12 @@
     const cellW = Math.round((frame.width - gap * (cols - 1)) / cols);
     const cellH = Math.round((frame.height - gap * (cols - 1)) / cols);
     return { cols, gap, cellW, cellH };
+  }
+
+  const PROMO_MOCKUP_RADIUS_PX = 32;
+
+  function gridMockupRadius(device, width) {
+    return width * (PROMO_MOCKUP_RADIUS_PX / device.frame);
   }
 
   function gridDeviceBox(device, cellW, cellH) {
@@ -4601,21 +4597,9 @@
       return motion;
     }
 
-    gridMark(device) {
-      const mark = document.createElement('span');
-      mark.className = 'promo-grid__mark';
-      device.append(mark);
-    }
-
     gridMountEnd(device) {
       const end = document.createElement('div');
       end.className = 'promo-grid__end';
-      const bar = document.createElement('div');
-      bar.className = 'promo-grid__end-bar';
-      for (let bit = 0; bit < 3; bit += 1) {
-        const dot = document.createElement('i');
-        bar.appendChild(dot);
-      }
       const glyph = document.createElement('span');
       glyph.className = 'promo-grid__end-glyph';
       glyph.innerHTML = `<span class="is-empty">${PROMO_END_EMPTY}</span><span class="is-sold">${PROMO_END_SOLD}</span>`;
@@ -4629,7 +4613,7 @@
         bit.style.setProperty('--ray', String(ray));
         burst.appendChild(bit);
       }
-      end.append(bar, burst, glyph, label);
+      end.append(burst, glyph, label);
       device.appendChild(end);
     }
 
@@ -4764,6 +4748,7 @@
         device.style.top = `${box.y}px`;
         device.style.width = `${box.w}px`;
         device.style.height = `${box.h}px`;
+        device.style.borderRadius = `${gridMockupRadius(deviceKind, box.w).toFixed(2)}px`;
         if (index === 0 && mode === 'pitch') {
           device.classList.add('is-lead');
           this.gridFillLeadStill(device);
@@ -4777,7 +4762,6 @@
           cell.classList.add(`is-${motion}`);
         }
         this.gridMountEnd(device);
-        this.gridMark(device);
         cell.appendChild(device);
         grid.appendChild(cell);
       }
