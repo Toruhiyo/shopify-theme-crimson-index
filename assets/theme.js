@@ -2454,7 +2454,7 @@
       viewport.appendChild(track);
       row.appendChild(viewport);
     }
-    appendSeeCta(row, track);
+    mountNakedCta(row);
     return track;
   }
 
@@ -2462,29 +2462,17 @@
     return PROMO_END_CTA[promoVideoConfig.cta] || null;
   }
 
-  function appendSeeCta(row, track) {
+  function mountNakedCta(row) {
     const copy = seeCtaCopy();
-    if (!track || !copy) return;
-    const slide = document.createElement('article');
-    slide.className = 'promo-opening__slide is-cta';
-    slide.dataset.store = 'cta';
-    const meta = document.createElement('header');
-    meta.className = 'promo-opening__slide-meta';
-    meta.setAttribute('aria-hidden', 'true');
-    const sector = document.createElement('p');
-    sector.className = 'promo-opening__slide-sector';
-    sector.textContent = '\u00a0';
-    const name = document.createElement('p');
-    name.className = 'promo-opening__slide-name';
-    name.textContent = '\u00a0';
-    meta.append(sector, name);
-    const card = document.createElement('div');
-    card.className = 'promo-opening__slide-card';
+    if (!row || !copy || promoVideoConfig.cta === 'demo') return;
+    if (row.querySelector('.promo-opening__naked-cta')) return;
+    const cta = document.createElement('div');
+    cta.className = 'promo-opening__naked-cta';
     if (copy.scarcity) {
       const note = document.createElement('p');
       note.className = 'promo-opening__see-note';
       note.textContent = copy.scarcity;
-      card.append(note);
+      cta.append(note);
     }
     const button = document.createElement('span');
     button.className = 'promo-opening__see-button';
@@ -2493,15 +2481,14 @@
     cursor.className = 'promo-opening__see-cursor';
     cursor.setAttribute('aria-hidden', 'true');
     cursor.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.2 19.2 12.1 11.6 13.4 8.8 20.6z"/></svg>';
-    card.append(button, cursor);
-    slide.append(meta, card);
-    track.appendChild(slide);
-    if (copy.url && row) {
+    cta.append(button, cursor);
+    if (copy.url) {
       const url = document.createElement('p');
       url.className = 'promo-opening__see-url';
       url.textContent = copy.url;
-      row.append(url);
+      cta.append(url);
     }
+    row.append(cta);
   }
 
   function hasPromoCover() {
@@ -3177,9 +3164,16 @@
     }
 
     snapSeeLanded() {
+      const stacked = promoVideoConfig.cta !== 'demo';
       this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed');
+      if (stacked) this.root.classList.add('is-see-stack');
       this.highlightStore(this.seeEndIndex(), true, true);
-      if (seeCtaCopy()) this.root.classList.add('is-cta-aim');
+      if (stacked && promoVideoConfig.cta !== 'none') {
+        this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
+          slide.classList.add('is-lift');
+        });
+        this.root.classList.add('is-see-cta', 'is-cta-aim');
+      }
       const store = this.stores[this.landIndex];
       if (store) promoWidget.applyStoreLook(store);
     }
@@ -3420,27 +3414,66 @@
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
 
+      const stacked = promoVideoConfig.cta !== 'demo';
       this.root.classList.add('is-see');
+      if (stacked) this.root.classList.add('is-see-stack');
       window.requestAnimationFrame(() => {
-        this.root.classList.add('is-see-in');
+        this.root.classList.add('is-see-in', 'is-see-docked', 'is-see-row');
       });
 
       window.setTimeout(() => {
-        this.root.classList.add('is-see-docked');
-      }, PROMO_SEE_HOLD_MS);
-
-      window.setTimeout(() => {
         this.glideClerkIntoRow();
+        if (stacked) {
+          this.playStoreStack(() => {
+            const hold = promoVideoConfig.cta === 'none' ? 1600 : PROMO_SEE_CTA_HOLD_MS;
+            if (promoVideoConfig.cta !== 'none') {
+              window.setTimeout(() => {
+                this.root.classList.add('is-cta-aim');
+              }, Math.max(0, hold - PROMO_SEE_CURSOR_MS));
+            }
+            window.setTimeout(() => this.depart(), hold);
+          });
+          return;
+        }
         this.playStoreGlide(() => {
-          const hold = PROMO_SEE_CTA_HOLD_MS;
-          if (seeCtaCopy()) {
-            window.setTimeout(() => {
-              this.root.classList.add('is-cta-aim');
-            }, Math.max(0, hold - PROMO_SEE_CURSOR_MS));
-          }
-          window.setTimeout(() => this.depart(), hold);
+          window.setTimeout(() => this.depart(), PROMO_SEE_CTA_HOLD_MS);
         });
-      }, PROMO_SEE_ROW_AT_MS);
+      }, 360);
+    }
+
+    playStoreStack(onDone) {
+      const slides = this.carouselTrack ? [...this.carouselTrack.children] : [];
+      if (!slides.length) {
+        onDone();
+        return;
+      }
+      const ask = promoVideoConfig.cta !== 'none';
+      const lookMs = 640;
+      const liftMs = 560;
+      slides.forEach((slide, index) => {
+        slide.style.zIndex = String(slides.length - index);
+      });
+      let index = 0;
+      const step = () => {
+        const store = this.stores[index];
+        if (store) this.arriveStore(store);
+        const last = index >= slides.length - 1;
+        window.setTimeout(() => {
+          if (last && !ask) {
+            onDone();
+            return;
+          }
+          slides[index].classList.add('is-lift');
+          index += 1;
+          if (index >= slides.length) {
+            this.root.classList.add('is-see-cta');
+            window.setTimeout(onDone, liftMs);
+            return;
+          }
+          window.setTimeout(step, liftMs);
+        }, lookMs);
+      };
+      step();
     }
 
     playStoreGlide(onDone) {
@@ -4719,11 +4752,32 @@
       const riseEase = 1 - (1 - rise) ** 3;
       const fade = Math.min(1, Math.max(0, (elapsed - fadeStart) / PROMO_GRID.resolveMs));
       const colors = this.gridPalette();
+      if (mode === 'pitch' && mark) {
+        const settle = Math.min(1, elapsed / 1100);
+        const ease = 1 - (1 - settle) ** 3;
+        const scale = 11 + (1 - 11) * ease;
+        verdict.style.opacity = '1';
+        hero.style.opacity = '1';
+        hero.style.transform = 'none';
+        mark.style.background = colors.primary;
+        mark.style.transformOrigin = 'center center';
+        mark.style.transform = `scale(${scale.toFixed(3)})`;
+        if (caption) {
+          caption.textContent = 'Built to sell.';
+          caption.style.opacity = String(Math.max(0, (ease - 0.74) / 0.26));
+        }
+        if (field) field.style.opacity = (1 - ease).toFixed(3);
+        if (ease >= 1 && !this.gridThudSent) {
+          this.gridThudSent = true;
+          this.emitThud();
+        }
+        return;
+      }
       verdict.style.opacity = String(riseEase);
       hero.style.opacity = '1';
       hero.style.transform = `translateY(${((1 - riseEase) * 18).toFixed(1)}px)`;
       if (zero) zero.style.color = fade > 0 ? gridMixWhite(colors.ink, fade) : '#fff';
-      if (mark) mark.style.background = fade > 0 ? gridMixWhite(colors.primary, fade) : '#fff';
+      if (mark) mark.style.background = '';
       if (caption) {
         caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
         caption.style.opacity = String(fade);
