@@ -394,6 +394,9 @@
   const PROMO_SEE_CTA_HOLD_MS = 4000;
   const PROMO_SEE_CURSOR_MS = 800;
   const PROMO_SEE_GLIDE_MS = 9800;
+  const PROMO_SEE_WAVE_RISE_MS = 320;
+  const PROMO_SEE_WAVE_HOLD_MS = 1040;
+  const PROMO_SEE_WAVE_FALL_MS = 520;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 9;
   const PROMO_SEE_STAIN_BODY_COUNT = 5;
@@ -1152,7 +1155,7 @@
     accessory.append(
       momentPhoto(PROMO_MOMENT_CARD_COUNT),
       momentMeta(PROMO_MOMENT_CARD_COUNT),
-      momentAdd({ label: 'Add to cart', done: 'Added to cart' }),
+      momentAdd({ label: 'Add to cart', done: 'Added' }),
     );
     board.appendChild(accessory);
     board.appendChild(momentCompare());
@@ -2456,6 +2459,19 @@
     return `#${channel(red)}${channel(green)}${channel(blue)}`;
   }
 
+  function waveSample(elapsed) {
+    const rise = PROMO_SEE_WAVE_RISE_MS;
+    const hold = PROMO_SEE_WAVE_HOLD_MS;
+    const fall = PROMO_SEE_WAVE_FALL_MS;
+    if (elapsed <= rise) {
+      const u = elapsed / rise;
+      return { amount: Math.sin(u * Math.PI / 2), travel: u * 0.5 };
+    }
+    if (elapsed <= rise + hold) return { amount: 1, travel: 0.5 };
+    const u = Math.min(1, (elapsed - rise - hold) / fall);
+    return { amount: Math.cos(u * Math.PI / 2), travel: 0.5 + u * 0.5 };
+  }
+
   function glideEase(linear) {
     const t = Math.min(1, Math.max(0, linear));
     return t * t * (3 - 2 * t);
@@ -3323,6 +3339,13 @@
       const stacked = promoVideoConfig.cta !== 'demo';
       this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed');
       if (stacked) this.root.classList.add('is-see-stack');
+      else {
+        this.root.classList.add('is-see-wave');
+        this.paintWave(this.landIndex, 1, 0.5);
+        const store = this.stores[this.landIndex];
+        if (store) promoWidget.applyStoreLook(store);
+        return;
+      }
       this.highlightStore(this.seeEndIndex(), true, true);
       if (stacked && promoVideoConfig.cta !== 'none') {
         this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
@@ -3573,6 +3596,7 @@
       const stacked = promoVideoConfig.cta !== 'demo';
       this.root.classList.add('is-see');
       if (stacked) this.root.classList.add('is-see-stack');
+      else this.root.classList.add('is-see-wave');
       window.requestAnimationFrame(() => {
         this.root.classList.add('is-see-in', 'is-see-docked', 'is-see-row');
       });
@@ -3591,8 +3615,8 @@
           });
           return;
         }
-        this.playStoreGlide(() => {
-          window.setTimeout(() => this.depart(), PROMO_SEE_CTA_HOLD_MS);
+        this.playStoreWave(() => {
+          window.setTimeout(() => this.depart(), 400);
         });
       }, 360);
     }
@@ -3630,6 +3654,65 @@
         }, lookMs);
       };
       step();
+    }
+
+    playStoreWave(onDone) {
+      const slides = this.carouselTrack
+        ? [...this.carouselTrack.querySelectorAll('.promo-opening__slide')]
+        : [];
+      if (!slides.length) {
+        onDone();
+        return;
+      }
+      this.stopGlide();
+      if (this.carouselTrack) {
+        this.carouselTrack.style.transition = 'none';
+        this.carouselTrack.style.transform = 'none';
+      }
+      const cycle = PROMO_SEE_WAVE_RISE_MS + PROMO_SEE_WAVE_HOLD_MS + PROMO_SEE_WAVE_FALL_MS;
+      const started = performance.now();
+      let shown = -1;
+      const frame = (now) => {
+        const elapsed = now - started;
+        if (elapsed >= cycle * slides.length) {
+          this.paintWave(-1, 0, 0);
+          this.glideFrame = 0;
+          onDone();
+          return;
+        }
+        const index = Math.min(slides.length - 1, Math.floor(elapsed / cycle));
+        const sample = waveSample(elapsed - index * cycle);
+        this.paintWave(index, sample.amount, sample.travel);
+        if (index !== shown) {
+          shown = index;
+          const store = this.stores[index];
+          if (store) this.arriveStore(store);
+        }
+        this.glideFrame = window.requestAnimationFrame(frame);
+      };
+      this.glideFrame = window.requestAnimationFrame(frame);
+    }
+
+    paintWave(index, amount, travel) {
+      const slides = this.carouselTrack
+        ? [...this.carouselTrack.querySelectorAll('.promo-opening__slide')]
+        : [];
+      const wave = Math.min(1, Math.max(0, amount));
+      this.root.style.setProperty('--see-wave', wave.toFixed(4));
+      slides.forEach((slide, slideIndex) => {
+        const on = slideIndex === index && wave > 0.01;
+        slide.classList.toggle('is-wave', on);
+        slide.style.opacity = on ? wave.toFixed(4) : '0';
+        slide.style.setProperty('--wave', on ? wave.toFixed(4) : '0');
+        slide.style.setProperty('--wave-x', on ? travel.toFixed(4) : '0.5');
+        slide.style.zIndex = on ? '2' : '1';
+        slide.style.transform = on ? `scale(${(0.94 + wave * 0.06).toFixed(4)})` : 'none';
+      });
+      const store = this.stores[index];
+      const glow = this.ensureClerkGlow();
+      if (!glow) return;
+      if (store) glow.style.setProperty('--promo-clerk-glow', store.accent || 'transparent');
+      glow.style.opacity = wave.toFixed(4);
     }
 
     playStoreGlide(onDone) {
@@ -5670,6 +5753,8 @@
         });
         if (phase !== 'hero') root.classList.add('is-see-docked', 'is-see-row');
         if (phase === 'landed') root.classList.add('is-see-landed');
+        const wave = promoVideoConfig.cta === 'demo';
+        if (wave && phase !== 'hero') root.classList.add('is-see-wave');
 
         const midIndex = Math.min(2, Math.max(0, this.stores.length - 1));
         const highlight = phase === 'hero'
@@ -5678,9 +5763,16 @@
             ? 0
             : phase === 'roulette'
               ? midIndex
-              : this.seeEndIndex();
-        if (highlight >= 0) this.highlightStore(highlight, phase === 'landed', true);
-        if (phase === 'landed' && seeCtaCopy()) root.classList.add('is-cta-aim');
+              : this.landIndex;
+        if (wave && highlight >= 0) {
+          const rising = phase === 'row';
+          this.paintWave(highlight, rising ? 0.35 : 1, rising ? 0.18 : 0.5);
+        } else if (highlight >= 0) {
+          this.highlightStore(highlight, phase === 'landed', true);
+        }
+        if (phase === 'landed' && !wave && promoVideoConfig.cta !== 'none' && seeCtaCopy()) {
+          root.classList.add('is-cta-aim');
+        }
 
         if (phase === 'hero') {
           root.classList.add('is-moments');
