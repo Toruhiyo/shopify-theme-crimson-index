@@ -4339,6 +4339,20 @@
       });
     }
 
+    whenGridClipsReady() {
+      const videos = [...this.root.querySelectorAll('.promo-grid__cell.is-in .promo-grid__clip')];
+      const pending = videos.filter((video) => video.readyState < 2);
+      if (!pending.length) return Promise.resolve();
+      return Promise.race([
+        Promise.all(pending.map((video) => new Promise((resolve) => {
+          const done = () => resolve();
+          video.addEventListener('loadeddata', done, { once: true });
+          video.addEventListener('error', done, { once: true });
+        }))),
+        waitMs(2500),
+      ]);
+    }
+
     syncGridClip(cell, playing) {
       const video = cell.querySelector('.promo-grid__clip');
       if (!video) return;
@@ -4703,7 +4717,10 @@
         'residue-100': 5200,
         'residue-full': 5200,
       };
-      if (gridAt[shot] != null) this.paintGridAt(gridAt[shot], mode);
+      if (gridAt[shot] != null) {
+        this.paintGridAt(gridAt[shot], mode);
+        await this.whenGridClipsReady();
+      }
       if (shot === 'white' || shot === 'end') this.root.classList.add('is-scale-white');
       if (shot === 'end') {
         this.setConveyorEnd(mode, ctaKey);
