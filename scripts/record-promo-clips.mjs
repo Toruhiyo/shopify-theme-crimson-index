@@ -15,6 +15,16 @@ const BASE_URL = process.env.PROMO_FRAMES_URL
 const FFMPEG = process.env.FFMPEG || '/tmp/ffmpeg-bin/ffmpeg';
 const FPS = 10;
 const FRAME_COUNT = 30;
+const MOMENTS = [
+  'moment-catalog-a',
+  'moment-catalog-b',
+  'moment-product-a',
+  'moment-product-b',
+  'moment-compare-a',
+  'moment-compare-b',
+  'moment-bundle-a',
+  'moment-bundle-b',
+];
 
 const DEVICES = {
   desktop: {
@@ -36,21 +46,36 @@ const DEVICES = {
 
 function clipsFor(device) {
   const spec = DEVICES[device];
+  const set = (process.env.PROMO_CLIP_SET || 'all').trim();
+  const onlyMotion = (process.env.PROMO_CLIP_MOTION || '').trim();
   const clips = [];
-  for (const tone of ['pain', 'pitch']) {
+  if (set !== 'moments') {
     for (const motion of spec.motions) {
       for (const chat of [false, true]) {
         clips.push({
-          key: `${tone}-${device}-${motion}-${chat ? '1' : '0'}`,
+          key: `pain-${device}-${motion}-${chat ? '1' : '0'}`,
           device,
           motion,
           chat,
-          tone,
+          tone: 'pain',
+          moment: false,
         });
       }
     }
   }
-  return clips;
+  if (set !== 'pain') {
+    for (const motion of MOMENTS) {
+      clips.push({
+        key: `pitch-${device}-${motion}-0`,
+        device,
+        motion,
+        chat: false,
+        tone: 'pitch',
+        moment: true,
+      });
+    }
+  }
+  return onlyMotion ? clips.filter((clip) => clip.motion === onlyMotion) : clips;
 }
 
 async function loadPlaywright() {
@@ -140,7 +165,18 @@ async function recordDevice(browser, device, themeJs) {
         try { anim.play(); } catch { /* already running */ }
       });
     }, clip);
-    await page.waitForTimeout(40);
+    if (clip.moment) {
+      await page.waitForFunction(() => {
+        const canvas = document.querySelector('#bizmis-avatar-embed canvas');
+        return !!(canvas && canvas.width > 32);
+      }, null, { timeout: 25000 }).catch(() => {});
+      await page.evaluate((next) => {
+        window.__promoOpeningFrames.showClip(next);
+      }, clip);
+      await page.waitForTimeout(1100);
+    } else {
+      await page.waitForTimeout(40);
+    }
     const frameMs = 1000 / FPS;
     for (let index = 0; index < FRAME_COUNT; index += 1) {
       const started = Date.now();
@@ -148,6 +184,7 @@ async function recordDevice(browser, device, themeJs) {
         path: path.join(frames, `frame-${String(index).padStart(2, '0')}.jpg`),
         type: 'jpeg',
         quality: 72,
+        timeout: 15000,
       });
       const remain = frameMs - (Date.now() - started);
       if (remain > 0) await page.waitForTimeout(remain);

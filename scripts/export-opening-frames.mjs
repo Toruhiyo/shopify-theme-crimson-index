@@ -89,7 +89,7 @@ const FRAMES = [
   ['16-see-stores', 'See for yourself. has left. Three store cards are fully on screen. Clerk stays in the moments seat, clear of the cards.', 2500],
   ['17-see-roulette', 'Carousel on a mid-list store. Side cards are fully visible. Clerk has morphed and has not moved seats.', 2500],
   ['18-see-meridian', 'Landed on Meridian. Name, sector, and both side cards are fully visible. Clerk stays clear of them.', 2500],
-  ['pitch-c-lane-1', 'Pitch grid. One window fills most of the frame. Clerk in the corner. No red.', 0],
+  ['pitch-c-lane-1', 'Pitch grid. One window fills most of the frame. The clip is a moments take with the clerk in it. No red.', 0],
   ['pitch-c-event', 'Pitch grid. That window freezes on Added to cart. Orange field, white cart, white burst, primary hairline.', 0],
   ['pitch-c-lanes-3', 'Pitch grid. Zoomed out to a 2 by 2 matrix. No red.', 0],
   ['pitch-c-lanes-5', 'Pitch grid. Zoomed out to a 4 by 4 matrix. No red.', 0],
@@ -297,6 +297,7 @@ async function main() {
     await page.screenshot({
       path: path.join(OUT_DIR, `${id}.png`),
       type: 'png',
+      timeout: 15000,
     });
     process.stdout.write(`wrote ${id}.png\n`);
   }

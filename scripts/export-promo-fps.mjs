@@ -127,7 +127,7 @@ async function main() {
     const state = await page.evaluate(filmState);
     if (state.departed && second > 0) break;
     const name = `t-${String(second).padStart(3, '0')}.png`;
-    await page.screenshot({ path: path.join(OUT_DIR, name), type: 'png' });
+    await page.screenshot({ path: path.join(OUT_DIR, name), type: 'png', timeout: 15000 });
     rows.push(`- \`${name}\`: ${state.clock || `${second}.000`}`);
     process.stdout.write(`wrote ${name} ${state.clock}\n`);
     if (state.departed) break;

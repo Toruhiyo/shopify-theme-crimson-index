@@ -231,19 +231,19 @@
     cols: 8,
     hero: 0.8,
     inset: 0.92,
-    easeMs: 700,
-    settleMs: 600,
+    easeMs: 900,
+    settleMs: 750,
     fadeMs: 250,
     statusMs: 200,
-    introMs: 1000,
-    holdMs: 900,
+    introMs: 1200,
+    holdMs: 1600,
     lostAt: 280,
     gapRatio: 0.012,
     steps: [1, 2, 4, 8],
     devices: [
-      { id: 'desktop', weight: 0.6, ratio: 16 / 10 },
-      { id: 'phone', weight: 0.3, ratio: 9 / 19.5 },
-      { id: 'tablet', weight: 0.1, ratio: 4 / 3 },
+      { id: 'desktop', weight: 0.6, ratio: 16 / 10, radius: 6 },
+      { id: 'phone', weight: 0.3, ratio: 9 / 19.5, radius: 11 },
+      { id: 'tablet', weight: 0.1, ratio: 4 / 3, radius: 8 },
     ],
     variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
     burstMin: 4,
@@ -251,7 +251,9 @@
     gapMin: 300,
     gapMax: 380,
     lostShare: 0.9,
-    rushMs: 1200,
+    rushMs: 2600,
+    rushEase: 1.55,
+    wash: 0.72,
     fieldMs: 300,
     shimmerMs: 600,
     riseMs: 400,
@@ -296,6 +298,25 @@
     tablet: ['scroll-up', 'scroll-down', 'product-read', 'product-scroll', 'compare'],
   };
   const PROMO_CLIP_MOTION_ALL = ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'];
+  const PROMO_PITCH_MOMENTS = [
+    'moment-catalog-a',
+    'moment-catalog-b',
+    'moment-product-a',
+    'moment-product-b',
+    'moment-compare-a',
+    'moment-compare-b',
+    'moment-bundle-a',
+    'moment-bundle-b',
+  ];
+  const PROMO_MOMENT_CLIP_POSE = {
+    catalog: 'grid',
+    product: 'close',
+    compare: 'choice',
+    bundle: 'bundle',
+  };
+  const PROMO_MOMENT_TAKE_HEROES = {
+    b: { go: 'cone', pick: 'cylinder', other: 'dome', extra: 'slab' },
+  };
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -902,6 +923,36 @@
     board.dataset.clayReady = '1';
   }
 
+  function momentTakeLook(kind) {
+    return {
+      kind,
+      turn: '0',
+      finish: 'matte',
+      scale: 1,
+      tint: clayTintOf(kind),
+      file: kind,
+    };
+  }
+
+  function applyMomentTake(board, take) {
+    const heroes = PROMO_MOMENT_TAKE_HEROES[take];
+    if (!board || !heroes) return;
+    const assign = (selector, kind) => {
+      const card = board.querySelector(selector);
+      if (card) applyClayLook(card, momentTakeLook(kind));
+    };
+    assign('.promo-moments__card.is-go', heroes.go);
+    assign('.promo-moments__card.is-pick', heroes.pick);
+    assign('.promo-moments__card.is-other', heroes.other);
+    assign('.promo-moments__card.is-extra', heroes.extra);
+    const drops = [...board.querySelectorAll('.promo-moments__card.is-drop .promo-moments__glyph img')];
+    const srcs = drops.map((img) => img.getAttribute('src') || '');
+    drops.forEach((img, index) => {
+      const next = srcs[(index + 3) % srcs.length];
+      if (next) img.src = next;
+    });
+  }
+
   function promoClayUrls() {
     if (promoClayUrls.cache) return promoClayUrls.cache;
     try {
@@ -1172,7 +1223,9 @@
     const gy0 = -stage.clientHeight / 2 + PROMO_CATALOG_PAD_Y + cardH / 2;
     const rowGap = PROMO_ROW_GAP;
     const rowInset = 28;
-    const rowBudget = contentWidth - PROMO_ROW_CLERK_LANE - rowInset;
+    const laneRaw = parseFloat(getComputedStyle(stage).getPropertyValue('--clip-clerk-lane'));
+    const clerkLane = Number.isFinite(laneRaw) && laneRaw > 40 ? laneRaw : PROMO_ROW_CLERK_LANE;
+    const rowBudget = contentWidth - clerkLane - rowInset;
     const rowCardW = (rowBudget - rowGap * 2) / 3;
     const rowCardH = Math.max(200, stage.clientHeight - 64 - PROMO_COMPARE_RESERVE);
     const rowSeat = rowCardW + rowGap;
@@ -1722,11 +1775,12 @@
     const motions = PROMO_CLIP_MOTIONS[device];
     const motionRaw = (promoBootParams.get('motion') || motions[0]).trim().toLowerCase();
     const toneRaw = (promoBootParams.get('tone') || 'pain').trim().toLowerCase();
+    const moment = PROMO_PITCH_MOMENTS.includes(motionRaw);
     return {
       device,
-      motion: motions.includes(motionRaw) ? motionRaw : motions[0],
+      motion: moment || motions.includes(motionRaw) ? motionRaw : motions[0],
       chat: promoBootParams.get('chat') === '1',
-      tone: toneRaw === 'pitch' ? 'pitch' : 'pain',
+      tone: moment || toneRaw === 'pitch' ? 'pitch' : 'pain',
     };
   }
 
@@ -1754,9 +1808,21 @@
     return sample.replace(/[^/?#]+\.png(\?[^#]*)?/, `promo-clip-${key}.mp4`);
   }
 
-  function gridMotionOf(index, deviceId) {
+  function gridMotionOf(index, deviceId, mode) {
+    if (mode === 'pitch') {
+      return PROMO_PITCH_MOMENTS[Math.floor(wallSeededUnit(index, 6) * PROMO_PITCH_MOMENTS.length)];
+    }
     const list = PROMO_CLIP_MOTIONS[deviceId] || PROMO_CLIP_MOTIONS.desktop;
     return list[Math.floor(wallSeededUnit(index, 6) * list.length)];
+  }
+
+  function momentClipParts(motion) {
+    const bits = String(motion || '').split('-');
+    if (bits[0] !== 'moment') return null;
+    const scene = bits[1];
+    const take = bits[2] || 'a';
+    if (!PROMO_MOMENT_CLIP_POSE[scene]) return null;
+    return { scene, take, pose: PROMO_MOMENT_CLIP_POSE[scene] };
   }
 
   function gridSpan() {
@@ -1774,7 +1840,8 @@
   function gridFieldStart() {
     const span = PROMO_GRID.texture - PROMO_GRID.steps[PROMO_GRID.steps.length - 1];
     const unit = (PROMO_GRID.fieldCount - PROMO_GRID.steps[PROMO_GRID.steps.length - 1]) / span;
-    return Math.round(Math.sqrt(Math.max(0, unit)) * PROMO_GRID.rushMs);
+    const ease = PROMO_GRID.rushEase;
+    return Math.round(Math.max(0, unit) ** (1 / ease) * PROMO_GRID.rushMs);
   }
 
   function gridShimmerEnd() {
@@ -1794,10 +1861,11 @@
     const from = PROMO_GRID.steps[PROMO_GRID.steps.length - 1];
     const span = PROMO_GRID.texture - from;
     const rushT = Math.min(1, Math.max(0, tailMs / PROMO_GRID.rushMs));
-    const eased = rushT * rushT;
+    const ease = PROMO_GRID.rushEase;
+    const eased = rushT ** ease;
     let count = from + span * eased;
     if (tailMs > PROMO_GRID.rushMs) {
-      const rate = (2 * span) / PROMO_GRID.rushMs;
+      const rate = (ease * span) / PROMO_GRID.rushMs;
       count += rate * (tailMs - PROMO_GRID.rushMs);
     }
     return count;
@@ -1880,9 +1948,10 @@
     const count = Math.max(1, Math.ceil(camera.count || 8));
     const { cellW, cellH, gap } = camera.metrics;
     const sold = mode === 'pitch';
-    const fill = sold ? gridMixWhite(colors.primary, 0.85) : PROMO_GRID.lostField;
+    const wash = PROMO_GRID.wash;
+    const fill = sold ? colors.primary : PROMO_GRID.lostField;
     const ink = sold ? '#fff' : gridRgba(colors.ink3, 0.6);
-    const hair = sold ? colors.primary : gridRgba(colors.red, 0.55);
+    const hair = sold ? colors.primary : gridRgba(colors.ink3, 0.45);
     ctx.lineWidth = 1;
     ctx.font = `500 ${Math.max(8, 12)}px ${colors.font}`;
     ctx.textAlign = 'center';
@@ -1899,11 +1968,14 @@
         const w = box.w * camera.s;
         const h = box.h * camera.s;
         if (x > width || y > height || x + w < 0 || y + h < 0) continue;
-        ctx.globalAlpha = sold ? 1 : 0.9;
+        const radius = Math.min(device.radius * camera.s, w / 2, h / 2);
+        ctx.globalAlpha = wash;
         ctx.fillStyle = fill;
-        ctx.fillRect(x, y, w, h);
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, radius);
+        ctx.fill();
         if (h > 36) {
-          ctx.globalAlpha = (sold ? 1 : 0.9) * 0.4;
+          ctx.globalAlpha = wash * 0.4;
           ctx.fillStyle = ink;
           const dot = Math.max(1.5, h * 0.035);
           for (let bit = 0; bit < 3; bit += 1) {
@@ -1912,16 +1984,20 @@
             ctx.fill();
           }
         }
-        ctx.globalAlpha = sold ? 1 : 0.9;
+        ctx.globalAlpha = sold ? 1 : 0.55;
         ctx.strokeStyle = hair;
-        ctx.strokeRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
+        ctx.beginPath();
+        ctx.roundRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1), radius);
+        ctx.stroke();
         if (h > 28) {
+          ctx.globalAlpha = 1;
           ctx.fillStyle = ink;
           ctx.strokeStyle = ink;
           const glyph = h * 0.4;
           drawGridCart(ctx, x + (w - glyph) / 2, y + (h - glyph) / 2 - h * 0.04, glyph, sold);
         }
         if (h > 56) {
+          ctx.globalAlpha = 1;
           ctx.fillStyle = ink;
           ctx.font = `500 ${Math.max(8, h * 0.07)}px ${colors.font}`;
           ctx.fillText(sold ? 'Added to cart' : 'Cart is empty', x + w / 2, y + h * 0.78);
@@ -2809,7 +2885,7 @@
       const stage = this.momentStage();
       void stage?.offsetWidth;
       const laid = stage?.querySelector('.promo-moments__board');
-      if (laid) {
+      if (laid && !this.root.classList.contains('is-clip-moment')) {
         delete laid.dataset.gridLaid;
         applyMomentPose(stage, 'grid', { instant: true });
       }
@@ -2823,13 +2899,17 @@
       const storeBox = store.getBoundingClientRect();
       const canvasBox = canvas.getBoundingClientRect();
       if (storeBox.width < 40 || canvasBox.width < 40) return;
-      const height = PROMO_AVATAR_BOX_H * PROMO_CLERK_CORNER_SCALE;
-      const right = canvasBox.right - (storeBox.right - PROMO_CLERK_CORNER_INSET_X);
-      const top = storeBox.bottom - PROMO_CLERK_CORNER_INSET_Y - height - canvasBox.top;
+      const clipMoment = this.root.classList.contains('is-clip-moment');
+      const scale = clipMoment ? (this.clipClerkScale || 0.72) : PROMO_CLERK_CORNER_SCALE;
+      const insetX = clipMoment ? 28 : PROMO_CLERK_CORNER_INSET_X;
+      const insetY = clipMoment ? 18 : PROMO_CLERK_CORNER_INSET_Y;
+      const height = PROMO_AVATAR_BOX_H * scale;
+      const right = canvasBox.right - (storeBox.right - insetX);
+      const top = storeBox.bottom - insetY - height - canvasBox.top;
       this.root.style.setProperty('--promo-clerk-top', `${top.toFixed(1)}px`);
       this.root.style.setProperty('--promo-clerk-right', `${right.toFixed(1)}px`);
       if (snap) {
-        embed.style.setProperty('--promo-avatar-scale', String(PROMO_CLERK_CORNER_SCALE));
+        embed.style.setProperty('--promo-avatar-scale', String(scale));
         embed.style.setProperty('--promo-avatar-lift', '0px');
         this.root.classList.add('is-clerk-corner');
         return;
@@ -4194,10 +4274,11 @@
         ...(overrides || {}),
       };
       const motions = PROMO_CLIP_MOTIONS[clip.device] || PROMO_CLIP_MOTIONS.desktop;
+      const moment = momentClipParts(clip.motion);
       if (!PROMO_CLIP_DEVICES.includes(clip.device)) clip.device = 'desktop';
-      if (!motions.includes(clip.motion)) clip.motion = motions[0];
-      clip.tone = clip.tone === 'pitch' ? 'pitch' : 'pain';
-      clip.chat = !!clip.chat;
+      if (!moment && !motions.includes(clip.motion)) clip.motion = motions[0];
+      clip.tone = moment || clip.tone === 'pitch' ? 'pitch' : 'pain';
+      clip.chat = !!clip.chat && !moment;
 
       document.documentElement.classList.add('is-promo-clip');
       document.getElementById('page-loader')?.setAttribute('hidden', '');
@@ -4229,12 +4310,15 @@
       }
 
       const store = this.painStore();
+      if (moment) {
+        this.showMomentClip(clip, moment);
+        return;
+      }
       if (clip.device === 'desktop') {
         if (store) store.style.visibility = '';
         if (clip.motion === 'product-read' || clip.motion === 'product-scroll' || clip.motion === 'compare') {
           this.mountClipProduct(store?.querySelector('.promo-opening__moments-stage'), clip);
         }
-        if (clip.tone === 'pitch' && clip.chat && store) this.mountClipClerk(store);
       } else if (store) {
         store.style.visibility = 'hidden';
         this.mountHandheldClip(clip);
@@ -4244,6 +4328,38 @@
       this.root.dataset.clipMotion = clip.motion;
       this.root.dataset.clipTone = clip.tone;
       this.root.dataset.clipChat = clip.chat ? '1' : '0';
+      this.root.setAttribute('data-promo-clip-ready', '1');
+    }
+
+    showMomentClip(clip, moment) {
+      document.documentElement.classList.add('is-promo-pitch', 'is-clip-moment', 'is-promo-clerk');
+      document.documentElement.style.setProperty('--ad-warmth', '1');
+      this.root.classList.add('is-pitch', 'is-moments', 'is-clip-moment');
+      this.root.classList.remove('is-pain-loop', 'is-tone-pain');
+      this.root.querySelector('[data-promo-clip]')?.remove();
+      this.root.querySelectorAll('.promo-clip__clerk, .promo-grid__clerk').forEach((node) => node.remove());
+      const store = this.painStore();
+      if (store) store.style.visibility = '';
+      const stage = this.momentStage();
+      const board = stage?.querySelector('.promo-moments__board');
+      if (board) {
+        delete board.dataset.clayReady;
+        delete board.dataset.gridLaid;
+      }
+      promoWidget.applyStoreLook(this.bizmisLook());
+      this.parkWidget();
+      this.clipClerkScale = clip.device === 'phone' ? 0.46 : clip.device === 'tablet' ? 0.58 : 0.72;
+      if (stage) {
+        applyMomentPose(stage, moment.pose, { instant: false });
+        applyMomentTake(stage.querySelector('.promo-moments__board'), moment.take);
+      }
+      this.seatClerkInStore(true);
+      const gesture = moment.scene === 'catalog' ? 'waving' : 'nod';
+      window.setTimeout(() => setOpeningAvatarAction(gesture), 400);
+      this.root.dataset.clipDevice = clip.device;
+      this.root.dataset.clipMotion = clip.motion;
+      this.root.dataset.clipTone = 'pitch';
+      this.root.dataset.clipChat = '0';
       this.root.setAttribute('data-promo-clip-ready', '1');
     }
 
@@ -4366,7 +4482,6 @@
           screen.appendChild(clone);
         }
       }
-      if (clip.chat && clip.tone === 'pitch') this.mountClipClerk(screen);
       const home = document.createElement('span');
       home.className = 'promo-clip__home';
       bezel.append(this.clipStatus(clip.device), this.clipStoreBar(), screen, home);
@@ -4424,8 +4539,8 @@
     }
 
     gridFillClip(device, index, deviceId, mode) {
-      const motion = gridMotionOf(index, deviceId);
-      const chat = wallSeededUnit(index, 11) < 0.62;
+      const motion = gridMotionOf(index, deviceId, mode);
+      const chat = mode === 'pitch' ? false : wallSeededUnit(index, 11) < 0.62;
       const video = document.createElement('video');
       video.className = 'promo-grid__clip';
       video.muted = true;
@@ -4611,7 +4726,7 @@
         device.style.top = `${box.y}px`;
         device.style.width = `${box.w}px`;
         device.style.height = `${box.h}px`;
-        if (index === 0 && lead) {
+        if (index === 0 && lead && mode !== 'pitch') {
           device.classList.add('is-lead');
           this.gridFillLead(device, lead, box);
           cell.classList.add('is-lead');
@@ -4621,12 +4736,7 @@
         }
         this.gridMountEnd(device);
         this.gridMark(device);
-        if (index === 0) device.querySelector('.promo-grid__cart')?.remove();
-        if (index === 0 && mode === 'pitch') {
-          const clerk = document.createElement('span');
-          clerk.className = 'promo-grid__clerk';
-          device.appendChild(clerk);
-        }
+        if (index === 0 && mode !== 'pitch') device.querySelector('.promo-grid__cart')?.remove();
         cell.appendChild(device);
         grid.appendChild(cell);
       }
@@ -4656,7 +4766,7 @@
           opacity = inside ? 1 : 0;
           marked = inside;
         }
-        const shown = marked && mode !== 'pitch' ? opacity * 0.9 : opacity;
+        const shown = opacity;
         cell.style.opacity = shown.toFixed(3);
         cell.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
         cell.classList.toggle('is-in', opacity > 0.01);
