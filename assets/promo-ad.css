@@ -5238,9 +5238,23 @@ html.is-promo-cover .promo-cover,
   --device-ambient: 26%;
 }
 
+.promo-grid,
+.promo-grid__field {
+  --ad-warmth: 1;
+  --ad-surface: color-mix(in oklab, #F6F6F6, #F6F4F1 calc(var(--ad-warmth) * 100%));
+  --ad-ink-3: color-mix(in oklab, #969696, #9A948B calc(var(--ad-warmth) * 100%));
+}
+
 .promo-grid .promo-device {
-  -webkit-backdrop-filter: blur(calc(32px * var(--u))) saturate(1.7);
-  backdrop-filter: blur(calc(32px * var(--u))) saturate(1.7);
+  background: var(--ad-surface);
+  border-color: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.promo-grid .promo-device::after {
+  content: none;
 }
 
 .promo-opening.is-clip .promo-device::after {
@@ -5377,47 +5391,41 @@ html.is-promo-cover .promo-cover,
   opacity: 1;
 }
 
-.promo-grid__cell.is-lost .promo-grid__end {
-  background: color-mix(in srgb, #d7dbe2 18%, transparent);
-}
-
-.promo-grid__cell.is-lost .promo-grid__clip,
-.promo-grid__cell.is-lost .promo-grid__lead-still,
-.promo-grid__cell.is-lost .promo-grid__screen {
-  filter: grayscale(0.7);
-}
-
-.promo-grid__cell.is-lost [data-promo-pain-chat] {
-  opacity: 0.4;
+.promo-grid__cell.is-lost .promo-grid__device > :not(.promo-grid__end) {
+  filter: saturate(0);
+  opacity: 0.55;
 }
 
 .promo-grid__stamp {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 80%;
+  width: 78%;
   margin: 0;
-  transform: translate(-50%, -50%) rotate(-12deg) scale(1.4);
+  transform: translate(-50%, -50%) rotate(-12deg) scale(1.25);
   transform-origin: center center;
   font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 11.5cqw;
+  font-weight: 600;
+  font-size: 16cqw;
   line-height: 0.9;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.04em;
   text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
-  color: transparent;
-  -webkit-text-stroke: 2px color-mix(in srgb, var(--ad-ink-3) 80%, transparent);
+  color: color-mix(in srgb, var(--ad-ink-3) 70%, transparent);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  background: none;
   opacity: 0;
 }
 
 .promo-grid__cell.is-sold .promo-grid__stamp {
-  font-size: 20cqw;
-  letter-spacing: 0.18em;
-  color: var(--bizmis-primary);
-  -webkit-text-stroke: 2px #fff;
-  paint-order: stroke fill;
+  width: auto;
+  max-width: 78%;
+  padding: 0.14em 0.28em;
+  border-radius: 0.08em;
+  color: var(--ad-white);
+  background: var(--bizmis-primary);
 }
 
 .promo-grid__stamp .is-sold-word {
@@ -5475,7 +5483,7 @@ html.is-promo-cover .promo-cover,
 }
 
 @keyframes promo-stamp-press {
-  from { opacity: 0.65; transform: translate(-50%, -50%) rotate(-12deg) scale(1.4); }
+  from { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1.25); }
   to { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
 }
 
@@ -5504,12 +5512,14 @@ html.is-promo-cover .promo-cover,
 
 .promo-grid__field {
   z-index: 4;
-  background: #F4F4F6;
+  background: var(--ad-surface);
+  filter: saturate(0);
   opacity: 0;
 }
 
 .promo-grid__field.is-pitch {
   background: var(--bizmis-primary);
+  filter: none;
 }
 
 .promo-grid__cart {
