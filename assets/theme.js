@@ -1949,67 +1949,118 @@
     const screenH = 100;
     const gap = 10;
     const pitch = screenH + gap;
-    const rowWidth = PROMO_GRID.fieldCount * pitch - gap;
+    const inset = PROMO_GRID.inset;
+    const aspect = 16 / 9;
+    const view = PROMO_GRID.fieldCount * pitch;
+    const visibleH = view / inset;
+    const visibleW = visibleH * aspect;
+    const fieldW = visibleW + pitch * 3;
+    const fieldH = visibleH + pitch * 3;
     const devices = PROMO_GRID.devices;
     const items = [];
     const byKey = new Map();
-    const rowItems = [[]];
-    let x = 0;
-    let y = 0;
-    let rowIndex = 0;
-    let indexInRow = 0;
-    const count = PROMO_GRID.fieldCount * 22;
-    for (let n = 0; n < count; n += 1) {
-      const pick = (col, row, left, above) => {
-        if (col === 0 && row === 0) return devices[0];
-        const slot = gridSlot(col, row, 4, devices.length, (index) => (
-          (left && devices[index].id === left.id) || (above && devices[index].id === above.id)
+    const rows = [];
+    const rowCount = Math.ceil(fieldH / pitch) + 1;
+    let index = 0;
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+      const stagger = (rowIndex * 67) % pitch;
+      const line = [];
+      let x = stagger - pitch;
+      let col = 0;
+      while (x < fieldW + pitch) {
+        const prev = line[line.length - 1];
+        const aboveLine = rowIndex > 0 ? rows[rowIndex - 1] : null;
+        const above = aboveLine?.find((item) => item.x < x + screenH && item.x + item.w > x) || null;
+        const slot = gridSlot(col, rowIndex, 4, devices.length, (choice) => (
+          (prev && devices[choice].id === prev.device.id) || (above && devices[choice].id === above.device.id)
         ));
-        return devices[slot];
-      };
-      let left = indexInRow > 0 ? rowItems[rowIndex][indexInRow - 1].device : null;
-      let above = rowIndex > 0
-        ? rowItems[rowIndex - 1].find((item) => item.x < x + screenH && item.x + item.w > x)?.device || null
-        : null;
-      let device = pick(indexInRow, rowIndex, left, above);
-      let w = screenH * device.ratio;
-      if (indexInRow > 0 && x + w > rowWidth + 0.5) {
-        rowIndex += 1;
-        indexInRow = 0;
-        x = 0;
-        y += pitch;
-        rowItems[rowIndex] = [];
-        left = null;
-        above = rowItems[rowIndex - 1].find((item) => item.x < screenH && item.x + item.w > 0)?.device
-          || rowItems[rowIndex - 1][0].device;
-        device = pick(0, rowIndex, left, above);
-        w = screenH * device.ratio;
+        const device = devices[slot];
+        const w = screenH * device.ratio;
+        const item = {
+          index,
+          col,
+          row: rowIndex,
+          device,
+          x,
+          y: rowIndex * pitch,
+          w,
+          h: screenH,
+          lead: false,
+          dom: false,
+        };
+        line.push(item);
+        items.push(item);
+        byKey.set(`${col},${rowIndex}`, item);
+        x += w + gap;
+        col += 1;
+        index += 1;
       }
-      const item = { index: n, col: indexInRow, row: rowIndex, device, x, y, w, h: screenH };
-      rowItems[rowIndex].push(item);
-      items.push(item);
-      byKey.set(`${indexInRow},${rowIndex}`, item);
-      x += w + gap;
-      indexInRow += 1;
+      rows.push(line);
     }
+    const cx = fieldW / 2;
+    const cy = fieldH / 2;
+    let hero = items[0];
+    let best = Infinity;
+    items.forEach((item) => {
+      const dist = Math.hypot((item.x + item.w / 2) - cx, (item.y + item.h / 2) - cy);
+      if (dist < best) {
+        best = dist;
+        hero = item;
+      }
+    });
+    const desktop = devices[0];
+    const desktopW = screenH * desktop.ratio;
+    const widen = desktopW - hero.w;
+    hero.device = desktop;
+    hero.w = desktopW;
+    hero.lead = true;
+    rows[hero.row].forEach((item) => {
+      if (item.x > hero.x) item.x += widen;
+    });
+    const hx = hero.x + hero.w / 2;
+    const hy = hero.y + hero.h / 2;
+    const ranked = items
+      .map((item) => ({
+        item,
+        dist: Math.max(Math.abs(item.x + item.w / 2 - hx), Math.abs(item.y + item.h / 2 - hy)),
+      }))
+      .sort((a, b) => a.dist - b.dist);
+    ranked.slice(0, 72).forEach(({ item }) => {
+      item.dom = true;
+    });
+    hero.dom = true;
     gridFlexCache = {
       gap,
       screenH,
       pitch,
-      rowWidth,
+      fieldW,
+      fieldH,
       items,
       byKey,
-      domCount: PROMO_GRID.cols * PROMO_GRID.cols,
+      hero,
     };
     return gridFlexCache;
+  }
+
+  function gridItemEnterCount(item) {
+    const layout = gridFlexLayout();
+    if (!item || item.lead) return 1;
+    const hx = layout.hero.x + layout.hero.w / 2;
+    const hy = layout.hero.y + layout.hero.h / 2;
+    const dx = Math.abs(item.x + item.w / 2 - hx);
+    const dy = Math.abs(item.y + item.h / 2 - hy);
+    const inset = PROMO_GRID.inset;
+    const aspect = 16 / 9;
+    const countH = dy * 2 * inset / layout.pitch;
+    const countW = dx * 2 * inset / layout.pitch / aspect;
+    return Math.max(1.01, countH, countW);
   }
 
   function gridStampAt(col, row) {
     const layout = gridFlexLayout();
     const item = layout.byKey.get(`${col},${row}`);
-    if (!item || item.index === 0) return PROMO_GRID.stampDwell;
-    const need = Math.max(item.x + item.w * 0.5, item.y + item.h * 0.5);
-    const count = Math.max(1.01, need / layout.pitch);
+    if (!item || item.lead) return PROMO_GRID.stampDwell;
+    const count = gridItemEnterCount(item);
     const stagger = wallSeededUnit(item.row * 17 + item.col, 19) * PROMO_GRID.stampSpread;
     return gridTimeForCount(count) + PROMO_GRID.stampDwell + stagger;
   }
@@ -2112,7 +2163,7 @@
     const now = camera.timeMs || 0;
     const handoff = camera.handoff || 0;
     layout.items.forEach((item) => {
-      const alpha = item.index < layout.domCount ? handoff : 1;
+      const alpha = item.dom ? handoff : 1;
       if (alpha < 0.02) return;
       const x = camera.x + item.x * camera.s;
       const y = camera.y + item.y * camera.s;
@@ -2221,7 +2272,7 @@
 
   function gridPose(count, frame) {
     const layout = gridFlexLayout();
-    const first = layout.items[0];
+    const first = layout.hero;
     const heroScale = (frame.width * PROMO_GRID.hero) / Math.max(1, first.w);
     const hero = {
       s: heroScale,
@@ -2231,10 +2282,12 @@
     const blockOf = (size) => {
       const view = size * layout.pitch;
       const s = Math.min(frame.width / view, frame.height / view) * PROMO_GRID.inset;
+      const hx = first.x + first.w / 2;
+      const hy = first.y + first.h / 2;
       return {
         s,
-        x: (frame.width - view * s) / 2,
-        y: (frame.height - view * s) / 2,
+        x: frame.width / 2 - hx * s,
+        y: frame.height / 2 - hy * s,
       };
     };
     let pose = hero;
@@ -4890,7 +4943,7 @@
       grid.dataset.mode = mode;
       grid.dataset.frameW = String(frame.width);
       const lead = this.gridLeadNode(mode);
-      layout.items.slice(0, layout.domCount).forEach((item) => {
+      layout.items.filter((item) => item.dom).forEach((item) => {
         const cell = document.createElement('div');
         cell.className = 'promo-grid__cell';
         cell.dataset.index = String(item.index);
@@ -4907,11 +4960,11 @@
         device.style.width = '100%';
         device.style.height = '100%';
         device.style.borderRadius = `${gridMockupRadius(item.device, item.w).toFixed(2)}px`;
-        if (item.index === 0 && mode === 'pitch') {
+        if (item.lead && mode === 'pitch') {
           device.classList.add('is-lead');
           this.gridFillLeadStill(device);
           cell.classList.add('is-lead');
-        } else if (item.index === 0 && lead) {
+        } else if (item.lead && lead) {
           device.classList.add('is-lead');
           this.gridFillLead(device, lead, { x: 0, y: 0, w: item.w, h: item.h });
           cell.classList.add('is-lead');
@@ -4955,8 +5008,7 @@
         const onScreen = opacity > 0.55;
         let marked = onScreen && timeMs >= gridStampAt(col, row);
         if (options.reduced && item) {
-          const enter = Math.max(item.x + item.w * 0.5, item.y + item.h * 0.5) / layout.pitch;
-          opacity = enter <= 4 ? 1 : 0;
+          opacity = gridItemEnterCount(item) <= 4 ? 1 : 0;
           marked = opacity > 0;
         }
         cell.style.opacity = opacity.toFixed(3);
@@ -4974,11 +5026,22 @@
       if (thud && !options.reduced && !this.root.classList.contains('is-scale-still')) this.emitThud();
       const layers = this.ensureGridLayers(grid.parentElement);
       const field = camera.field || 0;
-      const viewBottom = -camera.y / Math.max(0.05, camera.s) + frame.height / Math.max(0.05, camera.s);
-      const domLast = layout.items[layout.domCount - 1];
-      const extension = viewBottom > domLast.y + domLast.h;
+      const span = Math.max(0.05, camera.s);
+      const viewLeft = -camera.x / span;
+      const viewTop = -camera.y / span;
+      const viewRight = viewLeft + frame.width / span;
+      const viewBottom = viewTop + frame.height / span;
+      const extension = layout.items.some((item) => (
+        !item.dom
+        && item.x < viewRight
+        && item.x + item.w > viewLeft
+        && item.y < viewBottom
+        && item.y + item.h > viewTop
+      ));
       grid.style.opacity = pastGrid ? (1 - handoff).toFixed(3) : '1';
-      layers.texture.style.opacity = (extension || handoff > 0.02) ? ((1 - field) * (options.reduced ? 0 : 1)).toFixed(3) : '0';
+      layers.texture.style.opacity = (extension || handoff > 0.02) && !options.reduced
+        ? (1 - field).toFixed(3)
+        : '0';
       if (camera.phase !== 'resolve') layers.field.style.opacity = field.toFixed(3);
       layers.field.classList.toggle('is-pitch', mode === 'pitch');
       if ((extension || handoff > 0.02) && field < 0.98 && !options.reduced) {
