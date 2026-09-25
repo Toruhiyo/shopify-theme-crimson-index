@@ -4466,6 +4466,8 @@
       this.resetScaleScene();
       this.prepareScaleScene();
       if (mode === 'pitch') {
+        document.documentElement.classList.remove('is-promo-depart', 'is-promo-pitch');
+        this.resetSee();
         this.root.classList.remove('is-pitch');
         this.openPainStage();
         this.applyPainBeat('answer-2', true);
