@@ -57,6 +57,15 @@ async function serveLocalTheme(page) {
     }
     await route.fulfill({ path: file, contentType: 'video/mp4' });
   });
+  await page.route('**/promo-still-*.jpg*', async (route) => {
+    const name = route.request().url().split('/').pop().split('?')[0];
+    const file = path.join(THEME_ROOT, 'assets', name);
+    if (!fs.existsSync(file)) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({ path: file, contentType: 'image/jpeg' });
+  });
   await page.route('**/promo-pitch-grid-lead.jpg*', async (route) => {
     const file = path.join(THEME_ROOT, 'assets/promo-pitch-grid-lead.jpg');
     if (!fs.existsSync(file)) {
@@ -92,10 +101,12 @@ async function unlockStorefront(page) {
 function filmState() {
   const root = document.querySelector('.promo-opening');
   const clock = document.querySelector('[data-promo-clock]');
+  const probe = typeof window.__promoGlideProbe === 'function' ? window.__promoGlideProbe() : null;
   return {
     ready: document.documentElement.classList.contains('is-promo-ready'),
     departed: document.documentElement.classList.contains('is-promo-depart') || !root,
     clock: clock?.textContent || '',
+    probe,
   };
 }
 
@@ -136,7 +147,11 @@ async function main() {
     if (state.departed && second > 0) break;
     const name = `t-${String(second).padStart(3, '0')}.png`;
     await page.screenshot({ path: path.join(OUT_DIR, name), type: 'png', timeout: 15000 });
-    rows.push(`- \`${name}\`: ${state.clock || `${second}.000`}`);
+    const probe = state.probe;
+    const probeText = probe && probe.mode
+      ? ` | glide ${probe.mode} ${probe.phase} coverage=${probe.coverage} near=${probe.nearCellWidth} events=${probe.activeEvents}`
+      : '';
+    rows.push(`- \`${name}\`: ${state.clock || `${second}.000`}${probeText}`);
     process.stdout.write(`wrote ${name} ${state.clock}\n`);
     if (state.departed) break;
   }

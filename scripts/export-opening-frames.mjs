@@ -34,15 +34,15 @@ const FRAMES = [
   ['pain-b-answer-1', 'Pain, dull chatbot. Collection answer with View collection and Size guide. Grid and cart unchanged.', 0],
   ['pain-b-typed-2', 'Pain, dull chatbot. Input reads: Which one would you pick for me?', 0],
   ['pain-b-answer-2', 'Pain, dull chatbot. Ticket answer with Open a ticket and No, thanks. The store is still full size.', 0],
-  ['pain-c-lane-1', 'Pain grid. One window sits at the top left, inside a 6% margin. The page is still moving. No stamp yet.', 0],
-  ['pain-c-event', 'Pain grid. NO SALE has pressed in. Semibold, no outline. The page is desaturated to 55% on the warm surface.', 0],
-  ['pain-c-lanes-3', 'Pain grid, continuous zoom. Windows flow right and down from the first one. Only a window that fully fits is visible. The first window is stamped.', 0],
-  ['pain-c-lanes-5', 'Pain grid, continuous zoom. Phones and tablets sit on the shared bottom of each row. Stamps land only after a window fully fits.', 0],
-  ['pain-c-lanes-7', 'Pain grid, continuous zoom. Stamped windows read NO SALE. Nothing is cut off at the frame edge. The pull has not stepped.', 0],
-  ['pain-c-texture', 'Pain grid. The pull is still moving. Fully fitted windows only, desaturated on the warm surface, each stamped NO SALE.', 0],
-  ['pain-c-white', 'Pain grid. The mosaic has fallen into the warm surface. That surface gives way to the close-up of the zero.', 0],
-  ['pain-c-resolve', 'Pain grid. The zero and Sold by the chatbot. pull back together from the close-up.', 0],
-  ['pain-c-end', 'Pain grid end frame. White field. The zero and Sold by the chatbot. have settled at the same scale.', 0],
+  ['pain-c-lane-1', 'Pain glide. The store window is laying down into a tilted plane of devices. The plane already runs off every edge.', 0],
+  ['pain-c-event', 'Pain glide. A window poofs: it shrinks, fades, and throws a grey puff. The gap stays. No stamp and no red.', 0],
+  ['pain-c-lanes-3', 'Pain glide. The camera is sliding diagonally. Near windows play, farther ones are stills. Phones and tablets share the row bottom.', 0],
+  ['pain-c-lanes-5', 'Pain glide, faster. More windows have poofed and the plane is thinning. Cell size has not changed.', 0],
+  ['pain-c-lanes-7', 'Pain glide. The plane is streaking. Windows keep poofing. No edge of the plane is in frame.', 0],
+  ['pain-c-texture', 'Pain glide. Directional blur, then the plane starts dissolving into the warm grey surface.', 0],
+  ['pain-c-white', 'Pain glide. The plane is gone. The frame is the warm surface, about to fade to white.', 0],
+  ['pain-c-resolve', 'Pain end. The surface fades to white and the line rises: It replies. It doesn\'t sell.', 0],
+  ['pain-c-end', 'Pain end frame. White field. The line It replies. It doesn\'t sell. No zero.', 0],
   ['01-toggle-rest', 'Store at rest. Small Bizmis toggle, knob off.', 40],
   ['02-toggle-on', 'Knob on. Label goes orange: Agentic sales.', 40],
   ['02b-toggle-gone', 'Typical chatbot and the toggle are gone. Agentic sales is centered at its original size. It has not started scaling.', 40],
@@ -85,22 +85,22 @@ const FRAMES = [
   ['14f1-moments-contract', 'Wrap-up. The store is fading and the dot is forming where the products were.', 0],
   ['14f2-moments-dot', 'Wrap-up. The dot is reaching the clerk.', 0],
   ['14f3-moments-nod', 'Wrap-up, settled. Stage is empty. Clerk nods.', 0],
-  ['15-see-yourself', 'sell. is gone. No See for yourself. Demo is about to play one store at a time. Other variants stack the cards.', 0],
-  ['16-see-stores', 'Demo: the first store is rising, light still low. Other variants: the stack is on screen. No See for yourself line.', 2500],
-  ['17-see-roulette', 'Demo: one store at the light peak, card and title large. Other variants: the front card is lifting off the stack.', 2500],
+  ['15-see-yourself', 'sell. is gone. No See for yourself. Every variant is about to play one store at a time.', 0],
+  ['16-see-stores', 'The first store is rising. Ambient store-color light and particles are just starting. The photo itself is untouched. No See for yourself line.', 2500],
+  ['17-see-roulette', 'One store at the light peak. Card and title are large. Store-color light and particles are spread. The photo has no lighting filter.', 2500],
   ['18-see-meridian', 'Demo: Meridian at full light, no button. Early access and install end on the ask with no card: the line, the drawn button, the URL when the variant has one. Cursor rests on the button.', 2500],
-  ['pitch-c-lane-1', 'Pitch grid. One window sits at the top left, inside a 6% margin. It is the last moments frame, the bundle with the clerk, not a different clip. No red.', 0],
-  ['pitch-c-event', 'Pitch grid. SOLD has pressed in, orange fill, white type, same size as NO SALE. The page stays warm at full strength. Clerk and cart stay in the picture.', 0],
-  ['pitch-c-lanes-3', 'Pitch grid, continuous zoom. Windows flow right and down from the first one. Only a window that fully fits is visible. The first window is stamped SOLD.', 0],
-  ['pitch-c-lanes-5', 'Pitch grid, continuous zoom. Phones and tablets sit on the shared bottom of each row. Stamps land only after a window fully fits.', 0],
-  ['pitch-c-lanes-7', 'Pitch grid, continuous zoom. Stamped windows read SOLD. Nothing is cut off at the frame edge.', 0],
-  ['pitch-c-texture', 'Pitch grid. The pull is still moving, past 8 by 8, into a warm mosaic of SOLD stamps.', 0],
-  ['pitch-c-white', 'Pitch grid. The mosaic has fallen into a flat Bizmis orange field. That orange is the close-up of the orange logo.', 0],
-  ['pitch-c-resolve', 'Pitch grid. The orange logo and Built to sell. pull back together from the close-up onto white.', 0],
-  ['pitch-c-end-demo', 'Pitch grid resolve. Orange mark on white, and Built to sell. No button. The stores are the demo.', 0],
-  ['pitch-c-end-install', 'Pitch grid resolve. Orange mark on white, and Built to sell. No button. The ask comes after the card stack.', 0],
-  ['pitch-c-end-ea', 'Pitch grid resolve. Orange mark on white, and Built to sell. No button. The ask comes after the card stack.', 0],
-  ['pitch-c-end-none', 'Pitch grid resolve. Orange mark on white, and Built to sell. No button.', 0],
+  ['pitch-c-lane-1', 'Pitch glide. The bundle picture is laying down into a tilted plane. The clerk stays in that window. No red.', 0],
+  ['pitch-c-event', 'Pitch glide. A window blooms orange from the cart, with a short white burst. No words. The clerk and the cart stay in the picture.', 0],
+  ['pitch-c-lanes-3', 'Pitch glide. The camera slides diagonally. Near windows play, farther ones are stills. Blooms are spreading.', 0],
+  ['pitch-c-lanes-5', 'Pitch glide, faster. Most windows in the middle have settled into a soft orange wash. Cell size has not changed.', 0],
+  ['pitch-c-lanes-7', 'Pitch glide. The plane is streaking and the blooms read as one warm field. No edge of the plane is in frame.', 0],
+  ['pitch-c-texture', 'Pitch glide. Directional blur, then the plane starts dissolving into Bizmis orange.', 0],
+  ['pitch-c-white', 'Pitch glide. The plane is gone. The orange field is a close-up of the orange logo.', 0],
+  ['pitch-c-resolve', 'Pitch end. The orange logo and Built to sell. pull back together from the close-up onto white.', 0],
+  ['pitch-c-end-demo', 'Pitch end. Orange mark on white, and Built to sell. No button. The stores are the demo.', 0],
+  ['pitch-c-end-install', 'Pitch end. Orange mark on white, and Built to sell. No button. The ask comes after the store wave.', 0],
+  ['pitch-c-end-ea', 'Pitch end. Orange mark on white, and Built to sell. No button. The ask comes after the store wave.', 0],
+  ['pitch-c-end-none', 'Pitch end. Orange mark on white, and Built to sell. No button.', 0],
 ];
 
 async function loadPlaywright() {
@@ -197,6 +197,15 @@ async function serveExportAssets(page) {
       return;
     }
     await route.fulfill({ path: file, contentType: 'video/mp4' });
+  });
+  await page.route('**/promo-still-*.jpg*', async (route) => {
+    const name = route.request().url().split('/').pop().split('?')[0];
+    const file = path.join(THEME_ROOT, 'assets', name);
+    if (!fs.existsSync(file)) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({ path: file, contentType: 'image/jpeg' });
   });
   await page.route('**/promo-pitch-grid-lead.jpg*', async (route) => {
     const file = path.join(THEME_ROOT, 'assets/promo-pitch-grid-lead.jpg');

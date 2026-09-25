@@ -40,7 +40,7 @@ html.is-promo-opening.is-promo-depart body > * {
 
 html.is-promo-cover,
 html.is-promo-cover body {
-  background: var(--bizmis-primary) !important;
+  background: var(--color-primary, #D1001A) !important;
 }
 
 
@@ -1321,6 +1321,21 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-end-pitch .promo-scale__mark {
   display: block;
+}
+
+.promo-opening.is-end-pain .promo-scale__zero,
+.promo-opening.is-end-pain .promo-scale__mark,
+.promo-opening.is-end-pain .promo-scale__end-hero {
+  display: none;
+}
+
+.promo-opening.is-end-pain .promo-scale__sold {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight, 600);
+  font-size: clamp(40px, 4.6vw, 64px);
+  letter-spacing: -0.03em;
+  color: var(--ad-ink);
 }
 
 .promo-scale__sold {
@@ -4487,40 +4502,70 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   letter-spacing: 0.16em;
 }
 
-.promo-opening.is-see-wave .promo-opening__slide-card {
-  box-shadow:
-    0 0 calc(90px * var(--wave, 0)) color-mix(in srgb, var(--promo-store-accent) calc(var(--wave, 0) * 62%), transparent),
-    0 30px 70px color-mix(in srgb, var(--ad-ink) 12%, transparent);
+.promo-opening.is-see-wave .promo-opening__stores {
+  position: relative;
 }
 
-.promo-opening.is-see-wave .promo-opening__slide-card::after {
-  content: "";
+.promo-opening.is-see-wave .promo-opening__carousel {
+  position: relative;
+  z-index: 1;
+}
+
+.promo-opening__wave-field {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  inset: -14% -6% -16%;
+  z-index: 0;
   pointer-events: none;
-  background: linear-gradient(
-    104deg,
-    transparent 8%,
-    color-mix(in srgb, white calc(var(--wave, 0) * 78%), transparent) 48%,
-    transparent 74%
-  );
-  transform: translateX(calc((var(--wave-x, 0.5) - 0.5) * 80%));
-  mix-blend-mode: soft-light;
+  opacity: 0;
 }
 
-.promo-opening.is-see-wave .promo-opening__slide-glow {
-  opacity: var(--wave, 0);
+.promo-opening.is-see-wave .promo-opening__wave-field {
+  opacity: 1;
+}
+
+.promo-opening__wave-ambient {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 140%;
+  height: 130%;
+  border-radius: 50%;
   background: radial-gradient(
-    circle at 50% 40%,
-    color-mix(in srgb, var(--promo-store-accent) calc(var(--wave, 0) * 85%), white),
-    transparent 68%
+    circle,
+    color-mix(in srgb, var(--promo-store-accent, #888) 78%, white) 0%,
+    color-mix(in srgb, var(--promo-store-accent, #888) 34%, transparent) 42%,
+    transparent 70%
   );
-  filter: blur(10px);
+  filter: blur(42px);
+  opacity: calc(var(--see-wave, 0));
+  transform: translate(-50%, -50%) scale(calc(0.55 + var(--see-travel, 0) * 0.9));
 }
 
+.promo-opening__wave-mote {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: var(--mote, 6px);
+  height: var(--mote, 6px);
+  margin-left: calc(var(--mote, 6px) / -2);
+  margin-top: calc(var(--mote, 6px) / -2);
+  border-radius: 50%;
+  background: var(--promo-store-accent, #888);
+  box-shadow: 0 0 14px var(--promo-store-accent, #888);
+  opacity: calc(var(--see-wave, 0) * 0.92);
+  transform: translate(
+    calc((var(--mx) - 0.5) * var(--see-travel, 0) * 1400px),
+    calc((var(--my) - 0.58) * var(--see-travel, 0) * 1100px)
+  );
+}
+
+.promo-opening.is-see-wave .promo-opening__slide-card {
+  box-shadow: 0 22px 48px color-mix(in srgb, var(--ad-ink) 10%, transparent);
+}
+
+.promo-opening.is-see-wave .promo-opening__slide-glow,
 .promo-opening.is-see-wave .promo-opening__slide-hero {
-  filter: brightness(calc(0.55 + var(--wave, 0) * 0.85)) saturate(calc(0.8 + var(--wave, 0) * 0.45));
+  filter: none;
 }
 
 .promo-opening.is-see-wave.is-see-row .promo-opening__clerk-glow {
@@ -4549,12 +4594,14 @@ html.is-promo-opening.is-promo-depart .promo-opening {
   position: relative;
 }
 
-.promo-opening.is-see-stack .promo-opening__naked-cta .promo-opening__see-cursor {
+.promo-opening.is-see-stack .promo-opening__naked-cta .promo-opening__see-cursor,
+.promo-opening.is-see-wave .promo-opening__naked-cta .promo-opening__see-cursor {
   left: calc(50% - 6.5rem);
   top: calc(50% + 0.4rem);
 }
 
-.promo-opening.is-see-stack.is-cta-aim .promo-opening__naked-cta .promo-opening__see-cursor {
+.promo-opening.is-see-stack.is-cta-aim .promo-opening__naked-cta .promo-opening__see-cursor,
+.promo-opening.is-see-wave.is-cta-aim .promo-opening__naked-cta .promo-opening__see-cursor {
   left: calc(50% + 2.4rem);
   top: calc(50% + 1.1rem);
   opacity: 1;
@@ -5119,7 +5166,7 @@ html.is-promo-opening.is-promo-pitch .bizmis-caption-word {
   z-index: 100000;
   align-items: center;
   justify-content: center;
-  background: var(--bizmis-primary);
+  background: var(--color-primary, #D1001A);
   pointer-events: none;
 }
 
@@ -5463,91 +5510,6 @@ html.is-promo-cover .promo-cover,
   opacity: 1;
 }
 
-.promo-grid__stamp {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 78%;
-  margin: 0;
-  padding: 0.08em 0;
-  box-sizing: border-box;
-  transform: translate(-50%, -50%) rotate(-12deg) scale(1.25);
-  transform-origin: center center;
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 17cqw;
-  line-height: 0.9;
-  letter-spacing: 0.04em;
-  text-align: center;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: color-mix(in srgb, var(--ad-ink-3) 70%, transparent);
-  background: none;
-  text-shadow: none;
-  -webkit-text-stroke: 0;
-  opacity: 0;
-}
-
-.promo-grid__cell.is-sold .promo-grid__stamp {
-  color: #fff;
-  background: var(--bizmis-primary);
-  -webkit-text-stroke: 0;
-}
-
-.promo-grid__stamp .is-sold-word {
-  display: none;
-}
-
-.promo-grid__cell.is-sold .promo-grid__stamp .is-lost-word {
-  display: none;
-}
-
-.promo-grid__cell.is-sold .promo-grid__stamp .is-sold-word {
-  display: inline;
-}
-
-.promo-grid__cell.is-lost .promo-grid__stamp,
-.promo-grid__cell.is-sold .promo-grid__stamp {
-  animation: promo-stamp-press 120ms ease-in both;
-}
-
-.promo-grid__stamp-ring {
-  display: none;
-}
-
-.promo-grid__cell.is-sold .promo-grid__stamp-ring {
-  border-color: color-mix(in srgb, #fff 70%, transparent);
-}
-
-.promo-grid__cell.is-lost .promo-grid__stamp-ring,
-.promo-grid__cell.is-sold .promo-grid__stamp-ring {
-  animation: promo-stamp-ring 200ms ease-out both;
-}
-
-.promo-opening.is-scale-still .promo-grid__stamp,
-.promo-opening.is-scale-still .promo-grid__stamp-ring {
-  animation: none;
-}
-
-.promo-opening.is-scale-still .promo-grid__cell.is-lost .promo-grid__stamp,
-.promo-opening.is-scale-still .promo-grid__cell.is-sold .promo-grid__stamp {
-  opacity: 1;
-  transform: translate(-50%, -50%) rotate(-12deg) scale(1);
-}
-
-.promo-opening.is-scale-still .promo-grid__stamp-ring {
-  opacity: 0;
-}
-
-@keyframes promo-stamp-press {
-  from { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1.25); }
-  to { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
-}
-
-@keyframes promo-stamp-ring {
-  from { opacity: 0.5; transform: translate(-50%, -50%) rotate(-12deg) scale(0.82); }
-  to { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1.4); }
-}
 
 .promo-grid__lead-still {
   object-fit: cover;
@@ -6340,5 +6302,185 @@ html.is-promo-clip.is-clip-moment #bizmis-avatar-embed {
 @keyframes promo-clip-compare-down {
   0%, 34% { transform: translateY(0); }
   66%, 100% { transform: translateY(108.4%); }
+}
+
+.promo-glide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.promo-glide.is-pain .promo-glide__sheet {
+  filter: saturate(0);
+}
+
+.promo-glide__streak,
+.promo-glide__level,
+.promo-glide__world,
+.promo-glide__tilt,
+.promo-glide__sheet {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.promo-glide__cell {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  background: var(--ad-surface);
+  transform-origin: 0 0;
+}
+
+.promo-glide__cell.is-dusting {
+  overflow: visible;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.promo-glide__cell.is-dusting::after {
+  opacity: var(--card-left, 0);
+}
+
+.promo-glide__still,
+.promo-glide__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+}
+
+.promo-glide__bloom,
+.promo-glide__rays,
+.promo-glide__poof {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.promo-glide__bloom {
+  z-index: 3;
+  opacity: 0;
+  background: radial-gradient(
+    circle at var(--bloom-x, 90%) var(--bloom-y, 16%),
+    #fff 0%,
+    var(--bizmis-primary) 16%,
+    color-mix(in srgb, var(--bizmis-primary) 78%, transparent) calc(var(--bloom, 0) * 92%),
+    transparent calc(18% + var(--bloom, 0) * 90%)
+  );
+}
+
+.promo-glide__bloom.is-settled {
+  background:
+    radial-gradient(circle at var(--bloom-x, 90%) var(--bloom-y, 16%), #fff 0%, var(--bizmis-primary) 22%, transparent 58%),
+    linear-gradient(155deg, color-mix(in srgb, var(--bizmis-primary) 86%, white) 0%, color-mix(in srgb, var(--bizmis-primary) 48%, transparent) 78%);
+}
+
+.promo-glide__rays {
+  z-index: 4;
+  opacity: 0;
+}
+
+.promo-glide__rays i {
+  position: absolute;
+  left: var(--bloom-x, 90%);
+  top: var(--bloom-y, 16%);
+  width: 5px;
+  height: 78%;
+  margin-left: -2.5px;
+  background: linear-gradient(to bottom, #fff 0%, var(--bizmis-primary) 28%, transparent 100%);
+  transform-origin: center top;
+  transform: rotate(calc(var(--ray) * 45deg)) scaleY(calc(0.2 + var(--burst, 0) * 1.45));
+}
+
+.promo-glide__poof {
+  z-index: 6;
+  overflow: visible;
+}
+
+.promo-glide__dust {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 78%;
+  height: 78%;
+  margin: -39% 0 0 -39%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(214, 208, 200, 0.95) 0%, rgba(176, 168, 158, 0.55) 38%, transparent 70%);
+  filter: blur(5px);
+}
+
+.promo-glide__speck {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: var(--speck, 6px);
+  height: var(--speck, 6px);
+  margin-left: calc(var(--speck, 6px) / -2);
+  margin-top: calc(var(--speck, 6px) / -2);
+  border-radius: 50%;
+  background: #b7b1aa;
+}
+
+.promo-glide__speck.is-mote {
+  filter: blur(1.4px);
+  opacity: 0.8;
+}
+
+.promo-glide__light,
+.promo-glide__dof,
+.promo-glide__field,
+.promo-glide__lead {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.promo-glide__light {
+  background: radial-gradient(ellipse at 50% 74%, rgba(255, 248, 240, 0.34), transparent 46%);
+  mix-blend-mode: soft-light;
+}
+
+.promo-glide__dof-mid {
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 26%, transparent 62%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 26%, transparent 62%);
+}
+
+.promo-glide__dof-far {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 40%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 40%);
+}
+
+.promo-glide__field {
+  opacity: 0;
+  background: var(--ad-surface);
+}
+
+.promo-glide.is-pitch .promo-glide__field {
+  background: var(--bizmis-primary);
+}
+
+.promo-glide__lead {
+  inset: auto;
+  overflow: hidden;
+  border-radius: 32px;
+  z-index: 3;
+}
+
+.promo-glide__lead img,
+.promo-glide__lead .promo-opening__store {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 

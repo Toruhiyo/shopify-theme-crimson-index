@@ -303,6 +303,407 @@
   const PROMO_CONVEYOR_MID_MS = 4500;
   const PROMO_CONVEYOR_STILL_MS = PROMO_CORRIDOR.stillSec;
   const PROMO_WALL_SEED = 40721;
+  const PROMO_GLIDE = {
+    tilt: 28,
+    yaw: -8,
+    perspective: 1600,
+    cellScale: 0.3,
+    baseH: 100,
+    layDownMs: 900,
+    rampMs: 5000,
+    speedFrom: 60,
+    speedTo: 2400,
+    liveRows: 2,
+    liveMaxSpeed: 600,
+    blurStart: 0.72,
+    blurMax: 24,
+    poofMs: 480,
+    dustMs: 360,
+    bloomMs: 680,
+    burstMs: 520,
+    dissolveMs: 800,
+    fieldHoldMs: 1000,
+    resolveMs: 1100,
+    endHoldMs: 1000,
+    pool: 140,
+    dirX: 0.34,
+    dirY: 0.94,
+    stepMs: 80,
+  };
+  const GLIDE_CART = {
+    desktop: { x: 0.9, y: 0.16 },
+    tablet: { x: 0.88, y: 0.14 },
+    phone: { x: 0.82, y: 0.07 },
+  };
+  const GLIDE_PAIN_LINE = "It replies. It doesn't sell.";
+  const glideRows = new Map();
+  let glideEventCache = { key: '', list: [] };
+
+  function glidePlayEnd() {
+    return PROMO_GLIDE.layDownMs
+      + PROMO_GLIDE.rampMs
+      + PROMO_GLIDE.dissolveMs
+      + PROMO_GLIDE.fieldHoldMs
+      + PROMO_GLIDE.resolveMs
+      + PROMO_GLIDE.endHoldMs;
+  }
+
+  function glidePhase(timeMs) {
+    const fieldAt = PROMO_GLIDE.layDownMs + PROMO_GLIDE.rampMs;
+    const endAt = fieldAt + PROMO_GLIDE.dissolveMs + PROMO_GLIDE.fieldHoldMs;
+    if (timeMs < PROMO_GLIDE.layDownMs) return 'laydown';
+    if (timeMs < fieldAt) return 'glide';
+    if (timeMs < endAt) return 'field';
+    return 'end';
+  }
+
+  function glideTilt() {
+    return PROMO_GLIDE.tilt * Math.PI / 180;
+  }
+
+  function glideYaw() {
+    return PROMO_GLIDE.yaw * Math.PI / 180;
+  }
+
+  function glideProject(localX, localY) {
+    const yaw = glideYaw();
+    const tilt = glideTilt();
+    const x1 = localX * Math.cos(yaw) - localY * Math.sin(yaw);
+    const y1 = localX * Math.sin(yaw) + localY * Math.cos(yaw);
+    const y2 = y1 * Math.cos(tilt);
+    const z2 = y1 * Math.sin(tilt);
+    const depth = Math.max(80, PROMO_GLIDE.perspective - z2);
+    const scale = PROMO_GLIDE.perspective / depth;
+    return { x: x1 * scale, y: y2 * scale, scale };
+  }
+
+  function glideUnproject(screenX, screenY) {
+    const yaw = glideYaw();
+    const tilt = glideTilt();
+    const cosT = Math.cos(tilt);
+    const sinT = Math.sin(tilt);
+    const denom = PROMO_GLIDE.perspective * cosT + screenY * sinT;
+    const y1 = denom === 0 ? 0 : (screenY * PROMO_GLIDE.perspective) / denom;
+    const z2 = y1 * sinT;
+    const scale = PROMO_GLIDE.perspective / Math.max(80, PROMO_GLIDE.perspective - z2);
+    const x1 = screenX / scale;
+    const cosY = Math.cos(yaw);
+    const sinY = Math.sin(yaw);
+    return {
+      x: x1 * cosY + y1 * sinY,
+      y: -x1 * sinY + y1 * cosY,
+    };
+  }
+
+  function glideBlurAngle() {
+    const len = Math.hypot(PROMO_GLIDE.dirX, PROMO_GLIDE.dirY) || 1;
+    const step = 48;
+    const moved = glideProject(
+      -PROMO_GLIDE.dirX / len * step,
+      -PROMO_GLIDE.dirY / len * step,
+    );
+    return Math.atan2(moved.y, moved.x) * 180 / Math.PI;
+  }
+
+  function glideUnit(frame) {
+    const local = glideUnproject(0, frame.height * 0.46);
+    const scale = Math.max(0.2, glideProject(local.x, local.y).scale);
+    const desktopW = PROMO_GLIDE.baseH * (16 / 10);
+    return (frame.width * PROMO_GLIDE.cellScale) / (desktopW * scale);
+  }
+
+  function glideSpeed(glideMs) {
+    const u = Math.min(1, Math.max(0, glideMs / PROMO_GLIDE.rampMs));
+    return PROMO_GLIDE.speedFrom + (PROMO_GLIDE.speedTo - PROMO_GLIDE.speedFrom) * u * u;
+  }
+
+  function glideDistance(glideMs) {
+    const span = PROMO_GLIDE.rampMs;
+    const from = PROMO_GLIDE.speedFrom;
+    const to = PROMO_GLIDE.speedTo;
+    const elapsed = Math.max(0, glideMs);
+    if (elapsed >= span) {
+      const ramp = from * span + (to - from) * span / 3;
+      return (ramp + to * (elapsed - span)) / 1000;
+    }
+    const u = elapsed / span;
+    return (from * elapsed + (to - from) * elapsed * u * u / 3) / 1000;
+  }
+
+  function glideCamera(timeMs) {
+    const glideMs = Math.max(0, timeMs - PROMO_GLIDE.layDownMs);
+    const dist = glideDistance(glideMs);
+    const len = Math.hypot(PROMO_GLIDE.dirX, PROMO_GLIDE.dirY) || 1;
+    return {
+      x: dist * PROMO_GLIDE.dirX / len,
+      y: dist * PROMO_GLIDE.dirY / len,
+      speed: timeMs < PROMO_GLIDE.layDownMs ? 0 : glideSpeed(glideMs),
+    };
+  }
+
+  function glideSpec(id) {
+    const devices = PROMO_GRID.devices;
+    const desktop = devices[0];
+    const device = devices.find((item) => item.id === id) || desktop;
+    const desktopW = PROMO_GLIDE.baseH * desktop.ratio;
+    const w = desktopW * (PROMO_GRID.deviceWidth[id] || 1);
+    return { id, device, w, h: w / device.ratio };
+  }
+
+  function glidePitch() {
+    return PROMO_GLIDE.baseH * (1 + PROMO_GRID.flowGap);
+  }
+
+  function glideDeviceId(row, col, neighborA, neighborB) {
+    if (row === 0 && col === 0) return 'desktop';
+    const roll = wallSeededUnit(row * 17 + col * 13 + 400, 29);
+    const mix = PROMO_GRID.deviceMix;
+    let id = 'desktop';
+    if (roll < mix.phone) id = 'phone';
+    else if (roll < mix.phone + mix.tablet) id = 'tablet';
+    if (id === 'phone' && neighborA === 'phone' && neighborB === 'phone') id = 'tablet';
+    return id;
+  }
+
+  function glideEnsureRow(row, minX, maxX) {
+    let line = glideRows.get(row);
+    if (!line) {
+      line = { cells: [], minCol: 0, maxCol: -1, left: 0, right: 0 };
+      glideRows.set(row, line);
+    }
+    const gap = PROMO_GLIDE.baseH * PROMO_GRID.flowGap;
+    let guard = 0;
+    while (line.right < maxX && guard < 200) {
+      const col = line.maxCol + 1;
+      const prev = line.cells[line.cells.length - 1];
+      const prev2 = line.cells[line.cells.length - 2];
+      const id = glideDeviceId(row, col, prev?.id, prev2?.id);
+      const spec = glideSpec(id);
+      const cell = {
+        id,
+        device: spec.device,
+        w: spec.w,
+        h: spec.h,
+        x: line.right,
+        y: row * glidePitch() + (PROMO_GLIDE.baseH - spec.h),
+        col,
+        row,
+        key: `${row}:${col}`,
+      };
+      line.cells.push(cell);
+      line.right += spec.w + gap;
+      line.maxCol = col;
+      guard += 1;
+    }
+    guard = 0;
+    while (line.left > minX && guard < 200) {
+      const col = line.minCol - 1;
+      const id = glideDeviceId(row, col, line.cells[0]?.id, line.cells[1]?.id);
+      const spec = glideSpec(id);
+      line.left -= spec.w + gap;
+      line.cells.unshift({
+        id,
+        device: spec.device,
+        w: spec.w,
+        h: spec.h,
+        x: line.left,
+        y: row * glidePitch() + (PROMO_GLIDE.baseH - spec.h),
+        col,
+        row,
+        key: `${row}:${col}`,
+      });
+      line.minCol = col;
+      guard += 1;
+    }
+    return line;
+  }
+
+  function glideSpan(timeMs, frame) {
+    const cam = glideCamera(timeMs);
+    const unit = glideUnit(frame);
+    const padX = frame.width * 0.12;
+    const padY = frame.height * 0.12;
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    [-1, -0.5, 0, 0.5, 1].forEach((sx) => [-1, -0.5, 0, 0.5, 1].forEach((sy) => {
+      const local = glideUnproject(sx * (frame.width / 2 + padX), sy * (frame.height / 2 + padY));
+      const x = (local.x + cam.x) / unit;
+      const y = (local.y + cam.y) / unit;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }));
+    const extraX = (maxX - minX) * 0.08;
+    const extraY = (maxY - minY) * 0.08;
+    return {
+      minX: minX - extraX,
+      maxX: maxX + extraX,
+      minY: minY - extraY,
+      maxY: maxY + extraY,
+      cam,
+      unit,
+    };
+  }
+
+  function glideCells(timeMs, frame) {
+    const span = glideSpan(timeMs, frame);
+    const pitch = glidePitch();
+    const row0 = Math.floor(span.minY / pitch) - 1;
+    const row1 = Math.floor(span.maxY / pitch) + 1;
+    const cells = [];
+    for (let row = row0; row <= row1; row += 1) {
+      const line = glideEnsureRow(row, span.minX - 40, span.maxX + 40);
+      line.cells.forEach((cell) => {
+        if (cell.x + cell.w < span.minX || cell.x > span.maxX) return;
+        if (cell.y + cell.h < span.minY || cell.y > span.maxY) return;
+        cells.push(cell);
+      });
+    }
+    return { cells, span, pitch };
+  }
+
+  function glideCellScreen(cell, cam, unit, frame) {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    [[0, 0], [cell.w, 0], [cell.w, cell.h], [0, cell.h]].forEach(([x, y]) => {
+      const point = glideProject((cell.x + x) * unit - cam.x, (cell.y + y) * unit - cam.y);
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+    });
+    return {
+      x: frame.width / 2 + minX,
+      y: frame.height / 2 + minY,
+      w: Math.max(1, maxX - minX),
+      h: Math.max(1, maxY - minY),
+      cx: frame.width / 2 + (minX + maxX) / 2,
+      cy: frame.height / 2 + (minY + maxY) / 2,
+    };
+  }
+
+  function glideLeadCell(frame) {
+    const view = glideCells(0, frame);
+    let best = null;
+    let bestDist = Infinity;
+    const targetX = frame.width / 2;
+    const targetY = frame.height * 0.68;
+    view.cells.forEach((cell) => {
+      if (cell.id !== 'desktop') return;
+      const screen = glideCellScreen(cell, view.span.cam, view.span.unit, frame);
+      const dist = Math.hypot(screen.cx - targetX, screen.cy - targetY);
+      if (dist < bestDist) {
+        best = cell;
+        bestDist = dist;
+      }
+    });
+    return best || view.cells[0] || null;
+  }
+
+  function glideMotion(cell, mode) {
+    const list = mode === 'pitch'
+      ? PROMO_PITCH_MOMENTS
+      : (PROMO_CLIP_MOTIONS[cell.id] || PROMO_CLIP_MOTIONS.desktop);
+    const slot = gridSlot(cell.col, cell.row, mode === 'pitch' ? 7 : 3, list.length, () => false);
+    return list[slot];
+  }
+
+  function glideStillSrc(tone, device, motion, chat) {
+    return clipSrc(tone, device, motion, chat).replace(/promo-clip-([^/?#]+)\.mp4/, 'promo-still-$1.jpg');
+  }
+
+  function glideEventStart() {
+    return Math.round(PROMO_GLIDE.layDownMs * 0.5);
+  }
+
+  function glideRate(mode, timeMs) {
+    const span = PROMO_GLIDE.rampMs * 0.4;
+    const u = Math.min(1, Math.max(0, (timeMs - glideEventStart()) / span));
+    if (mode === 'pitch') return 3.6 + u * 5.2;
+    return 4.4 + u * 5;
+  }
+
+  function glideMiddle(cell, cam, unit, frame) {
+    const screen = glideCellScreen(cell, cam, unit, frame);
+    return screen.cx > frame.width * 0.16
+      && screen.cx < frame.width * 0.84
+      && screen.cy > frame.height * 0.2
+      && screen.cy < frame.height * 0.8;
+  }
+
+  function glideEvents(mode, frame) {
+    const key = `${mode}:${frame.width}x${frame.height}`;
+    if (glideEventCache.key === key) return glideEventCache.list;
+    const list = [];
+    const used = new Set();
+    const end = PROMO_GLIDE.layDownMs + PROMO_GLIDE.rampMs;
+    let debt = 0;
+    for (let time = glideEventStart(); time < end; time += PROMO_GLIDE.stepMs) {
+      debt += glideRate(mode, time) * PROMO_GLIDE.stepMs / 1000;
+      while (debt >= 1) {
+        const view = glideCells(time, frame);
+        const leadKey = glideLeadCell(frame)?.key || '';
+        const open = view.cells.filter((cell) => {
+          if (used.has(cell.key)) return false;
+          if (time < PROMO_GLIDE.layDownMs && cell.key === leadKey) return false;
+          return glideMiddle(cell, view.span.cam, view.span.unit, frame);
+        });
+        if (!open.length) break;
+        debt -= 1;
+        const pick = open[Math.floor(wallSeededUnit(list.length + 1, mode === 'pitch' ? 11 : 5) * open.length)] || open[0];
+        used.add(pick.key);
+        list.push({ t: time, key: pick.key, row: pick.row, col: pick.col });
+      }
+    }
+    glideEventCache = { key, list };
+    return list;
+  }
+
+  function glideEventAt(mode, frame, key, timeMs) {
+    return glideEvents(mode, frame).find((event) => event.key === key && event.t <= timeMs) || null;
+  }
+
+  function glideBlurPx(timeMs) {
+    const glideMs = timeMs - PROMO_GLIDE.layDownMs;
+    const start = PROMO_GLIDE.rampMs * PROMO_GLIDE.blurStart;
+    if (glideMs <= start) return 0;
+    const u = Math.min(1, (glideMs - start) / (PROMO_GLIDE.rampMs - start));
+    return PROMO_GLIDE.blurMax * u * u;
+  }
+
+  function glideFieldOpacity(timeMs) {
+    const start = PROMO_GLIDE.layDownMs + PROMO_GLIDE.rampMs;
+    const fade = start + PROMO_GLIDE.dissolveMs;
+    const hold = fade + PROMO_GLIDE.fieldHoldMs;
+    if (timeMs <= start) return 0;
+    if (timeMs >= hold) return 1;
+    if (timeMs >= fade) return 1;
+    return (timeMs - start) / PROMO_GLIDE.dissolveMs;
+  }
+
+  function glideCoverage(timeMs, frame) {
+    const span = glideSpan(timeMs, frame);
+    const pitch = glidePitch();
+    return [-1, 0, 1].every((sx) => [-1, 0, 1].every((sy) => {
+      const local = glideUnproject(sx * frame.width / 2, sy * frame.height / 2);
+      const x = (local.x + span.cam.x) / span.unit;
+      const y = (local.y + span.cam.y) / span.unit;
+      const row = Math.floor(y / pitch);
+      const line = glideRows.get(row) || glideEnsureRow(row, x - 30, x + 30);
+      return x >= line.left && x <= line.right;
+    }));
+  }
+
+  function glideNearWidth(frame) {
+    const unit = glideUnit(frame);
+    const local = glideUnproject(0, frame.height * 0.46);
+    return glideSpec('desktop').w * unit * glideProject(local.x, local.y).scale;
+  }
   const PROMO_CLIP_DEVICES = ['desktop', 'phone', 'tablet'];
   const PROMO_CLIP_MOTIONS = {
     desktop: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
@@ -1848,49 +2249,6 @@
     return slot;
   }
 
-  const gridDeviceCache = new Map();
-  function gridDeviceAt(col, row) {
-    const key = `${col},${row}`;
-    const hit = gridDeviceCache.get(key);
-    if (hit) return hit;
-    const devices = PROMO_GRID.devices;
-    let device = devices[0];
-    if (col !== 0 || row !== 0) {
-      const left = col > 0 ? gridDeviceAt(col - 1, row) : null;
-      const above = row > 0 ? gridDeviceAt(col, row - 1) : null;
-      const slot = gridSlot(col, row, 4, devices.length, (index) => (
-        (left && devices[index].id === left.id) || (above && devices[index].id === above.id)
-      ));
-      device = devices[slot];
-    }
-    gridDeviceCache.set(key, device);
-    return device;
-  }
-
-  const gridMotionCache = new Map();
-  function gridMotionAt(col, row, deviceId, mode) {
-    const key = `${mode}:${col},${row}`;
-    const hit = gridMotionCache.get(key);
-    if (hit) return hit;
-    const list = mode === 'pitch'
-      ? PROMO_PITCH_MOMENTS
-      : (PROMO_CLIP_MOTIONS[deviceId] || PROMO_CLIP_MOTIONS.desktop);
-    const leftDevice = col > 0 ? gridDeviceAt(col - 1, row) : null;
-    const aboveDevice = row > 0 ? gridDeviceAt(col, row - 1) : null;
-    const left = col > 0 ? gridMotionAt(col - 1, row, leftDevice.id, mode) : '';
-    const above = row > 0 ? gridMotionAt(col, row - 1, aboveDevice.id, mode) : '';
-    const slot = gridSlot(col, row, mode === 'pitch' ? 6 : 11, list.length, (index) => (
-      list[index] === left || list[index] === above
-    ));
-    const motion = list[slot];
-    gridMotionCache.set(key, motion);
-    return motion;
-  }
-
-  function pitchLeadSrc() {
-    return document.documentElement.getAttribute('data-promo-pitch-lead') || '';
-  }
-
   function momentClipParts(motion) {
     const bits = String(motion || '').split('-');
     if (bits[0] !== 'moment') return null;
@@ -1900,491 +2258,15 @@
     return { scene, take, pose: PROMO_MOMENT_CLIP_POSE[scene] };
   }
 
-  function gridSpan() {
-    return PROMO_GRID.easeMs + PROMO_GRID.settleMs;
-  }
-
-  function gridHoldStart() {
-    return PROMO_GRID.introMs;
-  }
-
-  function gridDuration() {
-    return PROMO_GRID.introMs + PROMO_GRID.zoomMs;
-  }
-
-  function gridFieldStart() {
-    return Math.round(PROMO_GRID.zoomMs * PROMO_GRID.fieldAt);
-  }
-
-  function gridShimmerEnd() {
-    return gridDuration() + PROMO_GRID.shimmerMs;
-  }
-
-  function gridResolveSpan(mode) {
-    const hold = mode === 'pitch' ? PROMO_GRID.pitchHoldMs : 0;
-    return PROMO_GRID.riseMs + hold + PROMO_GRID.resolveMs;
-  }
-
-  function gridPlayEnd(mode) {
-    return gridShimmerEnd() + gridResolveSpan(mode);
-  }
-
-  function gridZoomUnit(t) {
-    const x = Math.min(1, Math.max(0, t));
-    return x * x * (3 - 2 * x);
-  }
-
-  function gridCountAt(timeMs) {
-    if (timeMs <= PROMO_GRID.introMs) return 1;
-    const t = Math.min(1, (timeMs - PROMO_GRID.introMs) / PROMO_GRID.zoomMs);
-    return 1 + (PROMO_GRID.fieldCount - 1) * gridZoomUnit(t);
-  }
-
-  function gridTimeForCount(count) {
-    if (count <= 1) return 0;
-    const span = PROMO_GRID.fieldCount - 1;
-    const unit = Math.min(1, Math.max(0, (count - 1) / span));
-    let t = unit;
-    for (let step = 0; step < 8; step += 1) {
-      const value = gridZoomUnit(t) - unit;
-      const slope = 6 * t * (1 - t);
-      if (Math.abs(slope) < 1e-5) break;
-      t = Math.min(1, Math.max(0, t - value / slope));
-    }
-    return PROMO_GRID.introMs + t * PROMO_GRID.zoomMs;
-  }
-
-  let gridFlexCache = null;
-  function gridFlowSpec(id) {
-    const desktop = PROMO_GRID.devices[0];
-    const baseH = 100;
-    const desktopW = baseH * desktop.ratio;
-    const device = PROMO_GRID.devices.find((entry) => entry.id === id) || desktop;
-    const w = desktopW * (PROMO_GRID.deviceWidth[id] || 1);
-    return { id, device, w, h: w / device.ratio };
-  }
-
-  function gridPhoneBlocked(line, rows, x, w) {
-    const last = line[line.length - 1];
-    const before = line[line.length - 2];
-    if (last?.id === 'phone' && before?.id === 'phone') return true;
-    const above = rows[rows.length - 1];
-    const aboveHit = above?.some((item) => item.id === 'phone' && item.x < x + w && item.x + item.w > x);
-    if (last?.id === 'phone' && aboveHit) return true;
-    let column = 0;
-    for (let row = rows.length - 1; row >= 0 && column < 2; row -= 1) {
-      const hit = rows[row].some((item) => item.id === 'phone' && item.x < x + w && item.x + item.w > x);
-      if (!hit) break;
-      column += 1;
-    }
-    return column >= 2;
-  }
-
-  function gridFlexLayout() {
-    if (gridFlexCache) return gridFlexCache;
-    const baseH = 100;
-    const gap = baseH * PROMO_GRID.flowGap;
-    const pitch = baseH + gap;
-    const endH = PROMO_GRID.fieldCount * pitch;
-    const endW = endH * (16 / 9);
-    const fieldW = endW + pitch * 2;
-    const fieldH = endH + pitch * 2;
-    const mix = PROMO_GRID.deviceMix;
-    const items = [];
-    const byKey = new Map();
-    const rows = [];
-    let index = 0;
-    let top = 0;
-    while (top < fieldH) {
-      const line = [];
-      let x = 0;
-      let col = 0;
-      while (x < fieldW) {
-        const roll = wallSeededUnit(index, 23);
-        let id = 'desktop';
-        if (index !== 0) {
-          if (roll < mix.phone) id = 'phone';
-          else if (roll < mix.phone + mix.tablet) id = 'tablet';
-        }
-        let spec = gridFlowSpec(id);
-        if (id === 'phone' && gridPhoneBlocked(line, rows, x, spec.w)) {
-          id = 'tablet';
-          spec = gridFlowSpec(id);
-        }
-        if (line.length && x + spec.w > fieldW) break;
-        line.push({ id, spec, x, col, index });
-        x += spec.w + gap;
-        col += 1;
-        index += 1;
-      }
-      if (!line.length) break;
-      const rowH = line.reduce((max, slot) => Math.max(max, slot.spec.h), 0);
-      const rowIndex = rows.length;
-      const placed = line.map((slot) => {
-        const item = {
-          index: slot.index,
-          col: slot.col,
-          row: rowIndex,
-          device: slot.spec.device,
-          id: slot.id,
-          x: slot.x,
-          y: top + rowH - slot.spec.h,
-          w: slot.spec.w,
-          h: slot.spec.h,
-          lead: false,
-          dom: false,
-        };
-        item.right = item.x + item.w;
-        item.bottom = item.y + item.h;
-        items.push(item);
-        byKey.set(`${item.col},${item.row}`, item);
-        return item;
-      });
-      rows.push(placed);
-      top += rowH + gap;
-    }
-    const hero = items[0];
-    hero.lead = true;
-    hero.dom = true;
-    items
-      .filter((item) => item.x < endW && item.y < endH)
-      .slice(0, 72)
-      .forEach((item) => { item.dom = true; });
-    gridFlexCache = {
-      gap,
-      screenH: baseH,
-      pitch,
-      fieldW,
-      fieldH,
-      endW,
-      endH,
-      items,
-      byKey,
-      hero,
-    };
-    return gridFlexCache;
-  }
-
-  function gridFrameBox(frame) {
-    const margin = PROMO_GRID.frameMargin;
-    const originX = frame.width * margin;
-    const originY = frame.height * margin;
-    return {
-      margin,
-      originX,
-      originY,
-      innerW: frame.width - originX * 2,
-      innerH: frame.height - originY * 2,
-    };
-  }
-
-  function gridScaleEnds(frame) {
-    const layout = gridFlexLayout();
-    const box = gridFrameBox(frame);
-    const first = layout.hero;
-    const sHero = Math.min(box.innerW / first.w, box.innerH / first.h);
-    const sEnd = box.innerH / (PROMO_GRID.fieldCount * layout.pitch);
-    return { ...box, sHero, sEnd, layout };
-  }
-
-  function gridScaleAt(count, frame) {
-    const { sHero, sEnd } = gridScaleEnds(frame);
-    const span = PROMO_GRID.fieldCount - 1;
-    const t = count <= 1 ? 0 : Math.min(1, (count - 1) / span);
-    return sHero + (sEnd - sHero) * t;
-  }
-
-  function gridItemEnterCount(item, frame) {
-    if (!item || item.lead) return 1;
-    const view = frame || { width: 1440, height: 810 };
-    const { sHero, sEnd, innerW, innerH } = gridScaleEnds(view);
-    const sFit = Math.min(innerW / Math.max(1, item.right), innerH / Math.max(1, item.bottom));
-    if (sFit >= sHero) return 1;
-    if (sFit <= sEnd) return PROMO_GRID.fieldCount;
-    return 1 + ((sFit - sHero) / (sEnd - sHero)) * (PROMO_GRID.fieldCount - 1);
-  }
-
-  function gridStampAt(col, row, frame) {
-    const layout = gridFlexLayout();
-    const item = layout.byKey.get(`${col},${row}`);
-    const view = frame || { width: 1440, height: 810 };
-    if (!item || item.lead) return PROMO_GRID.stampDwell;
-    const count = gridItemEnterCount(item, view);
-    const stagger = wallSeededUnit(item.row * 17 + item.col, 19) * PROMO_GRID.stampSpread;
-    return gridTimeForCount(count) + PROMO_GRID.stampDwell + stagger;
-  }
-
-  function gridItemFits(item, camera, frame) {
-    const box = gridFrameBox(frame);
-    const x = camera.x + item.x * camera.s;
-    const y = camera.y + item.y * camera.s;
-    const right = x + item.w * camera.s;
-    const bottom = y + item.h * camera.s;
-    const slack = 0.75;
-    return x >= box.originX - slack
-      && y >= box.originY - slack
-      && right <= frame.width - box.originX + slack
-      && bottom <= frame.height - box.originY + slack;
-  }
-
-  function gridItemFade(item, camera, frame) {
-    return gridItemFits(item, camera, frame) ? 1 : 0;
-  }
-
   function gridCssColor(root, name, fallback) {
-    const probe = document.createElement('span');
-    probe.style.color = `var(${name})`;
-    root.appendChild(probe);
-    const value = getComputedStyle(probe).color || fallback;
-    probe.remove();
-    return value;
-  }
-
-  function gridRgb(color) {
-    const match = String(color).match(/[\d.]+/g);
-    if (!match || match.length < 3) return { r: 249, g: 163, b: 83 };
-    return { r: Number(match[0]), g: Number(match[1]), b: Number(match[2]) };
-  }
-
-  function gridRgba(color, alpha) {
-    const { r, g, b } = gridRgb(color);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  function gridMixWhite(color, amount) {
-    const { r, g, b } = gridRgb(color);
-    const mix = (channel) => Math.round(channel * amount + 255 * (1 - amount));
-    return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
-  }
-
-  const PROMO_END_EMPTY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.15" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.15" fill="currentColor"/></svg>';
-  const PROMO_END_SOLD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9.2 11.4 11.1 13.3 15.4 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.2" cy="19.2" r="1.15" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.15" fill="currentColor"/></svg>';
-
-  function drawGridCart(ctx, x, y, size, sold) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(size / 24, size / 24);
-    ctx.lineWidth = 1.4;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(6.5, 7);
-    ctx.lineTo(19.5, 7);
-    ctx.lineTo(18.1, 15.2);
-    ctx.lineTo(8.1, 15.2);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(6.5, 7);
-    ctx.lineTo(5.2, 4);
-    ctx.lineTo(2.5, 4);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(9.2, 19.2, 1.15, 0, Math.PI * 2);
-    ctx.arc(16.6, 19.2, 1.15, 0, Math.PI * 2);
-    ctx.fill();
-    if (sold) {
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(9.2, 11.4);
-      ctx.lineTo(11.1, 13.3);
-      ctx.lineTo(15.4, 9);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawGridTexture(canvas, camera, mode, colors) {
-    const width = canvas.clientWidth || 1440;
-    const height = canvas.clientHeight || 810;
-    const ratio = Math.min(2, window.devicePixelRatio || 1);
-    if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
-      canvas.width = Math.round(width * ratio);
-      canvas.height = Math.round(height * ratio);
-    }
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-    const layout = camera.layout || gridFlexLayout();
-    const sold = mode === 'pitch';
-    const fill = sold ? '#fff6ee' : (colors.surface || '#F6F4F1');
-    const now = camera.timeMs || 0;
-    const handoff = camera.handoff || 0;
-    const view = { width, height };
-    layout.items.forEach((item) => {
-      const alpha = item.dom ? handoff : 1;
-      if (alpha < 0.02) return;
-      if (!gridItemFits(item, camera, view)) return;
-      const x = camera.x + item.x * camera.s;
-      const y = camera.y + item.y * camera.s;
-      const w = item.w * camera.s;
-      const h = item.h * camera.s;
-      const radius = Math.min(gridMockupRadius(item.device, w), w / 2, h / 2);
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = fill;
-      ctx.beginPath();
-      ctx.roundRect(x, y, w, h, radius);
-      ctx.fill();
-      if (h > 36 && now >= gridStampAt(item.col, item.row, view)) {
-        const word = sold ? 'SOLD' : 'NO SALE';
-        const target = w * PROMO_GRID.stampWidth;
-        ctx.save();
-        ctx.translate(x + w / 2, y + h / 2);
-        ctx.rotate(PROMO_GRID.stampAngle * Math.PI / 180);
-        ctx.font = `600 100px ${colors.font}`;
-        ctx.letterSpacing = '0.04em';
-        const sample = ctx.measureText('NO SALE').width || 1;
-        const size = 100 * (target / sample);
-        ctx.font = `600 ${size}px ${colors.font}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        if (sold) {
-          const band = size * 0.9;
-          ctx.fillStyle = colors.primary;
-          ctx.fillRect(-target / 2, -band / 2, target, band);
-          ctx.fillStyle = '#fff';
-        } else {
-          ctx.fillStyle = gridRgba(colors.ink3, PROMO_GRID.stampInk);
-        }
-        ctx.fillText(word, 0, 0);
-        ctx.restore();
-      }
-    });
-    ctx.globalAlpha = 1;
-  }
-
-  function gridEase(t) {
-    const clamped = Math.min(1, Math.max(0, t));
-    const x1 = 0.4;
-    const y1 = 0;
-    const x2 = 0.2;
-    const y2 = 1;
-    const cx = 3 * x1;
-    const bx = 3 * (x2 - x1) - cx;
-    const ax = 1 - cx - bx;
-    const cy = 3 * y1;
-    const by = 3 * (y2 - y1) - cy;
-    const ay = 1 - cy - by;
-    const sampleX = (u) => ((ax * u + bx) * u + cx) * u;
-    const sampleY = (u) => ((ay * u + by) * u + cy) * u;
-    const sampleDX = (u) => (3 * ax * u + 2 * bx) * u + cx;
-    let u = clamped;
-    for (let step = 0; step < 6; step += 1) {
-      const slope = sampleDX(u);
-      if (Math.abs(slope) < 1e-6) break;
-      u = Math.min(1, Math.max(0, u - (sampleX(u) - clamped) / slope));
-    }
-    return sampleY(u);
-  }
-
-  function gridMetrics(frame) {
-    const cols = PROMO_GRID.cols;
-    const gap = Math.round(frame.width * PROMO_GRID.gapRatio);
-    const cellW = Math.round((frame.width - gap * (cols - 1)) / cols);
-    const cellH = Math.round((frame.height - gap * (cols - 1)) / cols);
-    return { cols, gap, cellW, cellH };
+    const value = getComputedStyle(root).getPropertyValue(name).trim();
+    return value || fallback;
   }
 
   const PROMO_MOCKUP_RADIUS_PX = 32;
 
   function gridMockupRadius(device, width) {
     return width * (PROMO_MOCKUP_RADIUS_PX / device.frame);
-  }
-
-  function gridDeviceBox(device, cellW, cellH) {
-    let w = cellW;
-    let h = w / device.ratio;
-    if (h > cellH) {
-      h = cellH;
-      w = h * device.ratio;
-    }
-    return {
-      w: Math.round(w),
-      h: Math.round(h),
-      x: Math.round((cellW - w) / 2),
-      y: Math.round((cellH - h) / 2),
-    };
-  }
-
-  function gridTailView(timeMs) {
-    const fieldStart = PROMO_GRID.introMs + gridFieldStart();
-    const fadeEnd = fieldStart + PROMO_GRID.fieldMs;
-    let field = 0;
-    if (timeMs >= fieldStart) field = Math.min(1, (timeMs - fieldStart) / PROMO_GRID.fieldMs);
-    let tile = 0;
-    if (timeMs >= fadeEnd) {
-      const fade = Math.min(1, (timeMs - fadeEnd) / PROMO_GRID.shimmerMs);
-      tile = 1 - fade;
-    } else if (timeMs >= fieldStart) {
-      tile = 1;
-    }
-    return { field, tile };
-  }
-
-  function gridPose(count, frame) {
-    const ends = gridScaleEnds(frame);
-    const s = gridScaleAt(count, frame);
-    const hero = ends.layout.hero;
-    return {
-      s,
-      x: ends.originX - hero.x * s,
-      y: ends.originY - hero.y * s,
-      step: count,
-      reveal: count,
-      fade: 1,
-      layout: ends.layout,
-    };
-  }
-
-  function gridCamera(timeMs, frame) {
-    const count = gridCountAt(timeMs);
-    const view = gridTailView(timeMs);
-    const shimmer = timeMs >= gridShimmerEnd();
-    let phase = 'grid';
-    if (shimmer) phase = 'resolve';
-    else if (count > 8 || view.field > 0) phase = 'rush';
-    return {
-      ...gridPose(count, frame),
-      count,
-      phase,
-      field: shimmer ? 1 : view.field,
-      tile: shimmer ? 0 : view.tile,
-      timeMs,
-    };
-  }
-
-  function gridCellFade(col, row, camera) {
-    const edge = camera.count || 1;
-    const slot = Math.max(col, row);
-    if (slot + 1 <= edge) return 1;
-    if (slot >= edge) return 0;
-    return edge - slot;
-  }
-
-  let gridLookCache = null;
-  function gridAllLooks() {
-    if (!gridLookCache) gridLookCache = catalogLooks(16, 4);
-    return gridLookCache;
-  }
-
-  function gridLooksFor(index) {
-    const all = gridAllLooks();
-    const start = Math.floor(wallSeededUnit(index, 8) * all.length);
-    const picks = [];
-    for (let i = 0; i < 8; i += 1) picks.push(all[(start + i) % all.length]);
-    return picks;
-  }
-
-  let gridDeathCache = null;
-  function gridDeathAt() {
-    if (gridDeathCache) return gridDeathCache;
-    const total = PROMO_GRID.cols * PROMO_GRID.cols;
-    const at = new Array(total);
-    for (let index = 0; index < total; index += 1) {
-      at[index] = gridStampAt(index % PROMO_GRID.cols, Math.floor(index / PROMO_GRID.cols));
-    }
-    gridDeathCache = at;
-    return at;
   }
 
   function loadPromoStores() {
@@ -2469,7 +2351,8 @@
     }
     if (elapsed <= rise + hold) return { amount: 1, travel: 0.5 };
     const u = Math.min(1, (elapsed - rise - hold) / fall);
-    return { amount: Math.cos(u * Math.PI / 2), travel: 0.5 + u * 0.5 };
+    const leave = u * u;
+    return { amount: 1 - leave, travel: 0.5 + leave * 0.5 };
   }
 
   function glideEase(linear) {
@@ -2627,7 +2510,29 @@
       row.appendChild(viewport);
     }
     mountNakedCta(row);
+    mountWaveField(row);
     return track;
+  }
+
+  function mountWaveField(row) {
+    if (!row || row.querySelector('.promo-opening__wave-field')) return;
+    const field = document.createElement('div');
+    field.className = 'promo-opening__wave-field';
+    field.setAttribute('aria-hidden', 'true');
+    const ambient = document.createElement('div');
+    ambient.className = 'promo-opening__wave-ambient';
+    field.append(ambient);
+    for (let index = 0; index < 26; index += 1) {
+      const mote = document.createElement('i');
+      mote.className = 'promo-opening__wave-mote';
+      const angle = (index / 26) * Math.PI * 2 + (index % 3) * 0.15;
+      const reach = 0.72 + (index % 5) * 0.1;
+      mote.style.setProperty('--mx', (0.5 + Math.cos(angle) * reach).toFixed(3));
+      mote.style.setProperty('--my', (0.58 + Math.sin(angle) * reach * 0.72).toFixed(3));
+      mote.style.setProperty('--mote', `${7 + (index % 4) * 3}px`);
+      field.append(mote);
+    }
+    row.prepend(field);
   }
 
   function seeCtaCopy() {
@@ -2699,7 +2604,10 @@
       this.parkedStyle = null;
       this.parkTimer = 0;
       this.glideFrame = 0;
+      this.planeFrame = 0;
+      this.glideStats = null;
       this.clerkGlow = this.ensureClerkGlow();
+      window.__promoGlideProbe = () => this.glideProbe();
       this.boundDock = () => this.fitOpeningLayout();
       this.toggle?.addEventListener('click', () => this.flip());
       promoWidget.preloadStoreStamps(this.stores);
@@ -3336,22 +3244,13 @@
     }
 
     snapSeeLanded() {
-      const stacked = promoVideoConfig.cta !== 'demo';
-      this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed');
-      if (stacked) this.root.classList.add('is-see-stack');
-      else {
-        this.root.classList.add('is-see-wave');
-        this.paintWave(this.landIndex, 1, 0.5);
-        const store = this.stores[this.landIndex];
-        if (store) promoWidget.applyStoreLook(store);
-        return;
-      }
-      this.highlightStore(this.seeEndIndex(), true, true);
-      if (stacked && promoVideoConfig.cta !== 'none') {
-        this.carouselTrack?.querySelectorAll('.promo-opening__slide').forEach((slide) => {
-          slide.classList.add('is-lift');
-        });
+      const ask = promoVideoConfig.cta !== 'demo' && promoVideoConfig.cta !== 'none';
+      this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed', 'is-see-wave');
+      if (ask) {
+        this.paintWave(-1, 0, 0);
         this.root.classList.add('is-see-cta', 'is-cta-aim');
+      } else {
+        this.paintWave(this.landIndex, 1, 0.5);
       }
       const store = this.stores[this.landIndex];
       if (store) promoWidget.applyStoreLook(store);
@@ -3593,30 +3492,29 @@
       sell?.classList.remove('is-in');
       sell?.classList.add('is-out');
 
-      const stacked = promoVideoConfig.cta !== 'demo';
-      this.root.classList.add('is-see');
-      if (stacked) this.root.classList.add('is-see-stack');
-      else this.root.classList.add('is-see-wave');
+      this.root.classList.add('is-see', 'is-see-wave');
       window.requestAnimationFrame(() => {
         this.root.classList.add('is-see-in', 'is-see-docked', 'is-see-row');
       });
 
       window.setTimeout(() => {
         this.glideClerkIntoRow();
-        if (stacked) {
-          this.playStoreStack(() => {
-            const hold = promoVideoConfig.cta === 'none' ? 1600 : PROMO_SEE_CTA_HOLD_MS;
-            if (promoVideoConfig.cta !== 'none') {
-              window.setTimeout(() => {
-                this.root.classList.add('is-cta-aim');
-              }, Math.max(0, hold - PROMO_SEE_CURSOR_MS));
-            }
-            window.setTimeout(() => this.depart(), hold);
-          });
-          return;
-        }
         this.playStoreWave(() => {
-          window.setTimeout(() => this.depart(), 400);
+          const cta = promoVideoConfig.cta;
+          if (cta === 'none') {
+            this.paintWave(Math.max(0, this.stores.length - 1), 1, 0.5);
+            window.setTimeout(() => this.depart(), 1200);
+            return;
+          }
+          if (cta === 'demo') {
+            window.setTimeout(() => this.depart(), 400);
+            return;
+          }
+          this.root.classList.add('is-see-cta');
+          window.setTimeout(() => {
+            this.root.classList.add('is-cta-aim');
+          }, Math.max(0, PROMO_SEE_CTA_HOLD_MS - PROMO_SEE_CURSOR_MS));
+          window.setTimeout(() => this.depart(), PROMO_SEE_CTA_HOLD_MS);
         });
       }, 360);
     }
@@ -3698,17 +3596,21 @@
         ? [...this.carouselTrack.querySelectorAll('.promo-opening__slide')]
         : [];
       const wave = Math.min(1, Math.max(0, amount));
+      const motion = Math.min(1, Math.max(0, travel));
       this.root.style.setProperty('--see-wave', wave.toFixed(4));
+      this.root.style.setProperty('--see-travel', motion.toFixed(4));
+      const store = this.stores[index];
+      if (store?.accent) this.root.style.setProperty('--promo-store-accent', store.accent);
       slides.forEach((slide, slideIndex) => {
         const on = slideIndex === index && wave > 0.01;
+        const present = wave <= 0.08 ? wave / 0.08 : 1;
         slide.classList.toggle('is-wave', on);
-        slide.style.opacity = on ? wave.toFixed(4) : '0';
+        slide.style.opacity = on ? present.toFixed(4) : '0';
         slide.style.setProperty('--wave', on ? wave.toFixed(4) : '0');
         slide.style.setProperty('--wave-x', on ? travel.toFixed(4) : '0.5');
         slide.style.zIndex = on ? '2' : '1';
-        slide.style.transform = on ? `scale(${(0.94 + wave * 0.06).toFixed(4)})` : 'none';
+        slide.style.transform = on ? `scale(${(0.92 + wave * 0.08).toFixed(4)})` : 'scale(0.92)';
       });
-      const store = this.stores[index];
       const glow = this.ensureClerkGlow();
       if (!glow) return;
       if (store) glow.style.setProperty('--promo-clerk-glow', store.accent || 'transparent');
@@ -4380,7 +4282,7 @@
       this.gridPaletteCache = null;
       this.gridThudSent = false;
       const caption = this.root.querySelector('[data-promo-end-caption]');
-      if (caption) caption.textContent = 'Sold by the chatbot.';
+      if (caption) caption.textContent = GLIDE_PAIN_LINE;
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = true;
       const wall = this.root.querySelector('[data-promo-scale-wall]');
@@ -4440,7 +4342,7 @@
         const caption = verdict.querySelector('.promo-scale__sold') || document.createElement('p');
         caption.className = 'promo-scale__sold';
         caption.setAttribute('data-promo-end-caption', '');
-        if (!caption.textContent) caption.textContent = 'Sold by the chatbot.';
+        if (!caption.textContent) caption.textContent = GLIDE_PAIN_LINE;
         verdict.replaceChildren(hero, caption);
       }
       scale.querySelector('[data-promo-residue]')?.remove();
@@ -4866,89 +4768,6 @@
       return clone;
     }
 
-    gridFillLead(device, clone, box) {
-      const naturalW = Number(clone.dataset.naturalW) || box.w;
-      const naturalH = Number(clone.dataset.naturalH) || box.h;
-      const scale = Math.min(box.w / Math.max(1, naturalW), box.h / Math.max(1, naturalH));
-      clone.classList.add('promo-grid__lead');
-      clone.style.position = 'absolute';
-      clone.style.width = `${naturalW}px`;
-      clone.style.height = `${naturalH}px`;
-      clone.style.maxWidth = 'none';
-      clone.style.maxHeight = 'none';
-      clone.style.transformOrigin = 'top left';
-      clone.style.left = `${((box.w - naturalW * scale) / 2).toFixed(1)}px`;
-      clone.style.top = `${((box.h - naturalH * scale) / 2).toFixed(1)}px`;
-      clone.style.transform = `scale(${scale.toFixed(4)})`;
-      device.appendChild(clone);
-    }
-
-    gridFillLeadStill(device) {
-      const still = document.createElement('img');
-      still.className = 'promo-grid__clip promo-grid__lead-still';
-      still.alt = '';
-      still.draggable = false;
-      still.src = pitchLeadSrc();
-      device.appendChild(still);
-    }
-
-    gridFillClip(device, col, row, deviceId, mode) {
-      const motion = gridMotionAt(col, row, deviceId, mode);
-      const chat = mode === 'pitch' ? false : gridMix(col, row, 11) < 0.62;
-      const video = document.createElement('video');
-      video.className = 'promo-grid__clip';
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.loop = true;
-      video.preload = 'auto';
-      video.setAttribute('playsinline', '');
-      video.setAttribute('muted', '');
-      const src = clipSrc(mode === 'pitch' ? 'pitch' : 'pain', deviceId, motion, chat);
-      if (src) video.src = src;
-      const offset = gridMix(col, row, 53);
-      video.addEventListener('loadedmetadata', () => {
-        const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 3;
-        try { video.currentTime = offset * Math.max(0, duration - 0.05); } catch { /* seek can fail before a frame */ }
-      }, { once: true });
-      device.appendChild(video);
-      return motion;
-    }
-
-    gridMountEnd(device) {
-      const end = document.createElement('div');
-      end.className = 'promo-grid__end';
-      const stamp = document.createElement('p');
-      stamp.className = 'promo-grid__stamp';
-      const lost = document.createElement('span');
-      lost.className = 'is-lost-word';
-      lost.textContent = 'NO SALE';
-      const sold = document.createElement('span');
-      sold.className = 'is-sold-word';
-      sold.textContent = 'SOLD';
-      stamp.append(lost, sold);
-      end.append(stamp);
-      device.appendChild(end);
-    }
-
-    ensureGridLayers(wall) {
-      let texture = wall.querySelector('[data-promo-grid-texture]');
-      if (!texture) {
-        texture = document.createElement('canvas');
-        texture.className = 'promo-grid__texture';
-        texture.setAttribute('data-promo-grid-texture', '');
-        wall.appendChild(texture);
-      }
-      let field = wall.querySelector('[data-promo-grid-field]');
-      if (!field) {
-        field = document.createElement('div');
-        field.className = 'promo-grid__field';
-        field.setAttribute('data-promo-grid-field', '');
-        wall.appendChild(field);
-      }
-      return { texture, field };
-    }
-
     gridPalette() {
       if (this.gridPaletteCache) return this.gridPaletteCache;
       const fontProbe = document.createElement('span');
@@ -4967,48 +4786,440 @@
       return this.gridPaletteCache;
     }
 
-    paintGridResolve(timeMs, mode) {
+    glideProbe() {
+      return this.glideStats || {
+        coverage: false,
+        nearCellWidth: 0,
+        activeEvents: 0,
+        phase: '',
+        mode: '',
+      };
+    }
+
+    ensureGlideFilter() {
+      if (document.getElementById('promo-glide-blur')) return;
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.style.position = 'absolute';
+      svg.style.width = '0';
+      svg.style.height = '0';
+      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+      filter.id = 'promo-glide-blur';
+      filter.setAttribute('x', '-30%');
+      filter.setAttribute('y', '-30%');
+      filter.setAttribute('width', '160%');
+      filter.setAttribute('height', '160%');
+      const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+      blur.id = 'promo-glide-blur-node';
+      blur.setAttribute('stdDeviation', '0 0');
+      filter.append(blur);
+      svg.append(filter);
+      document.body.append(svg);
+    }
+
+    mountGlide(mode) {
+      const wall = this.ensureWall();
+      if (!wall) return null;
+      this.ensureGlideFilter();
+      const frame = this.gridFrame();
+      const existing = wall.querySelector('[data-promo-glide]');
+      if (existing && existing.dataset.mode === mode && existing.dataset.frameW === String(frame.width)) return existing;
+      const store = this.painStore();
+      const wallBox = wall.getBoundingClientRect();
+      const storeBox = store?.getBoundingClientRect();
+      wall.replaceChildren();
+      const root = document.createElement('div');
+      root.className = `promo-glide${mode === 'pitch' ? ' is-pitch' : ' is-pain'}`;
+      root.setAttribute('data-promo-glide', '');
+      root.dataset.mode = mode;
+      root.dataset.frameW = String(frame.width);
+      const streak = document.createElement('div');
+      streak.className = 'promo-glide__streak';
+      const level = document.createElement('div');
+      level.className = 'promo-glide__level';
+      const world = document.createElement('div');
+      world.className = 'promo-glide__world';
+      world.style.perspective = `${PROMO_GLIDE.perspective}px`;
+      const tilt = document.createElement('div');
+      tilt.className = 'promo-glide__tilt';
+      tilt.style.transform = `rotateX(${PROMO_GLIDE.tilt}deg) rotateZ(${PROMO_GLIDE.yaw}deg)`;
+      const sheet = document.createElement('div');
+      sheet.className = 'promo-glide__sheet';
+      const pool = [];
+      for (let index = 0; index < PROMO_GLIDE.pool; index += 1) {
+        const cell = document.createElement('div');
+        cell.className = 'promo-glide__cell promo-device';
+        const still = document.createElement('img');
+        still.className = 'promo-glide__still';
+        still.alt = '';
+        const video = document.createElement('video');
+        video.className = 'promo-glide__video';
+        video.muted = true;
+        video.defaultMuted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        const bloom = document.createElement('div');
+        bloom.className = 'promo-glide__bloom';
+        const rays = document.createElement('div');
+        rays.className = 'promo-glide__rays';
+        for (let ray = 0; ray < 8; ray += 1) {
+          const spoke = document.createElement('i');
+          spoke.style.setProperty('--ray', String(ray));
+          rays.append(spoke);
+        }
+        const poof = document.createElement('div');
+        poof.className = 'promo-glide__poof';
+        const dust = document.createElement('i');
+        dust.className = 'promo-glide__dust';
+        poof.append(dust);
+        const speckTones = ['#e4dfd8', '#cfc8bf', '#b7b1aa', '#9c968f'];
+        for (let bit = 0; bit < 28; bit += 1) {
+          const speck = document.createElement('i');
+          speck.className = bit % 4 === 0 ? 'promo-glide__speck is-mote' : 'promo-glide__speck';
+          speck.style.setProperty('--speck', `${3 + (bit % 5) * 2.2}px`);
+          speck.style.background = speckTones[bit % speckTones.length];
+          poof.append(speck);
+        }
+        cell.append(still, video, bloom, rays, poof);
+        sheet.append(cell);
+        pool.push(cell);
+      }
+      tilt.append(sheet);
+      world.append(tilt);
+      level.append(world);
+      streak.append(level);
+      const light = document.createElement('div');
+      light.className = 'promo-glide__light';
+      const dofMid = document.createElement('div');
+      dofMid.className = 'promo-glide__dof promo-glide__dof-mid';
+      const dofFar = document.createElement('div');
+      dofFar.className = 'promo-glide__dof promo-glide__dof-far';
+      const field = document.createElement('div');
+      field.className = 'promo-glide__field';
+      field.setAttribute('data-promo-grid-field', '');
+      const lead = document.createElement('div');
+      lead.className = 'promo-glide__lead';
+      if (mode === 'pitch') {
+        const image = document.createElement('img');
+        image.alt = '';
+        image.src = document.documentElement.getAttribute('data-promo-pitch-lead') || '';
+        lead.append(image);
+      } else {
+        const clone = this.gridLeadNode('pain');
+        if (clone) lead.append(clone);
+      }
+      root.append(streak, light, dofMid, dofFar, field, lead);
+      wall.append(root);
+      if (store) store.style.visibility = 'hidden';
+      const start = storeBox && storeBox.width > 40
+        ? {
+          x: storeBox.left - wallBox.left,
+          y: storeBox.top - wallBox.top,
+          w: storeBox.width,
+          h: storeBox.height,
+        }
+        : null;
+      this.glideLeadStart = start;
+      this.glideLeadKey = glideLeadCell(frame)?.key || '';
+      return root;
+    }
+
+    paintGlideCell(node, cell, mode, timeMs, view, live) {
+      const frame = this.gridFrame();
+      const event = glideEventAt(mode, frame, cell.key, timeMs);
+      const dustLife = PROMO_GLIDE.poofMs + PROMO_GLIDE.dustMs;
+      if (mode !== 'pitch' && event && timeMs - event.t >= dustLife) {
+        node.classList.remove('is-dusting');
+        node.dataset.key = cell.key;
+        return false;
+      }
+      const blooming = mode === 'pitch' && event && timeMs - event.t < PROMO_GLIDE.bloomMs + PROMO_GLIDE.burstMs;
+      const poofing = mode !== 'pitch' && event && timeMs - event.t < dustLife;
+      const stamp = `${cell.key}|${live ? 1 : 0}|${event ? event.t : ''}`;
+      if (node.dataset.stamp === stamp && !blooming && !poofing) {
+        node.hidden = false;
+        return true;
+      }
+      node.dataset.stamp = stamp;
+      node.classList.remove('is-dusting');
+      const unit = view.span.unit;
+      const tone = mode === 'pitch' ? 'pitch' : 'pain';
+      const chat = mode !== 'pitch';
+      const motion = glideMotion(cell, mode);
+      const clipKey = `${tone}-${cell.id}-${motion}-${chat ? '1' : '0'}`;
+      node.dataset.key = cell.key;
+      node.classList.toggle('is-desktop', cell.id === 'desktop');
+      node.classList.toggle('is-tablet', cell.id === 'tablet');
+      node.classList.toggle('is-phone', cell.id === 'phone');
+      const width = cell.w * unit;
+      const height = cell.h * unit;
+      node.hidden = false;
+      node.style.width = `${width.toFixed(2)}px`;
+      node.style.height = `${height.toFixed(2)}px`;
+      node.style.transform = `translate3d(${(cell.x * unit).toFixed(2)}px, ${(cell.y * unit).toFixed(2)}px, 0)`;
+      node.style.borderRadius = `${gridMockupRadius(cell.device, width).toFixed(2)}px`;
+      const still = node.querySelector('.promo-glide__still');
+      const video = node.querySelector('.promo-glide__video');
+      if (video) video.style.transform = '';
+      if (still) still.style.transform = '';
+      const leadStill = mode === 'pitch' && cell.key === this.glideLeadKey;
+      const stillSrc = leadStill
+        ? (document.documentElement.getAttribute('data-promo-pitch-lead') || '')
+        : glideStillSrc(tone, cell.id, motion, chat);
+      if (still && still.dataset.src !== stillSrc) {
+        still.dataset.src = stillSrc;
+        still.src = stillSrc;
+      }
+      const wantVideo = live && !leadStill && timeMs >= PROMO_GLIDE.layDownMs;
+      if (video) {
+        if (wantVideo && video.dataset.clip !== clipKey) {
+          video.dataset.clip = clipKey;
+          video.src = clipSrc(tone, cell.id, motion, chat);
+          const offset = wallSeededUnit(cell.row * 3 + cell.col, 19) * 1.4;
+          const seek = () => {
+            if (video.duration && offset < video.duration) video.currentTime = offset;
+          };
+          video.addEventListener('loadeddata', seek, { once: true });
+          video.play().catch(() => {});
+        }
+        if (!wantVideo && video.dataset.clip) {
+          video.pause();
+          video.removeAttribute('src');
+          video.dataset.clip = '';
+          video.load();
+        }
+        video.hidden = !wantVideo;
+      }
+      if (still) still.hidden = wantVideo;
+      const bloom = node.querySelector('.promo-glide__bloom');
+      const rays = node.querySelector('.promo-glide__rays');
+      const poof = node.querySelector('.promo-glide__poof');
+      node.style.opacity = '';
+      if (still) still.style.opacity = '';
+      if (video) video.style.opacity = '';
+      if (bloom) bloom.style.opacity = '0';
+      if (rays) rays.style.opacity = '0';
+      if (poof) poof.style.opacity = '0';
+      if (!event) return true;
+      if (mode === 'pitch') {
+        const cart = GLIDE_CART[cell.id] || GLIDE_CART.desktop;
+        const age = timeMs - event.t;
+        const grow = Math.min(1, age / PROMO_GLIDE.bloomMs);
+        const burst = Math.min(1, age / PROMO_GLIDE.burstMs);
+        if (bloom) {
+          bloom.style.opacity = '1';
+          bloom.style.setProperty('--bloom-x', `${(cart.x * 100).toFixed(1)}%`);
+          bloom.style.setProperty('--bloom-y', `${(cart.y * 100).toFixed(1)}%`);
+          bloom.style.setProperty('--bloom', grow.toFixed(3));
+          bloom.classList.toggle('is-settled', grow >= 1);
+        }
+        if (rays) {
+          const flash = burst < 1 ? Math.sin(burst * Math.PI) : 0;
+          rays.style.opacity = flash.toFixed(3);
+          rays.style.setProperty('--burst', burst.toFixed(3));
+          rays.style.setProperty('--bloom-x', `${(cart.x * 100).toFixed(1)}%`);
+          rays.style.setProperty('--bloom-y', `${(cart.y * 100).toFixed(1)}%`);
+        }
+        return true;
+      }
+      const age = timeMs - event.t;
+      const cardU = Math.min(1, age / PROMO_GLIDE.poofMs);
+      const dustU = Math.min(1, age / dustLife);
+      const fade = cardU >= 1 ? '0' : (1 - cardU).toFixed(3);
+      const shrink = `scale(${(1 - 0.22 * cardU).toFixed(3)})`;
+      node.classList.add('is-dusting');
+      node.style.setProperty('--card-left', fade);
+      if (still) {
+        still.style.opacity = fade;
+        still.style.transform = shrink;
+      }
+      if (video) {
+        video.style.opacity = fade;
+        video.style.transform = shrink;
+      }
+      if (poof) {
+        const puff = Math.sin(dustU * Math.PI);
+        poof.style.opacity = String(Math.min(1, puff * 1.2).toFixed(3));
+        const fly = dustU ** 0.55;
+        poof.querySelectorAll('.promo-glide__speck').forEach((speck, index) => {
+          const angle = wallSeededUnit(cell.row + cell.col, 20 + index) * Math.PI * 2;
+          const dist = (48 + wallSeededUnit(cell.col, 40 + index) * 130) * fly;
+          speck.style.transform = `translate(${(Math.cos(angle) * dist).toFixed(1)}px, ${(Math.sin(angle) * dist).toFixed(1)}px)`;
+        });
+        const cloud = poof.querySelector('.promo-glide__dust');
+        if (cloud) {
+          cloud.style.opacity = (puff * 0.9).toFixed(3);
+          cloud.style.transform = `scale(${(0.35 + dustU * 1.85).toFixed(3)})`;
+        }
+      }
+      return true;
+    }
+
+    paintGlideEnd(timeMs, mode) {
       const verdict = this.root.querySelector('[data-promo-scale-verdict]');
       const hero = verdict?.querySelector('.promo-scale__end-hero');
-      const zero = verdict?.querySelector('.promo-scale__zero');
-      const mark = verdict?.querySelector('.promo-scale__mark');
       const caption = verdict?.querySelector('.promo-scale__sold');
       const field = this.root.querySelector('[data-promo-grid-field]');
       if (!verdict || !hero) return;
-      const start = gridShimmerEnd();
-      if (timeMs < start) {
-        verdict.style.opacity = '0';
-        verdict.style.transform = '';
-        hero.style.transform = '';
-        if (caption) caption.style.opacity = '0';
-        return;
-      }
-      const elapsed = timeMs - start;
-      const settle = Math.min(1, elapsed / 1100);
-      const ease = 1 - (1 - settle) ** 3;
-      const scale = 11 + (1 - 11) * ease;
-      const colors = this.gridPalette();
+      const endAt = PROMO_GLIDE.layDownMs + PROMO_GLIDE.rampMs + PROMO_GLIDE.dissolveMs + PROMO_GLIDE.fieldHoldMs;
       this.root.classList.toggle('is-end-pitch', mode === 'pitch');
       this.root.classList.toggle('is-end-pain', mode !== 'pitch');
-      verdict.style.opacity = '1';
-      verdict.style.transformOrigin = 'center calc(50% - 24px)';
-      verdict.style.transform = `scale(${scale.toFixed(3)})`;
-      hero.style.opacity = '1';
-      hero.style.transform = 'none';
-      if (mode === 'pitch' && mark) {
-        mark.style.background = colors.primary;
-        mark.style.transform = 'none';
+      const streak = this.root.querySelector('.promo-glide__streak');
+      if (timeMs < endAt) {
+        verdict.style.opacity = '0';
+        verdict.style.transform = '';
+        if (caption) caption.style.opacity = '0';
+        if (streak) streak.style.opacity = '1';
+        if (field && glidePhase(timeMs) === 'field') field.style.opacity = glideFieldOpacity(timeMs).toFixed(3);
+        return;
       }
-      if (zero) zero.style.color = '';
+      const elapsed = timeMs - endAt;
+      const settle = Math.min(1, elapsed / PROMO_GLIDE.resolveMs);
+      const ease = 1 - (1 - settle) ** 3;
+      const colors = this.gridPalette();
+      const mark = verdict.querySelector('.promo-scale__mark');
+      verdict.style.opacity = '1';
+      if (streak) streak.style.opacity = (1 - ease).toFixed(3);
+      if (mode === 'pitch') {
+        const scale = 11 + (1 - 11) * ease;
+        verdict.style.transformOrigin = 'center calc(50% - 24px)';
+        verdict.style.transform = `scale(${scale.toFixed(3)})`;
+        if (mark) {
+          mark.style.background = colors.primary;
+          mark.style.transform = 'none';
+        }
+        if (caption) {
+          caption.textContent = 'Built to sell.';
+          caption.style.opacity = '1';
+          caption.style.transform = 'none';
+        }
+        if (field) field.style.opacity = (1 - ease).toFixed(3);
+        if (ease >= 1 && !this.gridThudSent) {
+          this.gridThudSent = true;
+          this.emitThud();
+        }
+        return;
+      }
+      verdict.style.transform = 'none';
       if (caption) {
-        caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
-        caption.style.opacity = '1';
+        caption.textContent = GLIDE_PAIN_LINE;
+        caption.style.opacity = ease.toFixed(3);
+        caption.style.transform = `translateY(${((1 - ease) * 28).toFixed(1)}px)`;
       }
       if (field) field.style.opacity = (1 - ease).toFixed(3);
-      if (ease >= 1 && !this.gridThudSent) {
-        this.gridThudSent = true;
-        this.emitThud();
+    }
+
+    paintGlideAt(timeMs, mode, options = {}) {
+      const root = this.mountGlide(mode);
+      if (!root) return;
+      const frame = this.gridFrame();
+      const time = options.reduced ? PROMO_GLIDE.layDownMs + 1500 : timeMs;
+      const view = glideCells(time, frame);
+      const sheet = root.querySelector('.promo-glide__sheet');
+      const streak = root.querySelector('.promo-glide__streak');
+      const level = root.querySelector('.promo-glide__level');
+      const lead = root.querySelector('.promo-glide__lead');
+      const field = root.querySelector('.promo-glide__field');
+      const cam = view.span.cam;
+      if (sheet) {
+        sheet.style.transform = `translate3d(${(frame.width / 2 - cam.x).toFixed(2)}px, ${(frame.height / 2 - cam.y).toFixed(2)}px, 0)`;
+        const lay = Math.min(1, time / PROMO_GLIDE.layDownMs);
+        sheet.style.opacity = options.reduced ? '1' : lay.toFixed(3);
       }
+      const blur = options.reduced ? 0 : glideBlurPx(time);
+      if (streak && level) {
+        if (blur > 0.4) {
+          const angle = glideBlurAngle();
+          streak.style.transform = `rotate(${angle.toFixed(2)}deg) scale(1.14)`;
+          level.style.transform = `rotate(${(-angle).toFixed(2)}deg) scale(${(1 / 1.14).toFixed(4)})`;
+          streak.style.filter = 'url(#promo-glide-blur)';
+          document.getElementById('promo-glide-blur-node')?.setAttribute('stdDeviation', `${blur.toFixed(2)} 0`);
+        } else {
+          streak.style.transform = '';
+          level.style.transform = '';
+          streak.style.filter = '';
+        }
+      }
+      root.querySelectorAll('.promo-glide__dof').forEach((layer) => {
+        layer.style.visibility = blur > 8 ? 'hidden' : '';
+      });
+      const nearRow = Math.floor(view.span.maxY / view.pitch);
+      const speed = cam.speed;
+      const liveOk = speed <= PROMO_GLIDE.liveMaxSpeed && glidePhase(time) === 'glide';
+      const pool = [...root.querySelectorAll('.promo-glide__cell')];
+      const used = new Set();
+      let shown = 0;
+      view.cells.forEach((cell) => {
+        if (cell.key === this.glideLeadKey && time < PROMO_GLIDE.layDownMs) return;
+        const node = pool.find((item) => item.dataset.key === cell.key && !used.has(item))
+          || pool.find((item) => !used.has(item));
+        if (!node) return;
+        const live = liveOk && cell.row >= nearRow - (PROMO_GLIDE.liveRows - 1) && cell.row <= nearRow;
+        const keep = this.paintGlideCell(node, cell, mode, time, view, live);
+        used.add(node);
+        if (!keep) {
+          node.hidden = true;
+          return;
+        }
+        shown += 1;
+      });
+      pool.forEach((node) => {
+        if (!used.has(node)) node.hidden = true;
+      });
+      if (lead) {
+        const leadCell = view.cells.find((cell) => cell.key === this.glideLeadKey) || glideLeadCell(frame);
+        const end = leadCell ? glideCellScreen(leadCell, cam, view.span.unit, frame) : null;
+        const start = this.glideLeadStart || end;
+        const lay = options.reduced ? 1 : Math.min(1, time / PROMO_GLIDE.layDownMs);
+        const ease = 1 - (1 - lay) ** 3;
+        if (start && end && lay < 1) {
+          lead.hidden = false;
+          lead.style.opacity = lay > 0.84 ? ((1 - lay) / 0.16).toFixed(3) : '1';
+          lead.style.left = `${(start.x + (end.x - start.x) * ease).toFixed(1)}px`;
+          lead.style.top = `${(start.y + (end.y - start.y) * ease).toFixed(1)}px`;
+          lead.style.width = `${(start.w + (end.w - start.w) * ease).toFixed(1)}px`;
+          lead.style.height = `${(start.h + (end.h - start.h) * ease).toFixed(1)}px`;
+        } else {
+          lead.hidden = true;
+        }
+      }
+      if (field && glidePhase(time) !== 'end') field.style.opacity = glideFieldOpacity(time).toFixed(3);
+      if (!options.reduced) this.paintGlideEnd(time, mode);
+      const activeEvents = glideEvents(mode, frame).filter((event) => event.t <= time).length;
+      this.glideStats = {
+        coverage: glideCoverage(time, frame),
+        nearCellWidth: Math.round(glideNearWidth(frame) * 10) / 10,
+        activeEvents,
+        shown,
+        phase: options.reduced ? 'glide' : glidePhase(time),
+        mode,
+      };
+    }
+
+    runGlide(mode) {
+      window.cancelAnimationFrame(this.planeFrame);
+      const start = performance.now();
+      const step = (now) => {
+        const elapsed = now - start;
+        this.paintGlideAt(elapsed, mode);
+        if (elapsed < glidePlayEnd()) this.planeFrame = window.requestAnimationFrame(step);
+      };
+      this.planeFrame = window.requestAnimationFrame(step);
+    }
+
+    whenGlideMediaReady() {
+      const videos = [...this.root.querySelectorAll('.promo-glide__cell:not([hidden]) video.promo-glide__video')];
+      const pending = videos.filter((video) => video.getAttribute('src') && video.readyState < 2);
+      if (!pending.length) return Promise.resolve();
+      return Promise.race([
+        Promise.all(pending.map((video) => new Promise((resolve) => {
+          const done = () => resolve();
+          video.addEventListener('loadeddata', done, { once: true });
+          video.addEventListener('error', done, { once: true });
+        }))),
+        waitMs(2500),
+      ]);
     }
 
     clearGridResolve() {
@@ -5024,181 +5235,6 @@
         node.style.color = '';
         node.style.background = '';
       });
-    }
-
-    mountGrid(mode) {
-      const wall = this.ensureWall();
-      if (!wall) return null;
-      wall.style.perspective = 'none';
-      wall.style.perspectiveOrigin = '50% 50%';
-      wall.style.transform = 'none';
-      wall.style.filter = 'none';
-      this.root.querySelector('.promo-scale__floor')?.remove();
-      const store = this.painStore();
-      if (store) store.style.visibility = 'hidden';
-      const frame = this.gridFrame();
-      const existing = wall.querySelector('[data-promo-grid]');
-      if (existing && existing.dataset.mode === mode && existing.dataset.frameW === String(frame.width)) return existing;
-      wall.replaceChildren();
-      const layout = gridFlexLayout();
-      const grid = document.createElement('div');
-      grid.className = 'promo-grid';
-      grid.dataset.promoGrid = 'true';
-      grid.dataset.mode = mode;
-      grid.dataset.frameW = String(frame.width);
-      const lead = this.gridLeadNode(mode);
-      layout.items.filter((item) => item.dom).forEach((item) => {
-        const cell = document.createElement('div');
-        cell.className = 'promo-grid__cell';
-        cell.dataset.index = String(item.index);
-        cell.dataset.col = String(item.col);
-        cell.dataset.row = String(item.row);
-        cell.style.left = `${item.x}px`;
-        cell.style.top = `${item.y}px`;
-        cell.style.width = `${item.w}px`;
-        cell.style.height = `${item.h}px`;
-        const device = document.createElement('div');
-        device.className = `promo-grid__device promo-device is-${item.device.id}`;
-        device.style.left = '0';
-        device.style.top = '0';
-        device.style.width = '100%';
-        device.style.height = '100%';
-        device.style.setProperty('--device-unit', (item.w / item.device.frame).toFixed(4));
-        device.style.borderRadius = `${gridMockupRadius(item.device, item.w).toFixed(2)}px`;
-        if (item.lead && mode === 'pitch') {
-          device.classList.add('is-lead');
-          this.gridFillLeadStill(device);
-          cell.classList.add('is-lead');
-        } else if (item.lead && lead) {
-          device.classList.add('is-lead');
-          this.gridFillLead(device, lead, { x: 0, y: 0, w: item.w, h: item.h });
-          cell.classList.add('is-lead');
-        } else {
-          const motion = this.gridFillClip(device, item.col, item.row, item.device.id, mode);
-          cell.classList.add(`is-${motion}`);
-        }
-        this.gridMountEnd(device);
-        cell.appendChild(device);
-        grid.appendChild(cell);
-      });
-      wall.appendChild(grid);
-      this.ensureGridLayers(wall);
-      this.gridStamped = new Set();
-      return grid;
-    }
-
-    paintGridAt(timeMs, mode = 'pain', options = {}) {
-      const grid = this.mountGrid(mode);
-      if (!grid) return;
-      const frame = this.gridFrame();
-      const layout = gridFlexLayout();
-      const camera = options.reduced
-        ? { ...gridPose(4, frame), count: 4, field: 0, phase: 'grid', timeMs, handoff: 1 }
-        : gridCamera(timeMs, frame);
-      const pastGrid = camera.count > 8;
-      const handoff = pastGrid ? Math.min(1, (camera.count - 8) / 2.4) : 0;
-      camera.handoff = options.reduced ? 1 : handoff;
-      grid.dataset.step = String(camera.step);
-      grid.style.setProperty('--grid-inv', (1 / Math.max(0.05, camera.s)).toFixed(5));
-      grid.style.transformOrigin = `${layout.hero.x}px ${layout.hero.y}px`;
-      grid.style.transform = `translate(${camera.x.toFixed(2)}px, ${camera.y.toFixed(2)}px) scale(${camera.s.toFixed(4)})`;
-      const cells = grid.querySelectorAll('.promo-grid__cell');
-      if (!this.gridStamped) this.gridStamped = new Set();
-      let thud = false;
-      cells.forEach((cell) => {
-        const col = Number(cell.dataset.col);
-        const row = Number(cell.dataset.row);
-        const index = Number(cell.dataset.index);
-        const item = layout.byKey.get(`${col},${row}`);
-        let opacity = item ? gridItemFade(item, camera, frame) : 0;
-        const onScreen = opacity > 0.55;
-        let marked = onScreen && timeMs >= gridStampAt(col, row, frame);
-        if (options.reduced && item) {
-          opacity = gridItemEnterCount(item, frame) <= 4 ? 1 : 0;
-          marked = opacity > 0;
-        }
-        cell.style.opacity = opacity.toFixed(3);
-        cell.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
-        cell.classList.toggle('is-in', opacity > 0.01);
-        cell.classList.toggle('is-lost', marked && mode !== 'pitch');
-        cell.classList.toggle('is-sold', marked && mode === 'pitch');
-        if (marked && !this.gridStamped.has(index)) {
-          this.gridStamped.add(index);
-          const screenH = Number.parseFloat(cell.style.height) * camera.s;
-          if (screenH > 72) thud = true;
-        }
-        this.syncGridClip(cell, onScreen && !marked);
-      });
-      if (thud && !options.reduced && !this.root.classList.contains('is-scale-still')) {
-        this.armScaleTimer(() => this.emitThud(), PROMO_GRID.stampPressMs);
-      }
-      const layers = this.ensureGridLayers(grid.parentElement);
-      const field = camera.field || 0;
-      const span = Math.max(0.05, camera.s);
-      const viewLeft = -camera.x / span;
-      const viewTop = -camera.y / span;
-      const viewRight = viewLeft + frame.width / span;
-      const viewBottom = viewTop + frame.height / span;
-      const extension = layout.items.some((item) => (
-        !item.dom
-        && item.x < viewRight
-        && item.x + item.w > viewLeft
-        && item.y < viewBottom
-        && item.y + item.h > viewTop
-      ));
-      grid.style.opacity = pastGrid ? (1 - handoff).toFixed(3) : '1';
-      layers.texture.style.opacity = (extension || handoff > 0.02) && !options.reduced
-        ? (1 - field).toFixed(3)
-        : '0';
-      if (camera.phase !== 'resolve') layers.field.style.opacity = field.toFixed(3);
-      layers.field.classList.toggle('is-pitch', mode === 'pitch');
-      if ((extension || handoff > 0.02) && field < 0.98 && !options.reduced) {
-        drawGridTexture(layers.texture, camera, mode, this.gridPalette());
-      }
-      if (!options.reduced) this.paintGridResolve(timeMs, mode);
-      else this.paintGridResolve(0, mode);
-    }
-
-    whenGridClipsReady() {
-      const videos = [...this.root.querySelectorAll('.promo-grid__cell.is-in video.promo-grid__clip')];
-      const pending = videos.filter((video) => video.readyState < 2);
-      if (!pending.length) return Promise.resolve();
-      return Promise.race([
-        Promise.all(pending.map((video) => new Promise((resolve) => {
-          const done = () => resolve();
-          video.addEventListener('loadeddata', done, { once: true });
-          video.addEventListener('error', done, { once: true });
-        }))),
-        waitMs(2500),
-      ]);
-    }
-
-    syncGridClip(cell, playing) {
-      const video = cell.querySelector('video.promo-grid__clip');
-      if (!video) return;
-      const next = playing ? '1' : '0';
-      if (cell.dataset.playing === next) return;
-      cell.dataset.playing = next;
-      if (!playing) {
-        video.pause();
-        return;
-      }
-      const play = () => video.play().catch(() => {});
-      if (video.readyState >= 2) play();
-      else video.addEventListener('loadeddata', play, { once: true });
-    }
-
-    runGrid(mode) {
-      const generation = this.scaleGeneration;
-      const started = performance.now();
-      const tick = (now) => {
-        if (generation !== this.scaleGeneration) return;
-        const elapsed = now - started;
-        this.paintGridAt(elapsed, mode);
-        if (elapsed < gridPlayEnd(mode)) this.conveyorFrame = requestAnimationFrame(tick);
-      };
-      this.paintGridAt(0, mode);
-      this.conveyorFrame = requestAnimationFrame(tick);
     }
 
     puffPainStore() {
@@ -5312,7 +5348,7 @@
         this.revealScaleLayer();
         this.root.classList.add('is-scale-still');
         await this.captureConveyorStill();
-        this.paintGridAt(0, 'pain', { reduced: true });
+        this.paintGlideAt(0, 'pain', { reduced: true });
         await waitMs(400);
         await this.playConveyorEnd('pain');
         if (marketingPart() === 'full') {
@@ -5359,16 +5395,17 @@
     async playScaleTimeline() {
       const generation = this.scaleGeneration;
       this.revealScaleLayer();
-      this.mountGrid('pain');
+      this.mountGlide('pain');
       if (generation !== this.scaleGeneration) return;
-      this.runGrid('pain');
-      await waitMs(gridPlayEnd('pain'));
+      this.runGlide('pain');
+      await waitMs(glidePlayEnd());
       if (generation !== this.scaleGeneration) return;
       await this.playConveyorEnd('pain', { settled: true });
     }
 
     leaveCorridor() {
       window.cancelAnimationFrame(this.conveyorFrame);
+      window.cancelAnimationFrame(this.planeFrame);
       this.scaleGeneration = (this.scaleGeneration || 0) + 1;
       this.root.classList.remove(
         'is-scale',
@@ -5427,7 +5464,7 @@
 
     setConveyorEnd(mode, ctaKey) {
       const caption = this.root.querySelector('[data-promo-end-caption]');
-      if (caption) caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
+      if (caption) caption.textContent = mode === 'pitch' ? 'Built to sell.' : GLIDE_PAIN_LINE;
       this.root.classList.toggle('is-end-pitch', mode === 'pitch');
       this.root.classList.toggle('is-end-pain', mode !== 'pitch');
       this.mountEndCta('none');
@@ -5481,7 +5518,7 @@
       if (prefersReducedMotion()) {
         this.root.classList.add('is-scale-still');
         this.revealScaleLayer();
-        this.paintGridAt(0, 'pitch', { reduced: true });
+        this.paintGlideAt(0, 'pitch', { reduced: true });
         await waitMs(400);
         await this.playConveyorEnd('pitch');
         this.restoreClerkSeat();
@@ -5490,10 +5527,10 @@
         return;
       }
       this.revealScaleLayer();
-      this.mountGrid('pitch');
+      this.mountGlide('pitch');
       if (generation !== this.scaleGeneration) return;
-      this.runGrid('pitch');
-      await waitMs(gridPlayEnd('pitch'));
+      this.runGlide('pitch');
+      await waitMs(glidePlayEnd());
       if (generation !== this.scaleGeneration) return;
       await this.playConveyorEnd('pitch', { settled: true });
       this.restoreClerkSeat();
@@ -5527,26 +5564,27 @@
       this.root.classList.add('is-scale-still');
       if (mode !== 'pitch') await Promise.race([this.captureConveyorStill(), waitMs(1200)]);
       const shot = kind === 'puff' ? 'event' : (kind === 'stream' ? 'lanes-7' : (kind === 'zero' ? 'end' : kind));
+      const fieldAt = PROMO_GLIDE.layDownMs + PROMO_GLIDE.rampMs + PROMO_GLIDE.dissolveMs;
       const gridAt = {
-        travel: 40,
-        'lane-1': 40,
-        event: gridStampAt(0, 0) + 180,
-        mid: gridTimeForCount(2) + 80,
-        'lanes-3': gridTimeForCount(2) + 80,
-        'lanes-5': gridTimeForCount(4) + 80,
-        'lanes-7': gridTimeForCount(8) + 200,
-        'residue-10': gridTimeForCount(4) + 80,
-        'residue-20': gridTimeForCount(4) + 80,
-        'residue-100': gridTimeForCount(8) + 200,
-        'residue-full': gridTimeForCount(8) + 200,
-        texture: gridTimeForCount(14),
-        field: gridShimmerEnd() - 40,
-        resolve: gridShimmerEnd() + PROMO_GRID.riseMs,
-        white: gridShimmerEnd() - 40,
+        travel: 280,
+        'lane-1': 280,
+        event: 1900,
+        mid: 3400,
+        'lanes-3': 2600,
+        'lanes-5': 4200,
+        'lanes-7': 5400,
+        'residue-10': 2600,
+        'residue-20': 3400,
+        'residue-100': 4800,
+        'residue-full': 5600,
+        texture: 5400,
+        field: fieldAt + 200,
+        resolve: fieldAt + PROMO_GLIDE.fieldHoldMs + 280,
+        white: fieldAt + 200,
       };
       if (gridAt[shot] != null) {
-        this.paintGridAt(gridAt[shot], mode);
-        await this.whenGridClipsReady();
+        this.paintGlideAt(gridAt[shot], mode);
+        await this.whenGlideMediaReady();
       }
       if (shot === 'end') {
         this.setConveyorEnd(mode, ctaKey);
@@ -5753,8 +5791,7 @@
         });
         if (phase !== 'hero') root.classList.add('is-see-docked', 'is-see-row');
         if (phase === 'landed') root.classList.add('is-see-landed');
-        const wave = promoVideoConfig.cta === 'demo';
-        if (wave && phase !== 'hero') root.classList.add('is-see-wave');
+        if (phase !== 'hero') root.classList.add('is-see-wave');
 
         const midIndex = Math.min(2, Math.max(0, this.stores.length - 1));
         const highlight = phase === 'hero'
@@ -5764,14 +5801,13 @@
             : phase === 'roulette'
               ? midIndex
               : this.landIndex;
-        if (wave && highlight >= 0) {
+        const ask = promoVideoConfig.cta !== 'demo' && promoVideoConfig.cta !== 'none';
+        if (phase === 'landed' && ask) {
+          this.paintWave(-1, 0, 0);
+          root.classList.add('is-see-cta', 'is-cta-aim');
+        } else if (highlight >= 0) {
           const rising = phase === 'row';
           this.paintWave(highlight, rising ? 0.35 : 1, rising ? 0.18 : 0.5);
-        } else if (highlight >= 0) {
-          this.highlightStore(highlight, phase === 'landed', true);
-        }
-        if (phase === 'landed' && !wave && promoVideoConfig.cta !== 'none' && seeCtaCopy()) {
-          root.classList.add('is-cta-aim');
         }
 
         if (phase === 'hero') {
