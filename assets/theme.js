@@ -4348,7 +4348,7 @@
       }
       promoWidget.applyStoreLook(this.bizmisLook());
       this.parkWidget();
-      this.clipClerkScale = clip.device === 'phone' ? 0.46 : clip.device === 'tablet' ? 0.58 : 0.72;
+      this.clipClerkScale = clip.device === 'phone' ? 0.62 : clip.device === 'tablet' ? 0.55 : 0.72;
       if (stage) {
         applyMomentPose(stage, moment.pose, { instant: false });
         applyMomentTake(stage.querySelector('.promo-moments__board'), moment.take);

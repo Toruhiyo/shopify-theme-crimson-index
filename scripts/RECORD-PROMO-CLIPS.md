@@ -79,4 +79,4 @@ Hard-reload the store after the theme sync before judging the live page. The exp
 
 ## What to look at in a pitch frame
 
-The clerk is the 3D Bizmis character, inside the window, not a circle. Take `a` and take `b` show different products. Catalog, product, compare, and bundle are four different layouts. Phone and tablet are the same scenes fitted to those viewports (`--clip-clerk-lane` and a smaller clerk scale), not a stretched desktop frame. No orange sphere.
+The clerk is the 3D Bizmis character, inside the window, not a circle. Take `a` and take `b` show different products. Catalog, product, compare, and bundle are four different layouts. Phone and tablet are the same scenes fitted to those viewports (`--clip-clerk-lane`, a smaller clerk scale, and the clerk pinned to the bottom-right of the viewport), not a stretched desktop frame. No orange sphere. Phone clips spoof `window.innerWidth` to 1280 before the page loads. Under 768px the widget swaps the full character for a hidden round bubble, so the phone viewport has to lie about its width or the clerk never appears. Tablet and desktop do not spoof it.

@@ -5501,6 +5501,29 @@ html.is-promo-clip .promo-scale {
 .promo-opening.is-clip-moment.is-clip-phone { --clip-clerk-lane: 108px; }
 .promo-opening.is-clip-moment.is-clip-tablet { --clip-clerk-lane: 150px; }
 
+.promo-opening.is-clip-moment.is-clip-phone.is-clerk-corner .promo-opening__widget,
+.promo-opening.is-clip-moment.is-clip-tablet.is-clerk-corner .promo-opening__widget {
+  position: fixed;
+  top: auto;
+  transform: none;
+  z-index: 40;
+}
+
+.promo-opening.is-clip-moment.is-clip-phone.is-clerk-corner .promo-opening__widget {
+  right: 0;
+  bottom: 64px;
+}
+
+.promo-opening.is-clip-moment.is-clip-phone [id="bizmis-avatar-embed"].is-promo-widget-parked {
+  height: 460px !important;
+  overflow: hidden !important;
+}
+
+.promo-opening.is-clip-moment.is-clip-tablet.is-clerk-corner .promo-opening__widget {
+  right: 16px;
+  bottom: 20px;
+}
+
 .promo-opening.is-clip-moment.is-clip-desktop.is-moments .promo-opening__store,
 .promo-opening.is-clip-moment.is-clip-desktop .promo-opening__store,
 .promo-opening.is-clip-moment .promo-opening__store,

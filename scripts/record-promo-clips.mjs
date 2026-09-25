@@ -128,6 +128,11 @@ async function recordDevice(browser, device, themeJs) {
     deviceScaleFactor: 1,
   });
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+  if (device === 'phone') {
+    await page.addInitScript(() => {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => 1280 });
+    });
+  }
   await page.route('**/assets/theme.js*', (route) => route.fulfill({
     status: 200,
     contentType: 'application/javascript; charset=utf-8',
