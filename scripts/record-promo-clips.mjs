@@ -18,8 +18,8 @@ const FRAME_COUNT = 30;
 
 const DEVICES = {
   desktop: {
-    width: 1280,
-    height: 800,
+    width: 800,
+    height: 500,
     motions: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
   },
   phone: {

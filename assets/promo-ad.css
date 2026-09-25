@@ -5025,9 +5025,11 @@ html.is-promo-cover .promo-cover,
   transition: none;
 }
 
-.promo-grid__device.is-desktop { border-radius: calc(14px * var(--grid-inv, 1)); }
-.promo-grid__device.is-tablet { border-radius: calc(16px * var(--grid-inv, 1)); }
-.promo-grid__device.is-phone { border-radius: calc(22px * var(--grid-inv, 1)); }
+.promo-grid__device.is-desktop,
+.promo-grid__device.is-tablet,
+.promo-grid__device.is-phone {
+  border-radius: 0;
+}
 
 .promo-grid__cell.is-lost .promo-grid__device { border-color: var(--ad-red); }
 .promo-grid__cell.is-sold .promo-grid__device { border-color: var(--bizmis-primary); }
@@ -5139,7 +5141,7 @@ html.is-promo-cover .promo-cover,
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   background: var(--ad-field);
   pointer-events: none;
 }
@@ -5320,6 +5322,7 @@ html.is-promo-clip .promo-scale {
   display: none !important;
 }
 
+.promo-opening.is-clip-desktop.is-moments .promo-opening__store,
 .promo-opening.is-clip-desktop .promo-opening__store {
   position: fixed;
   inset: 0;
@@ -5329,6 +5332,7 @@ html.is-promo-clip .promo-scale {
   max-width: none;
   max-height: none;
   aspect-ratio: auto;
+  transform: none;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -5558,8 +5562,118 @@ html.is-promo-clip .promo-scale {
   background: var(--ad-field);
 }
 
-.promo-clip__screen .promo-clip__hero {
-  width: min(78%, 460px);
+.promo-opening.is-clip-desktop .promo-clip__product {
+  padding: 0;
+  align-items: stretch;
+}
+
+.promo-opening.is-clip-desktop .promo-clip__scroll {
+  height: 100%;
+  justify-content: flex-start;
+}
+
+.promo-opening.is-clip-desktop .promo-clip__hero {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 6%;
+}
+
+.promo-opening.is-clip-desktop .promo-clip__product.is-product-read .promo-clip__hero img,
+.promo-opening.is-clip-desktop .promo-clip__product.is-product-scroll .promo-clip__hero img {
+  width: auto;
+  height: 78%;
+  max-width: 100%;
+  max-height: none;
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.promo-opening.is-clip-desktop .promo-clip__product.is-compare .promo-clip__hero {
+  width: 48%;
+  height: 100%;
+  padding: 0;
+}
+
+.promo-opening.is-clip-desktop .promo-clip__product.is-compare .promo-clip__hero img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+.promo-clip__screen .promo-clip__product {
+  padding: 8px 12px 4px;
+  align-items: stretch;
+}
+
+.promo-clip__screen .promo-clip__product .promo-clip__scroll {
+  height: 100%;
+}
+
+.promo-clip.is-phone .promo-clip__product.is-product-read .promo-clip__hero,
+.promo-clip.is-phone .promo-clip__product.is-product-scroll .promo-clip__hero {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  justify-content: flex-start;
+}
+
+.promo-clip.is-phone .promo-clip__product.is-product-read .promo-clip__hero img,
+.promo-clip.is-phone .promo-clip__product.is-product-scroll .promo-clip__hero img {
+  width: 100%;
+  height: 58%;
+  max-height: none;
+  flex: 0 0 auto;
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
+.promo-clip.is-phone .promo-clip__copy {
+  flex: 1 1 auto;
+  justify-content: space-evenly;
+  padding-top: 10px;
+}
+
+.promo-clip.is-tablet .promo-clip__product.is-product-read .promo-clip__hero,
+.promo-clip.is-tablet .promo-clip__product.is-product-scroll .promo-clip__hero {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  justify-content: flex-start;
+  padding: 0 8%;
+}
+
+.promo-clip.is-tablet .promo-clip__product.is-product-read .promo-clip__hero img,
+.promo-clip.is-tablet .promo-clip__product.is-product-scroll .promo-clip__hero img {
+  width: auto;
+  height: 72%;
+  max-width: 80%;
+  max-height: none;
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.promo-clip__screen .promo-clip__product.is-compare .promo-clip__hero {
+  width: 48%;
+  max-width: none;
+  height: 100%;
+  padding: 0;
+}
+
+.promo-clip__screen .promo-clip__product.is-compare .promo-clip__hero img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: contain;
 }
 
 .promo-clip__scroll {
@@ -5594,34 +5708,55 @@ html.is-promo-clip .promo-scale {
 .promo-clip__product.is-compare .promo-clip__scroll {
   flex-direction: row;
   align-items: stretch;
-  justify-content: center;
-  gap: 6%;
+  justify-content: space-between;
+  gap: 4%;
   height: 100%;
+  width: 100%;
 }
 
 .promo-clip__product.is-compare .promo-clip__hero {
-  width: 42%;
+  width: 48%;
+  height: 100%;
 }
 
 .promo-clip__product.is-compare,
-.promo-clip__product.is-product-read {
+.promo-clip__product.is-product-read,
+.promo-clip__product.is-product-scroll {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   align-items: center;
   padding-top: 0;
 }
 
-.promo-clip__product.is-compare {
-  position: relative;
+.promo-clip.is-phone .promo-clip__product.is-compare .promo-clip__scroll {
+  flex-direction: column;
+}
+
+.promo-clip.is-phone .promo-clip__product.is-compare .promo-clip__hero {
+  width: 100%;
+  height: 48%;
+}
+
+.promo-clip.is-phone .promo-clip__product.is-compare::after {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 48%;
+  animation-name: promo-clip-compare-down;
 }
 
 .promo-clip__product.is-compare::after {
   content: "";
   position: absolute;
-  left: 5%;
-  top: 8%;
-  width: 40%;
-  height: 78%;
+  left: 0;
+  top: 0;
+  width: 48%;
+  height: 100%;
   border: 1.5px solid var(--ad-ink);
-  border-radius: 22px;
+  border-radius: 18px;
   animation: promo-clip-compare 3s ease-in-out infinite;
 }
 
@@ -5716,6 +5851,11 @@ html.is-promo-clip .promo-scale {
 
 @keyframes promo-clip-compare {
   0%, 34% { transform: translateX(0); }
-  66%, 100% { transform: translateX(128%); }
+  66%, 100% { transform: translateX(108.4%); }
+}
+
+@keyframes promo-clip-compare-down {
+  0%, 34% { transform: translateY(0); }
+  66%, 100% { transform: translateY(108.4%); }
 }
 
