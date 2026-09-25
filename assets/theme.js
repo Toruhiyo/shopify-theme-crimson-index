@@ -251,6 +251,15 @@
     gapMin: 300,
     gapMax: 380,
     lostShare: 0.9,
+    rushMs: 1200,
+    fieldMs: 300,
+    shimmerMs: 600,
+    riseMs: 400,
+    pitchHoldMs: 800,
+    resolveMs: 500,
+    texture: 64,
+    fieldCount: 20,
+    lostField: '#F4F4F6',
     nearWidth: 0.8,
     farWidth: 0.14,
     stagger: 0,
@@ -1762,6 +1771,166 @@
     return gridHoldStart() + PROMO_GRID.holdMs;
   }
 
+  function gridFieldStart() {
+    const span = PROMO_GRID.texture - PROMO_GRID.steps[PROMO_GRID.steps.length - 1];
+    const unit = (PROMO_GRID.fieldCount - PROMO_GRID.steps[PROMO_GRID.steps.length - 1]) / span;
+    return Math.round(Math.sqrt(Math.max(0, unit)) * PROMO_GRID.rushMs);
+  }
+
+  function gridShimmerEnd() {
+    return gridDuration() + gridFieldStart() + PROMO_GRID.fieldMs + PROMO_GRID.shimmerMs;
+  }
+
+  function gridResolveSpan(mode) {
+    const hold = mode === 'pitch' ? PROMO_GRID.pitchHoldMs : 0;
+    return PROMO_GRID.riseMs + hold + PROMO_GRID.resolveMs;
+  }
+
+  function gridPlayEnd(mode) {
+    return gridShimmerEnd() + gridResolveSpan(mode);
+  }
+
+  function gridRushCount(tailMs) {
+    const from = PROMO_GRID.steps[PROMO_GRID.steps.length - 1];
+    const span = PROMO_GRID.texture - from;
+    const rushT = Math.min(1, Math.max(0, tailMs / PROMO_GRID.rushMs));
+    const eased = rushT * rushT;
+    let count = from + span * eased;
+    if (tailMs > PROMO_GRID.rushMs) {
+      const rate = (2 * span) / PROMO_GRID.rushMs;
+      count += rate * (tailMs - PROMO_GRID.rushMs);
+    }
+    return count;
+  }
+
+  function gridCssColor(root, name, fallback) {
+    const probe = document.createElement('span');
+    probe.style.color = `var(${name})`;
+    root.appendChild(probe);
+    const value = getComputedStyle(probe).color || fallback;
+    probe.remove();
+    return value;
+  }
+
+  function gridRgb(color) {
+    const match = String(color).match(/[\d.]+/g);
+    if (!match || match.length < 3) return { r: 249, g: 163, b: 83 };
+    return { r: Number(match[0]), g: Number(match[1]), b: Number(match[2]) };
+  }
+
+  function gridRgba(color, alpha) {
+    const { r, g, b } = gridRgb(color);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function gridMixWhite(color, amount) {
+    const { r, g, b } = gridRgb(color);
+    const mix = (channel) => Math.round(channel * amount + 255 * (1 - amount));
+    return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+  }
+
+  const PROMO_END_EMPTY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9.2" cy="19.2" r="1.15" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.15" fill="currentColor"/></svg>';
+  const PROMO_END_SOLD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h13l-1.4 8.2H8.1L6.5 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 7 5.2 4H2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9.2 11.4 11.1 13.3 15.4 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.2" cy="19.2" r="1.15" fill="currentColor"/><circle cx="16.6" cy="19.2" r="1.15" fill="currentColor"/></svg>';
+
+  function drawGridCart(ctx, x, y, size, sold) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size / 24, size / 24);
+    ctx.lineWidth = 1.4;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(6.5, 7);
+    ctx.lineTo(19.5, 7);
+    ctx.lineTo(18.1, 15.2);
+    ctx.lineTo(8.1, 15.2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(6.5, 7);
+    ctx.lineTo(5.2, 4);
+    ctx.lineTo(2.5, 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(9.2, 19.2, 1.15, 0, Math.PI * 2);
+    ctx.arc(16.6, 19.2, 1.15, 0, Math.PI * 2);
+    ctx.fill();
+    if (sold) {
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(9.2, 11.4);
+      ctx.lineTo(11.1, 13.3);
+      ctx.lineTo(15.4, 9);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawGridTexture(canvas, camera, mode, colors) {
+    const width = canvas.clientWidth || 1440;
+    const height = canvas.clientHeight || 810;
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+    }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    const count = Math.max(1, Math.ceil(camera.count || 8));
+    const { cellW, cellH, gap } = camera.metrics;
+    const sold = mode === 'pitch';
+    const fill = sold ? gridMixWhite(colors.primary, 0.85) : PROMO_GRID.lostField;
+    const ink = sold ? '#fff' : gridRgba(colors.ink3, 0.6);
+    const hair = sold ? colors.primary : gridRgba(colors.red, 0.55);
+    ctx.lineWidth = 1;
+    ctx.font = `500 ${Math.max(8, 12)}px ${colors.font}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let row = 0; row < count; row += 1) {
+      for (let col = 0; col < count; col += 1) {
+        const index = col < PROMO_GRID.cols && row < PROMO_GRID.cols
+          ? row * PROMO_GRID.cols + col
+          : PROMO_GRID.cols * PROMO_GRID.cols + row * count + col;
+        const device = gridDeviceOf(index);
+        const box = gridDeviceBox(device, cellW, cellH);
+        const x = camera.x + (col * (cellW + gap) + box.x) * camera.s;
+        const y = camera.y + (row * (cellH + gap) + box.y) * camera.s;
+        const w = box.w * camera.s;
+        const h = box.h * camera.s;
+        if (x > width || y > height || x + w < 0 || y + h < 0) continue;
+        ctx.globalAlpha = sold ? 1 : 0.9;
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, w, h);
+        if (h > 36) {
+          ctx.globalAlpha = (sold ? 1 : 0.9) * 0.4;
+          ctx.fillStyle = ink;
+          const dot = Math.max(1.5, h * 0.035);
+          for (let bit = 0; bit < 3; bit += 1) {
+            ctx.beginPath();
+            ctx.arc(x + w * (0.08 + bit * 0.045), y + h * 0.08, dot, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = sold ? 1 : 0.9;
+        ctx.strokeStyle = hair;
+        ctx.strokeRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
+        if (h > 28) {
+          ctx.fillStyle = ink;
+          ctx.strokeStyle = ink;
+          const glyph = h * 0.4;
+          drawGridCart(ctx, x + (w - glyph) / 2, y + (h - glyph) / 2 - h * 0.04, glyph, sold);
+        }
+        if (h > 56) {
+          ctx.fillStyle = ink;
+          ctx.font = `500 ${Math.max(8, h * 0.07)}px ${colors.font}`;
+          ctx.fillText(sold ? 'Added to cart' : 'Cart is empty', x + w / 2, y + h * 0.78);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function gridEase(t) {
     const clamped = Math.min(1, Math.max(0, t));
     const x1 = 0.4;
@@ -1846,14 +2015,47 @@
     };
   }
 
+  function gridTailView(tailMs) {
+    const fieldStart = gridFieldStart();
+    const fadeEnd = fieldStart + PROMO_GRID.fieldMs;
+    let field = 0;
+    let tile = 1;
+    if (tailMs >= fieldStart) field = Math.min(1, (tailMs - fieldStart) / PROMO_GRID.fieldMs);
+    if (tailMs >= fadeEnd) {
+      const fade = Math.min(1, (tailMs - fadeEnd) / PROMO_GRID.shimmerMs);
+      tile = 0.08 * (1 - fade);
+    } else if (tailMs >= fieldStart) {
+      const fade = (tailMs - fieldStart) / PROMO_GRID.fieldMs;
+      tile = 1 - fade * (1 - 0.08);
+    }
+    return { field, tile };
+  }
+
   function gridCamera(timeMs, frame) {
     const metrics = gridMetrics(frame);
     const steps = PROMO_GRID.steps;
-    if (timeMs <= PROMO_GRID.introMs) return { ...gridPose(1, frame, metrics), metrics };
+    if (timeMs >= gridDuration()) {
+      const frozen = Math.min(timeMs, gridShimmerEnd());
+      const tailMs = frozen - gridDuration();
+      const count = gridRushCount(tailMs);
+      const view = gridTailView(tailMs);
+      return {
+        ...gridPose(count, frame, metrics),
+        metrics,
+        count,
+        phase: timeMs >= gridShimmerEnd() ? 'resolve' : 'rush',
+        field: timeMs >= gridShimmerEnd() ? 1 : view.field,
+        tile: timeMs >= gridShimmerEnd() ? 0 : view.tile,
+      };
+    }
+    if (timeMs <= PROMO_GRID.introMs) {
+      return { ...gridPose(1, frame, metrics), metrics, count: 1, phase: 'grid', field: 0, tile: 0 };
+    }
     const elapsed = timeMs - PROMO_GRID.introMs;
     const hops = steps.length - 1;
     if (elapsed >= hops * gridSpan()) {
-      return { ...gridPose(steps[steps.length - 1], frame, metrics), metrics };
+      const pose = gridPose(steps[steps.length - 1], frame, metrics);
+      return { ...pose, metrics, count: pose.step, phase: 'grid', field: 0, tile: 0 };
     }
     const hop = Math.min(hops - 1, Math.floor(elapsed / gridSpan()));
     const local = elapsed - hop * gridSpan();
@@ -1869,6 +2071,10 @@
       reveal: steps[hop + 1],
       fade: Math.min(1, local / PROMO_GRID.fadeMs),
       metrics,
+      count: unit >= 1 ? steps[hop + 1] : steps[hop],
+      phase: 'grid',
+      field: 0,
+      tile: 0,
     };
   }
 
@@ -3737,6 +3943,7 @@
         'is-pitch-belt',
         'is-corridor',
         'is-grid',
+        'is-grid-locked',
         'snap',
         'thud',
         'puff',
@@ -3745,6 +3952,8 @@
       this.residue?.reset();
       this.residue = null;
       this.openingResidueAt = 0;
+      this.gridPaletteCache = null;
+      this.gridThudSent = false;
       const caption = this.root.querySelector('[data-promo-end-caption]');
       if (caption) caption.textContent = 'Sold by the chatbot.';
       const scale = this.root.querySelector('[data-promo-scale]');
@@ -4245,6 +4454,121 @@
       device.append(cart, mark);
     }
 
+    gridMountEnd(device) {
+      const end = document.createElement('div');
+      end.className = 'promo-grid__end';
+      const bar = document.createElement('div');
+      bar.className = 'promo-grid__end-bar';
+      for (let bit = 0; bit < 3; bit += 1) {
+        const dot = document.createElement('i');
+        bar.appendChild(dot);
+      }
+      const glyph = document.createElement('span');
+      glyph.className = 'promo-grid__end-glyph';
+      glyph.innerHTML = `<span class="is-empty">${PROMO_END_EMPTY}</span><span class="is-sold">${PROMO_END_SOLD}</span>`;
+      const label = document.createElement('p');
+      label.className = 'promo-grid__end-label';
+      label.innerHTML = '<span class="is-empty">Cart is empty</span><span class="is-sold">Added to cart</span>';
+      const burst = document.createElement('span');
+      burst.className = 'promo-grid__end-burst';
+      for (let ray = 0; ray < 8; ray += 1) {
+        const bit = document.createElement('i');
+        bit.style.setProperty('--ray', String(ray));
+        burst.appendChild(bit);
+      }
+      end.append(bar, burst, glyph, label);
+      device.appendChild(end);
+    }
+
+    ensureGridLayers(wall) {
+      let texture = wall.querySelector('[data-promo-grid-texture]');
+      if (!texture) {
+        texture = document.createElement('canvas');
+        texture.className = 'promo-grid__texture';
+        texture.setAttribute('data-promo-grid-texture', '');
+        wall.appendChild(texture);
+      }
+      let field = wall.querySelector('[data-promo-grid-field]');
+      if (!field) {
+        field = document.createElement('div');
+        field.className = 'promo-grid__field';
+        field.setAttribute('data-promo-grid-field', '');
+        wall.appendChild(field);
+      }
+      return { texture, field };
+    }
+
+    gridPalette() {
+      if (this.gridPaletteCache) return this.gridPaletteCache;
+      const fontProbe = document.createElement('span');
+      fontProbe.style.fontFamily = 'var(--font-heading)';
+      this.root.appendChild(fontProbe);
+      const font = getComputedStyle(fontProbe).fontFamily || 'sans-serif';
+      fontProbe.remove();
+      this.gridPaletteCache = {
+        primary: gridCssColor(this.root, '--bizmis-primary', '#f9a353'),
+        red: gridCssColor(this.root, '--ad-red', '#E5533D'),
+        ink: gridCssColor(this.root, '--ad-ink', '#171717'),
+        ink3: gridCssColor(this.root, '--ad-ink-3', '#969696'),
+        font,
+      };
+      return this.gridPaletteCache;
+    }
+
+    paintGridResolve(timeMs, mode) {
+      const verdict = this.root.querySelector('[data-promo-scale-verdict]');
+      const hero = verdict?.querySelector('.promo-scale__end-hero');
+      const zero = verdict?.querySelector('.promo-scale__zero');
+      const mark = verdict?.querySelector('.promo-scale__mark');
+      const caption = verdict?.querySelector('.promo-scale__sold');
+      const field = this.root.querySelector('[data-promo-grid-field]');
+      if (!verdict || !hero) return;
+      const start = gridShimmerEnd();
+      if (timeMs < start) {
+        verdict.style.opacity = '0';
+        hero.style.transform = '';
+        if (caption) caption.style.opacity = '0';
+        return;
+      }
+      this.root.classList.toggle('is-end-pitch', mode === 'pitch');
+      this.root.classList.toggle('is-end-pain', mode !== 'pitch');
+      const elapsed = timeMs - start;
+      const fadeStart = PROMO_GRID.riseMs + (mode === 'pitch' ? PROMO_GRID.pitchHoldMs : 0);
+      const rise = Math.min(1, elapsed / PROMO_GRID.riseMs);
+      const riseEase = 1 - (1 - rise) ** 3;
+      const fade = Math.min(1, Math.max(0, (elapsed - fadeStart) / PROMO_GRID.resolveMs));
+      const colors = this.gridPalette();
+      verdict.style.opacity = String(riseEase);
+      hero.style.opacity = '1';
+      hero.style.transform = `translateY(${((1 - riseEase) * 18).toFixed(1)}px)`;
+      if (zero) zero.style.color = fade > 0 ? gridMixWhite(colors.ink, fade) : '#fff';
+      if (mark) mark.style.background = fade > 0 ? gridMixWhite(colors.primary, fade) : '#fff';
+      if (caption) {
+        caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
+        caption.style.opacity = String(fade);
+      }
+      if (field) field.style.opacity = (1 - fade).toFixed(3);
+      if (rise >= 1 && !this.gridThudSent) {
+        this.gridThudSent = true;
+        this.emitThud();
+      }
+    }
+
+    clearGridResolve() {
+      const verdict = this.root.querySelector('[data-promo-scale-verdict]');
+      const hero = verdict?.querySelector('.promo-scale__end-hero');
+      const zero = verdict?.querySelector('.promo-scale__zero');
+      const mark = verdict?.querySelector('.promo-scale__mark');
+      const caption = verdict?.querySelector('.promo-scale__sold');
+      [verdict, hero, zero, mark, caption].forEach((node) => {
+        if (!node) return;
+        node.style.opacity = '';
+        node.style.transform = '';
+        node.style.color = '';
+        node.style.background = '';
+      });
+    }
+
     mountGrid(mode) {
       const wall = this.ensureWall();
       if (!wall) return null;
@@ -4295,6 +4619,7 @@
           const motion = this.gridFillClip(device, index, deviceKind.id, mode);
           cell.classList.add(`is-${motion}`);
         }
+        this.gridMountEnd(device);
         this.gridMark(device);
         if (index === 0) device.querySelector('.promo-grid__cart')?.remove();
         if (index === 0 && mode === 'pitch') {
@@ -4306,6 +4631,7 @@
         grid.appendChild(cell);
       }
       wall.appendChild(grid);
+      this.ensureGridLayers(wall);
       return grid;
     }
 
@@ -4330,13 +4656,24 @@
           opacity = inside ? 1 : 0;
           marked = inside;
         }
-        cell.style.opacity = opacity.toFixed(3);
+        const shown = marked && mode !== 'pitch' ? opacity * 0.9 : opacity;
+        cell.style.opacity = shown.toFixed(3);
         cell.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
         cell.classList.toggle('is-in', opacity > 0.01);
         cell.classList.toggle('is-lost', marked && mode !== 'pitch');
         cell.classList.toggle('is-sold', marked && mode === 'pitch');
         this.syncGridClip(cell, opacity > 0.01 && !marked);
       });
+      const layers = this.ensureGridLayers(grid.parentElement);
+      const rushing = camera.phase !== 'grid' && !options.reduced;
+      const handoff = rushing ? Math.min(1, (timeMs - gridDuration()) / 180) : 0;
+      grid.style.opacity = rushing ? (1 - handoff).toFixed(3) : '1';
+      layers.texture.style.opacity = rushing ? camera.tile.toFixed(3) : '0';
+      if (camera.phase !== 'resolve') layers.field.style.opacity = camera.field.toFixed(3);
+      layers.field.classList.toggle('is-pitch', mode === 'pitch');
+      if (rushing && camera.tile > 0.001) drawGridTexture(layers.texture, camera, mode, this.gridPalette());
+      if (!options.reduced) this.paintGridResolve(timeMs, mode);
+      else this.paintGridResolve(0, mode);
     }
 
     whenGridClipsReady() {
@@ -4375,7 +4712,7 @@
         if (generation !== this.scaleGeneration) return;
         const elapsed = now - started;
         this.paintGridAt(elapsed, mode);
-        if (elapsed < gridDuration()) this.conveyorFrame = requestAnimationFrame(tick);
+        if (elapsed < gridPlayEnd(mode)) this.conveyorFrame = requestAnimationFrame(tick);
       };
       this.paintGridAt(0, mode);
       this.conveyorFrame = requestAnimationFrame(tick);
@@ -4542,9 +4879,9 @@
       this.mountGrid('pain');
       if (generation !== this.scaleGeneration) return;
       this.runGrid('pain');
-      await waitMs(gridDuration());
+      await waitMs(gridPlayEnd('pain'));
       if (generation !== this.scaleGeneration) return;
-      await this.playConveyorEnd('pain');
+      await this.playConveyorEnd('pain', { settled: true });
     }
 
     leaveCorridor() {
@@ -4613,13 +4950,18 @@
       this.mountEndCta(mode === 'pitch' ? (ctaKey || promoVideoConfig.cta) : 'none');
     }
 
-    async playConveyorEnd(mode) {
+    async playConveyorEnd(mode, options = {}) {
       window.cancelAnimationFrame(this.conveyorFrame);
       this.setConveyorEnd(mode);
-      this.root.classList.add('is-scale-white');
-      await waitMs(PROMO_SCALE_WHITE_MS);
-      this.root.classList.add('is-scale-zero');
-      this.emitThud();
+      if (options.settled) {
+        this.root.classList.add('is-scale-white', 'is-scale-zero', 'is-grid-locked');
+        this.clearGridResolve();
+      } else {
+        this.root.classList.add('is-scale-white');
+        await waitMs(PROMO_SCALE_WHITE_MS);
+        this.root.classList.add('is-scale-zero');
+        this.emitThud();
+      }
       const cta = mode === 'pitch' ? promoVideoConfig.cta : 'none';
       const visible = cta === 'none' ? PROMO_SCALE_HOLD_MS : PROMO_END_CTA_DELAY_MS + PROMO_END_CTA_HOLD_MS;
       await waitMs(visible + promoHoldMs());
@@ -4670,9 +5012,9 @@
       this.mountGrid('pitch');
       if (generation !== this.scaleGeneration) return;
       this.runGrid('pitch');
-      await waitMs(gridDuration());
+      await waitMs(gridPlayEnd('pitch'));
       if (generation !== this.scaleGeneration) return;
-      await this.playConveyorEnd('pitch');
+      await this.playConveyorEnd('pitch', { settled: true });
       this.restoreClerkSeat();
       this.leaveCorridor();
       this.playSeeForYourself();
@@ -4716,15 +5058,25 @@
         'residue-20': 3100,
         'residue-100': 5200,
         'residue-full': 5200,
+        texture: gridDuration() + gridFieldStart(),
+        field: gridShimmerEnd() - 40,
+        resolve: gridShimmerEnd() + PROMO_GRID.riseMs,
+        white: gridShimmerEnd() - 40,
       };
       if (gridAt[shot] != null) {
         this.paintGridAt(gridAt[shot], mode);
         await this.whenGridClipsReady();
       }
-      if (shot === 'white' || shot === 'end') this.root.classList.add('is-scale-white');
       if (shot === 'end') {
         this.setConveyorEnd(mode, ctaKey);
-        this.root.classList.add('is-scale-zero');
+        this.root.classList.add('is-scale-white', 'is-scale-zero', 'is-grid-locked');
+        this.clearGridResolve();
+      }
+      if (shot === 'event' && mode === 'pitch') {
+        this.root.querySelectorAll('.promo-grid__cell.is-sold .promo-grid__end-burst').forEach((node) => {
+          node.style.animationDelay = '-90ms';
+          node.style.animationPlayState = 'paused';
+        });
       }
       return this.whenPainRest(this.painHost());
     }
@@ -5288,6 +5640,9 @@
         'pain-c-lanes-3': () => this.showScaleExport('lanes-3', 'pain'),
         'pain-c-lanes-5': () => this.showScaleExport('lanes-5', 'pain'),
         'pain-c-lanes-7': () => this.showScaleExport('lanes-7', 'pain'),
+        'pain-c-texture': () => this.showScaleExport('texture', 'pain'),
+        'pain-c-field': () => this.showScaleExport('field', 'pain'),
+        'pain-c-resolve': () => this.showScaleExport('resolve', 'pain'),
         'pain-c-residue-10': () => this.showScaleExport('lanes-5', 'pain'),
         'pain-c-residue-20': () => this.showScaleExport('lanes-5', 'pain'),
         'pain-c-residue-100': () => this.showScaleExport('lanes-7', 'pain'),
@@ -5303,6 +5658,9 @@
         'pitch-c-lanes-3': () => this.showScaleExport('lanes-3', 'pitch'),
         'pitch-c-lanes-5': () => this.showScaleExport('lanes-5', 'pitch'),
         'pitch-c-lanes-7': () => this.showScaleExport('lanes-7', 'pitch'),
+        'pitch-c-texture': () => this.showScaleExport('texture', 'pitch'),
+        'pitch-c-field': () => this.showScaleExport('field', 'pitch'),
+        'pitch-c-resolve': () => this.showScaleExport('resolve', 'pitch'),
         'pitch-c-residue-10': () => this.showScaleExport('lanes-5', 'pitch'),
         'pitch-c-residue-20': () => this.showScaleExport('lanes-5', 'pitch'),
         'pitch-c-residue-100': () => this.showScaleExport('lanes-7', 'pitch'),
