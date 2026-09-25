@@ -366,7 +366,7 @@
   const PROMO_MOMENT_OTHER_RING_MS = 600;
   const PROMO_MOMENTS_SHORTLIST_MS = 1680;
   const PROMO_MOMENTS_DOCK_MS = 820;
-  const PROMO_MOMENTS_ADDON_AT_MS = 1000;
+  const PROMO_MOMENTS_BUNDLE_CELEBRATE_MS = 120;
   const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
@@ -379,6 +379,8 @@
   const PROMO_SEE_ROW_AT_MS = 3120;
   const PROMO_CLERK_ROW_MS = 1200;
   const PROMO_SEE_LAND_HOLD_MS = 1200;
+  const PROMO_SEE_CTA_HOLD_MS = 4000;
+  const PROMO_SEE_CURSOR_MS = 800;
   const PROMO_SEE_GLIDE_MS = 9800;
   const PROMO_SEE_STAIN_MS = 920;
   const PROMO_SEE_STAIN_COUNT = 9;
@@ -1049,15 +1051,15 @@
     return meta;
   }
 
-  function momentAdd() {
+  function momentAdd(copy) {
     const add = document.createElement('span');
     add.className = 'promo-moments__add';
     const label = document.createElement('span');
     label.className = 'promo-moments__add-label';
-    label.textContent = 'Add';
+    label.textContent = copy?.label || 'Add';
     const done = document.createElement('span');
     done.className = 'promo-moments__add-done';
-    done.append(momentMark('yes'), document.createTextNode('Added'));
+    done.append(momentMark('yes'), document.createTextNode(copy?.done || 'Added'));
     add.append(label, done);
     return add;
   }
@@ -1135,7 +1137,11 @@
     }
     const accessory = document.createElement('div');
     accessory.className = 'promo-moments__card is-extra';
-    accessory.append(momentPhoto(PROMO_MOMENT_CARD_COUNT), momentMeta(PROMO_MOMENT_CARD_COUNT), momentAdd());
+    accessory.append(
+      momentPhoto(PROMO_MOMENT_CARD_COUNT),
+      momentMeta(PROMO_MOMENT_CARD_COUNT),
+      momentAdd({ label: 'Add to cart', done: 'Added to cart' }),
+    );
     board.appendChild(accessory);
     board.appendChild(momentCompare());
     const orbits = [
@@ -2470,7 +2476,54 @@
       viewport.appendChild(track);
       row.appendChild(viewport);
     }
+    appendSeeCta(row, track);
     return track;
+  }
+
+  function seeCtaCopy() {
+    return PROMO_END_CTA[promoVideoConfig.cta] || null;
+  }
+
+  function appendSeeCta(row, track) {
+    const copy = seeCtaCopy();
+    if (!track || !copy) return;
+    const slide = document.createElement('article');
+    slide.className = 'promo-opening__slide is-cta';
+    slide.dataset.store = 'cta';
+    const meta = document.createElement('header');
+    meta.className = 'promo-opening__slide-meta';
+    meta.setAttribute('aria-hidden', 'true');
+    const sector = document.createElement('p');
+    sector.className = 'promo-opening__slide-sector';
+    sector.textContent = '\u00a0';
+    const name = document.createElement('p');
+    name.className = 'promo-opening__slide-name';
+    name.textContent = '\u00a0';
+    meta.append(sector, name);
+    const card = document.createElement('div');
+    card.className = 'promo-opening__slide-card';
+    if (copy.scarcity) {
+      const note = document.createElement('p');
+      note.className = 'promo-opening__see-note';
+      note.textContent = copy.scarcity;
+      card.append(note);
+    }
+    const button = document.createElement('span');
+    button.className = 'promo-opening__see-button';
+    button.textContent = copy.label;
+    const cursor = document.createElement('span');
+    cursor.className = 'promo-opening__see-cursor';
+    cursor.setAttribute('aria-hidden', 'true');
+    cursor.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.2 19.2 12.1 11.6 13.4 8.8 20.6z"/></svg>';
+    card.append(button, cursor);
+    slide.append(meta, card);
+    track.appendChild(slide);
+    if (copy.url && row) {
+      const url = document.createElement('p');
+      url.className = 'promo-opening__see-url';
+      url.textContent = copy.url;
+      row.append(url);
+    }
   }
 
   function hasPromoCover() {
@@ -3147,7 +3200,8 @@
 
     snapSeeLanded() {
       this.root.classList.add('is-see', 'is-see-in', 'is-see-docked', 'is-see-row', 'is-see-landed');
-      this.highlightStore(this.landIndex, true, true);
+      this.highlightStore(this.seeEndIndex(), true, true);
+      if (seeCtaCopy()) this.root.classList.add('is-cta-aim');
       const store = this.stores[this.landIndex];
       if (store) promoWidget.applyStoreLook(store);
     }
@@ -3280,7 +3334,7 @@
       this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
       this.root.style.setProperty('--promo-compare-fold', `${PROMO_MOMENTS_CHOICE_MS - 200}ms`);
       this.root.style.setProperty('--promo-settle-end', `${PROMO_MOMENTS_DOCK_MS}ms`);
-      this.root.style.setProperty('--promo-addon-at', `${PROMO_MOMENTS_ADDON_AT_MS}ms`);
+      this.root.style.setProperty('--promo-bundle-celebrate', `${PROMO_MOMENTS_BUNDLE_CELEBRATE_MS}ms`);
       this.root.style.setProperty('--promo-ring-gap', `${PROMO_MOMENT_RING_GAP_MS}ms`);
       this.root.style.setProperty('--promo-other-ring', `${PROMO_MOMENT_OTHER_RING_MS}ms`);
       this.root.style.setProperty('--promo-catalog-seek', `${PROMO_MOMENT_SEEK_MS}ms`);
@@ -3365,6 +3419,12 @@
       onDone();
     }
 
+    seeEndIndex() {
+      const cta = this.carouselTrack?.querySelector('.promo-opening__slide.is-cta');
+      if (!cta || !this.carouselTrack) return this.landIndex;
+      return [...this.carouselTrack.children].indexOf(cta);
+    }
+
     playSeeForYourself() {
       endOpeningAgent();
       if (!this.stores.length) {
@@ -3374,7 +3434,7 @@
 
       if (prefersReducedMotion()) {
         this.snapSeeLanded();
-        window.setTimeout(() => this.depart(), PROMO_SEE_REDUCED_HOLD_MS);
+        window.setTimeout(() => this.depart(), PROMO_SEE_CTA_HOLD_MS);
         return;
       }
 
@@ -3394,13 +3454,19 @@
       window.setTimeout(() => {
         this.glideClerkIntoRow();
         this.playStoreGlide(() => {
-          window.setTimeout(() => this.depart(), PROMO_SEE_LAND_HOLD_MS);
+          const hold = PROMO_SEE_CTA_HOLD_MS;
+          if (seeCtaCopy()) {
+            window.setTimeout(() => {
+              this.root.classList.add('is-cta-aim');
+            }, Math.max(0, hold - PROMO_SEE_CURSOR_MS));
+          }
+          window.setTimeout(() => this.depart(), hold);
         });
       }, PROMO_SEE_ROW_AT_MS);
     }
 
     playStoreGlide(onDone) {
-      const land = this.landIndex;
+      const end = this.seeEndIndex();
       const track = this.carouselTrack;
       if (!track || !track.children.length) {
         onDone();
@@ -3411,10 +3477,10 @@
       track.style.transform = `translate3d(${-this.carouselOffset(0)}px, 0, 0)`;
       this.syncWheelPerspective();
       this.applyWheel(0);
-      this.setActiveSlide(0, land <= 0);
+      this.setActiveSlide(0, end <= 0);
       const first = this.stores[0];
       if (first) this.arriveStore(first);
-      if (land <= 0) {
+      if (end <= 0) {
         onDone();
         return;
       }
@@ -3425,18 +3491,18 @@
       const frame = (now) => {
         const linear = (now - started) / PROMO_SEE_GLIDE_MS;
         if (linear >= 1) {
-          this.placeCarousel(land, true);
-          this.setActiveSlide(land, true);
-          if (arrived < land) {
-            const store = this.stores[land];
+          this.placeCarousel(end, true);
+          this.setActiveSlide(end, true);
+          if (arrived < end) {
+            const store = this.stores[end];
             if (store) this.arriveStore(store);
           }
           this.glideFrame = 0;
           onDone();
           return;
         }
-        const index = land * glideEase(linear);
-        const base = Math.min(land - 1, Math.floor(index));
+        const index = end * glideEase(linear);
+        const base = Math.min(end - 1, Math.floor(index));
         const next = base + 1;
         const frac = index - base;
         const offset = this.carouselOffset(base)
@@ -5084,7 +5150,7 @@
       if (caption) caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
       this.root.classList.toggle('is-end-pitch', mode === 'pitch');
       this.root.classList.toggle('is-end-pain', mode !== 'pitch');
-      this.mountEndCta(mode === 'pitch' ? (ctaKey || promoVideoConfig.cta) : 'none');
+      this.mountEndCta('none');
     }
 
     async playConveyorEnd(mode, options = {}) {
@@ -5099,9 +5165,7 @@
         this.root.classList.add('is-scale-zero');
         this.emitThud();
       }
-      const cta = mode === 'pitch' ? promoVideoConfig.cta : 'none';
-      const visible = cta === 'none' ? PROMO_SCALE_HOLD_MS : PROMO_END_CTA_DELAY_MS + PROMO_END_CTA_HOLD_MS;
-      await waitMs(visible + promoHoldMs());
+      await waitMs(PROMO_SCALE_HOLD_MS + promoHoldMs());
     }
 
     seatClerkOnBelt(instant) {
@@ -5423,15 +5487,16 @@
             ? 0
             : phase === 'roulette'
               ? midIndex
-              : this.landIndex;
+              : this.seeEndIndex();
         if (highlight >= 0) this.highlightStore(highlight, phase === 'landed', true);
+        if (phase === 'landed' && seeCtaCopy()) root.classList.add('is-cta-aim');
 
         if (phase === 'hero') {
           root.classList.add('is-moments');
           promoWidget.applyStoreLook(this.bizmisLook());
         } else {
           root.classList.remove('is-moments');
-          const store = this.stores[highlight];
+          const store = this.stores[Math.min(highlight, this.stores.length - 1)];
           if (store) promoWidget.applyStoreLook(store);
         }
       };

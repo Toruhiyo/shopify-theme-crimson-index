@@ -88,7 +88,7 @@ const FRAMES = [
   ['15-see-yourself', 'sell. is gone. See for yourself. has settled in the same seat, about 60% of sell. size.', 0],
   ['16-see-stores', 'See for yourself. has left. Three store cards are fully on screen. Clerk stays in the moments seat, clear of the cards.', 2500],
   ['17-see-roulette', 'Carousel on a mid-list store. Side cards are fully visible. Clerk has morphed and has not moved seats.', 2500],
-  ['18-see-meridian', 'Landed on Meridian. Name, sector, and both side cards are fully visible. Clerk stays clear of them.', 2500],
+  ['18-see-meridian', 'Roulette stopped on the 9th slot: a drawn button, not a link. URL under the row when the variant has one. Cursor rests on the button. Hold is the end card.', 2500],
   ['pitch-c-lane-1', 'Pitch grid. One window fills most of the frame. It is the last moments frame, the bundle with the clerk, not a different clip. No red.', 0],
   ['pitch-c-event', 'Pitch grid. That window freezes on Added to cart. Orange field, white cart, white burst, primary hairline.', 0],
   ['pitch-c-lanes-3', 'Pitch grid. Zoomed out to a 2 by 2 matrix. No red.', 0],
@@ -97,10 +97,10 @@ const FRAMES = [
   ['pitch-c-texture', 'Pitch grid. The zoom has rushed past 8 by 8. About 20 by 20 orange end-state tiles.', 0],
   ['pitch-c-white', 'Pitch grid. The mosaic has fallen into a flat Bizmis orange field. The mark has not landed.', 0],
   ['pitch-c-resolve', 'Pitch grid. The white Bizmis mark has risen on the orange field. Built to sell. has not arrived.', 0],
-  ['pitch-c-end-demo', 'Pitch end frame, cta=demo. Mark and Built to sell. Button See it in action, then bizmis.ai/demo.', 0],
-  ['pitch-c-end-install', 'Pitch end frame, cta=install. Mark and Built to sell. Button Install on Shopify. No URL line.', 0],
-  ['pitch-c-end-ea', 'Pitch end frame, cta=ea. Scarcity line, button Join Early Access, then bizmis.ai/early-access.', 0],
-  ['pitch-c-end-none', 'Pitch end frame, cta=none. Mark and Built to sell. only. No button.', 0],
+  ['pitch-c-end-demo', 'Pitch grid resolve. Mark and Built to sell. No button. The one CTA is the roulette slot.', 0],
+  ['pitch-c-end-install', 'Pitch grid resolve. Mark and Built to sell. No button. The one CTA is the roulette slot.', 0],
+  ['pitch-c-end-ea', 'Pitch grid resolve. Mark and Built to sell. No button. The one CTA is the roulette slot.', 0],
+  ['pitch-c-end-none', 'Pitch grid resolve. Mark and Built to sell. No button.', 0],
 ];
 
 async function loadPlaywright() {
