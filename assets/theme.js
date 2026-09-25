@@ -237,19 +237,9 @@
     statusMs: 200,
     introMs: 1500,
     zoomMs: 7400,
-    hold1Ms: 1500,
-    zoom12Ms: 700,
-    hold2Ms: 900,
-    zoom24Ms: 800,
-    hold4Ms: 1200,
-    rushMs: 3800,
-    frameMargin: 0.06,
-    gapOfHeight: 0.06,
-    textureCount: 12,
-    textureAlpha: 0.08,
     stampDwell: 680,
-    stampSpread: 220,
-    fieldAt: 0.62,
+    stampSpread: 520,
+    fieldAt: 0.5,
     holdMs: 1600,
     lostAt: 280,
     gapRatio: 0.012,
@@ -275,7 +265,15 @@
     resolveMs: 500,
     texture: 64,
     fieldCount: 20,
-    lostField: '#F6F4F1',
+    lostField: '#F4F4F6',
+    flowGap: 0.06,
+    frameMargin: 0.06,
+    stampWidth: 0.78,
+    stampInk: 0.7,
+    stampAngle: -12,
+    stampPressMs: 120,
+    deviceMix: { desktop: 0.6, tablet: 0.3, phone: 0.1 },
+    deviceWidth: { desktop: 1, tablet: 0.55, phone: 0.22 },
     nearWidth: 0.8,
     farWidth: 0.14,
     stagger: 0,
@@ -1907,33 +1905,12 @@
     return PROMO_GRID.introMs;
   }
 
-  function gridBeats() {
-    const hold1 = PROMO_GRID.hold1Ms;
-    const zoom12 = hold1 + PROMO_GRID.zoom12Ms;
-    const hold2 = zoom12 + PROMO_GRID.hold2Ms;
-    const zoom24 = hold2 + PROMO_GRID.zoom24Ms;
-    const hold4 = zoom24 + PROMO_GRID.hold4Ms;
-    const end = hold4 + PROMO_GRID.rushMs;
-    const fieldAt = hold4 + Math.round(PROMO_GRID.rushMs * PROMO_GRID.fieldAt);
-    return {
-      hold1,
-      zoom12,
-      hold2,
-      zoom24,
-      hold4,
-      end,
-      fieldAt,
-      fieldMs: end - fieldAt,
-    };
-  }
-
   function gridDuration() {
-    return gridBeats().end;
+    return PROMO_GRID.introMs + PROMO_GRID.zoomMs;
   }
 
   function gridFieldStart() {
-    const beats = gridBeats();
-    return beats.fieldAt - beats.hold1;
+    return Math.round(PROMO_GRID.zoomMs * PROMO_GRID.fieldAt);
   }
 
   function gridShimmerEnd() {
@@ -1954,207 +1931,201 @@
     return x * x * (3 - 2 * x);
   }
 
-  function gridInverseSmooth(unit) {
-    const target = Math.min(1, Math.max(0, unit));
-    let t = target;
+  function gridCountAt(timeMs) {
+    if (timeMs <= PROMO_GRID.introMs) return 1;
+    const t = Math.min(1, (timeMs - PROMO_GRID.introMs) / PROMO_GRID.zoomMs);
+    return 1 + (PROMO_GRID.fieldCount - 1) * gridZoomUnit(t);
+  }
+
+  function gridTimeForCount(count) {
+    if (count <= 1) return 0;
+    const span = PROMO_GRID.fieldCount - 1;
+    const unit = Math.min(1, Math.max(0, (count - 1) / span));
+    let t = unit;
     for (let step = 0; step < 8; step += 1) {
-      const value = gridZoomUnit(t) - target;
+      const value = gridZoomUnit(t) - unit;
       const slope = 6 * t * (1 - t);
       if (Math.abs(slope) < 1e-5) break;
       t = Math.min(1, Math.max(0, t - value / slope));
     }
-    return t;
-  }
-
-  function gridCountAt(timeMs) {
-    const beats = gridBeats();
-    const t = Math.max(0, timeMs);
-    if (t <= beats.hold1) return 1;
-    if (t <= beats.zoom12) return 1 + gridZoomUnit((t - beats.hold1) / PROMO_GRID.zoom12Ms);
-    if (t <= beats.hold2) return 2;
-    if (t <= beats.zoom24) return 2 + 2 * gridZoomUnit((t - beats.hold2) / PROMO_GRID.zoom24Ms);
-    if (t <= beats.hold4) return 4;
-    const rush = Math.min(1, (t - beats.hold4) / PROMO_GRID.rushMs);
-    return 4 + (PROMO_GRID.textureCount - 4) * rush * rush;
-  }
-
-  function gridTimeForCount(count) {
-    const beats = gridBeats();
-    if (count <= 1) return 0;
-    if (count < 2) return beats.hold1 + gridInverseSmooth(count - 1) * PROMO_GRID.zoom12Ms;
-    if (count === 2) return beats.hold2 - 40;
-    if (count < 4) return beats.hold2 + gridInverseSmooth((count - 2) / 2) * PROMO_GRID.zoom24Ms;
-    if (count === 4) return beats.hold4 - 40;
-    const span = PROMO_GRID.textureCount - 4;
-    const unit = Math.min(1, Math.max(0, (count - 4) / span));
-    return beats.hold4 + Math.sqrt(unit) * PROMO_GRID.rushMs;
-  }
-
-  function gridFlowDevice(col, row, line, aboveLine, x) {
-    const devices = PROMO_GRID.devices;
-    const desktop = devices.find((device) => device.id === 'desktop');
-    const tablet = devices.find((device) => device.id === 'tablet');
-    const phone = devices.find((device) => device.id === 'phone');
-    if (col === 0 && row === 0) return desktop;
-    const roll = gridMix(col, row, 4);
-    let device = desktop;
-    if (roll >= 0.6 && roll < 0.9) device = tablet;
-    else if (roll >= 0.9) device = phone;
-    let phonesLeft = 0;
-    for (let index = line.length - 1; index >= 0; index -= 1) {
-      if (line[index].device.id !== 'phone') break;
-      phonesLeft += 1;
-    }
-    const above = aboveLine?.find((item) => x >= item.x && x < item.x + item.w);
-    const phoneAbove = above?.device.id === 'phone';
-    if (device.id === 'phone' && (phonesLeft >= 2 || (phonesLeft >= 1 && phoneAbove))) {
-      device = desktop;
-    }
-    return device;
+    return PROMO_GRID.introMs + t * PROMO_GRID.zoomMs;
   }
 
   let gridFlexCache = null;
+  function gridFlowSpec(id) {
+    const desktop = PROMO_GRID.devices[0];
+    const baseH = 100;
+    const desktopW = baseH * desktop.ratio;
+    const device = PROMO_GRID.devices.find((entry) => entry.id === id) || desktop;
+    const w = desktopW * (PROMO_GRID.deviceWidth[id] || 1);
+    return { id, device, w, h: w / device.ratio };
+  }
+
+  function gridPhoneBlocked(line, rows, x, w) {
+    const last = line[line.length - 1];
+    const before = line[line.length - 2];
+    if (last?.id === 'phone' && before?.id === 'phone') return true;
+    const above = rows[rows.length - 1];
+    const aboveHit = above?.some((item) => item.id === 'phone' && item.x < x + w && item.x + item.w > x);
+    if (last?.id === 'phone' && aboveHit) return true;
+    let column = 0;
+    for (let row = rows.length - 1; row >= 0 && column < 2; row -= 1) {
+      const hit = rows[row].some((item) => item.id === 'phone' && item.x < x + w && item.x + item.w > x);
+      if (!hit) break;
+      column += 1;
+    }
+    return column >= 2;
+  }
+
   function gridFlexLayout() {
     if (gridFlexCache) return gridFlexCache;
-    const screenH = 100;
-    const gap = screenH * PROMO_GRID.gapOfHeight;
-    const desktop = PROMO_GRID.devices.find((device) => device.id === 'desktop');
-    const desktopW = screenH * desktop.ratio;
-    const span = PROMO_GRID.textureCount + 2;
-    const fieldW = span * desktopW + (span - 1) * gap;
-    const fieldH = span * screenH + (span - 1) * gap;
+    const baseH = 100;
+    const gap = baseH * PROMO_GRID.flowGap;
+    const pitch = baseH + gap;
+    const endH = PROMO_GRID.fieldCount * pitch;
+    const endW = endH * (16 / 9);
+    const fieldW = endW + pitch * 2;
+    const fieldH = endH + pitch * 2;
+    const mix = PROMO_GRID.deviceMix;
     const items = [];
     const byKey = new Map();
     const rows = [];
     let index = 0;
-    let y = 0;
-    let rowIndex = 0;
-    while (y + screenH <= fieldH + 0.01) {
+    let top = 0;
+    while (top < fieldH) {
       const line = [];
-      const rowBottom = y + screenH;
       let x = 0;
       let col = 0;
       while (x < fieldW) {
-        const device = gridFlowDevice(col, rowIndex, line, rows[rowIndex - 1], x);
-        const w = screenH * device.ratio;
-        const h = screenH;
-        if (x + w > fieldW + 0.01) break;
-        const item = {
-          index,
-          col,
-          row: rowIndex,
-          device,
-          x,
-          y: rowBottom - h,
-          w,
-          h,
-          lead: index === 0,
-          dom: false,
-        };
-        line.push(item);
-        items.push(item);
-        byKey.set(`${col},${rowIndex}`, item);
-        x += w + gap;
+        const roll = wallSeededUnit(index, 23);
+        let id = 'desktop';
+        if (index !== 0) {
+          if (roll < mix.phone) id = 'phone';
+          else if (roll < mix.phone + mix.tablet) id = 'tablet';
+        }
+        let spec = gridFlowSpec(id);
+        if (id === 'phone' && gridPhoneBlocked(line, rows, x, spec.w)) {
+          id = 'tablet';
+          spec = gridFlowSpec(id);
+        }
+        if (line.length && x + spec.w > fieldW) break;
+        line.push({ id, spec, x, col, index });
+        x += spec.w + gap;
         col += 1;
         index += 1;
       }
-      rows.push(line);
-      y += screenH + gap;
-      rowIndex += 1;
+      if (!line.length) break;
+      const rowH = line.reduce((max, slot) => Math.max(max, slot.spec.h), 0);
+      const rowIndex = rows.length;
+      const placed = line.map((slot) => {
+        const item = {
+          index: slot.index,
+          col: slot.col,
+          row: rowIndex,
+          device: slot.spec.device,
+          id: slot.id,
+          x: slot.x,
+          y: top + rowH - slot.spec.h,
+          w: slot.spec.w,
+          h: slot.spec.h,
+          lead: false,
+          dom: false,
+        };
+        item.right = item.x + item.w;
+        item.bottom = item.y + item.h;
+        items.push(item);
+        byKey.set(`${item.col},${item.row}`, item);
+        return item;
+      });
+      rows.push(placed);
+      top += rowH + gap;
     }
+    const hero = items[0];
+    hero.lead = true;
+    hero.dom = true;
+    items
+      .filter((item) => item.x < endW && item.y < endH)
+      .slice(0, 72)
+      .forEach((item) => { item.dom = true; });
     gridFlexCache = {
       gap,
-      screenH,
-      desktopW,
-      pitch: screenH + gap,
+      screenH: baseH,
+      pitch,
       fieldW,
       fieldH,
+      endW,
+      endH,
       items,
       byKey,
-      hero: items[0],
+      hero,
     };
     return gridFlexCache;
   }
 
-  function gridViewRect(camera, frame) {
+  function gridFrameBox(frame) {
     const margin = PROMO_GRID.frameMargin;
-    const span = Math.max(0.0001, camera.s);
+    const originX = frame.width * margin;
+    const originY = frame.height * margin;
     return {
-      left: (frame.width * margin - camera.x) / span,
-      top: (frame.height * margin - camera.y) / span,
-      right: (frame.width * (1 - margin) - camera.x) / span,
-      bottom: (frame.height * (1 - margin) - camera.y) / span,
+      margin,
+      originX,
+      originY,
+      innerW: frame.width - originX * 2,
+      innerH: frame.height - originY * 2,
     };
   }
 
-  function gridItemFits(item, camera, frame) {
-    if (!item) return false;
-    const rect = gridViewRect(camera, frame);
-    const layout = camera.layout || gridFlexLayout();
-    const n = Math.max(1, camera.step || 1);
-    const blockRight = n * layout.desktopW + (n - 1) * layout.gap;
-    const blockBottom = n * layout.screenH + (n - 1) * layout.gap;
-    const slack = 1.25;
-    const right = Math.min(rect.right, blockRight);
-    const bottom = Math.min(rect.bottom, blockBottom);
-    return item.x >= rect.left - slack
-      && item.y >= rect.top - slack
-      && item.x + item.w <= right + slack
-      && item.y + item.h <= bottom + slack;
+  function gridScaleEnds(frame) {
+    const layout = gridFlexLayout();
+    const box = gridFrameBox(frame);
+    const first = layout.hero;
+    const sHero = Math.min(box.innerW / first.w, box.innerH / first.h);
+    const sEnd = box.innerH / (PROMO_GRID.fieldCount * layout.pitch);
+    return { ...box, sHero, sEnd, layout };
+  }
+
+  function gridScaleAt(count, frame) {
+    const { sHero, sEnd } = gridScaleEnds(frame);
+    const span = PROMO_GRID.fieldCount - 1;
+    const t = count <= 1 ? 0 : Math.min(1, (count - 1) / span);
+    return sHero + (sEnd - sHero) * t;
   }
 
   function gridItemEnterCount(item, frame) {
-    const view = frame || { width: 1440, height: 810 };
     if (!item || item.lead) return 1;
-    if (!gridItemFits(item, gridPose(4, view), view)) return Infinity;
-    let lo = 1;
-    let hi = 4;
-    for (let step = 0; step < 18; step += 1) {
-      const mid = (lo + hi) / 2;
-      if (gridItemFits(item, gridPose(mid, view), view)) hi = mid;
-      else lo = mid;
-    }
-    return hi;
+    const view = frame || { width: 1440, height: 810 };
+    const { sHero, sEnd, innerW, innerH } = gridScaleEnds(view);
+    const sFit = Math.min(innerW / Math.max(1, item.right), innerH / Math.max(1, item.bottom));
+    if (sFit >= sHero) return 1;
+    if (sFit <= sEnd) return PROMO_GRID.fieldCount;
+    return 1 + ((sFit - sHero) / (sEnd - sHero)) * (PROMO_GRID.fieldCount - 1);
   }
 
   function gridStampAt(col, row, frame) {
     const layout = gridFlexLayout();
     const item = layout.byKey.get(`${col},${row}`);
     const view = frame || { width: 1440, height: 810 };
-    if (!item) return Number.POSITIVE_INFINITY;
-    if (item.lead) return PROMO_GRID.stampDwell;
-    const enterCount = gridItemEnterCount(item, view);
-    if (!Number.isFinite(enterCount)) return Number.POSITIVE_INFINITY;
-    const beats = gridBeats();
-    const holdEnd = enterCount <= 2 ? beats.hold2 : beats.hold4;
+    if (!item || item.lead) return PROMO_GRID.stampDwell;
+    const count = gridItemEnterCount(item, view);
     const stagger = wallSeededUnit(item.row * 17 + item.col, 19) * PROMO_GRID.stampSpread;
-    const at = gridEnterTime(enterCount) + PROMO_GRID.stampDwell + stagger;
-    return Math.min(at, holdEnd - 80);
+    return gridTimeForCount(count) + PROMO_GRID.stampDwell + stagger;
   }
 
-  function gridEnterTime(count) {
-    const beats = gridBeats();
-    if (count <= 1) return 0;
-    if (count <= 2) return beats.hold1 + gridInverseSmooth(Math.min(1, count - 1)) * PROMO_GRID.zoom12Ms;
-    return beats.hold2 + gridInverseSmooth(Math.min(1, (count - 2) / 2)) * PROMO_GRID.zoom24Ms;
+  function gridItemFits(item, camera, frame) {
+    const box = gridFrameBox(frame);
+    const x = camera.x + item.x * camera.s;
+    const y = camera.y + item.y * camera.s;
+    const right = x + item.w * camera.s;
+    const bottom = y + item.h * camera.s;
+    const slack = 0.75;
+    return x >= box.originX - slack
+      && y >= box.originY - slack
+      && right <= frame.width - box.originX + slack
+      && bottom <= frame.height - box.originY + slack;
   }
 
   function gridItemFade(item, camera, frame) {
-    const span = Math.max(0.05, camera.s);
-    const left = -camera.x / span;
-    const top = -camera.y / span;
-    const right = left + frame.width / span;
-    const bottom = top + frame.height / span;
-    const inset = Math.min(
-      item.x - left,
-      item.y - top,
-      right - (item.x + item.w),
-      bottom - (item.y + item.h),
-    );
-    const band = (camera.layout?.pitch || 110) * 0.4;
-    if (inset >= 0) return 1;
-    if (inset <= -band) return 0;
-    return (inset + band) / band;
+    return gridItemFits(item, camera, frame) ? 1 : 0;
   }
 
   function gridCssColor(root, name, fallback) {
@@ -2220,38 +2191,6 @@
     ctx.restore();
   }
 
-  function drawGridStamp(ctx, x, y, w, h, sold, colors) {
-    ctx.save();
-    ctx.translate(x + w / 2, y + h / 2);
-    ctx.rotate(-12 * Math.PI / 180);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    if ('letterSpacing' in ctx) ctx.letterSpacing = '0.04em';
-    ctx.shadowBlur = 0;
-    let size = w * 0.16;
-    ctx.font = `600 ${size}px ${colors.font}`;
-    const lostWidth = ctx.measureText('NO SALE').width;
-    const target = w * 0.78;
-    if (lostWidth > 0) size *= target / lostWidth;
-    ctx.font = `600 ${size}px ${colors.font}`;
-    if (sold) {
-      const word = 'SOLD';
-      const textW = ctx.measureText(word).width;
-      const padX = size * 0.28;
-      const padY = size * 0.16;
-      ctx.fillStyle = colors.primary;
-      ctx.beginPath();
-      ctx.roundRect(-textW / 2 - padX, -size * 0.55 - padY, textW + padX * 2, size * 1.1 + padY * 2, size * 0.12);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.fillText(word, 0, 0);
-    } else {
-      ctx.fillStyle = gridRgba(colors.ink3, 0.7);
-      ctx.fillText('NO SALE', 0, 0);
-    }
-    ctx.restore();
-  }
-
   function drawGridTexture(canvas, camera, mode, colors) {
     const width = canvas.clientWidth || 1440;
     const height = canvas.clientHeight || 810;
@@ -2265,24 +2204,48 @@
     ctx.clearRect(0, 0, width, height);
     const layout = camera.layout || gridFlexLayout();
     const sold = mode === 'pitch';
-    const fill = colors.surface || PROMO_GRID.lostField;
+    const fill = sold ? '#fff6ee' : (colors.surface || '#F6F4F1');
     const now = camera.timeMs || 0;
+    const handoff = camera.handoff || 0;
     const view = { width, height };
     layout.items.forEach((item) => {
+      const alpha = item.dom ? handoff : 1;
+      if (alpha < 0.02) return;
+      if (!gridItemFits(item, camera, view)) return;
       const x = camera.x + item.x * camera.s;
       const y = camera.y + item.y * camera.s;
       const w = item.w * camera.s;
       const h = item.h * camera.s;
-      if (x > width || y > height || x + w < 0 || y + h < 0) return;
       const radius = Math.min(gridMockupRadius(item.device, w), w / 2, h / 2);
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = alpha;
       ctx.fillStyle = fill;
       ctx.beginPath();
       ctx.roundRect(x, y, w, h, radius);
       ctx.fill();
-      const stampAt = gridStampAt(item.col, item.row, view);
-      const stamped = Number.isFinite(stampAt) && now >= stampAt;
-      if (stamped && h > 8) drawGridStamp(ctx, x, y, w, h, sold, colors);
+      if (h > 36 && now >= gridStampAt(item.col, item.row, view)) {
+        const word = sold ? 'SOLD' : 'NO SALE';
+        const target = w * PROMO_GRID.stampWidth;
+        ctx.save();
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate(PROMO_GRID.stampAngle * Math.PI / 180);
+        ctx.font = `600 100px ${colors.font}`;
+        ctx.letterSpacing = '0.04em';
+        const sample = ctx.measureText('NO SALE').width || 1;
+        const size = 100 * (target / sample);
+        ctx.font = `600 ${size}px ${colors.font}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if (sold) {
+          const band = size * 0.9;
+          ctx.fillStyle = colors.primary;
+          ctx.fillRect(-target / 2, -band / 2, target, band);
+          ctx.fillStyle = '#fff';
+        } else {
+          ctx.fillStyle = gridRgba(colors.ink3, PROMO_GRID.stampInk);
+        }
+        ctx.fillText(word, 0, 0);
+        ctx.restore();
+      }
     });
     ctx.globalAlpha = 1;
   }
@@ -2341,40 +2304,42 @@
   }
 
   function gridTailView(timeMs) {
-    const beats = gridBeats();
+    const fieldStart = PROMO_GRID.introMs + gridFieldStart();
+    const fadeEnd = fieldStart + PROMO_GRID.fieldMs;
     let field = 0;
-    if (timeMs >= beats.fieldAt) field = Math.min(1, (timeMs - beats.fieldAt) / beats.fieldMs);
-    return { field, tile: field > 0 && field < 1 ? 1 : 0 };
+    if (timeMs >= fieldStart) field = Math.min(1, (timeMs - fieldStart) / PROMO_GRID.fieldMs);
+    let tile = 0;
+    if (timeMs >= fadeEnd) {
+      const fade = Math.min(1, (timeMs - fadeEnd) / PROMO_GRID.shimmerMs);
+      tile = 1 - fade;
+    } else if (timeMs >= fieldStart) {
+      tile = 1;
+    }
+    return { field, tile };
   }
 
   function gridPose(count, frame) {
-    const layout = gridFlexLayout();
-    const margin = PROMO_GRID.frameMargin;
-    const n = Math.max(1, count);
-    const blockW = n * layout.desktopW + (n - 1) * layout.gap;
-    const blockH = n * layout.screenH + (n - 1) * layout.gap;
-    const innerW = frame.width * (1 - 2 * margin);
-    const innerH = frame.height * (1 - 2 * margin);
-    const s = Math.min(innerW / blockW, innerH / blockH);
+    const ends = gridScaleEnds(frame);
+    const s = gridScaleAt(count, frame);
+    const hero = ends.layout.hero;
     return {
       s,
-      x: frame.width * margin,
-      y: frame.height * margin,
+      x: ends.originX - hero.x * s,
+      y: ends.originY - hero.y * s,
       step: count,
       reveal: count,
       fade: 1,
-      layout,
+      layout: ends.layout,
     };
   }
 
   function gridCamera(timeMs, frame) {
     const count = gridCountAt(timeMs);
     const view = gridTailView(timeMs);
-    const beats = gridBeats();
     const shimmer = timeMs >= gridShimmerEnd();
     let phase = 'grid';
     if (shimmer) phase = 'resolve';
-    else if (timeMs >= beats.hold4) phase = 'rush';
+    else if (count > 8 || view.field > 0) phase = 'rush';
     return {
       ...gridPose(count, frame),
       count,
@@ -4908,22 +4873,12 @@
       this.root.appendChild(fontProbe);
       const font = getComputedStyle(fontProbe).fontFamily || 'sans-serif';
       fontProbe.remove();
-      const warm = document.createElement('span');
-      warm.style.setProperty('--ad-warmth', '1');
-      warm.style.setProperty('--ad-surface', 'color-mix(in oklab, #F6F6F6, #F6F4F1 calc(var(--ad-warmth) * 100%))');
-      warm.style.setProperty('--ad-ink-3', 'color-mix(in oklab, #969696, #9A948B calc(var(--ad-warmth) * 100%))');
-      warm.style.color = 'var(--ad-surface)';
-      this.root.appendChild(warm);
-      const surfaceColor = getComputedStyle(warm).color || PROMO_GRID.lostField;
-      warm.style.color = 'var(--ad-ink-3)';
-      const ink3 = getComputedStyle(warm).color || '#9A948B';
-      warm.remove();
       this.gridPaletteCache = {
         primary: gridCssColor(this.root, '--bizmis-primary', '#f9a353'),
         red: gridCssColor(this.root, '--ad-red', '#E5533D'),
         ink: gridCssColor(this.root, '--ad-ink', '#171717'),
-        ink3,
-        surface: surfaceColor,
+        ink3: gridCssColor(this.root, '--ad-ink-3', '#969696'),
+        surface: gridCssColor(this.root, '--ad-surface', '#F6F4F1'),
         font,
       };
       return this.gridPaletteCache;
@@ -5009,8 +4964,7 @@
       grid.dataset.mode = mode;
       grid.dataset.frameW = String(frame.width);
       const lead = this.gridLeadNode(mode);
-      const fitted = gridPose(4, frame);
-      layout.items.filter((item) => gridItemFits(item, fitted, frame)).forEach((item) => {
+      layout.items.filter((item) => item.dom).forEach((item) => {
         const cell = document.createElement('div');
         cell.className = 'promo-grid__cell';
         cell.dataset.index = String(item.index);
@@ -5058,13 +5012,12 @@
       const camera = options.reduced
         ? { ...gridPose(4, frame), count: 4, field: 0, phase: 'grid', timeMs, handoff: 1 }
         : gridCamera(timeMs, frame);
-      const beats = gridBeats();
-      const handoff = options.reduced || timeMs <= beats.hold4
-        ? 0
-        : Math.min(1, (timeMs - beats.hold4) / 420);
-      camera.handoff = handoff;
+      const pastGrid = camera.count > 8;
+      const handoff = pastGrid ? Math.min(1, (camera.count - 8) / 2.4) : 0;
+      camera.handoff = options.reduced ? 1 : handoff;
       grid.dataset.step = String(camera.step);
       grid.style.setProperty('--grid-inv', (1 / Math.max(0.05, camera.s)).toFixed(5));
+      grid.style.transformOrigin = `${layout.hero.x}px ${layout.hero.y}px`;
       grid.style.transform = `translate(${camera.x.toFixed(2)}px, ${camera.y.toFixed(2)}px) scale(${camera.s.toFixed(4)})`;
       const cells = grid.querySelectorAll('.promo-grid__cell');
       if (!this.gridStamped) this.gridStamped = new Set();
@@ -5074,14 +5027,11 @@
         const row = Number(cell.dataset.row);
         const index = Number(cell.dataset.index);
         const item = layout.byKey.get(`${col},${row}`);
-        const fitted = item ? gridItemFits(item, camera, frame) : false;
-        const composed = item ? gridItemEnterCount(item, frame) <= 4 : false;
-        let opacity = fitted && composed ? 1 : 0;
-        if (camera.count > 4) opacity = composed && gridItemFits(item, gridPose(4, frame), frame) ? 1 : 0;
+        let opacity = item ? gridItemFade(item, camera, frame) : 0;
         const onScreen = opacity > 0.55;
         let marked = onScreen && timeMs >= gridStampAt(col, row, frame);
         if (options.reduced && item) {
-          opacity = gridItemFits(item, gridPose(4, frame), frame) ? 1 : 0;
+          opacity = gridItemEnterCount(item, frame) <= 4 ? 1 : 0;
           marked = opacity > 0;
         }
         cell.style.opacity = opacity.toFixed(3);
@@ -5096,17 +5046,30 @@
         }
         this.syncGridClip(cell, onScreen && !marked);
       });
-      if (thud && !options.reduced && !this.root.classList.contains('is-scale-still')) this.emitThud();
+      if (thud && !options.reduced && !this.root.classList.contains('is-scale-still')) {
+        this.armScaleTimer(() => this.emitThud(), PROMO_GRID.stampPressMs);
+      }
       const layers = this.ensureGridLayers(grid.parentElement);
       const field = camera.field || 0;
-      grid.style.opacity = (1 - handoff).toFixed(3);
-      const textureAlpha = !options.reduced && handoff > 0.02 && field < 0.98
-        ? PROMO_GRID.textureAlpha * Math.min(1, handoff) * (1 - field)
-        : 0;
-      layers.texture.style.opacity = textureAlpha.toFixed(3);
+      const span = Math.max(0.05, camera.s);
+      const viewLeft = -camera.x / span;
+      const viewTop = -camera.y / span;
+      const viewRight = viewLeft + frame.width / span;
+      const viewBottom = viewTop + frame.height / span;
+      const extension = layout.items.some((item) => (
+        !item.dom
+        && item.x < viewRight
+        && item.x + item.w > viewLeft
+        && item.y < viewBottom
+        && item.y + item.h > viewTop
+      ));
+      grid.style.opacity = pastGrid ? (1 - handoff).toFixed(3) : '1';
+      layers.texture.style.opacity = (extension || handoff > 0.02) && !options.reduced
+        ? (1 - field).toFixed(3)
+        : '0';
       if (camera.phase !== 'resolve') layers.field.style.opacity = field.toFixed(3);
       layers.field.classList.toggle('is-pitch', mode === 'pitch');
-      if (textureAlpha > 0.002) {
+      if ((extension || handoff > 0.02) && field < 0.98 && !options.reduced) {
         drawGridTexture(layers.texture, camera, mode, this.gridPalette());
       }
       if (!options.reduced) this.paintGridResolve(timeMs, mode);
@@ -5485,16 +5448,16 @@
         travel: 40,
         'lane-1': 40,
         event: gridStampAt(0, 0) + 180,
-        mid: gridBeats().hold2 - 40,
-        'lanes-3': gridBeats().hold2 - 40,
-        'lanes-5': gridBeats().hold4 - 40,
-        'lanes-7': gridBeats().hold4 + 480,
-        'residue-10': gridBeats().hold4 - 40,
-        'residue-20': gridBeats().hold4 - 40,
-        'residue-100': gridBeats().fieldAt - 180,
-        'residue-full': gridBeats().fieldAt - 180,
-        texture: gridBeats().fieldAt - 180,
-        field: gridBeats().end + 40,
+        mid: gridTimeForCount(2) + 80,
+        'lanes-3': gridTimeForCount(2) + 80,
+        'lanes-5': gridTimeForCount(4) + 80,
+        'lanes-7': gridTimeForCount(8) + 200,
+        'residue-10': gridTimeForCount(4) + 80,
+        'residue-20': gridTimeForCount(4) + 80,
+        'residue-100': gridTimeForCount(8) + 200,
+        'residue-full': gridTimeForCount(8) + 200,
+        texture: gridTimeForCount(14),
+        field: gridShimmerEnd() - 40,
         resolve: gridShimmerEnd() + PROMO_GRID.riseMs,
         white: gridShimmerEnd() - 40,
       };
