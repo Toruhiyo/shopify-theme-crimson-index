@@ -4466,10 +4466,15 @@
       this.resetScaleScene();
       this.prepareScaleScene();
       if (mode === 'pitch') {
+        this.root.classList.remove('is-pitch');
+        this.openPainStage();
+        this.applyPainBeat('answer-2', true);
+        this.neutralStage = null;
+        this.neutralStageWidth = 0;
+        this.captureNeutralStage();
         this.root.classList.add('is-pitch', 'is-pitch-belt', 'is-moments');
         const stage = this.momentStage();
         if (stage) applyMomentPose(stage, 'bundle', { instant: true });
-        this.captureNeutralStage();
         promoWidget.applyStoreLook(this.bizmisLook());
       } else {
         this.root.classList.remove('is-pitch');
