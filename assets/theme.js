@@ -366,6 +366,7 @@
   const PROMO_MOMENT_OTHER_RING_MS = 600;
   const PROMO_MOMENTS_SHORTLIST_MS = 1680;
   const PROMO_MOMENTS_DOCK_MS = 820;
+  const PROMO_MOMENTS_ADDON_AT_MS = 1000;
   const PROMO_MOMENTS_FLY_MS = 780;
   const PROMO_MOMENTS_ORBIT_MS = 14000;
   const PROMO_MOMENTS_BADGE_TICK_MS = 280;
@@ -3279,6 +3280,7 @@
       this.root.style.setProperty('--promo-moments-choice', `${PROMO_MOMENTS_CHOICE_MS}ms`);
       this.root.style.setProperty('--promo-compare-fold', `${PROMO_MOMENTS_CHOICE_MS - 200}ms`);
       this.root.style.setProperty('--promo-settle-end', `${PROMO_MOMENTS_DOCK_MS}ms`);
+      this.root.style.setProperty('--promo-addon-at', `${PROMO_MOMENTS_ADDON_AT_MS}ms`);
       this.root.style.setProperty('--promo-ring-gap', `${PROMO_MOMENT_RING_GAP_MS}ms`);
       this.root.style.setProperty('--promo-other-ring', `${PROMO_MOMENT_OTHER_RING_MS}ms`);
       this.root.style.setProperty('--promo-catalog-seek', `${PROMO_MOMENT_SEEK_MS}ms`);
