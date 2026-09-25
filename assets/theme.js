@@ -4954,11 +4954,12 @@
         cell.style.width = `${item.w}px`;
         cell.style.height = `${item.h}px`;
         const device = document.createElement('div');
-        device.className = `promo-grid__device is-${item.device.id}`;
+        device.className = `promo-grid__device promo-device is-${item.device.id}`;
         device.style.left = '0';
         device.style.top = '0';
         device.style.width = '100%';
         device.style.height = '100%';
+        device.style.setProperty('--device-unit', (item.w / item.device.frame).toFixed(4));
         device.style.borderRadius = `${gridMockupRadius(item.device, item.w).toFixed(2)}px`;
         if (item.lead && mode === 'pitch') {
           device.classList.add('is-lead');
