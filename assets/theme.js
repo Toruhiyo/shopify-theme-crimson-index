@@ -241,9 +241,9 @@
     gapRatio: 0.012,
     steps: [1, 2, 4, 8],
     devices: [
-      { id: 'desktop', weight: 0.6, ratio: 16 / 10, radius: 6 },
-      { id: 'phone', weight: 0.3, ratio: 9 / 19.5, radius: 11 },
-      { id: 'tablet', weight: 0.1, ratio: 4 / 3, radius: 8 },
+      { id: 'desktop', weight: 0.6, ratio: 16 / 10, radius: 0 },
+      { id: 'phone', weight: 0.3, ratio: 9 / 19.5, radius: 0 },
+      { id: 'tablet', weight: 0.1, ratio: 4 / 3, radius: 0 },
     ],
     variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
     burstMin: 4,
@@ -1951,7 +1951,6 @@
     const wash = PROMO_GRID.wash;
     const fill = sold ? colors.primary : PROMO_GRID.lostField;
     const ink = sold ? '#fff' : gridRgba(colors.ink3, 0.6);
-    const hair = sold ? colors.primary : gridRgba(colors.ink3, 0.45);
     ctx.lineWidth = 1;
     ctx.font = `500 ${Math.max(8, 12)}px ${colors.font}`;
     ctx.textAlign = 'center';
@@ -1984,11 +1983,6 @@
             ctx.fill();
           }
         }
-        ctx.globalAlpha = sold ? 1 : 0.55;
-        ctx.strokeStyle = hair;
-        ctx.beginPath();
-        ctx.roundRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1), radius);
-        ctx.stroke();
         if (h > 28) {
           ctx.globalAlpha = 1;
           ctx.fillStyle = ink;
@@ -4562,11 +4556,9 @@
     }
 
     gridMark(device) {
-      const cart = document.createElement('span');
-      cart.className = 'promo-grid__cart';
       const mark = document.createElement('span');
       mark.className = 'promo-grid__mark';
-      device.append(cart, mark);
+      device.append(mark);
     }
 
     gridMountEnd(device) {
@@ -4736,7 +4728,6 @@
         }
         this.gridMountEnd(device);
         this.gridMark(device);
-        if (index === 0 && mode !== 'pitch') device.querySelector('.promo-grid__cart')?.remove();
         cell.appendChild(device);
         grid.appendChild(cell);
       }

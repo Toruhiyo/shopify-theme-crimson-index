@@ -5019,23 +5019,14 @@ html.is-promo-cover .promo-cover,
   flex-direction: column;
   overflow: hidden;
   background: var(--ad-white);
-  border-style: solid;
-  border-color: var(--ad-line-strong);
-  border-width: calc(1px * var(--grid-inv, 1));
-  box-shadow: 0 calc(8px * var(--grid-inv, 1)) calc(24px * var(--grid-inv, 1)) var(--ad-shadow);
-  transition: border-color 200ms linear;
+  border: 0;
+  box-shadow: none;
 }
 
 .promo-opening.is-scale-still .promo-grid__device,
 .promo-opening.is-scale-still .promo-grid__mark {
   transition: none;
 }
-
-.promo-grid__device.is-desktop { border-radius: 6px; }
-.promo-grid__device.is-tablet { border-radius: 8px; }
-.promo-grid__device.is-phone { border-radius: 11px; }
-
-.promo-grid__cell.is-sold .promo-grid__device { border-color: var(--bizmis-primary); }
 
 .promo-grid__bar {
   height: 22px;
@@ -5316,9 +5307,7 @@ html.is-promo-cover .promo-cover,
 .promo-grid__lead,
 .promo-grid__lead::before,
 .promo-grid__lead::after {
-  border: 0 !important;
   box-shadow: none !important;
-  border-radius: 0 !important;
   filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
