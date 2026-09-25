@@ -235,7 +235,11 @@
     settleMs: 750,
     fadeMs: 250,
     statusMs: 200,
-    introMs: 1200,
+    introMs: 1500,
+    zoomMs: 7400,
+    stampDwell: 680,
+    stampSpread: 520,
+    fieldAt: 0.5,
     holdMs: 1600,
     lostAt: 280,
     gapRatio: 0.012,
@@ -254,7 +258,7 @@
     rushMs: 2600,
     rushEase: 1.55,
     wash: 0.72,
-    fieldMs: 300,
+    fieldMs: 3700,
     shimmerMs: 600,
     riseMs: 400,
     pitchHoldMs: 800,
@@ -1888,22 +1892,19 @@
   }
 
   function gridHoldStart() {
-    return PROMO_GRID.introMs + (PROMO_GRID.steps.length - 1) * gridSpan();
+    return PROMO_GRID.introMs;
   }
 
   function gridDuration() {
-    return gridHoldStart() + PROMO_GRID.holdMs;
+    return PROMO_GRID.introMs + PROMO_GRID.zoomMs;
   }
 
   function gridFieldStart() {
-    const span = PROMO_GRID.texture - PROMO_GRID.steps[PROMO_GRID.steps.length - 1];
-    const unit = (PROMO_GRID.fieldCount - PROMO_GRID.steps[PROMO_GRID.steps.length - 1]) / span;
-    const ease = PROMO_GRID.rushEase;
-    return Math.round(Math.max(0, unit) ** (1 / ease) * PROMO_GRID.rushMs);
+    return Math.round(PROMO_GRID.zoomMs * PROMO_GRID.fieldAt);
   }
 
   function gridShimmerEnd() {
-    return gridDuration() + gridFieldStart() + PROMO_GRID.fieldMs + PROMO_GRID.shimmerMs;
+    return gridDuration() + PROMO_GRID.shimmerMs;
   }
 
   function gridResolveSpan(mode) {
@@ -1915,18 +1916,36 @@
     return gridShimmerEnd() + gridResolveSpan(mode);
   }
 
-  function gridRushCount(tailMs) {
-    const from = PROMO_GRID.steps[PROMO_GRID.steps.length - 1];
-    const span = PROMO_GRID.texture - from;
-    const rushT = Math.min(1, Math.max(0, tailMs / PROMO_GRID.rushMs));
-    const ease = PROMO_GRID.rushEase;
-    const eased = rushT ** ease;
-    let count = from + span * eased;
-    if (tailMs > PROMO_GRID.rushMs) {
-      const rate = (ease * span) / PROMO_GRID.rushMs;
-      count += rate * (tailMs - PROMO_GRID.rushMs);
+  function gridZoomUnit(t) {
+    const x = Math.min(1, Math.max(0, t));
+    return x * x * (3 - 2 * x);
+  }
+
+  function gridCountAt(timeMs) {
+    if (timeMs <= PROMO_GRID.introMs) return 1;
+    const t = Math.min(1, (timeMs - PROMO_GRID.introMs) / PROMO_GRID.zoomMs);
+    return 1 + (PROMO_GRID.fieldCount - 1) * gridZoomUnit(t);
+  }
+
+  function gridTimeForCount(count) {
+    if (count <= 1) return 0;
+    const span = PROMO_GRID.fieldCount - 1;
+    const unit = Math.min(1, Math.max(0, (count - 1) / span));
+    let t = unit;
+    for (let step = 0; step < 8; step += 1) {
+      const value = gridZoomUnit(t) - unit;
+      const slope = 6 * t * (1 - t);
+      if (Math.abs(slope) < 1e-5) break;
+      t = Math.min(1, Math.max(0, t - value / slope));
     }
-    return count;
+    return PROMO_GRID.introMs + t * PROMO_GRID.zoomMs;
+  }
+
+  function gridStampAt(col, row) {
+    const slot = Math.max(col, row);
+    const entered = slot === 0 ? 0 : gridTimeForCount(slot + 1);
+    const stagger = wallSeededUnit(row * 17 + col, 19) * PROMO_GRID.stampSpread;
+    return entered + PROMO_GRID.stampDwell + stagger;
   }
 
   function gridCssColor(root, name, fallback) {
@@ -2006,13 +2025,8 @@
     const count = Math.max(1, Math.ceil(camera.count || 8));
     const { cellW, cellH, gap } = camera.metrics;
     const sold = mode === 'pitch';
-    const wash = PROMO_GRID.wash;
-    const fill = sold ? colors.primary : PROMO_GRID.lostField;
-    const ink = sold ? '#fff' : gridRgba(colors.ink3, 0.6);
-    ctx.lineWidth = 1;
-    ctx.font = `500 ${Math.max(8, 12)}px ${colors.font}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    const fill = sold ? '#fff6ee' : PROMO_GRID.lostField;
+    const now = camera.timeMs || 0;
     for (let row = 0; row < count; row += 1) {
       for (let col = 0; col < count; col += 1) {
         const device = gridDeviceAt(col, row);
@@ -2023,23 +2037,32 @@
         const h = box.h * camera.s;
         if (x > width || y > height || x + w < 0 || y + h < 0) continue;
         const radius = Math.min(gridMockupRadius(device, w), w / 2, h / 2);
-        ctx.globalAlpha = wash;
+        ctx.globalAlpha = 0.94;
         ctx.fillStyle = fill;
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, radius);
         ctx.fill();
-        if (h > 28) {
-          ctx.globalAlpha = 1;
-          ctx.fillStyle = ink;
-          ctx.strokeStyle = ink;
-          const glyph = h * 0.4;
-          drawGridCart(ctx, x + (w - glyph) / 2, y + (h - glyph) / 2 - h * 0.04, glyph, sold);
-        }
-        if (h > 56) {
-          ctx.globalAlpha = 1;
-          ctx.fillStyle = ink;
-          ctx.font = `500 ${Math.max(8, h * 0.07)}px ${colors.font}`;
-          ctx.fillText(sold ? 'Added to cart' : 'Cart is empty', x + w / 2, y + h * 0.78);
+        if (h > 36 && now >= gridStampAt(col, row)) {
+          ctx.save();
+          ctx.translate(x + w / 2, y + h / 2);
+          ctx.rotate(-12 * Math.PI / 180);
+          const word = sold ? 'SOLD' : 'NO SALE';
+          const size = w * (sold ? 0.2 : 0.13);
+          ctx.font = `700 ${size}px ${colors.font}`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.lineWidth = Math.max(1.25, w * 0.018);
+          ctx.lineJoin = 'round';
+          if (sold) {
+            ctx.fillStyle = colors.primary;
+            ctx.strokeStyle = '#fff';
+            ctx.strokeText(word, 0, 0);
+            ctx.fillText(word, 0, 0);
+          } else {
+            ctx.strokeStyle = gridRgba(colors.ink3, 0.8);
+            ctx.strokeText(word, 0, 0);
+          }
+          ctx.restore();
         }
       }
     }
@@ -2099,102 +2122,84 @@
     };
   }
 
+  function gridTailView(timeMs) {
+    const fieldStart = PROMO_GRID.introMs + gridFieldStart();
+    const fadeEnd = fieldStart + PROMO_GRID.fieldMs;
+    let field = 0;
+    if (timeMs >= fieldStart) field = Math.min(1, (timeMs - fieldStart) / PROMO_GRID.fieldMs);
+    let tile = 0;
+    if (timeMs >= fadeEnd) {
+      const fade = Math.min(1, (timeMs - fadeEnd) / PROMO_GRID.shimmerMs);
+      tile = 1 - fade;
+    } else if (timeMs >= fieldStart) {
+      tile = 1;
+    }
+    return { field, tile };
+  }
+
   function gridPose(count, frame, metrics) {
-    if (count <= 1) {
-      const hero = gridDeviceBox(PROMO_GRID.devices[0], metrics.cellW, metrics.cellH);
-      const s = (frame.width * PROMO_GRID.hero) / Math.max(1, hero.w);
+    const heroBox = gridDeviceBox(PROMO_GRID.devices[0], metrics.cellW, metrics.cellH);
+    const heroScale = (frame.width * PROMO_GRID.hero) / Math.max(1, heroBox.w);
+    const hero = {
+      s: heroScale,
+      x: (frame.width - heroBox.w * heroScale) / 2 - heroBox.x * heroScale,
+      y: (frame.height - heroBox.h * heroScale) / 2 - heroBox.y * heroScale,
+    };
+    const blockOf = (size) => {
+      const blockW = size * metrics.cellW + (size - 1) * metrics.gap;
+      const blockH = size * metrics.cellH + (size - 1) * metrics.gap;
+      const s = Math.min(frame.width / blockW, frame.height / blockH) * PROMO_GRID.inset;
       return {
         s,
-        x: (frame.width - hero.w * s) / 2 - hero.x * s,
-        y: (frame.height - hero.h * s) / 2 - hero.y * s,
-        step: 1,
-        reveal: 1,
-        fade: 1,
+        x: (frame.width - blockW * s) / 2,
+        y: (frame.height - blockH * s) / 2,
       };
+    };
+    let pose = hero;
+    if (count > 1 && count < 2) {
+      const next = blockOf(2);
+      const blend = count - 1;
+      pose = {
+        s: hero.s + (next.s - hero.s) * blend,
+        x: hero.x + (next.x - hero.x) * blend,
+        y: hero.y + (next.y - hero.y) * blend,
+      };
+    } else if (count >= 2) {
+      pose = blockOf(count);
     }
-    const blockW = count * metrics.cellW + (count - 1) * metrics.gap;
-    const blockH = count * metrics.cellH + (count - 1) * metrics.gap;
-    const s = Math.min(frame.width / blockW, frame.height / blockH) * PROMO_GRID.inset;
     return {
-      s,
-      x: (frame.width - blockW * s) / 2,
-      y: (frame.height - blockH * s) / 2,
+      ...pose,
       step: count,
       reveal: count,
       fade: 1,
     };
   }
 
-  function gridTailView(tailMs) {
-    const fieldStart = gridFieldStart();
-    const fadeEnd = fieldStart + PROMO_GRID.fieldMs;
-    let field = 0;
-    let tile = 1;
-    if (tailMs >= fieldStart) field = Math.min(1, (tailMs - fieldStart) / PROMO_GRID.fieldMs);
-    if (tailMs >= fadeEnd) {
-      const fade = Math.min(1, (tailMs - fadeEnd) / PROMO_GRID.shimmerMs);
-      tile = 0.08 * (1 - fade);
-    } else if (tailMs >= fieldStart) {
-      const fade = (tailMs - fieldStart) / PROMO_GRID.fieldMs;
-      tile = 1 - fade * (1 - 0.08);
-    }
-    return { field, tile };
-  }
-
   function gridCamera(timeMs, frame) {
     const metrics = gridMetrics(frame);
-    const steps = PROMO_GRID.steps;
-    if (timeMs >= gridDuration()) {
-      const frozen = Math.min(timeMs, gridShimmerEnd());
-      const tailMs = frozen - gridDuration();
-      const count = gridRushCount(tailMs);
-      const view = gridTailView(tailMs);
-      return {
-        ...gridPose(count, frame, metrics),
-        metrics,
-        count,
-        phase: timeMs >= gridShimmerEnd() ? 'resolve' : 'rush',
-        field: timeMs >= gridShimmerEnd() ? 1 : view.field,
-        tile: timeMs >= gridShimmerEnd() ? 0 : view.tile,
-      };
-    }
-    if (timeMs <= PROMO_GRID.introMs) {
-      return { ...gridPose(1, frame, metrics), metrics, count: 1, phase: 'grid', field: 0, tile: 0 };
-    }
-    const elapsed = timeMs - PROMO_GRID.introMs;
-    const hops = steps.length - 1;
-    if (elapsed >= hops * gridSpan()) {
-      const pose = gridPose(steps[steps.length - 1], frame, metrics);
-      return { ...pose, metrics, count: pose.step, phase: 'grid', field: 0, tile: 0 };
-    }
-    const hop = Math.min(hops - 1, Math.floor(elapsed / gridSpan()));
-    const local = elapsed - hop * gridSpan();
-    const easeT = Math.min(1, local / PROMO_GRID.easeMs);
-    const unit = easeT >= 1 ? 1 : gridEase(easeT);
-    const from = gridPose(steps[hop], frame, metrics);
-    const to = gridPose(steps[hop + 1], frame, metrics);
+    const count = gridCountAt(timeMs);
+    const view = gridTailView(timeMs);
+    const shimmer = timeMs >= gridShimmerEnd();
+    let phase = 'grid';
+    if (shimmer) phase = 'resolve';
+    else if (count > 8 || view.field > 0) phase = 'rush';
     return {
-      s: from.s + (to.s - from.s) * unit,
-      x: from.x + (to.x - from.x) * unit,
-      y: from.y + (to.y - from.y) * unit,
-      step: unit >= 1 ? steps[hop + 1] : steps[hop],
-      reveal: steps[hop + 1],
-      fade: Math.min(1, local / PROMO_GRID.fadeMs),
+      ...gridPose(count, frame, metrics),
       metrics,
-      count: unit >= 1 ? steps[hop + 1] : steps[hop],
-      phase: 'grid',
-      field: 0,
-      tile: 0,
+      count,
+      phase,
+      field: shimmer ? 1 : view.field,
+      tile: shimmer ? 0 : view.tile,
+      timeMs,
     };
   }
 
   function gridCellFade(col, row, camera) {
-    const steps = PROMO_GRID.steps;
-    const reveal = camera.reveal;
-    const prev = steps[Math.max(0, steps.indexOf(reveal) - 1)] || 1;
-    if (col < prev && row < prev) return 1;
-    if (col < reveal && row < reveal) return camera.fade;
-    return 0;
+    const edge = camera.count || 1;
+    const slot = Math.max(col, row);
+    if (slot + 1 <= edge) return 1;
+    if (slot >= edge) return 0;
+    return edge - slot;
   }
 
   let gridLookCache = null;
@@ -2215,36 +2220,9 @@
   function gridDeathAt() {
     if (gridDeathCache) return gridDeathCache;
     const total = PROMO_GRID.cols * PROMO_GRID.cols;
-    const order = [];
-    for (let index = 1; index < total; index += 1) order.push(index);
-    for (let index = order.length - 1; index > 0; index -= 1) {
-      const swap = Math.floor(wallSeededUnit(index, 17) * (index + 1));
-      const held = order[index];
-      order[index] = order[swap];
-      order[swap] = held;
-    }
-    const at = new Array(total).fill(gridDuration());
-    at[0] = PROMO_GRID.lostAt;
-    const hold = gridHoldStart();
-    const target = Math.round(total * PROMO_GRID.lostShare);
-    let cursor = 0;
-    let time = PROMO_GRID.lostAt + 80;
-    let burstIndex = 0;
-    while (cursor < order.length && cursor + 1 < target && time < hold) {
-      const span = PROMO_GRID.burstMax - PROMO_GRID.burstMin + 1;
-      const burst = PROMO_GRID.burstMin + Math.floor(wallSeededUnit(burstIndex, 31) * span);
-      for (let bit = 0; bit < burst && cursor < order.length && cursor + 1 < target; bit += 1) {
-        at[order[cursor]] = time;
-        cursor += 1;
-      }
-      time += PROMO_GRID.gapMin + wallSeededUnit(burstIndex, 37) * (PROMO_GRID.gapMax - PROMO_GRID.gapMin);
-      burstIndex += 1;
-    }
-    let rest = hold;
-    while (cursor < order.length) {
-      at[order[cursor]] = rest;
-      cursor += 1;
-      rest += 36;
+    const at = new Array(total);
+    for (let index = 0; index < total; index += 1) {
+      at[index] = gridStampAt(index % PROMO_GRID.cols, Math.floor(index / PROMO_GRID.cols));
     }
     gridDeathCache = at;
     return at;
@@ -4668,20 +4646,18 @@
     gridMountEnd(device) {
       const end = document.createElement('div');
       end.className = 'promo-grid__end';
-      const glyph = document.createElement('span');
-      glyph.className = 'promo-grid__end-glyph';
-      glyph.innerHTML = `<span class="is-empty">${PROMO_END_EMPTY}</span><span class="is-sold">${PROMO_END_SOLD}</span>`;
-      const label = document.createElement('p');
-      label.className = 'promo-grid__end-label';
-      label.innerHTML = '<span class="is-empty">Cart is empty</span><span class="is-sold">Added to cart</span>';
-      const burst = document.createElement('span');
-      burst.className = 'promo-grid__end-burst';
-      for (let ray = 0; ray < 8; ray += 1) {
-        const bit = document.createElement('i');
-        bit.style.setProperty('--ray', String(ray));
-        burst.appendChild(bit);
-      }
-      end.append(burst, glyph, label);
+      const ring = document.createElement('span');
+      ring.className = 'promo-grid__stamp-ring';
+      const stamp = document.createElement('p');
+      stamp.className = 'promo-grid__stamp';
+      const lost = document.createElement('span');
+      lost.className = 'is-lost-word';
+      lost.textContent = 'NO SALE';
+      const sold = document.createElement('span');
+      sold.className = 'is-sold-word';
+      sold.textContent = 'SOLD';
+      stamp.append(lost, sold);
+      end.append(ring, stamp);
       device.appendChild(end);
     }
 
@@ -4835,6 +4811,7 @@
       }
       wall.appendChild(grid);
       this.ensureGridLayers(wall);
+      this.gridStamped = new Set();
       return grid;
     }
 
@@ -4846,35 +4823,43 @@
       grid.dataset.step = String(camera.step);
       grid.style.setProperty('--grid-inv', (1 / Math.max(0.05, camera.s)).toFixed(5));
       grid.style.transform = `translate(${camera.x.toFixed(2)}px, ${camera.y.toFixed(2)}px) scale(${camera.s.toFixed(4)})`;
-      const deaths = gridDeathAt();
       const cells = grid.querySelectorAll('.promo-grid__cell');
+      if (!this.gridStamped) this.gridStamped = new Set();
+      let thud = false;
       cells.forEach((cell) => {
         const col = Number(cell.dataset.col);
         const row = Number(cell.dataset.row);
         const index = Number(cell.dataset.index);
         let opacity = gridCellFade(col, row, camera);
-        let marked = timeMs >= deaths[index];
+        const onScreen = opacity > 0.55;
+        let marked = onScreen && timeMs >= gridStampAt(col, row);
         if (options.reduced) {
           const inside = col < 4 && row < 4;
           opacity = inside ? 1 : 0;
           marked = inside;
         }
-        const shown = opacity;
-        cell.style.opacity = shown.toFixed(3);
+        cell.style.opacity = opacity.toFixed(3);
         cell.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
         cell.classList.toggle('is-in', opacity > 0.01);
         cell.classList.toggle('is-lost', marked && mode !== 'pitch');
         cell.classList.toggle('is-sold', marked && mode === 'pitch');
-        this.syncGridClip(cell, opacity > 0.01 && !marked);
+        if (marked && !this.gridStamped.has(index)) {
+          this.gridStamped.add(index);
+          const screenH = Number.parseFloat(cell.style.height) * camera.s;
+          if (screenH > 72) thud = true;
+        }
+        this.syncGridClip(cell, onScreen && !marked);
       });
+      if (thud && !options.reduced && !this.root.classList.contains('is-scale-still')) this.emitThud();
       const layers = this.ensureGridLayers(grid.parentElement);
-      const rushing = camera.phase !== 'grid' && !options.reduced;
-      const handoff = rushing ? Math.min(1, (timeMs - gridDuration()) / 180) : 0;
-      grid.style.opacity = rushing ? (1 - handoff).toFixed(3) : '1';
-      layers.texture.style.opacity = rushing ? camera.tile.toFixed(3) : '0';
-      if (camera.phase !== 'resolve') layers.field.style.opacity = camera.field.toFixed(3);
+      const pastGrid = camera.count > 8;
+      const handoff = pastGrid ? Math.min(1, (camera.count - 8) / 2.4) : 0;
+      const field = camera.field || 0;
+      grid.style.opacity = pastGrid ? (1 - handoff).toFixed(3) : '1';
+      layers.texture.style.opacity = pastGrid ? (handoff * (1 - field)).toFixed(3) : '0';
+      if (camera.phase !== 'resolve') layers.field.style.opacity = field.toFixed(3);
       layers.field.classList.toggle('is-pitch', mode === 'pitch');
-      if (rushing && camera.tile > 0.001) drawGridTexture(layers.texture, camera, mode, this.gridPalette());
+      if (pastGrid && handoff > 0.02 && field < 0.98) drawGridTexture(layers.texture, camera, mode, this.gridPalette());
       if (!options.reduced) this.paintGridResolve(timeMs, mode);
       else this.paintGridResolve(0, mode);
     }
@@ -5250,16 +5235,16 @@
       const gridAt = {
         travel: 40,
         'lane-1': 40,
-        event: PROMO_GRID.lostAt + 80,
-        mid: 2200,
-        'lanes-3': 2200,
-        'lanes-5': 3100,
-        'lanes-7': 5200,
-        'residue-10': 3100,
-        'residue-20': 3100,
-        'residue-100': 5200,
-        'residue-full': 5200,
-        texture: gridDuration() + gridFieldStart(),
+        event: gridStampAt(0, 0) + 180,
+        mid: gridTimeForCount(2) + 80,
+        'lanes-3': gridTimeForCount(2) + 80,
+        'lanes-5': gridTimeForCount(4) + 80,
+        'lanes-7': gridTimeForCount(8) + 200,
+        'residue-10': gridTimeForCount(4) + 80,
+        'residue-20': gridTimeForCount(4) + 80,
+        'residue-100': gridTimeForCount(8) + 200,
+        'residue-full': gridTimeForCount(8) + 200,
+        texture: gridTimeForCount(14),
         field: gridShimmerEnd() - 40,
         resolve: gridShimmerEnd() + PROMO_GRID.riseMs,
         white: gridShimmerEnd() - 40,
@@ -5272,12 +5257,6 @@
         this.setConveyorEnd(mode, ctaKey);
         this.root.classList.add('is-scale-white', 'is-scale-zero', 'is-grid-locked');
         this.clearGridResolve();
-      }
-      if (shot === 'event' && mode === 'pitch') {
-        this.root.querySelectorAll('.promo-grid__cell.is-sold .promo-grid__end-burst').forEach((node) => {
-          node.style.animationDelay = '-90ms';
-          node.style.animationPlayState = 'paused';
-        });
       }
       return this.whenPainRest(this.painHost());
     }
