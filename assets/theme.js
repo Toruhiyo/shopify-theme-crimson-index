@@ -227,57 +227,44 @@
   const PROMO_END_CTA_HOLD_MS = 3000;
   const PROMO_SCALE_FADE_MS = 250;
   const PROMO_SCALE_LOOP_MS = 3000;
-  const PROMO_CORRIDOR = {
-    perspective: 1100,
-    originY: 0.42,
-    nearWidth: 0.48,
-    farScale: 0.14,
+  const PROMO_GRID = {
+    cols: 8,
+    hero: 0.8,
+    inset: 0.92,
+    easeMs: 700,
+    settleMs: 600,
+    fadeMs: 250,
+    statusMs: 200,
+    introMs: 1000,
+    holdMs: 900,
+    lostAt: 280,
+    gapRatio: 0.012,
+    steps: [1, 2, 4, 8],
+    devices: [
+      { id: 'desktop', weight: 0.6, ratio: 16 / 10 },
+      { id: 'phone', weight: 0.3, ratio: 9 / 19.5 },
+      { id: 'tablet', weight: 0.1, ratio: 4 / 3 },
+    ],
+    variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll'],
+    burstMin: 4,
+    burstMax: 5,
+    gapMin: 300,
+    gapMax: 380,
+    lostShare: 0.9,
+    nearWidth: 0.8,
     farWidth: 0.14,
     stagger: 0,
     intervals: [1200, 500],
-    aspect: 8 / 5,
-    approachMs: 5200,
-    approachStart: 5023,
-    approachEnd: 2200,
-    accelMs: 12000,
-    intervalStart: 2800,
-    intervalEnd: 1200,
-    intervalEaseMs: 12000,
-    zSpawn: -6000,
-    zJoin: -2500,
-    zExit: 150,
-    floorY: 0.72,
-    laneStaggerMs: 250,
-    zEventMin: -200,
-    zEventMax: 50,
-    zOpaque: -2000,
-    opacitySpawn: 0.35,
-    arriveHoldMs: 1099,
-    eventJitter: 0.06,
+    aspect: 16 / 10,
     flashMs: 33,
-    popScale: 1.04,
-    dotScale: 0.02,
     collapseMs: 120,
     exitMs: 300,
-    splitMs: 400,
-    streamMs: 17000,
-    phaseMax: 500,
     liveCount: 4,
-    recedeMs: 820,
-    ringMs: 200,
     stillSec: 1.15,
     travelLine: 0.42,
-    sizeStart: 0.48,
-    puffMs: 120,
-    burstMs: 120,
-    blinkMs: 33,
-    lanes: [
-      { at: 0, width: 0.48, lanes: [{ id: 'c', x: 0 }] },
-      { at: 6400, width: 0.3, lanes: [{ id: 'l', x: -0.22 }, { id: 'c', x: 0 }, { id: 'r', x: 0.22 }] },
-      { at: 10800, width: 0.2, lanes: [{ id: 'll', x: -0.4 }, { id: 'l', x: -0.2 }, { id: 'c', x: 0 }, { id: 'r', x: 0.2 }, { id: 'rr', x: 0.4 }] },
-      { at: 14800, width: 0.14, lanes: [{ id: 'ol', x: -0.51 }, { id: 'll', x: -0.34 }, { id: 'l', x: -0.17 }, { id: 'c', x: 0 }, { id: 'r', x: 0.17 }, { id: 'rr', x: 0.34 }, { id: 'or', x: 0.51 }] },
-    ],
+    ringMs: 200,
   };
+  const PROMO_CORRIDOR = PROMO_GRID;
   const PROMO_CONVEYOR = PROMO_CORRIDOR;
   const PROMO_CONVEYOR_INTERVALS = PROMO_CORRIDOR.intervals;
   const PROMO_CONVEYOR_SIZE_START = PROMO_CORRIDOR.nearWidth;
@@ -1711,209 +1698,194 @@
     return seed / 4294967296;
   }
 
-  function corridorSmooth(unit) {
-    const t = Math.min(1, Math.max(0, unit));
-    return t * t * (3 - 2 * t);
+  function gridSpan() {
+    return PROMO_GRID.easeMs + PROMO_GRID.settleMs;
   }
 
-  function corridorFarZ() {
-    return PROMO_CORRIDOR.zSpawn;
+  function gridHoldStart() {
+    return PROMO_GRID.introMs + (PROMO_GRID.steps.length - 1) * gridSpan();
   }
 
-  function corridorApproachAt(timeMs) {
-    const along = corridorSmooth(timeMs / PROMO_CORRIDOR.accelMs);
-    return PROMO_CORRIDOR.approachStart + (PROMO_CORRIDOR.approachEnd - PROMO_CORRIDOR.approachStart) * along;
+  function gridDuration() {
+    return gridHoldStart() + PROMO_GRID.holdMs;
   }
 
-  function corridorIntervalAt(timeMs) {
-    const along = corridorSmooth(timeMs / PROMO_CORRIDOR.intervalEaseMs);
-    return PROMO_CORRIDOR.intervalStart + (PROMO_CORRIDOR.intervalEnd - PROMO_CORRIDOR.intervalStart) * along;
-  }
-
-  function corridorStepIndex(timeMs) {
-    const steps = PROMO_CORRIDOR.lanes;
-    let index = 0;
-    for (let i = 0; i < steps.length; i += 1) {
-      if (timeMs >= steps[i].at) index = i;
+  function gridEase(t) {
+    const clamped = Math.min(1, Math.max(0, t));
+    const x1 = 0.4;
+    const y1 = 0;
+    const x2 = 0.2;
+    const y2 = 1;
+    const cx = 3 * x1;
+    const bx = 3 * (x2 - x1) - cx;
+    const ax = 1 - cx - bx;
+    const cy = 3 * y1;
+    const by = 3 * (y2 - y1) - cy;
+    const ay = 1 - cy - by;
+    const sampleX = (u) => ((ax * u + bx) * u + cx) * u;
+    const sampleY = (u) => ((ay * u + by) * u + cy) * u;
+    const sampleDX = (u) => (3 * ax * u + 2 * bx) * u + cx;
+    let u = clamped;
+    for (let step = 0; step < 6; step += 1) {
+      const slope = sampleDX(u);
+      if (Math.abs(slope) < 1e-6) break;
+      u = Math.min(1, Math.max(0, u - (sampleX(u) - clamped) / slope));
     }
-    return index;
+    return sampleY(u);
   }
 
-  function corridorLayout(timeMs) {
-    const steps = PROMO_CORRIDOR.lanes;
-    const index = corridorStepIndex(timeMs);
-    const current = steps[index];
-    const next = steps[index + 1];
-    const splitting = Boolean(next) && timeMs >= next.at && timeMs < next.at + PROMO_CORRIDOR.splitMs;
-    const mix = splitting ? corridorSmooth((timeMs - next.at) / PROMO_CORRIDOR.splitMs) : 1;
-    const width = splitting ? current.width + (next.width - current.width) * mix : current.width;
-    const ids = [];
-    (splitting ? next.lanes : current.lanes).forEach((lane) => {
-      if (!ids.includes(lane.id)) ids.push(lane.id);
-    });
-    const lanes = ids.map((id) => {
-      const from = current.lanes.find((lane) => lane.id === id);
-      const to = (splitting ? next.lanes : current.lanes).find((lane) => lane.id === id);
-      const origin = from ? from.x : to.x;
-      const target = to ? to.x : origin;
-      return { id, x: splitting ? origin + (target - origin) * mix : target };
-    });
-    return { width, lanes };
+  function gridMetrics(frame) {
+    const cols = PROMO_GRID.cols;
+    const gap = Math.round(frame.width * PROMO_GRID.gapRatio);
+    const cellW = Math.round((frame.width - gap * (cols - 1)) / cols);
+    const cellH = Math.round((frame.height - gap * (cols - 1)) / cols);
+    return { cols, gap, cellW, cellH };
   }
 
-  function corridorLaneOpenAt(id) {
-    const seen = new Set();
-    for (const step of PROMO_CORRIDOR.lanes) {
-      const fresh = step.lanes.filter((lane) => !seen.has(lane.id));
-      step.lanes.forEach((lane) => seen.add(lane.id));
-      const index = fresh.findIndex((lane) => lane.id === id);
-      if (index >= 0) return step.at + index * PROMO_CORRIDOR.laneStaggerMs;
+  function gridDeviceOf(index) {
+    if (index === 0) return PROMO_GRID.devices[0];
+    const roll = wallSeededUnit(index, 4);
+    let cursor = 0;
+    for (let i = 0; i < PROMO_GRID.devices.length; i += 1) {
+      cursor += PROMO_GRID.devices[i].weight;
+      if (roll < cursor) return PROMO_GRID.devices[i];
     }
+    return PROMO_GRID.devices[0];
+  }
+
+  function gridVariantOf(index) {
+    const list = PROMO_GRID.variants;
+    if (index === 0) return 'lead';
+    return list[Math.floor(wallSeededUnit(index, 6) * list.length)];
+  }
+
+  function gridDeviceBox(device, cellW, cellH) {
+    let w = cellW;
+    let h = w / device.ratio;
+    if (h > cellH) {
+      h = cellH;
+      w = h * device.ratio;
+    }
+    return {
+      w: Math.round(w),
+      h: Math.round(h),
+      x: Math.round((cellW - w) / 2),
+      y: Math.round((cellH - h) / 2),
+    };
+  }
+
+  function gridPose(count, frame, metrics) {
+    if (count <= 1) {
+      const hero = gridDeviceBox(PROMO_GRID.devices[0], metrics.cellW, metrics.cellH);
+      const s = (frame.width * PROMO_GRID.hero) / Math.max(1, hero.w);
+      return {
+        s,
+        x: (frame.width - hero.w * s) / 2 - hero.x * s,
+        y: (frame.height - hero.h * s) / 2 - hero.y * s,
+        step: 1,
+        reveal: 1,
+        fade: 1,
+      };
+    }
+    const blockW = count * metrics.cellW + (count - 1) * metrics.gap;
+    const blockH = count * metrics.cellH + (count - 1) * metrics.gap;
+    const s = Math.min(frame.width / blockW, frame.height / blockH) * PROMO_GRID.inset;
+    return {
+      s,
+      x: (frame.width - blockW * s) / 2,
+      y: (frame.height - blockH * s) / 2,
+      step: count,
+      reveal: count,
+      fade: 1,
+    };
+  }
+
+  function gridCamera(timeMs, frame) {
+    const metrics = gridMetrics(frame);
+    const steps = PROMO_GRID.steps;
+    if (timeMs <= PROMO_GRID.introMs) return { ...gridPose(1, frame, metrics), metrics };
+    const elapsed = timeMs - PROMO_GRID.introMs;
+    const hops = steps.length - 1;
+    if (elapsed >= hops * gridSpan()) {
+      return { ...gridPose(steps[steps.length - 1], frame, metrics), metrics };
+    }
+    const hop = Math.min(hops - 1, Math.floor(elapsed / gridSpan()));
+    const local = elapsed - hop * gridSpan();
+    const easeT = Math.min(1, local / PROMO_GRID.easeMs);
+    const unit = easeT >= 1 ? 1 : gridEase(easeT);
+    const from = gridPose(steps[hop], frame, metrics);
+    const to = gridPose(steps[hop + 1], frame, metrics);
+    return {
+      s: from.s + (to.s - from.s) * unit,
+      x: from.x + (to.x - from.x) * unit,
+      y: from.y + (to.y - from.y) * unit,
+      step: unit >= 1 ? steps[hop + 1] : steps[hop],
+      reveal: steps[hop + 1],
+      fade: Math.min(1, local / PROMO_GRID.fadeMs),
+      metrics,
+    };
+  }
+
+  function gridCellFade(col, row, camera) {
+    const steps = PROMO_GRID.steps;
+    const reveal = camera.reveal;
+    const prev = steps[Math.max(0, steps.indexOf(reveal) - 1)] || 1;
+    if (col < prev && row < prev) return 1;
+    if (col < reveal && row < reveal) return camera.fade;
     return 0;
   }
 
-  function corridorLaneBorn(id) {
-    return corridorLaneOpenAt(id);
+  let gridLookCache = null;
+  function gridAllLooks() {
+    if (!gridLookCache) gridLookCache = catalogLooks(16, 4);
+    return gridLookCache;
   }
 
-  function corridorLanePhase(id) {
-    if (id === 'c') return 0;
-    const interval = corridorIntervalAt(corridorLaneOpenAt(id));
-    let salt = 17;
-    for (let i = 0; i < id.length; i += 1) salt += id.charCodeAt(i) * (i + 3);
-    return wallSeededUnit(salt, 29) * interval;
+  function gridLooksFor(index) {
+    const all = gridAllLooks();
+    const start = Math.floor(wallSeededUnit(index, 8) * all.length);
+    const picks = [];
+    for (let i = 0; i < 8; i += 1) picks.push(all[(start + i) % all.length]);
+    return picks;
   }
 
-  function corridorEventZ(id, index) {
-    if (id === 'c' && index === 0) return 0;
-    let salt = 11;
-    for (let i = 0; i < id.length; i += 1) salt += id.charCodeAt(i);
-    const unit = wallSeededUnit(index + 1, salt);
-    return PROMO_CORRIDOR.zEventMin + unit * (PROMO_CORRIDOR.zEventMax - PROMO_CORRIDOR.zEventMin);
-  }
-
-  function corridorSpawns(id) {
-    const list = [];
-    let born = corridorLaneBorn(id) + corridorLanePhase(id);
-    let index = 0;
-    const limit = PROMO_CORRIDOR.streamMs + PROMO_CORRIDOR.approachStart;
-    while (born < limit && index < 16) {
-      list.push({
-        id,
-        index,
-        born,
-        approachMs: corridorApproachAt(born),
-        eventZ: corridorEventZ(id, index),
-        startZ: index === 0 ? PROMO_CORRIDOR.zJoin : PROMO_CORRIDOR.zSpawn,
-        lead: id === 'c' && index === 0,
-      });
-      born += corridorIntervalAt(born);
-      index += 1;
+  let gridDeathCache = null;
+  function gridDeathAt() {
+    if (gridDeathCache) return gridDeathCache;
+    const total = PROMO_GRID.cols * PROMO_GRID.cols;
+    const order = [];
+    for (let index = 1; index < total; index += 1) order.push(index);
+    for (let index = order.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(wallSeededUnit(index, 17) * (index + 1));
+      const held = order[index];
+      order[index] = order[swap];
+      order[swap] = held;
     }
-    return list;
-  }
-
-  function corridorLaneIds() {
-    const ids = [];
-    PROMO_CORRIDOR.lanes.forEach((step) => {
-      step.lanes.forEach((lane) => {
-        if (!ids.includes(lane.id)) ids.push(lane.id);
-      });
-    });
-    return ids;
-  }
-
-  function corridorStartZ(spawn) {
-    if (Number.isFinite(spawn.startZ)) return spawn.startZ;
-    return spawn.index === 0 ? PROMO_CORRIDOR.zJoin : PROMO_CORRIDOR.zSpawn;
-  }
-
-  function corridorTravelMs(spawn) {
-    const full = PROMO_CORRIDOR.zExit - PROMO_CORRIDOR.zSpawn;
-    const distance = PROMO_CORRIDOR.zExit - corridorStartZ(spawn);
-    return (spawn.approachMs || PROMO_CORRIDOR.approachStart) * distance / full;
-  }
-
-  function corridorArriveAt(spawn) {
-    const start = corridorStartZ(spawn);
-    const span = PROMO_CORRIDOR.zExit - start;
-    const along = (spawn.eventZ - start) / span;
-    return spawn.born + corridorTravelMs(spawn) * along;
-  }
-
-  function corridorDeathAt(spawn, mode) {
-    const arrive = corridorArriveAt(spawn);
-    if (spawn.lead && mode !== 'pitch') {
-      const nextSecond = Math.ceil((arrive + 1000) / 1000) * 1000;
-      return nextSecond - 1;
+    const at = new Array(total).fill(gridDuration());
+    at[0] = PROMO_GRID.lostAt;
+    const hold = gridHoldStart();
+    const target = Math.round(total * PROMO_GRID.lostShare);
+    let cursor = 0;
+    let time = PROMO_GRID.lostAt + 80;
+    let burstIndex = 0;
+    while (cursor < order.length && cursor + 1 < target && time < hold) {
+      const span = PROMO_GRID.burstMax - PROMO_GRID.burstMin + 1;
+      const burst = PROMO_GRID.burstMin + Math.floor(wallSeededUnit(burstIndex, 31) * span);
+      for (let bit = 0; bit < burst && cursor < order.length && cursor + 1 < target; bit += 1) {
+        at[order[cursor]] = time;
+        cursor += 1;
+      }
+      time += PROMO_GRID.gapMin + wallSeededUnit(burstIndex, 37) * (PROMO_GRID.gapMax - PROMO_GRID.gapMin);
+      burstIndex += 1;
     }
-    return arrive;
-  }
-
-  function corridorZOf(spawn, timeMs) {
-    const start = corridorStartZ(spawn);
-    if (timeMs <= spawn.born) return start;
-    const arrive = corridorArriveAt(spawn);
-    if (timeMs >= arrive) return spawn.eventZ;
-    const along = (timeMs - spawn.born) / corridorTravelMs(spawn);
-    return start + (PROMO_CORRIDOR.zExit - start) * along;
-  }
-
-  function corridorHitOf(spawn) {
-    return corridorDeathAt(spawn, 'pain');
-  }
-
-  function corridorStreamMs() {
-    return PROMO_CORRIDOR.streamMs;
-  }
-
-  function corridorFit(timeMs) {
-    return corridorLayout(timeMs).width / PROMO_CORRIDOR.nearWidth;
-  }
-
-  function corridorLaneX(id, frameWidth) {
-    const lanes = PROMO_CORRIDOR.lanes[PROMO_CORRIDOR.lanes.length - 1].lanes;
-    const lane = lanes.find((item) => item.id === id);
-    return (lane ? lane.x : 0) * frameWidth;
-  }
-
-  function corridorOpacity(spawn, z) {
-    const start = corridorStartZ(spawn);
-    const span = PROMO_CORRIDOR.zExit - start;
-    const traveled = span ? (z - start) / span : 1;
-    if (traveled >= 1 / 3) return 1;
-    const unit = Math.min(1, Math.max(0, traveled / (1 / 3)));
-    return PROMO_CORRIDOR.opacitySpawn + (1 - PROMO_CORRIDOR.opacitySpawn) * unit;
-  }
-
-  function corridorGroundY(frameHeight) {
-    return frameHeight * (PROMO_CORRIDOR.floorY - PROMO_CORRIDOR.originY);
-  }
-
-  function corridorFloorY(frameHeight, z) {
-    const depth = PROMO_CORRIDOR.perspective / (PROMO_CORRIDOR.perspective - z);
-    return frameHeight * PROMO_CORRIDOR.originY + corridorGroundY(frameHeight) * depth;
-  }
-
-  function corridorTransform(x, y, z, scale) {
-    return `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) translate(-50%, -100%) scale(${scale.toFixed(4)})`;
-  }
-
-  function corridorPhase(spawn, timeMs, mode) {
-    const death = corridorDeathAt(spawn, mode);
-    if (timeMs < death) return { phase: 'travel', since: timeMs - death, z: corridorZOf(spawn, timeMs) };
-    const since = timeMs - death;
-    if (mode === 'pitch') {
-      if (since >= PROMO_CORRIDOR.exitMs) return { phase: 'gone', since, z: PROMO_CORRIDOR.zExit };
-      const along = since / PROMO_CORRIDOR.exitMs;
-      const z = spawn.eventZ + (PROMO_CORRIDOR.zExit - spawn.eventZ) * along;
-      return { phase: 'exit', since, z };
+    let rest = hold;
+    while (cursor < order.length) {
+      at[order[cursor]] = rest;
+      cursor += 1;
+      rest += 36;
     }
-    if (since < PROMO_CORRIDOR.flashMs) return { phase: 'flash', since, z: spawn.eventZ };
-    if (since < PROMO_CORRIDOR.flashMs + PROMO_CORRIDOR.collapseMs) {
-      return { phase: 'collapse', since, z: spawn.eventZ };
-    }
-    return { phase: 'gone', since, z: spawn.eventZ };
+    gridDeathCache = at;
+    return at;
   }
 
   function loadPromoStores() {
@@ -3714,6 +3686,7 @@
         'is-end-pitch',
         'is-pitch-belt',
         'is-corridor',
+        'is-grid',
         'snap',
         'thud',
         'puff',
@@ -3745,7 +3718,7 @@
     revealScaleLayer() {
       const scale = this.root.querySelector('[data-promo-scale]');
       if (scale) scale.hidden = false;
-      this.root.classList.add('is-scale', 'is-corridor');
+      this.root.classList.add('is-scale', 'is-grid');
     }
 
     ensureWall() {
@@ -3951,44 +3924,28 @@
       frame.appendChild(clone);
     }
 
-    buildConveyorWindow(spawn, frameWidth, mode = 'pain') {
-      const width = Math.round(frameWidth * PROMO_CORRIDOR.nearWidth);
-      const height = Math.round(width / PROMO_CORRIDOR.aspect);
-      const tile = document.createElement('div');
-      tile.className = 'promo-scale__tile';
-      tile.dataset.spawn = String(spawn.index);
-      tile.dataset.lane = spawn.id || 'c';
-      tile.style.width = `${width}px`;
-      tile.style.height = `${height}px`;
-      tile.style.transformOrigin = '50% 100%';
-      tile.style.willChange = 'transform';
-      const frame = document.createElement('div');
-      frame.className = 'promo-scale__window';
-      if (spawn.lead) {
-        const clone = this.cloneCorridorStore(mode);
-        if (clone) this.mountCorridorStore(frame, clone, width, height);
-        else if (mode === 'pitch') this.mountPitchStage(frame, width);
-        else frame.appendChild(this.corridorVideo());
-        if (mode === 'pitch') this.mountPitchChrome(frame);
-      } else if (mode === 'pitch') {
-        this.mountPitchStage(frame, width);
-        this.mountPitchChrome(frame);
-      } else {
-        frame.appendChild(this.corridorVideo());
-        const chat = document.createElement('span');
-        chat.className = 'promo-scale__chat';
-        frame.appendChild(chat);
-      }
-      tile.appendChild(frame);
-      return { tile, frame };
+    gridFrame() {
+      const scale = this.root.querySelector('[data-promo-scale]');
+      const rect = scale?.getBoundingClientRect();
+      const width = Math.round(rect?.width || 0);
+      const height = Math.round(rect?.height || 0);
+      if (width >= 40 && height >= 40) return { width, height };
+      return { width: 1440, height: 810 };
     }
 
-    cloneCorridorStore(mode) {
+    gridLeadNode(mode) {
+      if (mode === 'pitch' && this.neutralStage) {
+        const clone = this.neutralStage.cloneNode(true);
+        clone.dataset.naturalW = String(this.neutralStageWidth || 0);
+        clone.dataset.naturalH = String(this.neutralStageHeight || 0);
+        return clone;
+      }
       const store = this.painStore();
       if (!store) return null;
       const clone = store.cloneNode(true);
-      clone.querySelector('[data-promo-pain-cursor]')?.remove();
-      if (mode === 'pitch') clone.querySelector('[data-promo-pain-chat]')?.remove();
+      if (mode === 'pitch') {
+        clone.querySelectorAll('[data-promo-pain-chat], [data-promo-pain-cursor]').forEach((node) => node.remove());
+      }
       clone.removeAttribute('id');
       clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
       clone.classList.remove('is-belt-stage');
@@ -3999,323 +3956,213 @@
       return clone;
     }
 
-    mountCorridorStore(frame, clone, width, height) {
-      const naturalW = Number(clone.dataset.naturalW) || width;
-      const naturalH = Number(clone.dataset.naturalH) || height;
-      const scale = Math.min(width / naturalW, height / naturalH);
-      clone.classList.add('is-belt-stage');
+    gridFillLead(device, clone, box) {
+      const naturalW = Number(clone.dataset.naturalW) || box.w;
+      const naturalH = Number(clone.dataset.naturalH) || box.h;
+      const scale = Math.min(box.w / Math.max(1, naturalW), box.h / Math.max(1, naturalH));
+      clone.classList.add('promo-grid__lead');
       clone.style.position = 'absolute';
       clone.style.width = `${naturalW}px`;
       clone.style.height = `${naturalH}px`;
       clone.style.maxWidth = 'none';
       clone.style.maxHeight = 'none';
       clone.style.transformOrigin = 'top left';
-      clone.style.left = `${((width - naturalW * scale) / 2).toFixed(1)}px`;
-      clone.style.top = `${((height - naturalH * scale) / 2).toFixed(1)}px`;
+      clone.style.left = `${((box.w - naturalW * scale) / 2).toFixed(1)}px`;
+      clone.style.top = `${((box.h - naturalH * scale) / 2).toFixed(1)}px`;
       clone.style.transform = `scale(${scale.toFixed(4)})`;
-      frame.appendChild(clone);
+      device.appendChild(clone);
     }
 
-    corridorLane() {
-      const wall = this.ensureWall();
-      const scale = wall?.parentElement;
-      if (scale && !scale.querySelector('.promo-scale__floor')) {
-        const floor = document.createElement('div');
-        floor.className = 'promo-scale__floor';
-        floor.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>';
-        scale.insertBefore(floor, wall);
-      }
-      this.lockCorridorCamera(wall);
-      let lane = wall.querySelector('[data-promo-lane]');
-      if (!lane) {
-        lane = document.createElement('div');
-        lane.className = 'promo-scale__lane';
-        lane.dataset.promoLane = 'true';
-        wall.append(lane);
-      }
-      this.paintCorridorFloor();
-      return lane;
-    }
-
-    lockCorridorCamera(wall) {
-      if (!wall || wall.dataset.cameraLocked === '1') return;
-      wall.style.perspective = `${PROMO_CORRIDOR.perspective}px`;
-      wall.style.perspectiveOrigin = '50% 42%';
-      wall.style.transform = 'none';
-      const computed = getComputedStyle(wall);
-      wall.dataset.cameraPerspective = computed.perspective;
-      wall.dataset.cameraOrigin = computed.perspectiveOrigin;
-      wall.dataset.cameraTransform = computed.transform;
-      wall.dataset.cameraLocked = '1';
-    }
-
-    assertCorridorCamera() {
-      const wall = this.root.querySelector('[data-promo-scale-wall]');
-      if (!wall || wall.dataset.cameraLocked !== '1') return;
-      const computed = getComputedStyle(wall);
-      const moved = computed.perspective !== wall.dataset.cameraPerspective
-        || computed.perspectiveOrigin !== wall.dataset.cameraOrigin
-        || computed.transform !== wall.dataset.cameraTransform;
-      if (moved) {
-        console.error(
-          'Corridor camera moved',
-          computed.perspective,
-          computed.perspectiveOrigin,
-          computed.transform,
-        );
-      }
-    }
-
-    corridorVideo() {
-      const { webm, mp4 } = this.conveyorSources();
-      const video = document.createElement('video');
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.setAttribute('playsinline', '');
-      video.preload = 'auto';
-      video.loop = true;
-      if (this.conveyorStill) video.poster = this.conveyorStill;
-      if (webm) {
-        const source = document.createElement('source');
-        source.src = webm;
-        source.type = 'video/webm';
-        video.append(source);
-      }
-      if (mp4) {
-        const source = document.createElement('source');
-        source.src = mp4;
-        source.type = 'video/mp4';
-        video.append(source);
-      }
-      video.addEventListener('loadeddata', () => {
-        if (!video.paused) return;
-        try { video.currentTime = PROMO_CONVEYOR_STILL_MS; } catch { /* poster stays */ }
-      }, { once: true });
-      return video;
-    }
-
-    corridorFrame() {
-      const scale = document.querySelector('[data-promo-scale]');
-      const rect = scale?.getBoundingClientRect();
-      return {
-        width: Math.max(1, Math.round(rect?.width || this.conveyorFrameWidth())),
-        height: Math.max(1, Math.round(rect?.height || 810)),
-      };
-    }
-
-    paintCorridorFloor() {
-      const svg = this.root.querySelector('.promo-scale__floor svg');
-      if (!svg || svg.dataset.floorLocked === '1') return;
-      const layout = PROMO_CORRIDOR.lanes[PROMO_CORRIDOR.lanes.length - 1];
-      const lines = layout.lanes.map((lane) => {
-        const center = 50 + lane.x * 100;
-        const half = (layout.width * 100) / 2;
-        const left = center - half;
-        const right = center + half;
-        return `<line x1="${left.toFixed(2)}" y1="100" x2="50" y2="42" /><line x1="${right.toFixed(2)}" y1="100" x2="50" y2="42" />`;
-      }).join('');
-      svg.innerHTML = lines;
-      svg.dataset.floorLocked = '1';
-    }
-
-    placeAvenueWindow(tile, spawn, state, timeMs, frame) {
-      const fit = corridorFit(timeMs);
-      const x = corridorLaneX(spawn.id, frame.width);
-      const y = corridorGroundY(frame.height);
-      const windowEl = tile.querySelector('.promo-scale__window');
-      tile.dataset.z = String(Math.round(state.z));
-      tile.dataset.lane = spawn.id;
-      tile.dataset.phase = state.phase;
-      tile.style.opacity = '1';
-      if (windowEl) windowEl.style.opacity = corridorOpacity(spawn, state.z).toFixed(3);
-      tile.classList.remove('is-shut', 'is-dot', 'is-exit', 'is-husk', 'is-lit');
-      if (state.phase === 'travel') {
-        tile.classList.remove('is-sold');
-        tile.style.transform = corridorTransform(x, y, state.z, fit);
-        return;
-      }
-      if (state.phase === 'flash') {
-        tile.classList.add('is-shut');
-        tile.style.transform = corridorTransform(x, y, state.z, fit * PROMO_CORRIDOR.popScale);
-        return;
-      }
-      if (state.phase === 'collapse') {
-        const collapse = (state.since - PROMO_CORRIDOR.flashMs) / PROMO_CORRIDOR.collapseMs;
-        const eased = 1 - (1 - Math.min(1, Math.max(0, collapse))) ** 3;
-        const scale = PROMO_CORRIDOR.popScale + (PROMO_CORRIDOR.dotScale - PROMO_CORRIDOR.popScale) * eased;
-        tile.classList.add('is-shut');
-        if (scale <= 0.08) tile.classList.add('is-dot');
-        tile.style.transform = corridorTransform(x, y, state.z, fit * scale);
-        return;
-      }
-      const t = Math.min(1, state.since / PROMO_CORRIDOR.exitMs);
-      const sign = Math.sign(x) || 1;
-      const drift = x + sign * frame.width * 0.85 * t;
-      tile.classList.add('is-sold', 'is-exit');
-      const cart = tile.querySelector('.promo-scale__cart');
-      if (cart) cart.textContent = '1';
-      tile.style.transform = corridorTransform(drift, y, state.z, fit);
-      const depth = PROMO_CORRIDOR.perspective / Math.max(1, PROMO_CORRIDOR.perspective - state.z);
-      const visualW = frame.width * PROMO_CORRIDOR.nearWidth * fit * depth;
-      const center = frame.width / 2 + drift * depth;
-      if (t >= 1 || center + visualW / 2 < 0 || center - visualW / 2 > frame.width) tile.remove();
-    }
-
-    syncCorridorLoops(laneEl) {
-      const byLane = new Map();
-      [...laneEl.querySelectorAll('.promo-scale__tile')].forEach((tile) => {
-        const id = tile.dataset.lane || 'c';
-        if (!byLane.has(id)) byLane.set(id, []);
-        byLane.get(id).push(tile);
-      });
-      byLane.forEach((tiles) => {
-        tiles.sort((a, b) => Number(b.dataset.z) - Number(a.dataset.z));
-        tiles.forEach((tile, rank) => {
-          const video = tile.querySelector('video');
-          if (!video || tile.classList.contains('is-dot')) {
-            video?.pause?.();
-            return;
-          }
-          if (rank < PROMO_CORRIDOR.liveCount) {
-            video.loop = true;
-            if (video.paused) video.play?.().catch(() => {});
-          } else if (!video.paused) {
-            video.pause?.();
-          }
-        });
-      });
-    }
-
-    mountAvenueStill(frame) {
-      if (!this.conveyorStill) return false;
-      const img = document.createElement('img');
-      img.className = 'promo-scale__still';
-      img.alt = '';
-      img.draggable = false;
-      img.src = this.conveyorStill;
-      frame.appendChild(img);
-      return true;
-    }
-
-    paintCorridorAt(timeMs, mode = 'pain') {
-      const lane = this.corridorLane();
-      lane.innerHTML = '';
-      const frame = this.corridorFrame();
-      this.assertCorridorCamera();
-      corridorLaneIds().forEach((id) => {
-        corridorSpawns(id).forEach((spawn) => {
-          if (spawn.born > timeMs) return;
-          const state = corridorPhase(spawn, timeMs, mode);
-          if (state.phase === 'gone') return;
-          const built = this.buildConveyorWindow(spawn, frame.width, mode);
-          if (spawn.index >= PROMO_CORRIDOR.liveCount) {
-            const windowEl = built.tile.querySelector('.promo-scale__window');
-            const video = windowEl?.querySelector('video');
-            if (video && this.mountAvenueStill(windowEl)) video.remove();
-          }
-          lane.appendChild(built.tile);
-          this.placeAvenueWindow(built.tile, spawn, state, timeMs, frame);
-        });
-      });
-      this.syncCorridorLoops(lane);
-    }
-
-    paintCorridorStatic(mode = 'pain') {
-      const lane = this.corridorLane();
-      lane.innerHTML = '';
-      const frame = this.corridorFrame();
-      const spawn = corridorSpawns('c')[0];
-      [-6000, -3200, -800].forEach((z, index) => {
-        const copy = { ...spawn, index, lead: index === 0 };
-        const built = this.buildConveyorWindow(copy, frame.width, mode);
-        lane.appendChild(built.tile);
-        this.placeAvenueWindow(built.tile, copy, { phase: 'travel', since: -1, z }, 0, frame);
-      });
-    }
-
-    runCorridor(mode, leadTile) {
-      const generation = this.scaleGeneration;
-      const lane = this.corridorLane();
-      const frame = this.corridorFrame();
-      const started = performance.now();
-      const tiles = new Map();
-      const clicked = new Set();
-      if (leadTile) {
-        leadTile.dataset.lane = 'c';
-        leadTile.dataset.spawn = '0';
-        tiles.set('c:0', leadTile);
-      }
-      const step = (now) => {
-        if (this.scaleGeneration !== generation) return;
-        const elapsed = now - started;
-        this.assertCorridorCamera();
-        corridorLaneIds().forEach((id) => {
-          corridorSpawns(id).forEach((spawn) => {
-            if (spawn.born > elapsed) return;
-            const key = `${spawn.id}:${spawn.index}`;
-            const state = corridorPhase(spawn, elapsed, mode);
-            let tile = tiles.get(key);
-            if (state.phase === 'gone') {
-              tile?.remove();
-              tiles.delete(key);
-              return;
-            }
-            if (!tile || !tile.isConnected) {
-              tile = this.buildConveyorWindow(spawn, frame.width, mode).tile;
-              if (spawn.index >= PROMO_CORRIDOR.liveCount) {
-                const windowEl = tile.querySelector('.promo-scale__window');
-                const video = windowEl?.querySelector('video');
-                if (video && this.mountAvenueStill(windowEl)) video.remove();
-              }
-              lane.appendChild(tile);
-              tiles.set(key, tile);
-            }
-            this.placeAvenueWindow(tile, spawn, state, elapsed, frame);
-            if ((state.phase === 'flash' || state.phase === 'exit') && !clicked.has(key)) {
-              clicked.add(key);
-              this.emitClick();
-            }
-            if (!tile.isConnected) tiles.delete(key);
+    gridFillLoop(screen, index) {
+      const variant = gridVariantOf(index);
+      const looks = gridLooksFor(index);
+      if (variant === 'product-read' || variant === 'product-scroll') {
+        const page = document.createElement('div');
+        page.className = 'promo-grid__page';
+        const img = document.createElement('img');
+        img.alt = '';
+        img.draggable = false;
+        const src = claySrc(looks[0]);
+        if (src) img.src = src;
+        page.appendChild(img);
+        const lines = document.createElement('span');
+        lines.className = 'promo-grid__lines';
+        page.appendChild(lines);
+        screen.appendChild(page);
+      } else {
+        const track = document.createElement('div');
+        track.className = 'promo-grid__track';
+        for (let copy = 0; copy < 2; copy += 1) {
+          const sheet = document.createElement('div');
+          sheet.className = 'promo-grid__sheet';
+          looks.forEach((look) => {
+            const card = document.createElement('span');
+            card.className = 'promo-grid__card';
+            const img = document.createElement('img');
+            img.alt = '';
+            img.draggable = false;
+            const src = claySrc(look);
+            if (src) img.src = src;
+            card.appendChild(img);
+            sheet.appendChild(card);
           });
-        });
-        this.syncCorridorLoops(lane);
-        if (elapsed < corridorStreamMs()) this.conveyorFrame = requestAnimationFrame(step);
-      };
-      this.conveyorFrame = requestAnimationFrame(step);
+          track.appendChild(sheet);
+        }
+        screen.appendChild(track);
+      }
+      const cursor = document.createElement('span');
+      cursor.className = 'promo-grid__cursor';
+      screen.appendChild(cursor);
+      return variant;
     }
 
-    async recedeStageIntoCorridor(mode) {
+    gridMark(device) {
+      const cart = document.createElement('span');
+      cart.className = 'promo-grid__cart';
+      const mark = document.createElement('span');
+      mark.className = 'promo-grid__mark';
+      device.append(cart, mark);
+    }
+
+    mountGrid(mode) {
+      const wall = this.ensureWall();
+      if (!wall) return null;
+      wall.style.perspective = 'none';
+      wall.style.perspectiveOrigin = '50% 50%';
+      wall.style.transform = 'none';
+      wall.style.filter = 'none';
+      this.root.querySelector('.promo-scale__floor')?.remove();
       const store = this.painStore();
-      const frame = this.corridorFrame();
-      const lane = this.corridorLane();
-      const spawn = corridorSpawns('c')[0];
-      const built = this.buildConveyorWindow(spawn, frame.width, mode);
-      lane.appendChild(built.tile);
-      const rect = store?.getBoundingClientRect();
-      const scaleRect = document.querySelector('[data-promo-scale]')?.getBoundingClientRect();
-      const naturalW = Math.max(1, rect?.width || frame.width * 0.5);
-      const layoutW = frame.width * PROMO_CORRIDOR.nearWidth;
-      const layoutH = layoutW / PROMO_CORRIDOR.aspect;
-      const rel = Math.min(1.4, layoutW / naturalW);
-      const z0 = Math.min(PROMO_CORRIDOR.perspective * 0.82, PROMO_CORRIDOR.perspective * (1 - rel));
-      const projected = PROMO_CORRIDOR.perspective / (PROMO_CORRIDOR.perspective - z0);
-      const originX = (rect?.left || 0) - (scaleRect?.left || 0) + naturalW / 2;
-      const originY = (rect?.top || 0) - (scaleRect?.top || 0) + (rect?.height || layoutH) / 2;
-      const startX = (originX - frame.width / 2) / projected;
-      const startY = (originY - frame.height * PROMO_CORRIDOR.originY) / projected + (layoutH / 2) / projected;
-      built.tile.style.transformOrigin = '50% 100%';
-      built.tile.style.transition = 'none';
-      built.tile.style.transform = corridorTransform(startX, startY, z0, 1);
-      built.tile.style.opacity = '1';
       if (store) store.style.visibility = 'hidden';
-      built.tile.getBoundingClientRect();
-      built.tile.style.transition = `transform ${PROMO_CORRIDOR.recedeMs}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${PROMO_CORRIDOR.recedeMs}ms linear`;
-      built.tile.style.transform = corridorTransform(0, corridorGroundY(frame.height), PROMO_CORRIDOR.zJoin, 1);
-      built.tile.style.opacity = String(PROMO_CORRIDOR.opacitySpawn);
-      await waitMs(PROMO_CORRIDOR.recedeMs);
-      built.tile.style.transition = 'none';
-      return built.tile;
+      const frame = this.gridFrame();
+      const existing = wall.querySelector('[data-promo-grid]');
+      if (existing && existing.dataset.mode === mode && existing.dataset.frameW === String(frame.width)) return existing;
+      wall.replaceChildren();
+      const metrics = gridMetrics(frame);
+      const grid = document.createElement('div');
+      grid.className = 'promo-grid';
+      grid.dataset.promoGrid = 'true';
+      grid.dataset.mode = mode;
+      grid.dataset.frameW = String(frame.width);
+      const count = metrics.cols * metrics.cols;
+      const lead = this.gridLeadNode(mode);
+      for (let index = 0; index < count; index += 1) {
+        const col = index % metrics.cols;
+        const row = Math.floor(index / metrics.cols);
+        const deviceKind = gridDeviceOf(index);
+        const cell = document.createElement('div');
+        cell.className = 'promo-grid__cell';
+        cell.dataset.index = String(index);
+        cell.dataset.col = String(col);
+        cell.dataset.row = String(row);
+        cell.style.left = `${col * (metrics.cellW + metrics.gap)}px`;
+        cell.style.top = `${row * (metrics.cellH + metrics.gap)}px`;
+        cell.style.width = `${metrics.cellW}px`;
+        cell.style.height = `${metrics.cellH}px`;
+        const box = gridDeviceBox(deviceKind, metrics.cellW, metrics.cellH);
+        const device = document.createElement('div');
+        device.className = `promo-grid__device is-${deviceKind.id}`;
+        device.style.left = `${box.x}px`;
+        device.style.top = `${box.y}px`;
+        device.style.width = `${box.w}px`;
+        device.style.height = `${box.h}px`;
+        if (index === 0 && lead) {
+          device.classList.add('is-lead');
+          this.gridFillLead(device, lead, box);
+          cell.classList.add('is-lead');
+        } else {
+          const bar = document.createElement('div');
+          bar.className = 'promo-grid__bar';
+          if (deviceKind.id === 'phone') {
+            const notch = document.createElement('span');
+            notch.className = 'promo-grid__notch';
+            bar.appendChild(notch);
+          } else {
+            const dots = document.createElement('span');
+            dots.className = 'promo-grid__dots';
+            dots.innerHTML = '<i></i><i></i><i></i>';
+            bar.appendChild(dots);
+          }
+          const end = document.createElement('span');
+          end.className = 'promo-grid__bar-end';
+          bar.appendChild(end);
+          device.appendChild(bar);
+          const screen = document.createElement('div');
+          screen.className = 'promo-grid__screen';
+          const variant = this.gridFillLoop(screen, index);
+          cell.classList.add(`is-${variant}`);
+          device.appendChild(screen);
+          if (mode === 'pitch') {
+            const clerk = document.createElement('span');
+            clerk.className = 'promo-grid__clerk';
+            screen.appendChild(clerk);
+          } else {
+            const chat = document.createElement('span');
+            chat.className = 'promo-grid__chat';
+            screen.appendChild(chat);
+          }
+        }
+        this.gridMark(device);
+        const barEnd = device.querySelector('.promo-grid__bar-end');
+        if (barEnd) {
+          const cart = device.querySelector('.promo-grid__cart');
+          const mark = device.querySelector('.promo-grid__mark');
+          if (cart) barEnd.appendChild(cart);
+          if (mark) barEnd.appendChild(mark);
+        }
+        if (index === 0) device.querySelector('.promo-grid__cart')?.remove();
+        if (index === 0 && mode === 'pitch') {
+          const clerk = document.createElement('span');
+          clerk.className = 'promo-grid__clerk';
+          device.appendChild(clerk);
+        }
+        cell.appendChild(device);
+        grid.appendChild(cell);
+      }
+      wall.appendChild(grid);
+      return grid;
+    }
+
+    paintGridAt(timeMs, mode = 'pain', options = {}) {
+      const grid = this.mountGrid(mode);
+      if (!grid) return;
+      const frame = this.gridFrame();
+      const camera = options.reduced ? { ...gridPose(4, frame, gridMetrics(frame)), metrics: gridMetrics(frame) } : gridCamera(timeMs, frame);
+      grid.dataset.step = String(camera.step);
+      grid.style.setProperty('--grid-inv', (1 / Math.max(0.05, camera.s)).toFixed(5));
+      grid.style.transform = `translate(${camera.x.toFixed(2)}px, ${camera.y.toFixed(2)}px) scale(${camera.s.toFixed(4)})`;
+      const deaths = gridDeathAt();
+      const cells = grid.querySelectorAll('.promo-grid__cell');
+      cells.forEach((cell) => {
+        const col = Number(cell.dataset.col);
+        const row = Number(cell.dataset.row);
+        const index = Number(cell.dataset.index);
+        let opacity = gridCellFade(col, row, camera);
+        let marked = timeMs >= deaths[index];
+        if (options.reduced) {
+          const inside = col < 4 && row < 4;
+          opacity = inside ? 1 : 0;
+          marked = inside;
+        }
+        cell.style.opacity = opacity.toFixed(3);
+        cell.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+        cell.classList.toggle('is-in', opacity > 0.01);
+        cell.classList.toggle('is-lost', marked && mode !== 'pitch');
+        cell.classList.toggle('is-sold', marked && mode === 'pitch');
+      });
+    }
+
+    runGrid(mode) {
+      const generation = this.scaleGeneration;
+      const started = performance.now();
+      const tick = (now) => {
+        if (generation !== this.scaleGeneration) return;
+        const elapsed = now - started;
+        this.paintGridAt(elapsed, mode);
+        if (elapsed < gridDuration()) this.conveyorFrame = requestAnimationFrame(tick);
+      };
+      this.paintGridAt(0, mode);
+      this.conveyorFrame = requestAnimationFrame(tick);
     }
 
     puffPainStore() {
@@ -4429,7 +4276,7 @@
         this.revealScaleLayer();
         this.root.classList.add('is-scale-still');
         await this.captureConveyorStill();
-        this.paintCorridorStatic('pain');
+        this.paintGridAt(0, 'pain', { reduced: true });
         await waitMs(400);
         await this.playConveyorEnd('pain');
         if (marketingPart() === 'full') {
@@ -4476,10 +4323,10 @@
     async playScaleTimeline() {
       const generation = this.scaleGeneration;
       this.revealScaleLayer();
-      const lead = await this.recedeStageIntoCorridor('pain');
+      this.mountGrid('pain');
       if (generation !== this.scaleGeneration) return;
-      this.runCorridor('pain', lead);
-      await waitMs(corridorStreamMs());
+      this.runGrid('pain');
+      await waitMs(gridDuration());
       if (generation !== this.scaleGeneration) return;
       await this.playConveyorEnd('pain');
     }
@@ -4493,6 +4340,7 @@
         'is-scale-zero',
         'is-scale-still',
         'is-corridor',
+        'is-grid',
         'is-end-pain',
         'is-end-pitch',
         'is-pitch-belt',
@@ -4594,8 +4442,7 @@
       if (prefersReducedMotion()) {
         this.root.classList.add('is-scale-still');
         this.revealScaleLayer();
-        this.paintCorridorStatic('pitch');
-        this.seatClerkOnBelt(true);
+        this.paintGridAt(0, 'pitch', { reduced: true });
         await waitMs(400);
         await this.playConveyorEnd('pitch');
         this.restoreClerkSeat();
@@ -4604,11 +4451,10 @@
         return;
       }
       this.revealScaleLayer();
-      const lead = await this.recedeStageIntoCorridor('pitch');
+      this.mountGrid('pitch');
       if (generation !== this.scaleGeneration) return;
-      this.seatClerkOnBelt(false);
-      this.runCorridor('pitch', lead);
-      await waitMs(corridorStreamMs());
+      this.runGrid('pitch');
+      await waitMs(gridDuration());
       if (generation !== this.scaleGeneration) return;
       await this.playConveyorEnd('pitch');
       this.restoreClerkSeat();
@@ -4633,24 +4479,22 @@
       }
       this.revealScaleLayer();
       this.root.classList.add('is-scale-still');
-      if (mode === 'pitch') this.seatClerkOnBelt(true);
       if (mode !== 'pitch') await Promise.race([this.captureConveyorStill(), waitMs(1200)]);
       const shot = kind === 'puff' ? 'event' : (kind === 'stream' ? 'lanes-7' : (kind === 'zero' ? 'end' : kind));
-      const firstHit = corridorHitOf(corridorSpawns('c')[0]);
-      const avenueAt = {
-        travel: Math.max(80, firstHit - 180),
-        'lane-1': Math.max(80, firstHit - 180),
-        event: firstHit + 16,
-        mid: 8000,
-        'lanes-3': 8000,
-        'lanes-5': 12400,
-        'lanes-7': 16000,
-        'residue-10': 12400,
-        'residue-20': 12400,
-        'residue-100': 16000,
-        'residue-full': 16000,
+      const gridAt = {
+        travel: 40,
+        'lane-1': 40,
+        event: PROMO_GRID.lostAt + 80,
+        mid: 2200,
+        'lanes-3': 2200,
+        'lanes-5': 3100,
+        'lanes-7': 5200,
+        'residue-10': 3100,
+        'residue-20': 3100,
+        'residue-100': 5200,
+        'residue-full': 5200,
       };
-      if (avenueAt[shot] != null) this.paintCorridorAt(avenueAt[shot], mode);
+      if (gridAt[shot] != null) this.paintGridAt(gridAt[shot], mode);
       if (shot === 'white' || shot === 'end') this.root.classList.add('is-scale-white');
       if (shot === 'end') {
         this.setConveyorEnd(mode, ctaKey);
