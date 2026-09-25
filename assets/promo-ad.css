@@ -5195,20 +5195,19 @@ html.is-promo-cover .promo-cover,
 
 .promo-device {
   --u: var(--device-unit, 1);
-  --device-lift: 36;
-  --device-blur: 80;
-  --device-ambient: 28%;
-  background: color-mix(in srgb, var(--ad-white) 55%, transparent);
-  border: calc(3px * var(--u)) solid color-mix(in srgb, var(--ad-white) 78%, transparent);
+  --device-lift: 28;
+  --device-blur: 64;
+  --device-ambient: 18%;
+  background: color-mix(in srgb, var(--ad-white) 72%, transparent);
+  border: calc(2px * var(--u)) solid color-mix(in srgb, var(--ad-white) 70%, transparent);
   box-shadow:
-    inset 0 calc(3px * var(--u)) 0 color-mix(in srgb, var(--ad-white) 95%, transparent),
-    inset 0 calc(-4px * var(--u)) calc(14px * var(--u)) color-mix(in srgb, var(--ad-ink) 28%, transparent),
-    inset 0 0 calc(28px * var(--u)) color-mix(in srgb, var(--ad-white) 55%, transparent),
-    0 calc(4px * var(--u)) calc(10px * var(--u)) color-mix(in srgb, var(--ad-ink) 22%, transparent),
-    0 calc(var(--device-lift) * 1px * var(--u)) calc(var(--device-blur) * 1px * var(--u)) color-mix(in srgb, var(--ad-ink) var(--device-ambient), transparent),
-    0 calc(var(--device-lift) * 1.8px * var(--u)) calc(var(--device-blur) * 2px * var(--u)) color-mix(in srgb, var(--ad-ink) 20%, transparent);
-  -webkit-backdrop-filter: blur(calc(48px * var(--u))) saturate(1.85);
-  backdrop-filter: blur(calc(48px * var(--u))) saturate(1.85);
+    inset 0 calc(2px * var(--u)) 0 color-mix(in srgb, var(--ad-white) 92%, transparent),
+    inset 0 calc(-2px * var(--u)) calc(6px * var(--u)) color-mix(in srgb, var(--ad-ink) 16%, transparent),
+    inset 0 0 calc(14px * var(--u)) color-mix(in srgb, var(--ad-white) 40%, transparent),
+    0 calc(3px * var(--u)) calc(8px * var(--u)) color-mix(in srgb, var(--ad-ink) 12%, transparent),
+    0 calc(var(--device-lift) * 1px * var(--u)) calc(var(--device-blur) * 1px * var(--u)) color-mix(in srgb, var(--ad-ink) var(--device-ambient), transparent);
+  -webkit-backdrop-filter: blur(calc(32px * var(--u))) saturate(1.7);
+  backdrop-filter: blur(calc(32px * var(--u))) saturate(1.7);
 }
 
 .promo-device::after {
@@ -5218,32 +5217,30 @@ html.is-promo-cover .promo-cover,
   z-index: 4;
   border-radius: inherit;
   pointer-events: none;
-  background:
-    linear-gradient(115deg, color-mix(in srgb, var(--ad-white) 70%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in srgb, var(--ad-white) 62%, transparent), transparent 36%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ad-white) 52%, transparent), transparent 22%);
 }
 
 .promo-device.is-desktop {
-  --device-lift: 52;
-  --device-blur: 120;
-  --device-ambient: 26%;
+  --device-lift: 38;
+  --device-blur: 88;
+  --device-ambient: 18%;
 }
 
 .promo-device.is-tablet {
-  --device-lift: 40;
-  --device-blur: 92;
-  --device-ambient: 30%;
+  --device-lift: 28;
+  --device-blur: 64;
+  --device-ambient: 22%;
 }
 
 .promo-device.is-phone {
-  --device-lift: 32;
-  --device-blur: 72;
-  --device-ambient: 36%;
+  --device-lift: 22;
+  --device-blur: 50;
+  --device-ambient: 26%;
 }
 
 .promo-grid .promo-device {
-  -webkit-backdrop-filter: blur(calc(48px * var(--u))) saturate(1.85);
-  backdrop-filter: blur(calc(48px * var(--u))) saturate(1.85);
+  -webkit-backdrop-filter: blur(calc(32px * var(--u))) saturate(1.7);
+  backdrop-filter: blur(calc(32px * var(--u))) saturate(1.7);
 }
 
 .promo-opening.is-clip .promo-device::after {
