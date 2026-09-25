@@ -185,6 +185,15 @@ async function revealForcedFaces(page) {
 
 async function serveExportAssets(page) {
   const themeJs = fs.readFileSync(path.join(THEME_ROOT, 'assets/theme.js'));
+  await page.route('**/promo-clip-*.mp4*', async (route) => {
+    const name = route.request().url().split('/').pop().split('?')[0];
+    const file = path.join(THEME_ROOT, 'assets', name);
+    if (!fs.existsSync(file)) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({ path: file, contentType: 'video/mp4' });
+  });
   await page.route('**/assets/theme.js*', async (route) => {
     await route.fulfill({
       status: 200,

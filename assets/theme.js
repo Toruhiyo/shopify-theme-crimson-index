@@ -48,7 +48,7 @@
     if (source.get(PROMO_MARKETING_PARAM)) keys.push(PROMO_MARKETING_PARAM);
     if (source.get(PROMO_VIDEO_PARAM)) keys.push(PROMO_VIDEO_PARAM);
     if (!keys.length) return;
-    const carry = ['part', 'hold', 'cta', 'store', 'auto', 'nocover', 'lighting', 'moments'];
+    const carry = ['part', 'hold', 'cta', 'store', 'auto', 'nocover', 'lighting', 'moments', 'clip', 'device', 'motion', 'chat', 'tone'];
 
     const updateLink = (link) => {
       const href = link.getAttribute('href');
@@ -245,7 +245,7 @@
       { id: 'phone', weight: 0.3, ratio: 9 / 19.5 },
       { id: 'tablet', weight: 0.1, ratio: 4 / 3 },
     ],
-    variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll'],
+    variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
     burstMin: 4,
     burstMax: 5,
     gapMin: 300,
@@ -280,6 +280,13 @@
   const PROMO_CONVEYOR_MID_MS = 4500;
   const PROMO_CONVEYOR_STILL_MS = PROMO_CORRIDOR.stillSec;
   const PROMO_WALL_SEED = 40721;
+  const PROMO_CLIP_DEVICES = ['desktop', 'phone', 'tablet'];
+  const PROMO_CLIP_MOTIONS = {
+    desktop: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
+    phone: ['scroll-up', 'scroll-down', 'product-read', 'product-scroll', 'compare'],
+    tablet: ['scroll-up', 'scroll-down', 'product-read', 'product-scroll', 'compare'],
+  };
+  const PROMO_CLIP_MOTION_ALL = ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'];
   const PROMO_CURSOR_HOT_X = 33 * (5 / 24);
   const PROMO_CURSOR_HOT_Y = 33 * (3.2 / 24);
   const PROMO_PAIN_LINE_1 = 'Looking for something light I can take everywhere.';
@@ -1698,6 +1705,51 @@
     return seed / 4294967296;
   }
 
+  function readPromoClip() {
+    const raw = (promoBootParams.get('clip') || '').trim().toLowerCase();
+    if (!raw) return null;
+    const deviceRaw = (promoBootParams.get('device') || (PROMO_CLIP_DEVICES.includes(raw) ? raw : 'desktop')).trim().toLowerCase();
+    const device = PROMO_CLIP_DEVICES.includes(deviceRaw) ? deviceRaw : 'desktop';
+    const motions = PROMO_CLIP_MOTIONS[device];
+    const motionRaw = (promoBootParams.get('motion') || motions[0]).trim().toLowerCase();
+    const toneRaw = (promoBootParams.get('tone') || 'pain').trim().toLowerCase();
+    return {
+      device,
+      motion: motions.includes(motionRaw) ? motionRaw : motions[0],
+      chat: promoBootParams.get('chat') === '1',
+      tone: toneRaw === 'pitch' ? 'pitch' : 'pain',
+    };
+  }
+
+  function promoClipUrls() {
+    const raw = document.documentElement.getAttribute('data-promo-clips');
+    if (!raw) return {};
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function clipFileKey(tone, device, motion, chat) {
+    return `${tone}-${device}-${motion}-${chat ? '1' : '0'}`;
+  }
+
+  function clipSrc(tone, device, motion, chat) {
+    const key = clipFileKey(tone, device, motion, chat);
+    const mapped = promoClipUrls()[key];
+    if (mapped) return mapped;
+    const sample = Object.values(promoClayUrls())[0] || '';
+    if (!sample) return '';
+    return sample.replace(/[^/?#]+\.png(\?[^#]*)?/, `promo-clip-${key}.mp4`);
+  }
+
+  function gridMotionOf(index, deviceId) {
+    const list = PROMO_CLIP_MOTIONS[deviceId] || PROMO_CLIP_MOTIONS.desktop;
+    return list[Math.floor(wallSeededUnit(index, 6) * list.length)];
+  }
+
   function gridSpan() {
     return PROMO_GRID.easeMs + PROMO_GRID.settleMs;
   }
@@ -1751,12 +1803,6 @@
       if (roll < cursor) return PROMO_GRID.devices[i];
     }
     return PROMO_GRID.devices[0];
-  }
-
-  function gridVariantOf(index) {
-    const list = PROMO_GRID.variants;
-    if (index === 0) return 'lead';
-    return list[Math.floor(wallSeededUnit(index, 6) * list.length)];
   }
 
   function gridDeviceBox(device, cellW, cellH) {
@@ -2167,6 +2213,10 @@
       document.documentElement.classList.add('is-promo-ready');
       if (this.flipWhenReady) {
         this.flip();
+        return;
+      }
+      if (readPromoClip()) {
+        this.showClip();
         return;
       }
       if (marketingPart() !== 'pitch') this.playPain();
@@ -3924,6 +3974,197 @@
       frame.appendChild(clone);
     }
 
+    showClip(overrides) {
+      const fromUrl = readPromoClip();
+      const clip = {
+        device: 'desktop',
+        motion: 'scroll-up',
+        chat: false,
+        tone: 'pain',
+        ...(fromUrl || {}),
+        ...(overrides || {}),
+      };
+      const motions = PROMO_CLIP_MOTIONS[clip.device] || PROMO_CLIP_MOTIONS.desktop;
+      if (!PROMO_CLIP_DEVICES.includes(clip.device)) clip.device = 'desktop';
+      if (!motions.includes(clip.motion)) clip.motion = motions[0];
+      clip.tone = clip.tone === 'pitch' ? 'pitch' : 'pain';
+      clip.chat = !!clip.chat;
+
+      document.documentElement.classList.add('is-promo-clip');
+      document.getElementById('page-loader')?.setAttribute('hidden', '');
+      this.root.classList.add('is-clip');
+      PROMO_CLIP_DEVICES.forEach((id) => this.root.classList.toggle(`is-clip-${id}`, id === clip.device));
+      PROMO_CLIP_MOTION_ALL.forEach((id) => this.root.classList.toggle(`is-motion-${id}`, id === clip.motion));
+      this.root.classList.toggle('is-tone-pain', clip.tone === 'pain');
+      this.root.classList.toggle('is-tone-pitch', clip.tone === 'pitch');
+      this.root.classList.toggle('is-pain-loop', clip.tone === 'pain');
+      this.root.classList.toggle('is-chat', clip.chat);
+      document.documentElement.style.setProperty('--ad-warmth', clip.tone === 'pitch' ? '1' : '0');
+
+      this.openPainStage();
+      this.applyPainBeat(clip.chat && clip.tone === 'pain' ? 'answer-2' : 'grid', true);
+      this.root.querySelectorAll('.promo-clip__product, .promo-clip__clerk, [data-promo-clip]').forEach((node) => node.remove());
+      this.painHost()?.querySelector('.promo-moments__board')?.removeAttribute('hidden');
+
+      const chat = this.root.querySelector('[data-promo-pain-chat]');
+      const cursor = this.root.querySelector('[data-promo-pain-cursor]');
+      const wander = clip.device === 'desktop' && (clip.motion === 'wander-near' || clip.motion === 'wander-far');
+      if (chat && !(clip.chat && clip.tone === 'pain')) {
+        chat.setAttribute('hidden', '');
+        chat.classList.remove('is-open');
+      }
+      if (cursor) {
+        cursor.hidden = !wander;
+        cursor.style.opacity = wander ? '1' : '0';
+        cursor.style.transitionDuration = '0ms';
+      }
+
+      const store = this.painStore();
+      if (clip.device === 'desktop') {
+        if (store) store.style.visibility = '';
+        if (clip.motion === 'product-read' || clip.motion === 'product-scroll' || clip.motion === 'compare') {
+          this.mountClipProduct(store?.querySelector('.promo-opening__moments-stage'), clip);
+        }
+        if (clip.tone === 'pitch' && clip.chat && store) this.mountClipClerk(store);
+      } else if (store) {
+        store.style.visibility = 'hidden';
+        this.mountHandheldClip(clip);
+      }
+
+      this.root.dataset.clipDevice = clip.device;
+      this.root.dataset.clipMotion = clip.motion;
+      this.root.dataset.clipTone = clip.tone;
+      this.root.dataset.clipChat = clip.chat ? '1' : '0';
+      this.root.setAttribute('data-promo-clip-ready', '1');
+    }
+
+    mountClipProduct(host, clip) {
+      if (!host) return;
+      const stage = document.createElement('div');
+      stage.className = `promo-clip__product is-${clip.motion}`;
+      const looks = gridAllLooks();
+      const scroller = document.createElement('div');
+      scroller.className = 'promo-clip__scroll';
+      const count = clip.motion === 'compare' ? 2 : 1;
+      for (let index = 0; index < count; index += 1) {
+        scroller.appendChild(this.clipHero(looks[index], clip.motion !== 'compare'));
+      }
+      if (clip.motion === 'product-scroll') {
+        const blurb = document.createElement('div');
+        blurb.className = 'promo-clip__blurb';
+        blurb.innerHTML = '<i></i><i></i><i></i><i class="is-short"></i>';
+        scroller.appendChild(blurb);
+      }
+      stage.appendChild(scroller);
+      host.appendChild(stage);
+    }
+
+    clipHero(look, withCopy) {
+      const card = document.createElement('div');
+      card.className = 'promo-clip__hero';
+      const img = document.createElement('img');
+      img.alt = '';
+      img.draggable = false;
+      const src = claySrc(look);
+      if (src) img.src = src;
+      card.appendChild(img);
+      if (withCopy) {
+        const copy = document.createElement('div');
+        copy.className = 'promo-clip__copy';
+        copy.innerHTML = '<i></i><i class="is-short"></i><i></i><i class="is-mid"></i>';
+        card.appendChild(copy);
+      }
+      return card;
+    }
+
+    clipCard(look) {
+      const card = document.createElement('article');
+      card.className = 'promo-clip__card';
+      const img = document.createElement('img');
+      img.alt = '';
+      img.draggable = false;
+      const src = claySrc(look);
+      if (src) img.src = src;
+      const price = document.createElement('p');
+      price.className = 'promo-clip__price';
+      price.innerHTML = '<span>$</span><i></i>';
+      card.append(img, price);
+      return card;
+    }
+
+    clipStatus(device) {
+      const status = document.createElement('div');
+      status.className = 'promo-clip__status';
+      const time = document.createElement('span');
+      time.className = 'promo-clip__time';
+      time.textContent = '9:41';
+      const island = document.createElement('span');
+      island.className = 'promo-clip__island';
+      const icons = document.createElement('span');
+      icons.className = 'promo-clip__status-icons';
+      icons.innerHTML = '<svg viewBox="0 0 18 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="0.6"/><rect x="5" y="5" width="3" height="7" rx="0.6"/><rect x="10" y="2" width="3" height="10" rx="0.6"/><rect x="15" y="0" width="3" height="12" rx="0.6" opacity="0.35"/></svg><svg viewBox="0 0 26 12" aria-hidden="true"><rect x="0.6" y="0.6" width="22" height="10.8" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="23.6" y="3.6" width="1.5" height="4.8" rx="0.4"/><rect x="2.4" y="2.4" width="15.2" height="7.2" rx="1"/></svg>';
+      status.append(time, island, icons);
+      status.dataset.device = device;
+      return status;
+    }
+
+    clipStoreBar() {
+      const bar = this.painStore()?.querySelector('.promo-opening__store-bar');
+      if (!bar) return document.createElement('div');
+      const clone = bar.cloneNode(true);
+      clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+      return clone;
+    }
+
+    mountClipClerk(host) {
+      const clerk = document.createElement('span');
+      clerk.className = 'promo-clip__clerk';
+      clerk.setAttribute('aria-hidden', 'true');
+      host.appendChild(clerk);
+    }
+
+    mountHandheldClip(clip) {
+      const frame = document.createElement('div');
+      frame.className = `promo-clip is-${clip.device}`;
+      frame.setAttribute('data-promo-clip', '');
+      const bezel = document.createElement('div');
+      bezel.className = 'promo-clip__bezel';
+      const screen = document.createElement('div');
+      screen.className = 'promo-clip__screen';
+      const cols = clip.device === 'tablet' ? 3 : 2;
+      const looks = gridAllLooks().slice(0, cols * 4);
+      const track = document.createElement('div');
+      track.className = 'promo-clip__track';
+      for (let copy = 0; copy < 2; copy += 1) {
+        const sheet = document.createElement('div');
+        sheet.className = 'promo-clip__sheet';
+        sheet.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+        looks.forEach((look) => sheet.appendChild(this.clipCard(look)));
+        track.appendChild(sheet);
+      }
+      screen.appendChild(track);
+      if (clip.motion === 'product-read' || clip.motion === 'product-scroll' || clip.motion === 'compare') {
+        this.mountClipProduct(screen, clip);
+      }
+      if (clip.chat && clip.tone === 'pain') {
+        const chat = this.root.querySelector('[data-promo-pain-chat]');
+        if (chat) {
+          const clone = chat.cloneNode(true);
+          clone.removeAttribute('id');
+          clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+          clone.removeAttribute('hidden');
+          clone.classList.add('is-open');
+          screen.appendChild(clone);
+        }
+      }
+      if (clip.chat && clip.tone === 'pitch') this.mountClipClerk(screen);
+      const home = document.createElement('span');
+      home.className = 'promo-clip__home';
+      bezel.append(this.clipStatus(clip.device), this.clipStoreBar(), screen, home);
+      frame.appendChild(bezel);
+      this.root.appendChild(frame);
+    }
+
     gridFrame() {
       const scale = this.root.querySelector('[data-promo-scale]');
       const rect = scale?.getBoundingClientRect();
@@ -3973,47 +4214,27 @@
       device.appendChild(clone);
     }
 
-    gridFillLoop(screen, index) {
-      const variant = gridVariantOf(index);
-      const looks = gridLooksFor(index);
-      if (variant === 'product-read' || variant === 'product-scroll') {
-        const page = document.createElement('div');
-        page.className = 'promo-grid__page';
-        const img = document.createElement('img');
-        img.alt = '';
-        img.draggable = false;
-        const src = claySrc(looks[0]);
-        if (src) img.src = src;
-        page.appendChild(img);
-        const lines = document.createElement('span');
-        lines.className = 'promo-grid__lines';
-        page.appendChild(lines);
-        screen.appendChild(page);
-      } else {
-        const track = document.createElement('div');
-        track.className = 'promo-grid__track';
-        for (let copy = 0; copy < 2; copy += 1) {
-          const sheet = document.createElement('div');
-          sheet.className = 'promo-grid__sheet';
-          looks.forEach((look) => {
-            const card = document.createElement('span');
-            card.className = 'promo-grid__card';
-            const img = document.createElement('img');
-            img.alt = '';
-            img.draggable = false;
-            const src = claySrc(look);
-            if (src) img.src = src;
-            card.appendChild(img);
-            sheet.appendChild(card);
-          });
-          track.appendChild(sheet);
-        }
-        screen.appendChild(track);
-      }
-      const cursor = document.createElement('span');
-      cursor.className = 'promo-grid__cursor';
-      screen.appendChild(cursor);
-      return variant;
+    gridFillClip(device, index, deviceId, mode) {
+      const motion = gridMotionOf(index, deviceId);
+      const chat = wallSeededUnit(index, 11) < 0.62;
+      const video = document.createElement('video');
+      video.className = 'promo-grid__clip';
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.loop = true;
+      video.preload = 'auto';
+      video.setAttribute('playsinline', '');
+      video.setAttribute('muted', '');
+      const src = clipSrc(mode === 'pitch' ? 'pitch' : 'pain', deviceId, motion, chat);
+      if (src) video.src = src;
+      const offset = wallSeededUnit(index, 53);
+      video.addEventListener('loadedmetadata', () => {
+        const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 3;
+        try { video.currentTime = offset * Math.max(0, duration - 0.05); } catch { /* seek can fail before a frame */ }
+      }, { once: true });
+      device.appendChild(video);
+      return motion;
     }
 
     gridMark(device) {
@@ -4071,45 +4292,10 @@
           this.gridFillLead(device, lead, box);
           cell.classList.add('is-lead');
         } else {
-          const bar = document.createElement('div');
-          bar.className = 'promo-grid__bar';
-          if (deviceKind.id === 'phone') {
-            const notch = document.createElement('span');
-            notch.className = 'promo-grid__notch';
-            bar.appendChild(notch);
-          } else {
-            const dots = document.createElement('span');
-            dots.className = 'promo-grid__dots';
-            dots.innerHTML = '<i></i><i></i><i></i>';
-            bar.appendChild(dots);
-          }
-          const end = document.createElement('span');
-          end.className = 'promo-grid__bar-end';
-          bar.appendChild(end);
-          device.appendChild(bar);
-          const screen = document.createElement('div');
-          screen.className = 'promo-grid__screen';
-          const variant = this.gridFillLoop(screen, index);
-          cell.classList.add(`is-${variant}`);
-          device.appendChild(screen);
-          if (mode === 'pitch') {
-            const clerk = document.createElement('span');
-            clerk.className = 'promo-grid__clerk';
-            screen.appendChild(clerk);
-          } else {
-            const chat = document.createElement('span');
-            chat.className = 'promo-grid__chat';
-            screen.appendChild(chat);
-          }
+          const motion = this.gridFillClip(device, index, deviceKind.id, mode);
+          cell.classList.add(`is-${motion}`);
         }
         this.gridMark(device);
-        const barEnd = device.querySelector('.promo-grid__bar-end');
-        if (barEnd) {
-          const cart = device.querySelector('.promo-grid__cart');
-          const mark = device.querySelector('.promo-grid__mark');
-          if (cart) barEnd.appendChild(cart);
-          if (mark) barEnd.appendChild(mark);
-        }
         if (index === 0) device.querySelector('.promo-grid__cart')?.remove();
         if (index === 0 && mode === 'pitch') {
           const clerk = document.createElement('span');
@@ -4149,7 +4335,23 @@
         cell.classList.toggle('is-in', opacity > 0.01);
         cell.classList.toggle('is-lost', marked && mode !== 'pitch');
         cell.classList.toggle('is-sold', marked && mode === 'pitch');
+        this.syncGridClip(cell, opacity > 0.01 && !marked);
       });
+    }
+
+    syncGridClip(cell, playing) {
+      const video = cell.querySelector('.promo-grid__clip');
+      if (!video) return;
+      const next = playing ? '1' : '0';
+      if (cell.dataset.playing === next) return;
+      cell.dataset.playing = next;
+      if (!playing) {
+        video.pause();
+        return;
+      }
+      const play = () => video.play().catch(() => {});
+      if (video.readyState >= 2) play();
+      else video.addEventListener('loadeddata', play, { once: true });
     }
 
     runGrid(mode) {
