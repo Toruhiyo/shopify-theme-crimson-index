@@ -607,7 +607,7 @@ html.is-promo-opening.is-promo-depart .promo-opening {
 
 .promo-opening.is-moments:not(.is-see):not(.is-pain) .promo-moments__board.is-pose-grid {
   --promo-grid-fit: 0.8;
-  --promo-grid-rest-y: -24px;
+  --promo-grid-rest-y: -92px;
   transform: translate(calc(-50% + var(--promo-board-x)), calc(-50% + var(--promo-grid-rest-y))) scale(var(--promo-grid-fit));
 }
 

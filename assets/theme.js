@@ -1231,7 +1231,9 @@
     const pitchY = cardH + rowGapY;
     const inset = PROMO_CATALOG_PAD_X;
     const gx0 = inset + cardW / 2 - (contentWidth / 2 + shift);
-    const gy0 = -stage.clientHeight / 2 + PROMO_CATALOG_PAD_Y + cardH / 2;
+    const pitchBoard = !board.closest('.promo-opening')?.classList.contains('is-pain');
+    const padY = pitchBoard ? 4 : PROMO_CATALOG_PAD_Y;
+    const gy0 = -stage.clientHeight / 2 + padY + cardH / 2;
     const rowGap = PROMO_ROW_GAP;
     const rowInset = 28;
     const laneRaw = parseFloat(getComputedStyle(stage).getPropertyValue('--clip-clerk-lane'));
@@ -1941,11 +1943,93 @@
     return PROMO_GRID.introMs + t * PROMO_GRID.zoomMs;
   }
 
+  let gridFlexCache = null;
+  function gridFlexLayout() {
+    if (gridFlexCache) return gridFlexCache;
+    const screenH = 100;
+    const gap = 10;
+    const pitch = screenH + gap;
+    const rowWidth = PROMO_GRID.fieldCount * pitch - gap;
+    const devices = PROMO_GRID.devices;
+    const items = [];
+    const byKey = new Map();
+    const rowItems = [[]];
+    let x = 0;
+    let y = 0;
+    let rowIndex = 0;
+    let indexInRow = 0;
+    const count = PROMO_GRID.fieldCount * 22;
+    for (let n = 0; n < count; n += 1) {
+      const pick = (col, row, left, above) => {
+        if (col === 0 && row === 0) return devices[0];
+        const slot = gridSlot(col, row, 4, devices.length, (index) => (
+          (left && devices[index].id === left.id) || (above && devices[index].id === above.id)
+        ));
+        return devices[slot];
+      };
+      let left = indexInRow > 0 ? rowItems[rowIndex][indexInRow - 1].device : null;
+      let above = rowIndex > 0
+        ? rowItems[rowIndex - 1].find((item) => item.x < x + screenH && item.x + item.w > x)?.device || null
+        : null;
+      let device = pick(indexInRow, rowIndex, left, above);
+      let w = screenH * device.ratio;
+      if (indexInRow > 0 && x + w > rowWidth + 0.5) {
+        rowIndex += 1;
+        indexInRow = 0;
+        x = 0;
+        y += pitch;
+        rowItems[rowIndex] = [];
+        left = null;
+        above = rowItems[rowIndex - 1].find((item) => item.x < screenH && item.x + item.w > 0)?.device
+          || rowItems[rowIndex - 1][0].device;
+        device = pick(0, rowIndex, left, above);
+        w = screenH * device.ratio;
+      }
+      const item = { index: n, col: indexInRow, row: rowIndex, device, x, y, w, h: screenH };
+      rowItems[rowIndex].push(item);
+      items.push(item);
+      byKey.set(`${indexInRow},${rowIndex}`, item);
+      x += w + gap;
+      indexInRow += 1;
+    }
+    gridFlexCache = {
+      gap,
+      screenH,
+      pitch,
+      rowWidth,
+      items,
+      byKey,
+      domCount: PROMO_GRID.cols * PROMO_GRID.cols,
+    };
+    return gridFlexCache;
+  }
+
   function gridStampAt(col, row) {
-    const slot = Math.max(col, row);
-    const entered = slot === 0 ? 0 : gridTimeForCount(slot + 1);
-    const stagger = wallSeededUnit(row * 17 + col, 19) * PROMO_GRID.stampSpread;
-    return entered + PROMO_GRID.stampDwell + stagger;
+    const layout = gridFlexLayout();
+    const item = layout.byKey.get(`${col},${row}`);
+    if (!item || item.index === 0) return PROMO_GRID.stampDwell;
+    const need = Math.max(item.x + item.w * 0.5, item.y + item.h * 0.5);
+    const count = Math.max(1.01, need / layout.pitch);
+    const stagger = wallSeededUnit(item.row * 17 + item.col, 19) * PROMO_GRID.stampSpread;
+    return gridTimeForCount(count) + PROMO_GRID.stampDwell + stagger;
+  }
+
+  function gridItemFade(item, camera, frame) {
+    const span = Math.max(0.05, camera.s);
+    const left = -camera.x / span;
+    const top = -camera.y / span;
+    const right = left + frame.width / span;
+    const bottom = top + frame.height / span;
+    const inset = Math.min(
+      item.x - left,
+      item.y - top,
+      right - (item.x + item.w),
+      bottom - (item.y + item.h),
+    );
+    const band = (camera.layout?.pitch || 110) * 0.4;
+    if (inset >= 0) return 1;
+    if (inset <= -band) return 0;
+    return (inset + band) / band;
   }
 
   function gridCssColor(root, name, fallback) {
@@ -2022,50 +2106,48 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    const count = Math.max(1, Math.ceil(camera.count || 8));
-    const { cellW, cellH, gap } = camera.metrics;
+    const layout = camera.layout || gridFlexLayout();
     const sold = mode === 'pitch';
     const fill = sold ? '#fff6ee' : PROMO_GRID.lostField;
     const now = camera.timeMs || 0;
-    for (let row = 0; row < count; row += 1) {
-      for (let col = 0; col < count; col += 1) {
-        const device = gridDeviceAt(col, row);
-        const box = gridDeviceBox(device, cellW, cellH);
-        const x = camera.x + (col * (cellW + gap) + box.x) * camera.s;
-        const y = camera.y + (row * (cellH + gap) + box.y) * camera.s;
-        const w = box.w * camera.s;
-        const h = box.h * camera.s;
-        if (x > width || y > height || x + w < 0 || y + h < 0) continue;
-        const radius = Math.min(gridMockupRadius(device, w), w / 2, h / 2);
-        ctx.globalAlpha = 0.94;
-        ctx.fillStyle = fill;
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, radius);
-        ctx.fill();
-        if (h > 36 && now >= gridStampAt(col, row)) {
-          ctx.save();
-          ctx.translate(x + w / 2, y + h / 2);
-          ctx.rotate(-12 * Math.PI / 180);
-          const word = sold ? 'SOLD' : 'NO SALE';
-          const size = w * (sold ? 0.2 : 0.13);
-          ctx.font = `700 ${size}px ${colors.font}`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.lineWidth = Math.max(1.25, w * 0.018);
-          ctx.lineJoin = 'round';
-          if (sold) {
-            ctx.fillStyle = colors.primary;
-            ctx.strokeStyle = '#fff';
-            ctx.strokeText(word, 0, 0);
-            ctx.fillText(word, 0, 0);
-          } else {
-            ctx.strokeStyle = gridRgba(colors.ink3, 0.8);
-            ctx.strokeText(word, 0, 0);
-          }
-          ctx.restore();
+    const handoff = camera.handoff || 0;
+    layout.items.forEach((item) => {
+      const alpha = item.index < layout.domCount ? handoff : 1;
+      if (alpha < 0.02) return;
+      const x = camera.x + item.x * camera.s;
+      const y = camera.y + item.y * camera.s;
+      const w = item.w * camera.s;
+      const h = item.h * camera.s;
+      if (x > width || y > height || x + w < 0 || y + h < 0) return;
+      const radius = Math.min(gridMockupRadius(item.device, w), w / 2, h / 2);
+      ctx.globalAlpha = 0.94 * alpha;
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, radius);
+      ctx.fill();
+      if (h > 36 && now >= gridStampAt(item.col, item.row)) {
+        ctx.save();
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate(-12 * Math.PI / 180);
+        const word = sold ? 'SOLD' : 'NO SALE';
+        const size = w * (sold ? 0.2 : 0.13);
+        ctx.font = `700 ${size}px ${colors.font}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = Math.max(1.25, w * 0.018);
+        ctx.lineJoin = 'round';
+        if (sold) {
+          ctx.fillStyle = colors.primary;
+          ctx.strokeStyle = '#fff';
+          ctx.strokeText(word, 0, 0);
+          ctx.fillText(word, 0, 0);
+        } else {
+          ctx.strokeStyle = gridRgba(colors.ink3, 0.8);
+          ctx.strokeText(word, 0, 0);
         }
+        ctx.restore();
       }
-    }
+    });
     ctx.globalAlpha = 1;
   }
 
@@ -2137,22 +2219,22 @@
     return { field, tile };
   }
 
-  function gridPose(count, frame, metrics) {
-    const heroBox = gridDeviceBox(PROMO_GRID.devices[0], metrics.cellW, metrics.cellH);
-    const heroScale = (frame.width * PROMO_GRID.hero) / Math.max(1, heroBox.w);
+  function gridPose(count, frame) {
+    const layout = gridFlexLayout();
+    const first = layout.items[0];
+    const heroScale = (frame.width * PROMO_GRID.hero) / Math.max(1, first.w);
     const hero = {
       s: heroScale,
-      x: (frame.width - heroBox.w * heroScale) / 2 - heroBox.x * heroScale,
-      y: (frame.height - heroBox.h * heroScale) / 2 - heroBox.y * heroScale,
+      x: (frame.width - first.w * heroScale) / 2 - first.x * heroScale,
+      y: (frame.height - first.h * heroScale) / 2 - first.y * heroScale,
     };
     const blockOf = (size) => {
-      const blockW = size * metrics.cellW + (size - 1) * metrics.gap;
-      const blockH = size * metrics.cellH + (size - 1) * metrics.gap;
-      const s = Math.min(frame.width / blockW, frame.height / blockH) * PROMO_GRID.inset;
+      const view = size * layout.pitch;
+      const s = Math.min(frame.width / view, frame.height / view) * PROMO_GRID.inset;
       return {
         s,
-        x: (frame.width - blockW * s) / 2,
-        y: (frame.height - blockH * s) / 2,
+        x: (frame.width - view * s) / 2,
+        y: (frame.height - view * s) / 2,
       };
     };
     let pose = hero;
@@ -2172,11 +2254,11 @@
       step: count,
       reveal: count,
       fade: 1,
+      layout,
     };
   }
 
   function gridCamera(timeMs, frame) {
-    const metrics = gridMetrics(frame);
     const count = gridCountAt(timeMs);
     const view = gridTailView(timeMs);
     const shimmer = timeMs >= gridShimmerEnd();
@@ -2184,8 +2266,7 @@
     if (shimmer) phase = 'resolve';
     else if (count > 8 || view.field > 0) phase = 'rush';
     return {
-      ...gridPose(count, frame, metrics),
-      metrics,
+      ...gridPose(count, frame),
       count,
       phase,
       field: shimmer ? 1 : view.field,
@@ -4740,50 +4821,34 @@
       const start = gridShimmerEnd();
       if (timeMs < start) {
         verdict.style.opacity = '0';
+        verdict.style.transform = '';
         hero.style.transform = '';
         if (caption) caption.style.opacity = '0';
         return;
       }
+      const elapsed = timeMs - start;
+      const settle = Math.min(1, elapsed / 1100);
+      const ease = 1 - (1 - settle) ** 3;
+      const scale = 11 + (1 - 11) * ease;
+      const colors = this.gridPalette();
       this.root.classList.toggle('is-end-pitch', mode === 'pitch');
       this.root.classList.toggle('is-end-pain', mode !== 'pitch');
-      const elapsed = timeMs - start;
-      const fadeStart = PROMO_GRID.riseMs + (mode === 'pitch' ? PROMO_GRID.pitchHoldMs : 0);
-      const rise = Math.min(1, elapsed / PROMO_GRID.riseMs);
-      const riseEase = 1 - (1 - rise) ** 3;
-      const fade = Math.min(1, Math.max(0, (elapsed - fadeStart) / PROMO_GRID.resolveMs));
-      const colors = this.gridPalette();
-      if (mode === 'pitch' && mark) {
-        const settle = Math.min(1, elapsed / 1100);
-        const ease = 1 - (1 - settle) ** 3;
-        const scale = 11 + (1 - 11) * ease;
-        verdict.style.opacity = '1';
-        hero.style.opacity = '1';
-        hero.style.transform = 'none';
-        mark.style.background = colors.primary;
-        mark.style.transformOrigin = 'center center';
-        mark.style.transform = `scale(${scale.toFixed(3)})`;
-        if (caption) {
-          caption.textContent = 'Built to sell.';
-          caption.style.opacity = String(Math.max(0, (ease - 0.74) / 0.26));
-        }
-        if (field) field.style.opacity = (1 - ease).toFixed(3);
-        if (ease >= 1 && !this.gridThudSent) {
-          this.gridThudSent = true;
-          this.emitThud();
-        }
-        return;
-      }
-      verdict.style.opacity = String(riseEase);
+      verdict.style.opacity = '1';
+      verdict.style.transformOrigin = 'center calc(50% - 24px)';
+      verdict.style.transform = `scale(${scale.toFixed(3)})`;
       hero.style.opacity = '1';
-      hero.style.transform = `translateY(${((1 - riseEase) * 18).toFixed(1)}px)`;
-      if (zero) zero.style.color = fade > 0 ? gridMixWhite(colors.ink, fade) : '#fff';
-      if (mark) mark.style.background = '';
+      hero.style.transform = 'none';
+      if (mode === 'pitch' && mark) {
+        mark.style.background = colors.primary;
+        mark.style.transform = 'none';
+      }
+      if (zero) zero.style.color = '';
       if (caption) {
         caption.textContent = mode === 'pitch' ? 'Built to sell.' : 'Sold by the chatbot.';
-        caption.style.opacity = String(fade);
+        caption.style.opacity = '1';
       }
-      if (field) field.style.opacity = (1 - fade).toFixed(3);
-      if (rise >= 1 && !this.gridThudSent) {
+      if (field) field.style.opacity = (1 - ease).toFixed(3);
+      if (ease >= 1 && !this.gridThudSent) {
         this.gridThudSent = true;
         this.emitThud();
       }
@@ -4818,51 +4883,46 @@
       const existing = wall.querySelector('[data-promo-grid]');
       if (existing && existing.dataset.mode === mode && existing.dataset.frameW === String(frame.width)) return existing;
       wall.replaceChildren();
-      const metrics = gridMetrics(frame);
+      const layout = gridFlexLayout();
       const grid = document.createElement('div');
       grid.className = 'promo-grid';
       grid.dataset.promoGrid = 'true';
       grid.dataset.mode = mode;
       grid.dataset.frameW = String(frame.width);
-      const count = metrics.cols * metrics.cols;
       const lead = this.gridLeadNode(mode);
-      for (let index = 0; index < count; index += 1) {
-        const col = index % metrics.cols;
-        const row = Math.floor(index / metrics.cols);
-        const deviceKind = gridDeviceAt(col, row);
+      layout.items.slice(0, layout.domCount).forEach((item) => {
         const cell = document.createElement('div');
         cell.className = 'promo-grid__cell';
-        cell.dataset.index = String(index);
-        cell.dataset.col = String(col);
-        cell.dataset.row = String(row);
-        cell.style.left = `${col * (metrics.cellW + metrics.gap)}px`;
-        cell.style.top = `${row * (metrics.cellH + metrics.gap)}px`;
-        cell.style.width = `${metrics.cellW}px`;
-        cell.style.height = `${metrics.cellH}px`;
-        const box = gridDeviceBox(deviceKind, metrics.cellW, metrics.cellH);
+        cell.dataset.index = String(item.index);
+        cell.dataset.col = String(item.col);
+        cell.dataset.row = String(item.row);
+        cell.style.left = `${item.x}px`;
+        cell.style.top = `${item.y}px`;
+        cell.style.width = `${item.w}px`;
+        cell.style.height = `${item.h}px`;
         const device = document.createElement('div');
-        device.className = `promo-grid__device is-${deviceKind.id}`;
-        device.style.left = `${box.x}px`;
-        device.style.top = `${box.y}px`;
-        device.style.width = `${box.w}px`;
-        device.style.height = `${box.h}px`;
-        device.style.borderRadius = `${gridMockupRadius(deviceKind, box.w).toFixed(2)}px`;
-        if (index === 0 && mode === 'pitch') {
+        device.className = `promo-grid__device is-${item.device.id}`;
+        device.style.left = '0';
+        device.style.top = '0';
+        device.style.width = '100%';
+        device.style.height = '100%';
+        device.style.borderRadius = `${gridMockupRadius(item.device, item.w).toFixed(2)}px`;
+        if (item.index === 0 && mode === 'pitch') {
           device.classList.add('is-lead');
           this.gridFillLeadStill(device);
           cell.classList.add('is-lead');
-        } else if (index === 0 && lead) {
+        } else if (item.index === 0 && lead) {
           device.classList.add('is-lead');
-          this.gridFillLead(device, lead, box);
+          this.gridFillLead(device, lead, { x: 0, y: 0, w: item.w, h: item.h });
           cell.classList.add('is-lead');
         } else {
-          const motion = this.gridFillClip(device, col, row, deviceKind.id, mode);
+          const motion = this.gridFillClip(device, item.col, item.row, item.device.id, mode);
           cell.classList.add(`is-${motion}`);
         }
         this.gridMountEnd(device);
         cell.appendChild(device);
         grid.appendChild(cell);
-      }
+      });
       wall.appendChild(grid);
       this.ensureGridLayers(wall);
       this.gridStamped = new Set();
@@ -4873,7 +4933,13 @@
       const grid = this.mountGrid(mode);
       if (!grid) return;
       const frame = this.gridFrame();
-      const camera = options.reduced ? { ...gridPose(4, frame, gridMetrics(frame)), metrics: gridMetrics(frame) } : gridCamera(timeMs, frame);
+      const layout = gridFlexLayout();
+      const camera = options.reduced
+        ? { ...gridPose(4, frame), count: 4, field: 0, phase: 'grid', timeMs, handoff: 1 }
+        : gridCamera(timeMs, frame);
+      const pastGrid = camera.count > 8;
+      const handoff = pastGrid ? Math.min(1, (camera.count - 8) / 2.4) : 0;
+      camera.handoff = options.reduced ? 1 : handoff;
       grid.dataset.step = String(camera.step);
       grid.style.setProperty('--grid-inv', (1 / Math.max(0.05, camera.s)).toFixed(5));
       grid.style.transform = `translate(${camera.x.toFixed(2)}px, ${camera.y.toFixed(2)}px) scale(${camera.s.toFixed(4)})`;
@@ -4884,13 +4950,14 @@
         const col = Number(cell.dataset.col);
         const row = Number(cell.dataset.row);
         const index = Number(cell.dataset.index);
-        let opacity = gridCellFade(col, row, camera);
+        const item = layout.byKey.get(`${col},${row}`);
+        let opacity = item ? gridItemFade(item, camera, frame) : 0;
         const onScreen = opacity > 0.55;
         let marked = onScreen && timeMs >= gridStampAt(col, row);
-        if (options.reduced) {
-          const inside = col < 4 && row < 4;
-          opacity = inside ? 1 : 0;
-          marked = inside;
+        if (options.reduced && item) {
+          const enter = Math.max(item.x + item.w * 0.5, item.y + item.h * 0.5) / layout.pitch;
+          opacity = enter <= 4 ? 1 : 0;
+          marked = opacity > 0;
         }
         cell.style.opacity = opacity.toFixed(3);
         cell.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
@@ -4906,14 +4973,17 @@
       });
       if (thud && !options.reduced && !this.root.classList.contains('is-scale-still')) this.emitThud();
       const layers = this.ensureGridLayers(grid.parentElement);
-      const pastGrid = camera.count > 8;
-      const handoff = pastGrid ? Math.min(1, (camera.count - 8) / 2.4) : 0;
       const field = camera.field || 0;
+      const viewBottom = -camera.y / Math.max(0.05, camera.s) + frame.height / Math.max(0.05, camera.s);
+      const domLast = layout.items[layout.domCount - 1];
+      const extension = viewBottom > domLast.y + domLast.h;
       grid.style.opacity = pastGrid ? (1 - handoff).toFixed(3) : '1';
-      layers.texture.style.opacity = pastGrid ? (handoff * (1 - field)).toFixed(3) : '0';
+      layers.texture.style.opacity = (extension || handoff > 0.02) ? ((1 - field) * (options.reduced ? 0 : 1)).toFixed(3) : '0';
       if (camera.phase !== 'resolve') layers.field.style.opacity = field.toFixed(3);
       layers.field.classList.toggle('is-pitch', mode === 'pitch');
-      if (pastGrid && handoff > 0.02 && field < 0.98) drawGridTexture(layers.texture, camera, mode, this.gridPalette());
+      if ((extension || handoff > 0.02) && field < 0.98 && !options.reduced) {
+        drawGridTexture(layers.texture, camera, mode, this.gridPalette());
+      }
       if (!options.reduced) this.paintGridResolve(timeMs, mode);
       else this.paintGridResolve(0, mode);
     }
