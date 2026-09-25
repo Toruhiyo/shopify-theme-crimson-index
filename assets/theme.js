@@ -4812,7 +4812,7 @@
     }
 
     whenGridClipsReady() {
-      const videos = [...this.root.querySelectorAll('.promo-grid__cell.is-in .promo-grid__clip')];
+      const videos = [...this.root.querySelectorAll('.promo-grid__cell.is-in video.promo-grid__clip')];
       const pending = videos.filter((video) => video.readyState < 2);
       if (!pending.length) return Promise.resolve();
       return Promise.race([
@@ -4826,7 +4826,7 @@
     }
 
     syncGridClip(cell, playing) {
-      const video = cell.querySelector('.promo-grid__clip');
+      const video = cell.querySelector('video.promo-grid__clip');
       if (!video) return;
       const next = playing ? '1' : '0';
       if (cell.dataset.playing === next) return;
