@@ -241,9 +241,9 @@
     gapRatio: 0.012,
     steps: [1, 2, 4, 8],
     devices: [
-      { id: 'desktop', weight: 0.6, ratio: 16 / 10, radius: 0 },
-      { id: 'phone', weight: 0.3, ratio: 9 / 19.5, radius: 0 },
-      { id: 'tablet', weight: 0.1, ratio: 4 / 3, radius: 0 },
+      { id: 'desktop', ratio: 16 / 10, radius: 0 },
+      { id: 'phone', ratio: 9 / 19.5, radius: 0 },
+      { id: 'tablet', ratio: 4 / 3, radius: 0 },
     ],
     variants: ['scroll-up', 'scroll-down', 'wander-near', 'wander-far', 'product-read', 'product-scroll', 'compare'],
     burstMin: 4,
@@ -1808,12 +1808,63 @@
     return sample.replace(/[^/?#]+\.png(\?[^#]*)?/, `promo-clip-${key}.mp4`);
   }
 
-  function gridMotionOf(index, deviceId, mode) {
-    if (mode === 'pitch') {
-      return PROMO_PITCH_MOMENTS[Math.floor(wallSeededUnit(index, 6) * PROMO_PITCH_MOMENTS.length)];
+  function gridMix(col, row, salt) {
+    let n = (Math.imul(col + 1, 374761393) + Math.imul(row + 1, 668265263) + Math.imul(salt + 1, 1442695041) + PROMO_WALL_SEED) >>> 0;
+    n = Math.imul(n ^ (n >>> 13), 1274126177) >>> 0;
+    return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+  }
+
+  function gridSlot(col, row, salt, count, blocked) {
+    let slot = Math.floor(gridMix(col, row, salt) * count);
+    let guard = 0;
+    while (guard < count && blocked(slot)) {
+      slot = (slot + 1) % count;
+      guard += 1;
     }
-    const list = PROMO_CLIP_MOTIONS[deviceId] || PROMO_CLIP_MOTIONS.desktop;
-    return list[Math.floor(wallSeededUnit(index, 6) * list.length)];
+    return slot;
+  }
+
+  const gridDeviceCache = new Map();
+  function gridDeviceAt(col, row) {
+    const key = `${col},${row}`;
+    const hit = gridDeviceCache.get(key);
+    if (hit) return hit;
+    const devices = PROMO_GRID.devices;
+    let device = devices[0];
+    if (col !== 0 || row !== 0) {
+      const left = col > 0 ? gridDeviceAt(col - 1, row) : null;
+      const above = row > 0 ? gridDeviceAt(col, row - 1) : null;
+      const slot = gridSlot(col, row, 4, devices.length, (index) => (
+        (left && devices[index].id === left.id) || (above && devices[index].id === above.id)
+      ));
+      device = devices[slot];
+    }
+    gridDeviceCache.set(key, device);
+    return device;
+  }
+
+  const gridMotionCache = new Map();
+  function gridMotionAt(col, row, deviceId, mode) {
+    const key = `${mode}:${col},${row}`;
+    const hit = gridMotionCache.get(key);
+    if (hit) return hit;
+    const list = mode === 'pitch'
+      ? PROMO_PITCH_MOMENTS
+      : (PROMO_CLIP_MOTIONS[deviceId] || PROMO_CLIP_MOTIONS.desktop);
+    const leftDevice = col > 0 ? gridDeviceAt(col - 1, row) : null;
+    const aboveDevice = row > 0 ? gridDeviceAt(col, row - 1) : null;
+    const left = col > 0 ? gridMotionAt(col - 1, row, leftDevice.id, mode) : '';
+    const above = row > 0 ? gridMotionAt(col, row - 1, aboveDevice.id, mode) : '';
+    const slot = gridSlot(col, row, mode === 'pitch' ? 6 : 11, list.length, (index) => (
+      list[index] === left || list[index] === above
+    ));
+    const motion = list[slot];
+    gridMotionCache.set(key, motion);
+    return motion;
+  }
+
+  function pitchLeadSrc() {
+    return document.documentElement.getAttribute('data-promo-pitch-lead') || '';
   }
 
   function momentClipParts(motion) {
@@ -1957,10 +2008,7 @@
     ctx.textBaseline = 'middle';
     for (let row = 0; row < count; row += 1) {
       for (let col = 0; col < count; col += 1) {
-        const index = col < PROMO_GRID.cols && row < PROMO_GRID.cols
-          ? row * PROMO_GRID.cols + col
-          : PROMO_GRID.cols * PROMO_GRID.cols + row * count + col;
-        const device = gridDeviceOf(index);
+        const device = gridDeviceAt(col, row);
         const box = gridDeviceBox(device, cellW, cellH);
         const x = camera.x + (col * (cellW + gap) + box.x) * camera.s;
         const y = camera.y + (row * (cellH + gap) + box.y) * camera.s;
@@ -2031,17 +2079,6 @@
     const cellW = Math.round((frame.width - gap * (cols - 1)) / cols);
     const cellH = Math.round((frame.height - gap * (cols - 1)) / cols);
     return { cols, gap, cellW, cellH };
-  }
-
-  function gridDeviceOf(index) {
-    if (index === 0) return PROMO_GRID.devices[0];
-    const roll = wallSeededUnit(index, 4);
-    let cursor = 0;
-    for (let i = 0; i < PROMO_GRID.devices.length; i += 1) {
-      cursor += PROMO_GRID.devices[i].weight;
-      if (roll < cursor) return PROMO_GRID.devices[i];
-    }
-    return PROMO_GRID.devices[0];
   }
 
   function gridDeviceBox(device, cellW, cellH) {
@@ -4532,9 +4569,18 @@
       device.appendChild(clone);
     }
 
-    gridFillClip(device, index, deviceId, mode) {
-      const motion = gridMotionOf(index, deviceId, mode);
-      const chat = mode === 'pitch' ? false : wallSeededUnit(index, 11) < 0.62;
+    gridFillLeadStill(device) {
+      const still = document.createElement('img');
+      still.className = 'promo-grid__clip promo-grid__lead-still';
+      still.alt = '';
+      still.draggable = false;
+      still.src = pitchLeadSrc();
+      device.appendChild(still);
+    }
+
+    gridFillClip(device, col, row, deviceId, mode) {
+      const motion = gridMotionAt(col, row, deviceId, mode);
+      const chat = mode === 'pitch' ? false : gridMix(col, row, 11) < 0.62;
       const video = document.createElement('video');
       video.className = 'promo-grid__clip';
       video.muted = true;
@@ -4546,7 +4592,7 @@
       video.setAttribute('muted', '');
       const src = clipSrc(mode === 'pitch' ? 'pitch' : 'pain', deviceId, motion, chat);
       if (src) video.src = src;
-      const offset = wallSeededUnit(index, 53);
+      const offset = gridMix(col, row, 53);
       video.addEventListener('loadedmetadata', () => {
         const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 3;
         try { video.currentTime = offset * Math.max(0, duration - 0.05); } catch { /* seek can fail before a frame */ }
@@ -4701,7 +4747,7 @@
       for (let index = 0; index < count; index += 1) {
         const col = index % metrics.cols;
         const row = Math.floor(index / metrics.cols);
-        const deviceKind = gridDeviceOf(index);
+        const deviceKind = gridDeviceAt(col, row);
         const cell = document.createElement('div');
         cell.className = 'promo-grid__cell';
         cell.dataset.index = String(index);
@@ -4718,12 +4764,16 @@
         device.style.top = `${box.y}px`;
         device.style.width = `${box.w}px`;
         device.style.height = `${box.h}px`;
-        if (index === 0 && lead && mode !== 'pitch') {
+        if (index === 0 && mode === 'pitch') {
+          device.classList.add('is-lead');
+          this.gridFillLeadStill(device);
+          cell.classList.add('is-lead');
+        } else if (index === 0 && lead) {
           device.classList.add('is-lead');
           this.gridFillLead(device, lead, box);
           cell.classList.add('is-lead');
         } else {
-          const motion = this.gridFillClip(device, index, deviceKind.id, mode);
+          const motion = this.gridFillClip(device, col, row, deviceKind.id, mode);
           cell.classList.add(`is-${motion}`);
         }
         this.gridMountEnd(device);

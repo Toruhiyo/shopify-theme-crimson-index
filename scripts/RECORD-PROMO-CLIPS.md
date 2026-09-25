@@ -27,7 +27,7 @@ Record size (exact, even, matches the window aspect so `object-fit: fill` does n
 
 ## Pitch clips (the moments, with the real clerk)
 
-These are the sold-grid windows. They are recordings of the same moments sequence as the pitch film: catalog, product page, compare, and the bundle, with the live Bizmis avatar seated in the window. Do not put a CSS circle, orange sphere, or still image in their place. `mountClipClerk` is the old stand-in and must stay unused.
+These are the sold-grid windows after the first one. They are recordings of the same moments sequence as the pitch film: catalog, product page, compare, and the bundle, with the live Bizmis avatar seated in the window. Do not put a CSS circle or an orange sphere in their place. `mountClipClerk` is the old stand-in and must stay unused. The first window is the saved still described below, not one of these clips.
 
 Two product takes, so neighboring cells are not the same shelf:
 
@@ -66,7 +66,20 @@ PROMO_CLIP_SET=pain node scripts/record-promo-clips.mjs
 
 `PROMO_CLIP_SET` is `moments`, `pain`, or `all` (default `all`).
 
-After the mp4s land in `assets/`, the keys in `layout/theme.liquid` (`promo_clip_keys`) must include every new file name without the `promo-clip-` prefix and without `.mp4`. `clipSrc` in `theme.js` looks that map up. Pitch grid cells pick a motion from `PROMO_PITCH_MOMENTS` with the wall seed. Pain cells still use `PROMO_CLIP_MOTIONS`.
+After the mp4s land in `assets/`, the keys in `layout/theme.liquid` (`promo_clip_keys`) must include every new file name without the `promo-clip-` prefix and without `.mp4`. `clipSrc` in `theme.js` looks that map up. Pitch grid cells pick a motion from `PROMO_PITCH_MOMENTS` by cell position, and skip a motion that matches the cell to the left or above. Pain cells still use `PROMO_CLIP_MOTIONS`, shuffled the same way. Device shape is shuffled the same way, except the top-left window, which stays desktop.
+
+## First sold window
+
+`assets/promo-pitch-grid-lead.jpg` is the last frame of the pitch moments: the bundle pose, clerk included, cropped to the store. The pitch grid's first window shows that still and does not swap it for a clip, so the cut from the moments has the same picture.
+
+Re-export it whenever a moments change would alter that last frame (products, colors, avatar, bundle pose, clerk seat):
+
+```bash
+export PLAYWRIGHT_MODULE="$HOME/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs"
+node scripts/export-pitch-grid-lead.mjs
+```
+
+The file is `data-promo-pitch-lead` in `layout/theme.liquid`. The orange sale wash fades in over 340ms with the burst. It does not replace the still.
 
 Then export both films. The exporters route `promo-clip-*.mp4` from local `assets/`, so you do not wait for the theme to sync:
 

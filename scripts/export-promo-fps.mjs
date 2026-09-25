@@ -57,6 +57,14 @@ async function serveLocalTheme(page) {
     }
     await route.fulfill({ path: file, contentType: 'video/mp4' });
   });
+  await page.route('**/promo-pitch-grid-lead.jpg*', async (route) => {
+    const file = path.join(THEME_ROOT, 'assets/promo-pitch-grid-lead.jpg');
+    if (!fs.existsSync(file)) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({ path: file, contentType: 'image/jpeg' });
+  });
   await page.route('**/assets/theme.js*', async (route) => {
     await route.fulfill({
       status: 200,

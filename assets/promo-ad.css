@@ -5147,7 +5147,7 @@ html.is-promo-cover .promo-cover,
 }
 
 .promo-grid__end {
-  display: none;
+  display: flex;
   position: absolute;
   inset: 0;
   z-index: 6;
@@ -5156,11 +5156,21 @@ html.is-promo-cover .promo-cover,
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  opacity: 0;
 }
 
-.promo-grid__cell.is-lost .promo-grid__end,
+.promo-grid__cell.is-lost .promo-grid__end {
+  opacity: 1;
+}
+
 .promo-grid__cell.is-sold .promo-grid__end {
-  display: flex;
+  opacity: 1;
+  transition: opacity 340ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.promo-grid__lead-still {
+  object-fit: cover;
+  object-position: center;
 }
 
 .promo-grid__cell.is-lost .promo-grid__end {

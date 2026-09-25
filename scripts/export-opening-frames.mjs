@@ -89,7 +89,7 @@ const FRAMES = [
   ['16-see-stores', 'See for yourself. has left. Three store cards are fully on screen. Clerk stays in the moments seat, clear of the cards.', 2500],
   ['17-see-roulette', 'Carousel on a mid-list store. Side cards are fully visible. Clerk has morphed and has not moved seats.', 2500],
   ['18-see-meridian', 'Landed on Meridian. Name, sector, and both side cards are fully visible. Clerk stays clear of them.', 2500],
-  ['pitch-c-lane-1', 'Pitch grid. One window fills most of the frame. The clip is a moments take with the clerk in it. No red.', 0],
+  ['pitch-c-lane-1', 'Pitch grid. One window fills most of the frame. It is the last moments frame, the bundle with the clerk, not a different clip. No red.', 0],
   ['pitch-c-event', 'Pitch grid. That window freezes on Added to cart. Orange field, white cart, white burst, primary hairline.', 0],
   ['pitch-c-lanes-3', 'Pitch grid. Zoomed out to a 2 by 2 matrix. No red.', 0],
   ['pitch-c-lanes-5', 'Pitch grid. Zoomed out to a 4 by 4 matrix. No red.', 0],
@@ -197,6 +197,14 @@ async function serveExportAssets(page) {
       return;
     }
     await route.fulfill({ path: file, contentType: 'video/mp4' });
+  });
+  await page.route('**/promo-pitch-grid-lead.jpg*', async (route) => {
+    const file = path.join(THEME_ROOT, 'assets/promo-pitch-grid-lead.jpg');
+    if (!fs.existsSync(file)) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({ path: file, contentType: 'image/jpeg' });
   });
   await page.route('**/assets/theme.js*', async (route) => {
     await route.fulfill({
