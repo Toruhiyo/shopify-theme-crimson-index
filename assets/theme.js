@@ -75,11 +75,11 @@
       if (method !== 'get') return;
       keys.forEach((key) => {
         if (form.querySelector(`[name="${key}"]`)) return;
-        const input = document.createElement('input');
-        input.type = 'hidden';
+      const input = document.createElement('input');
+      input.type = 'hidden';
         input.name = key;
         input.value = source.get(key);
-        form.appendChild(input);
+      form.appendChild(input);
       });
     };
 
@@ -902,7 +902,7 @@
     function hardenStamp(url, isGate) {
       if (!url) {
         if (isGate) {
-          stampReady = true;
+        stampReady = true;
           stampWaiters.splice(0).forEach((run) => run());
         }
         return;
@@ -929,16 +929,16 @@
         whiteStamps.set(url, dataUrl);
         if (isGate) {
           solidStampUrl = dataUrl;
-          stampReady = true;
-          stampWaiters.splice(0).forEach((run) => run());
+        stampReady = true;
+        stampWaiters.splice(0).forEach((run) => run());
         }
       };
       img.onerror = () => {
         whiteStamps.set(url, url);
         if (isGate) {
-          solidStampUrl = url;
-          stampReady = true;
-          stampWaiters.splice(0).forEach((run) => run());
+        solidStampUrl = url;
+        stampReady = true;
+        stampWaiters.splice(0).forEach((run) => run());
         }
       };
       img.src = url;
@@ -2810,7 +2810,7 @@
     pinLabelOrigin() {
       const label = this.root.querySelector('.promo-opening__choice--right');
       if (!label) {
-        this.pinKnobOrigin();
+      this.pinKnobOrigin();
         return;
       }
       const rect = label.getBoundingClientRect();
