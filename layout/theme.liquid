@@ -27,7 +27,14 @@
       root.className = root.className.replace('no-js', 'js');
       root.classList.toggle('is-promo-greyscale', promoVideo === 'mock' || promoVideo === 'unattended');
       root.classList.toggle('is-promo-opening', marketingAd);
-      root.classList.toggle('is-promo-cover', isHome && !marketingAd && params.get('nocover') !== '1');
+      // Clerk intro: on the first home view of a session (or ?intro=1) the clerk opens the store, big in the
+      // middle of a blank page, then settles into the widget corner as the store fades in. It replaces the red cover.
+      var introSeen = false;
+      try { introSeen = sessionStorage.getItem('meridian-clerk-intro-seen') === '1'; } catch (e) {}
+      var clerkIntro = isHome && !marketingAd && !promoVideo && params.get('nocover') !== '1'
+        && (params.get('intro') === '1' || (!introSeen && params.get('intro') !== '0'));
+      root.classList.toggle('is-clerk-intro', clerkIntro);
+      root.classList.toggle('is-promo-cover', isHome && !marketingAd && !clerkIntro && params.get('nocover') !== '1');
       root.classList.toggle('is-promo-clip', marketingAd && !!params.get('clip'));
       if (promoVideo || params.get('marketing')) {
         try { sessionStorage.removeItem('bizmis-session'); } catch (e) {}
@@ -50,7 +57,7 @@
       var meta = document.querySelector('meta[name="theme-color"]');
       if (!meta) return;
       if (marketingAd) meta.content = {{ settings.color_background | json }};
-      else if (isHome && params.get('nocover') !== '1') meta.content = {{ promo_red | json }};
+      else if (isHome && params.get('nocover') !== '1' && !document.documentElement.classList.contains('is-clerk-intro')) meta.content = {{ promo_red | json }};
     })();
   </script>
 
@@ -371,6 +378,8 @@
       }
     ]
   </script>
+
+  <div class="clerk-intro" id="clerk-intro" data-clerk-intro aria-hidden="true"></div>
 
   <div class="promo-cover" id="promo-cover" data-promo-cover aria-hidden="true">
     <div class="promo-cover__lockup">

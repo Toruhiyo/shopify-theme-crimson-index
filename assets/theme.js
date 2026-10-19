@@ -830,6 +830,16 @@
   const PROMO_BIZMIS_AVATAR_MODEL_URL = 'https://cdn.bizmis.ai/common/avatars/models/yusuke.glb';
   const PROMO_WIDGET_REMOUNT_MS = 280;
   const PROMO_WIDGET_FADE_MS = 480;
+  // Clerk intro (layout/theme.liquid sets html.is-clerk-intro): the widget's clerk shows big in the middle of a blank
+  // page, holds, then glides into its corner while the store fades in under it.
+  const CLERK_INTRO_SCALE = 2.6;
+  const CLERK_INTRO_CANVAS_WIDTH_PX = 760;   // 288 px card x the intro scale: the canvas stays sharp at full size
+  const CLERK_INTRO_READY_TIMEOUT_MS = 8000;
+  const CLERK_INTRO_SETTLE_MS = 900;        // after the canvas mounts: model and first pose on screen
+  const CLERK_INTRO_APPEAR_MS = 550;
+  const CLERK_INTRO_HOLD_MS = 1300;
+  const CLERK_INTRO_GLIDE_MS = 1150;
+  const CLERK_INTRO_SEEN_KEY = 'meridian-clerk-intro-seen';
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -856,6 +866,9 @@
 
     function lookForPromo(config) {
       const next = applyPromoLighting(config);
+      if (document.documentElement.classList.contains('is-clerk-intro')) {
+        return Object.assign({}, next, { canvasWidth: CLERK_INTRO_CANVAS_WIDTH_PX });
+      }
       if (!isOpening()) return next;
       const stamp = solidStampUrl
         || document.documentElement.getAttribute('data-promo-bizmis-stamp');
@@ -6202,6 +6215,93 @@
     }
   }
 
+  class ClerkIntro {
+    constructor(node, heroReveal, onReady) {
+      this.node = node;
+      this.heroReveal = heroReveal;
+      this.onReady = onReady;
+    }
+
+    async start() {
+      try { sessionStorage.setItem(CLERK_INTRO_SEEN_KEY, '1'); } catch (e) { /* private mode */ }
+      const card = await this.waitForClerk();
+      if (!card || prefersReducedMotion()) {
+        this.finish();
+        return;
+      }
+      const dock = card.closest('.bizmis-desktop-lite-chat') || card;
+      const avatar = card.querySelector('canvas')?.parentElement?.closest('.block') || card;
+      const box = avatar.getBoundingClientRect();
+      const scale = Math.min(CLERK_INTRO_SCALE, (window.innerHeight * 0.8) / Math.max(box.height, 1));
+      const dx = window.innerWidth / 2 - (box.left + box.width / 2);
+      const dy = window.innerHeight * 0.52 - (box.top + box.height / 2);
+      const dockBox = dock.getBoundingClientRect();
+      dock.style.transformOrigin = `${box.left + box.width / 2 - dockBox.left}px ${box.top + box.height / 2 - dockBox.top}px`;
+      const big = `translate(${dx}px, ${dy}px) scale(${scale})`;
+
+      document.documentElement.classList.add('is-clerk-intro-bare');
+      dock.style.transition = 'none';
+      dock.style.opacity = '0';
+      dock.style.transform = `${big} scale(0.94)`;
+      await nextFrames(2);
+      document.documentElement.classList.add('is-clerk-intro-staged');
+      dock.style.transition = `opacity ${CLERK_INTRO_APPEAR_MS}ms ease-out, transform ${CLERK_INTRO_APPEAR_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+      dock.style.opacity = '1';
+      dock.style.transform = big;
+      await wait(CLERK_INTRO_APPEAR_MS + CLERK_INTRO_HOLD_MS);
+
+      // the glide: the clerk settles into its corner while the store fades in under it
+      dock.style.transition = `transform ${CLERK_INTRO_GLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`;
+      dock.style.transform = 'translate(0px, 0px) scale(1)';
+      this.node.classList.add('is-fading');
+      this.heroReveal?.begin();
+      await wait(CLERK_INTRO_GLIDE_MS * 0.55);
+      document.documentElement.classList.remove('is-clerk-intro-bare');
+      await wait(CLERK_INTRO_GLIDE_MS * 0.45 + 80);
+      dock.style.transition = '';
+      dock.style.transform = '';
+      dock.style.transformOrigin = '';
+      dock.style.opacity = '';
+      this.dismiss();
+      this.onReady?.();
+    }
+
+    async waitForClerk() {
+      const end = Date.now() + CLERK_INTRO_READY_TIMEOUT_MS;
+      while (Date.now() < end) {
+        const card = document.querySelector('#bizmis-avatar-embed [class*="group/card"]');
+        if (card && card.querySelector('canvas')) {
+          await wait(CLERK_INTRO_SETTLE_MS);
+          return card;
+        }
+        await wait(100);
+      }
+      return null;
+    }
+
+    finish() {
+      this.heroReveal?.begin();
+      this.dismiss();
+      this.onReady?.();
+    }
+
+    dismiss() {
+      this.node.remove();
+      document.documentElement.classList.remove('is-clerk-intro', 'is-clerk-intro-bare', 'is-clerk-intro-staged');
+    }
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  function nextFrames(n) {
+    return new Promise((resolve) => {
+      const step = (left) => (left <= 0 ? resolve() : requestAnimationFrame(() => step(left - 1)));
+      step(n);
+    });
+  }
+
   class PromoCover {
     constructor(node, heroReveal, onReady) {
       this.node = node;
@@ -8612,6 +8712,10 @@
         });
         window.__promoOpeningFrames = openingController;
       }
+    } else if (document.documentElement.classList.contains('is-clerk-intro')) {
+      const intro = document.querySelector('[data-clerk-intro]');
+      if (intro) new ClerkIntro(intro, heroReveal, startPromoTypewriter).start();
+      else startPromoTypewriter();
     } else if (hasPromoCover()) {
       const cover = document.querySelector('[data-promo-cover]');
       if (cover) new PromoCover(cover, heroReveal, startPromoTypewriter).start();
