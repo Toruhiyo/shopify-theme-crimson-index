@@ -8525,7 +8525,8 @@
     celebrateFrom(btn);
   }
 
-  function celebrateFrom(el, { fan = 1 } = {}) {
+  // aim: the direction the burst leaves in (radians; up by default, down-left out of the header's cart icon)
+  function celebrateFrom(el, { aim = -Math.PI / 2, fan = 1, speed = 1 } = {}) {
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const box = el.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -8544,9 +8545,9 @@
     const cy = box.top + box.height / 2;
     const rnd = (a, b) => a + Math.random() * (b - a);
     const launch = (speedMin, speedMax) => {
-      const angle = -Math.PI / 2 + rnd(-0.75, 0.75) * Math.PI * 0.5 * fan;
-      const speed = rnd(speedMin, speedMax);
-      return { vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed };
+      const angle = aim + rnd(-0.75, 0.75) * Math.PI * 0.5 * fan;
+      const v = rnd(speedMin, speedMax) * speed;
+      return { vx: Math.cos(angle) * v, vy: Math.sin(angle) * v };
     };
     const coins = Array.from({ length: 24 }, () => {
       const near = Math.random() < 0.25;
@@ -8554,7 +8555,7 @@
         kind: 'coin',
         x: cx + rnd(-0.3, 0.3) * box.width,
         y: cy + rnd(-0.2, 0.2) * box.height,
-        r: near ? rnd(17, 22) : rnd(9, 15),
+        r: near ? rnd(21, 28) : rnd(12, 19),
         blur: near ? 2.2 : 0,
         flip: rnd(0, Math.PI * 2),
         flipSpeed: rnd(0.08, 0.2),
@@ -8689,7 +8690,7 @@
       if (!clerk && Date.now() < end) { window.setTimeout(tick, 120); return; }
       window.setTimeout(() => {
         const toggle = document.querySelector('[data-cart-toggle]');
-        celebrateFrom(toggle, { fan: 1.6 });
+        celebrateFrom(toggle, { aim: Math.PI * 0.68, fan: 1.3, speed: 0.75 });
         toggle?.classList.add('is-cart-pulse');
         badge?.classList.add('is-cart-count-pop');
         window.setTimeout(() => {
