@@ -8525,8 +8525,9 @@
     celebrateFrom(btn);
   }
 
-  // aim: the direction the burst leaves in (radians; up by default, down-left out of the header's cart icon)
-  function celebrateFrom(el, { aim = -Math.PI / 2, fan = 1, speed = 1 } = {}) {
+  // aim: the direction the burst leaves in (radians). By default up, or down into the page when it comes out of
+  // something near the top of the screen (a product's buy button, the header's cart icon), so it stays in view.
+  function celebrateFrom(el, { aim = null, fan = null, speed = 1 } = {}) {
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const box = el.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -8543,6 +8544,10 @@
     const ink = '#1F2A37';
     const cx = box.left + box.width / 2;
     const cy = box.top + box.height / 2;
+    const nearTop = cy < H * 0.35;
+    if (aim == null) aim = nearTop ? Math.PI / 2 : -Math.PI / 2;
+    if (fan == null) fan = nearTop ? 1.5 : 1;
+    if (nearTop) speed *= 0.75;
     const rnd = (a, b) => a + Math.random() * (b - a);
     const launch = (speedMin, speedMax) => {
       const angle = aim + rnd(-0.75, 0.75) * Math.PI * 0.5 * fan;
@@ -8690,7 +8695,7 @@
       if (!clerk && Date.now() < end) { window.setTimeout(tick, 120); return; }
       window.setTimeout(() => {
         const toggle = document.querySelector('[data-cart-toggle]');
-        celebrateFrom(toggle, { aim: Math.PI * 0.68, fan: 1.3, speed: 0.75 });
+        celebrateFrom(toggle, { aim: Math.PI * 0.68, fan: 1.3 });
         toggle?.classList.add('is-cart-pulse');
         badge?.classList.add('is-cart-count-pop');
         window.setTimeout(() => {
