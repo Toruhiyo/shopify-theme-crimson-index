@@ -6695,6 +6695,7 @@
       if (!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
       btn.classList.add('is-added-to-cart');
       btn.disabled = true;
+      burstFromButton(btn);
       if (isIcon) {
         btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
       } else {
@@ -8388,6 +8389,63 @@
   }
 
   /* --- Newsletter Confetti --- */
+  /* A short confetti burst out of an add-to-cart button: the brand colour, gold and white, fanning upwards. */
+  function burstFromButton(btn) {
+    if (!btn || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const box = btn.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
+    canvas.width = Math.round(window.innerWidth * dpr);
+    canvas.height = Math.round(window.innerHeight * dpr);
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#D1001A';
+    const colors = [primary, primary, '#FFC94D', '#FFFFFF', '#FF8A3D'];
+    const cx = box.left + box.width / 2;
+    const cy = box.top + box.height / 2;
+    const particles = Array.from({ length: 70 }, (_, i) => {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.25;
+      const speed = 5 + Math.random() * 9;
+      return {
+        x: cx + (Math.random() - 0.5) * box.width * 0.8,
+        y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        w: 5 + Math.random() * 5,
+        h: 3 + Math.random() * 4,
+        color: colors[i % colors.length],
+        rotation: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * 0.35,
+      };
+    });
+    const start = performance.now();
+    const duration = 1500;
+    const frame = (now) => {
+      const t = now - start;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      const fade = Math.max(0, 1 - Math.max(0, t - duration * 0.55) / (duration * 0.45));
+      particles.forEach((p) => {
+        p.vy += 0.3;
+        p.vx *= 0.985;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.spin;
+        ctx.save();
+        ctx.globalAlpha = fade;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      if (t < duration) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
   function fireConfetti() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 

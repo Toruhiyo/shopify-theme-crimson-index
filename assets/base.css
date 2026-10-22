@@ -430,19 +430,35 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
 }
 
+/* Added to cart: the button keeps the brand colour and celebrates (a pop, a ring and a confetti burst from
+   theme.js) instead of turning green. */
 .btn.is-added-to-cart {
-  background: var(--color-success) !important;
-  color: #fff !important;
-  border-color: var(--color-success) !important;
   filter: none !important;
   pointer-events: none;
-  animation: atc-success-pop 0.45s ease;
+  animation: atc-success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 0 0 rgba(209, 0, 26, 0.45);
+}
+
+.btn.is-added-to-cart::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--color-primary, #D1001A);
+  animation: atc-success-ring 0.7s ease-out forwards;
+  pointer-events: none;
 }
 
 @keyframes atc-success-pop {
   0% { transform: scale(1); }
-  40% { transform: scale(1.04); }
+  35% { transform: scale(1.09); }
+  65% { transform: scale(0.97); }
   100% { transform: scale(1); }
+}
+
+@keyframes atc-success-ring {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.35, 1.9); }
 }
 
 .header__icon-btn.is-cart-pulse {
@@ -468,6 +484,7 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (prefers-reduced-motion: reduce) {
   .btn.is-added-to-cart,
+  .btn.is-added-to-cart::after,
   .header__icon-btn.is-cart-pulse,
   .header__cart-count.is-cart-count-pop {
     animation: none;
