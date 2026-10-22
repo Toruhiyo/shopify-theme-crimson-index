@@ -846,7 +846,8 @@
   const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1440;
   const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5360;
   const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 6600;
-  const CLERK_INTRO_BIZMIS_GAP_PX = 64;
+  const CLERK_INTRO_BIZMIS_GAP_PX = 56;
+  const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 220;
   const CLERK_INTRO_BLOOM_HOLD_MS = 420;   // the new look loads under the bloom
   const CLERK_INTRO_BLOOM_FADE_MS = 600;
@@ -6289,7 +6290,7 @@
       let centreX = window.innerWidth / 2;
       if (brands) {
         const logoW = Math.max(...[...brands.children].map((el) => el.getBoundingClientRect().width));
-        const clerkW = box.width * scale * 0.62;   // the figure, not the canvas's empty sides
+        const clerkW = box.width * scale * CLERK_INTRO_FIGURE_WIDTH;
         const left = (window.innerWidth - (logoW + CLERK_INTRO_BIZMIS_GAP_PX + clerkW)) / 2;
         centreX = left + logoW + CLERK_INTRO_BIZMIS_GAP_PX + clerkW / 2;
         brands.style.width = `${logoW}px`;
@@ -6821,12 +6822,9 @@
       if (!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
       btn.classList.add('is-added-to-cart');
       btn.disabled = true;
-      burstFromButton(btn);
-      if (isIcon) {
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
-      } else {
-        btn.textContent = label;
-      }
+      const tick = '<svg class="atc-tick" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline pathLength="1" points="20 6 9 17 4 12"/></svg>';
+      btn.innerHTML = isIcon ? tick : `${tick}<span>${label}</span>`;
+      sparkleButton(btn);
       btn._addedTimer = setTimeout(() => {
         btn.classList.remove('is-added-to-cart');
         btn.innerHTML = btn.dataset.originalHtml;
@@ -8515,173 +8513,33 @@
   }
 
   /* --- Add-to-cart celebration ---
-     As in the Bizmis film: a ring of light and a shower of check-mark coins tumbling out of what was added (here in the
-     store's red), with paper confetti in the store's red and ink. Coins flip as they fall; a few sit out of focus,
-     nearer the camera. Frame-rate independent (the physics runs on elapsed time). */
-  const CELEBRATE_MS = 2300;
+     Local to the button: it pops, a light sweeps across it, a soft ring eases out, the tick draws in front of
+     "Added to cart" and a few small sparkles flick off its edges (base.css). */
   const CART_COUNT_KEY = 'meridian-cart-count';
+  const ATC_SPARKS = [[-0.52, -1], [0.1, -1.15], [0.6, -0.95], [0.62, 1], [-0.08, 1.15], [-0.6, 0.9]];
 
-  function burstFromButton(btn) {
-    celebrateFrom(btn);
-  }
-
-  // aim: the direction the burst leaves in (radians). By default up, or down into the page when it comes out of
-  // something near the top of the screen (a product's buy button, the header's cart icon), so it stays in view.
-  function celebrateFrom(el, { aim = null, fan = null, speed = 1 } = {}) {
-    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const box = el.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2147483646;';
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#D1001A';
-    const ink = '#1F2A37';
-    const cx = box.left + box.width / 2;
-    const cy = box.top + box.height / 2;
-    const nearTop = cy < H * 0.35;
-    if (aim == null) aim = nearTop ? Math.PI / 2 : -Math.PI / 2;
-    if (fan == null) fan = nearTop ? 1.5 : 1;
-    if (nearTop) speed *= 0.75;
-    const rnd = (a, b) => a + Math.random() * (b - a);
-    const launch = (speedMin, speedMax) => {
-      const angle = aim + rnd(-0.75, 0.75) * Math.PI * 0.5 * fan;
-      const v = rnd(speedMin, speedMax) * speed;
-      return { vx: Math.cos(angle) * v, vy: Math.sin(angle) * v };
-    };
-    const coins = Array.from({ length: 24 }, () => {
-      const near = Math.random() < 0.25;
-      return Object.assign(launch(8, 17), {
-        kind: 'coin',
-        x: cx + rnd(-0.3, 0.3) * box.width,
-        y: cy + rnd(-0.2, 0.2) * box.height,
-        r: near ? rnd(21, 28) : rnd(12, 19),
-        blur: near ? 2.2 : 0,
-        flip: rnd(0, Math.PI * 2),
-        flipSpeed: rnd(0.08, 0.2),
-        tilt: rnd(-0.4, 0.4),
-        spin: rnd(-0.03, 0.03),
-      });
+  function sparkleButton(btn) {
+    if (!btn || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    btn.querySelectorAll('.atc-spark').forEach((el) => el.remove());
+    const { width, height } = btn.getBoundingClientRect();
+    ATC_SPARKS.forEach(([x, y], i) => {
+      const spark = document.createElement('span');
+      spark.className = 'atc-spark';
+      spark.setAttribute('aria-hidden', 'true');
+      spark.style.setProperty('--x', String(x));
+      spark.style.setProperty('--y', String(y));
+      spark.style.setProperty('--d', `${(i % 3) * 40}ms`);
+      spark.style.setProperty('--hw', `${width / 2}px`);
+      spark.style.setProperty('--hh', `${height / 2}px`);
+      btn.appendChild(spark);
     });
-    const paper = Array.from({ length: 56 }, (_, i) => Object.assign(launch(7, 16), {
-      kind: 'paper',
-      x: cx + rnd(-0.45, 0.45) * box.width,
-      y: cy,
-      w: rnd(7, 12),
-      h: rnd(4, 6),
-      color: [primary, primary, ink, '#FF6B7D'][i % 4],
-      rot: rnd(0, Math.PI),
-      spin: rnd(-0.22, 0.22),
-      flutter: rnd(0, Math.PI * 2),
-      flutterSpeed: rnd(0.15, 0.3),
-    }));
-    // paper first, the coins on top
-    const pieces = [...paper, ...coins];
-    const ring = Math.max(box.width, box.height) * 0.6;
-    const start = performance.now();
-    let last = start;
-    const ease = (u) => 1 - (1 - Math.min(1, Math.max(0, u))) ** 3;
-
-    function drawCoin(p, alpha) {
-      const side = Math.cos(p.flip);
-      ctx.save();
-      ctx.globalAlpha = alpha * (p.blur ? 0.85 : 1);
-      if (p.blur) ctx.filter = `blur(${p.blur}px)`;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.tilt);
-      ctx.scale(Math.max(0.12, Math.abs(side)), 1);
-      ctx.shadowColor = 'rgba(80, 0, 10, 0.25)';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetY = 2;
-      ctx.beginPath();
-      ctx.arc(0, 0, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = side >= 0 ? primary : '#A50015';
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      if (side >= 0) {
-        // the face: a soft highlight and the white tick
-        const g = ctx.createRadialGradient(-p.r * 0.35, -p.r * 0.4, 0, 0, 0, p.r);
-        g.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
-        g.addColorStop(0.6, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
-        ctx.fill();
-        const k = p.r / 12;
-        ctx.beginPath();
-        ctx.moveTo(-5.5 * k, 0.4 * k);
-        ctx.lineTo(-1.8 * k, 4.1 * k);
-        ctx.lineTo(5.6 * k, -3.6 * k);
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2.4 * k;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    function drawPaper(p, alpha) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.scale(1, Math.cos(p.flutter));
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      ctx.restore();
-    }
-
-    const frame = (now) => {
-      const t = now - start;
-      const dt = Math.min(3, (now - last) / 16.667);
-      last = now;
-      ctx.clearRect(0, 0, W, H);
-      // the ring of light
-      const u = t / 880;
-      if (u < 1) {
-        ctx.save();
-        ctx.globalAlpha = u < 0.16 ? u / 0.16 : 1 - (u - 0.16) / 0.84;
-        ctx.beginPath();
-        ctx.arc(cx, cy, ring * (0.08 + 2.52 * ease(u)), 0, Math.PI * 2);
-        ctx.strokeStyle = primary;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.restore();
-      }
-      const fade = Math.max(0, 1 - Math.max(0, t - CELEBRATE_MS * 0.62) / (CELEBRATE_MS * 0.38));
-      pieces.forEach((p) => {
-        const drag = p.kind === 'coin' ? 0.988 : 0.972;
-        p.vy += (p.kind === 'coin' ? 0.42 : 0.3) * dt;
-        p.vx *= drag ** dt;
-        p.vy *= drag ** dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        if (p.kind === 'coin') {
-          p.flip += p.flipSpeed * dt;
-          p.tilt += p.spin * dt;
-          drawCoin(p, fade);
-        } else {
-          p.rot += p.spin * dt;
-          p.flutter += p.flutterSpeed * dt;
-          p.x += Math.sin(p.flutter) * 0.6 * dt;
-          drawPaper(p, fade);
-        }
-      });
-      if (t < CELEBRATE_MS) requestAnimationFrame(frame);
-      else canvas.remove();
-    };
-    requestAnimationFrame(frame);
   }
 
   function rememberCartCount(count) {
     try { sessionStorage.setItem(CART_COUNT_KEY, String(count)); } catch (e) { /* private mode */ }
   }
 
-  // The sales agent adds to the cart and the page reloads: celebrate out of the cart icon once the widget is back
+  // The sales agent adds to the cart and the page reloads: the cart icon pulses once the widget is back
   function celebrateAgentAdd() {
     const badge = document.querySelector('[data-cart-count]');
     const count = Number(badge?.textContent || 0) || 0;
@@ -8695,7 +8553,6 @@
       if (!clerk && Date.now() < end) { window.setTimeout(tick, 120); return; }
       window.setTimeout(() => {
         const toggle = document.querySelector('[data-cart-toggle]');
-        celebrateFrom(toggle, { aim: Math.PI * 0.68, fan: 1.3 });
         toggle?.classList.add('is-cart-pulse');
         badge?.classList.add('is-cart-count-pop');
         window.setTimeout(() => {

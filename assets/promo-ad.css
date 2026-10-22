@@ -6548,7 +6548,7 @@ html.is-clerk-intro-bizmis .clerk-intro.is-swapped::after { opacity: 1; }
 }
 
 .clerk-intro__brand--bizmis {
-  height: 150px;
+  height: 132px;
   width: auto;
 }
 
@@ -6559,13 +6559,13 @@ html.is-clerk-intro-bizmis .clerk-intro.is-swapped::after { opacity: 1; }
 }
 
 .clerk-intro__brand--store img {
-  height: 104px;
+  height: 92px;
   width: auto;
 }
 
 .clerk-intro__brand--store span {
   padding-left: 4px;
-  font-size: 23px;
+  font-size: 21px;
   font-weight: 600;
   letter-spacing: 0.27em;
   text-transform: uppercase;
