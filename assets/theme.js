@@ -6295,10 +6295,11 @@
         centreX = left + logoW + CLERK_INTRO_BIZMIS_GAP_PX + clerkW / 2;
         brands.style.width = `${logoW}px`;
         brands.style.left = `${left}px`;
-        brands.style.top = `${window.innerHeight * 0.5}px`;
+        brands.style.top = `${window.innerHeight * 0.47}px`;
       }
       const dx = centreX - (box.left + box.width / 2);
-      const dy = window.innerHeight * 0.52 - (box.top + box.height / 2);
+      // with the brands the pair sits a touch above centre (the figure's weight is low: a bust, hands at the bottom)
+      const dy = window.innerHeight * (brands ? 0.47 : 0.52) - (box.top + box.height / 2);
       const dockBox = dock.getBoundingClientRect();
       dock.style.transformOrigin = `${box.left + box.width / 2 - dockBox.left}px ${box.top + box.height / 2 - dockBox.top}px`;
       const big = `translate(${dx}px, ${dy}px) scale(${scale})`;
