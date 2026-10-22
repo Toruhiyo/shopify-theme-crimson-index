@@ -6502,6 +6502,12 @@ html.is-clerk-intro .clerk-intro {
   display: block;
 }
 
+/* the clerk stands in front of the cover: the widget's root sets its own z-index (9990 since the widget's 2026-10-22
+   build, below this cover's 9998), so lift it above the cover for the length of the intro */
+html.is-clerk-intro #bizmis-avatar-embed {
+  z-index: 9999 !important;
+}
+
 /* ?intro=bizmis: the Bizmis logo beside the Bizmis clerk, then the store's logo in its place (the logos never move;
    one fades out where the other rises in). The warm Bizmis light turns into the store's red with the swap. */
 .clerk-intro__brands {
