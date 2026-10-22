@@ -840,6 +840,16 @@
   const CLERK_INTRO_HOLD_MS = 1300;
   const CLERK_INTRO_GLIDE_MS = 1150;
   const CLERK_INTRO_SEEN_KEY = 'meridian-clerk-intro-seen';
+  // ?intro=bizmis, timed to a demo's intro line: the Bizmis logo rises in, the Bizmis clerk pops in beside it and
+  // waves, becomes the store's clerk under a bloom of light as the store's logo takes the Bizmis logo's place, then
+  // glides into its corner
+  const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1440;
+  const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5360;
+  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 6600;
+  const CLERK_INTRO_BIZMIS_GAP_PX = 64;
+  const CLERK_INTRO_BLOOM_RISE_MS = 220;
+  const CLERK_INTRO_BLOOM_HOLD_MS = 420;   // the new look loads under the bloom
+  const CLERK_INTRO_BLOOM_FADE_MS = 600;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -864,14 +874,29 @@
         || params.get(PROMO_VIDEO_PARAM) === 'opening';
     }
 
+    function isBizmisIntro() {
+      return document.documentElement.classList.contains('is-clerk-intro-bizmis');
+    }
+
     function lookForPromo(config) {
       const next = applyPromoLighting(config);
+      const stamp = solidStampUrl
+        || document.documentElement.getAttribute('data-promo-bizmis-stamp');
+      if (isBizmisIntro()) {
+        // the demo intro: only the clerk wears Bizmis (the widget keeps the store's colours for when it docks)
+        return Object.assign({}, next, {
+          avatarModelUrl: PROMO_BIZMIS_AVATAR_MODEL_URL,
+          avatarMeshColors: Object.assign({}, next.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
+          shirtStampUrl: stamp || next.shirtStampUrl,
+          shirtStampScale: PROMO_BIZMIS_STAMP_SCALE,
+          shirtStampOffsetX: PROMO_BIZMIS_STAMP_OFFSET_X,
+          canvasWidth: CLERK_INTRO_CANVAS_WIDTH_PX,
+        });
+      }
       if (document.documentElement.classList.contains('is-clerk-intro')) {
         return Object.assign({}, next, { canvasWidth: CLERK_INTRO_CANVAS_WIDTH_PX });
       }
       if (!isOpening()) return next;
-      const stamp = solidStampUrl
-        || document.documentElement.getAttribute('data-promo-bizmis-stamp');
       return Object.assign({}, next, {
         avatarModelUrl: PROMO_BIZMIS_AVATAR_MODEL_URL,
         avatarMeshColors: Object.assign({}, next.avatarMeshColors || {}, PROMO_BIZMIS_MESH_COLORS),
@@ -986,7 +1011,7 @@
       });
     }
 
-    if (promoVideo === 'opening') {
+    if (promoVideo === 'opening' || isBizmisIntro()) {
       hardenStamp(document.documentElement.getAttribute('data-promo-bizmis-stamp'), true);
     } else {
       stampReady = true;
@@ -1000,7 +1025,7 @@
       api.init = function (config) {
         storeConfig = config;
         const start = () => originalInit(lookForPromo(config));
-        if (!isOpening() || stampReady) return start();
+        if ((!isOpening() && !isBizmisIntro()) || stampReady) return start();
         stampWaiters.push(start);
       };
       wrapped = true;
@@ -1044,7 +1069,26 @@
       tick();
     }
 
-    return { arm, hide, remountForStore, applyStoreLook, preloadStoreStamps };
+    // the store's own clerk, as its widget config draws it (to turn the Bizmis clerk back in place, no remount)
+    function storeAppearance() {
+      if (!storeConfig) return null;
+      return {
+        avatarModelUrl: storeConfig.avatarModelUrl || null,
+        avatarMeshColors: storeConfig.avatarMeshColors || {},
+        shirtStampUrl: storeConfig.shirtStampUrl || null,
+        shirtStampScale: typeof storeConfig.shirtStampScale === 'number' ? storeConfig.shirtStampScale : 1,
+        shirtStampOffsetX: storeConfig.shirtStampOffsetX || 0,
+        shirtStampOffsetY: storeConfig.shirtStampOffsetY || 0,
+      };
+    }
+
+    function becomeStoreClerk() {
+      const api = window.AvatarVoicechat;
+      const look = storeAppearance();
+      if (look && api && typeof api.setAppearance === 'function') api.setAppearance(look);
+    }
+
+    return { arm, hide, remountForStore, applyStoreLook, preloadStoreStamps, storeAppearance, becomeStoreClerk };
   }
 
   let openingWaveStarted = false;
@@ -6222,8 +6266,15 @@
       this.onReady = onReady;
     }
 
+    phase(name) {
+      // the demo recorder follows these (data-clerk-intro on <html>)
+      document.documentElement.dataset.clerkIntro = name;
+    }
+
     async start() {
       try { sessionStorage.setItem(CLERK_INTRO_SEEN_KEY, '1'); } catch (e) { /* private mode */ }
+      const bizmis = document.documentElement.classList.contains('is-clerk-intro-bizmis');
+      if (bizmis) this.preloadStoreClerk();
       const card = await this.waitForClerk();
       if (!card || prefersReducedMotion()) {
         this.finish();
@@ -6233,7 +6284,19 @@
       const avatar = card.querySelector('canvas')?.parentElement?.closest('.block') || card;
       const box = avatar.getBoundingClientRect();
       const scale = Math.min(CLERK_INTRO_SCALE, (window.innerHeight * 0.8) / Math.max(box.height, 1));
-      const dx = window.innerWidth / 2 - (box.left + box.width / 2);
+      const brands = bizmis ? this.node.querySelector('[data-clerk-intro-brands]') : null;
+      // with the brands, the logo and the clerk stand side by side, the pair centred
+      let centreX = window.innerWidth / 2;
+      if (brands) {
+        const logoW = Math.max(...[...brands.children].map((el) => el.getBoundingClientRect().width));
+        const clerkW = box.width * scale * 0.62;   // the figure, not the canvas's empty sides
+        const left = (window.innerWidth - (logoW + CLERK_INTRO_BIZMIS_GAP_PX + clerkW)) / 2;
+        centreX = left + logoW + CLERK_INTRO_BIZMIS_GAP_PX + clerkW / 2;
+        brands.style.width = `${logoW}px`;
+        brands.style.left = `${left}px`;
+        brands.style.top = `${window.innerHeight * 0.5}px`;
+      }
+      const dx = centreX - (box.left + box.width / 2);
       const dy = window.innerHeight * 0.52 - (box.top + box.height / 2);
       const dockBox = dock.getBoundingClientRect();
       dock.style.transformOrigin = `${box.left + box.width / 2 - dockBox.left}px ${box.top + box.height / 2 - dockBox.top}px`;
@@ -6244,26 +6307,88 @@
       dock.style.opacity = '0';
       dock.style.transform = `${big} scale(0.94)`;
       await nextFrames(2);
+      let swapDone = null;
+      if (bizmis) {
+        this.phase('logo');
+        this.node.classList.add('is-brand-in');
+        await wait(CLERK_INTRO_BIZMIS_APPEAR_AT_MS);
+      }
+      this.phase('appear');
+      const appearedAt = performance.now();
       document.documentElement.classList.add('is-clerk-intro-staged');
       dock.style.transition = `opacity ${CLERK_INTRO_APPEAR_MS}ms ease-out, transform ${CLERK_INTRO_APPEAR_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
       dock.style.opacity = '1';
       dock.style.transform = big;
-      await wait(CLERK_INTRO_APPEAR_MS + CLERK_INTRO_HOLD_MS);
+      if (bizmis) {
+        window.dispatchEvent(new CustomEvent('avatar-animation', { detail: { name: 'waving', lifecycle: { times: 1, when: null, duration_in_ms: null }, toolCallId: `clerk-intro-waving-${Date.now()}` } }));
+        await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
+        this.phase('swap');
+        swapDone = this.becomeStoreClerk(card);
+        await wait(CLERK_INTRO_BIZMIS_GLIDE_AT_MS - CLERK_INTRO_BIZMIS_SWAP_AT_MS);
+      } else {
+        await wait(CLERK_INTRO_APPEAR_MS + CLERK_INTRO_HOLD_MS);
+      }
 
-      // the glide: the clerk settles into its corner while the store fades in under it
+      // the glide: the clerk settles into its corner while the store fades in under it; the widget's card only
+      // comes back once the clerk has landed in it (no panel growing around a flying clerk)
+      this.phase('glide');
       dock.style.transition = `transform ${CLERK_INTRO_GLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`;
       dock.style.transform = 'translate(0px, 0px) scale(1)';
       this.node.classList.add('is-fading');
       this.heroReveal?.begin();
-      await wait(CLERK_INTRO_GLIDE_MS * 0.55);
+      await wait(CLERK_INTRO_GLIDE_MS + 40);
       document.documentElement.classList.remove('is-clerk-intro-bare');
-      await wait(CLERK_INTRO_GLIDE_MS * 0.45 + 80);
+      await swapDone;
+      await wait(440);
+      this.phase('done');
       dock.style.transition = '';
       dock.style.transform = '';
       dock.style.transformOrigin = '';
       dock.style.opacity = '';
       this.dismiss();
       this.onReady?.();
+    }
+
+    preloadStoreClerk() {
+      // warm the store clerk's model and stamp so the swap under the bloom is quick
+      const tryLook = (left) => {
+        const look = promoWidget.storeAppearance();
+        if (!look) { if (left > 0) window.setTimeout(() => tryLook(left - 1), 100); return; }
+        if (look.avatarModelUrl) fetch(look.avatarModelUrl, { mode: 'cors' }).catch(() => {});
+        if (look.shirtStampUrl) { const img = new Image(); img.crossOrigin = 'anonymous'; img.src = look.shirtStampUrl; }
+      };
+      tryLook(80);
+    }
+
+    async becomeStoreClerk(card) {
+      // a bloom of light over the clerk; under it the clerk takes the store's look and the logos trade places
+      const box = (card.querySelector('canvas')?.parentElement?.closest('.block') || card).getBoundingClientRect();
+      const bloom = document.createElement('div');
+      bloom.className = 'clerk-intro-bloom';
+      bloom.style.left = `${box.left + box.width / 2}px`;
+      bloom.style.top = `${box.top + box.height * 0.5}px`;
+      bloom.style.setProperty('--size', `${Math.max(box.width, box.height) * 1.15}px`);
+      for (let i = 0; i < 16; i += 1) {
+        const spark = document.createElement('span');
+        const a = (i / 16) * Math.PI * 2 + (i % 3) * 0.21;
+        const d = 0.55 + ((i * 37) % 120) / 260;
+        spark.style.setProperty('--x', `${Math.cos(a) * d}`);
+        spark.style.setProperty('--y', `${Math.sin(a) * d}`);
+        spark.style.setProperty('--delay', `${(i % 5) * 35}ms`);
+        spark.style.setProperty('--s', `${0.6 + ((i * 11) % 16) / 22}`);
+        if (i % 2) spark.classList.add('is-gold');
+        bloom.appendChild(spark);
+      }
+      document.body.appendChild(bloom);
+      await nextFrames(1);
+      bloom.classList.add('is-on');
+      this.node.classList.add('is-swapped');
+      await wait(CLERK_INTRO_BLOOM_RISE_MS * 0.6);
+      promoWidget.becomeStoreClerk();
+      await wait(CLERK_INTRO_BLOOM_RISE_MS * 0.4 + CLERK_INTRO_BLOOM_HOLD_MS);
+      bloom.classList.add('is-off');
+      await wait(CLERK_INTRO_BLOOM_FADE_MS + 900);
+      bloom.remove();
     }
 
     async waitForClerk() {
@@ -6287,7 +6412,7 @@
 
     dismiss() {
       this.node.remove();
-      document.documentElement.classList.remove('is-clerk-intro', 'is-clerk-intro-bare', 'is-clerk-intro-staged');
+      document.documentElement.classList.remove('is-clerk-intro', 'is-clerk-intro-bare', 'is-clerk-intro-staged', 'is-clerk-intro-bizmis');
     }
   }
 
@@ -6366,6 +6491,7 @@
     _listeners: [],
     on(fn) { this._listeners.push(fn); },
     emit(cart) {
+      rememberCartCount(cart.item_count);
       const badge = document.querySelector('[data-cart-count]');
       if (badge) {
         badge.textContent = cart.item_count;
@@ -8388,64 +8514,194 @@
       .replace('{{amount}}', withCommas);
   }
 
-  /* --- Newsletter Confetti --- */
-  /* A short confetti burst out of an add-to-cart button: the brand colour, gold and white, fanning upwards. */
+  /* --- Add-to-cart celebration ---
+     As in the Bizmis film: a ring of light and a shower of check-mark coins tumbling out of what was added (here in the
+     store's red), with paper confetti in the store's red and ink. Coins flip as they fall; a few sit out of focus,
+     nearer the camera. Frame-rate independent (the physics runs on elapsed time). */
+  const CELEBRATE_MS = 2300;
+  const CART_COUNT_KEY = 'meridian-cart-count';
+
   function burstFromButton(btn) {
-    if (!btn || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const box = btn.getBoundingClientRect();
+    celebrateFrom(btn);
+  }
+
+  function celebrateFrom(el, { fan = 1 } = {}) {
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const box = el.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
     const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
-    canvas.width = Math.round(window.innerWidth * dpr);
-    canvas.height = Math.round(window.innerHeight * dpr);
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2147483646;';
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
     const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#D1001A';
-    const colors = [primary, primary, '#FFC94D', '#FFFFFF', '#FF8A3D'];
+    const ink = '#1F2A37';
     const cx = box.left + box.width / 2;
     const cy = box.top + box.height / 2;
-    const particles = Array.from({ length: 70 }, (_, i) => {
-      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.25;
-      const speed = 5 + Math.random() * 9;
-      return {
-        x: cx + (Math.random() - 0.5) * box.width * 0.8,
-        y: cy,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        w: 5 + Math.random() * 5,
-        h: 3 + Math.random() * 4,
-        color: colors[i % colors.length],
-        rotation: Math.random() * Math.PI,
-        spin: (Math.random() - 0.5) * 0.35,
-      };
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const launch = (speedMin, speedMax) => {
+      const angle = -Math.PI / 2 + rnd(-0.75, 0.75) * Math.PI * 0.5 * fan;
+      const speed = rnd(speedMin, speedMax);
+      return { vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed };
+    };
+    const coins = Array.from({ length: 24 }, () => {
+      const near = Math.random() < 0.25;
+      return Object.assign(launch(8, 17), {
+        kind: 'coin',
+        x: cx + rnd(-0.3, 0.3) * box.width,
+        y: cy + rnd(-0.2, 0.2) * box.height,
+        r: near ? rnd(17, 22) : rnd(9, 15),
+        blur: near ? 2.2 : 0,
+        flip: rnd(0, Math.PI * 2),
+        flipSpeed: rnd(0.08, 0.2),
+        tilt: rnd(-0.4, 0.4),
+        spin: rnd(-0.03, 0.03),
+      });
     });
+    const paper = Array.from({ length: 56 }, (_, i) => Object.assign(launch(7, 16), {
+      kind: 'paper',
+      x: cx + rnd(-0.45, 0.45) * box.width,
+      y: cy,
+      w: rnd(7, 12),
+      h: rnd(4, 6),
+      color: [primary, primary, ink, '#FF6B7D'][i % 4],
+      rot: rnd(0, Math.PI),
+      spin: rnd(-0.22, 0.22),
+      flutter: rnd(0, Math.PI * 2),
+      flutterSpeed: rnd(0.15, 0.3),
+    }));
+    // paper first, the coins on top
+    const pieces = [...paper, ...coins];
+    const ring = Math.max(box.width, box.height) * 0.6;
     const start = performance.now();
-    const duration = 1500;
+    let last = start;
+    const ease = (u) => 1 - (1 - Math.min(1, Math.max(0, u))) ** 3;
+
+    function drawCoin(p, alpha) {
+      const side = Math.cos(p.flip);
+      ctx.save();
+      ctx.globalAlpha = alpha * (p.blur ? 0.85 : 1);
+      if (p.blur) ctx.filter = `blur(${p.blur}px)`;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.tilt);
+      ctx.scale(Math.max(0.12, Math.abs(side)), 1);
+      ctx.shadowColor = 'rgba(80, 0, 10, 0.25)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = side >= 0 ? primary : '#A50015';
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      if (side >= 0) {
+        // the face: a soft highlight and the white tick
+        const g = ctx.createRadialGradient(-p.r * 0.35, -p.r * 0.4, 0, 0, 0, p.r);
+        g.addColorStop(0, 'rgba(255, 255, 255, 0.28)');
+        g.addColorStop(0.6, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.fill();
+        const k = p.r / 12;
+        ctx.beginPath();
+        ctx.moveTo(-5.5 * k, 0.4 * k);
+        ctx.lineTo(-1.8 * k, 4.1 * k);
+        ctx.lineTo(5.6 * k, -3.6 * k);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2.4 * k;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawPaper(p, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(1, Math.cos(p.flutter));
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+
     const frame = (now) => {
       const t = now - start;
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      const fade = Math.max(0, 1 - Math.max(0, t - duration * 0.55) / (duration * 0.45));
-      particles.forEach((p) => {
-        p.vy += 0.3;
-        p.vx *= 0.985;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.rotation += p.spin;
+      const dt = Math.min(3, (now - last) / 16.667);
+      last = now;
+      ctx.clearRect(0, 0, W, H);
+      // the ring of light
+      const u = t / 880;
+      if (u < 1) {
         ctx.save();
-        ctx.globalAlpha = fade;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.globalAlpha = u < 0.16 ? u / 0.16 : 1 - (u - 0.16) / 0.84;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ring * (0.08 + 2.52 * ease(u)), 0, Math.PI * 2);
+        ctx.strokeStyle = primary;
+        ctx.lineWidth = 3;
+        ctx.stroke();
         ctx.restore();
+      }
+      const fade = Math.max(0, 1 - Math.max(0, t - CELEBRATE_MS * 0.62) / (CELEBRATE_MS * 0.38));
+      pieces.forEach((p) => {
+        const drag = p.kind === 'coin' ? 0.988 : 0.972;
+        p.vy += (p.kind === 'coin' ? 0.42 : 0.3) * dt;
+        p.vx *= drag ** dt;
+        p.vy *= drag ** dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if (p.kind === 'coin') {
+          p.flip += p.flipSpeed * dt;
+          p.tilt += p.spin * dt;
+          drawCoin(p, fade);
+        } else {
+          p.rot += p.spin * dt;
+          p.flutter += p.flutterSpeed * dt;
+          p.x += Math.sin(p.flutter) * 0.6 * dt;
+          drawPaper(p, fade);
+        }
       });
-      if (t < duration) requestAnimationFrame(frame);
+      if (t < CELEBRATE_MS) requestAnimationFrame(frame);
       else canvas.remove();
     };
     requestAnimationFrame(frame);
   }
 
+  function rememberCartCount(count) {
+    try { sessionStorage.setItem(CART_COUNT_KEY, String(count)); } catch (e) { /* private mode */ }
+  }
+
+  // The sales agent adds to the cart and the page reloads: celebrate out of the cart icon once the widget is back
+  function celebrateAgentAdd() {
+    const badge = document.querySelector('[data-cart-count]');
+    const count = Number(badge?.textContent || 0) || 0;
+    let before = null;
+    try { before = sessionStorage.getItem(CART_COUNT_KEY); } catch (e) { /* private mode */ }
+    rememberCartCount(count);
+    if (before == null || count <= Number(before)) return;
+    const end = Date.now() + 8000;
+    const tick = () => {
+      const clerk = document.querySelector('#bizmis-avatar-embed [class*="group/card"] canvas');
+      if (!clerk && Date.now() < end) { window.setTimeout(tick, 120); return; }
+      window.setTimeout(() => {
+        const toggle = document.querySelector('[data-cart-toggle]');
+        celebrateFrom(toggle, { fan: 1.6 });
+        toggle?.classList.add('is-cart-pulse');
+        badge?.classList.add('is-cart-count-pop');
+        window.setTimeout(() => {
+          toggle?.classList.remove('is-cart-pulse');
+          badge?.classList.remove('is-cart-count-pop');
+        }, 900);
+      }, 350);
+    };
+    tick();
+  }
+
+  /* --- Newsletter Confetti --- */
   function fireConfetti() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -8735,6 +8991,7 @@
 
   /* --- Initialize --- */
   function init() {
+    celebrateAgentAdd();
     const cartDrawer = new CartDrawer();
     new AddToCart(cartDrawer);
     new CartPage();

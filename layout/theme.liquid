@@ -32,8 +32,11 @@
       var introSeen = false;
       try { introSeen = sessionStorage.getItem('meridian-clerk-intro-seen') === '1'; } catch (e) {}
       var clerkIntro = isHome && !marketingAd && !promoVideo && params.get('nocover') !== '1'
-        && (params.get('intro') === '1' || (!introSeen && params.get('intro') !== '0'));
+        && (params.get('intro') === '1' || params.get('intro') === 'bizmis' || (!introSeen && params.get('intro') !== '0'));
       root.classList.toggle('is-clerk-intro', clerkIntro);
+      // ?intro=bizmis (store demos): the clerk first shows as the Bizmis clerk beside the Bizmis logo, then becomes
+      // the store's own clerk before it settles into its corner
+      root.classList.toggle('is-clerk-intro-bizmis', clerkIntro && params.get('intro') === 'bizmis');
       root.classList.toggle('is-promo-cover', isHome && !marketingAd && !clerkIntro && params.get('nocover') !== '1');
       root.classList.toggle('is-promo-clip', marketingAd && !!params.get('clip'));
       if (promoVideo || params.get('marketing')) {
@@ -379,7 +382,15 @@
     ]
   </script>
 
-  <div class="clerk-intro" id="clerk-intro" data-clerk-intro aria-hidden="true"></div>
+  <div class="clerk-intro" id="clerk-intro" data-clerk-intro aria-hidden="true">
+    <div class="clerk-intro__brands" data-clerk-intro-brands>
+      <img class="clerk-intro__brand clerk-intro__brand--bizmis" src="{{ 'bizmis-logo-full-orange.svg' | asset_url }}" alt="">
+      <div class="clerk-intro__brand clerk-intro__brand--store">
+        <img src="{{ 'meridian-intro-logo.png' | asset_url }}" alt="">
+        <span>Consumer Electronics</span>
+      </div>
+    </div>
+  </div>
 
   <div class="promo-cover" id="promo-cover" data-promo-cover aria-hidden="true">
     <div class="promo-cover__lockup">
