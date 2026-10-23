@@ -846,7 +846,7 @@
   const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1440;
   const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5360;
   const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 6600;
-  const CLERK_INTRO_BIZMIS_GAP_PX = 56;
+  const CLERK_INTRO_BIZMIS_GAP_PX = 96;
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 220;
   const CLERK_INTRO_BLOOM_HOLD_MS = 420;   // the new look loads under the bloom
