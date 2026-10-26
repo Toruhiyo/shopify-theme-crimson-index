@@ -855,11 +855,11 @@
   const CLERK_INTRO_BLOOM_HOLD_MS = 60;    // after the peak: the new look (cut in, no crossfade) draws as the light starts to leave
   const CLERK_INTRO_BLOOM_FADE_MS = 450;
   const CLERK_INTRO_BLOOM_MAX_COVER_MS = 1200;   // a widget that never reports the new model on screen
-  // widgets that can hold a look: the store clerk is built unseen during the wave, the light rises once it is drawn
-  // and it is revealed in the rise (its cut lands two frames on, at the peak), so the light never waits on a model
-  const CLERK_INTRO_BIZMIS_PREPARE_LEAD_MS = 1400;
+  // widgets that can hold a look: the store clerk is parsed and built unseen while the cover is still blank (both
+  // stall the page for a moment: during the wave the clerk froze, then jumped) and revealed in the bloom's rise (its
+  // cut lands two frames on, at the peak), so the light never waits on a model
+  const CLERK_INTRO_BIZMIS_PREPARE_MAX_MS = 4000;
   const CLERK_INTRO_BLOOM_REVEAL_IN_RISE_MS = 250;
-  const CLERK_INTRO_BLOOM_MAX_READY_WAIT_MS = 2500;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -6362,7 +6362,12 @@
       dock.style.scale = `${scale * 0.94}`;
       await nextFrames(2);
       let swapDone = null;
+      let prepared = Promise.resolve(false);
       if (bizmis) {
+        prepared = this.prepareStoreClerk();
+        await Promise.race([prepared, wait(CLERK_INTRO_BIZMIS_PREPARE_MAX_MS)]);
+        // the page is still for a beat after the build before the logo comes in
+        await nextFrames(6);
         this.phase('logo');
         this.node.classList.add('is-brand-in');
         await wait(CLERK_INTRO_BIZMIS_SHIFT_AT_MS);
@@ -6379,9 +6384,9 @@
       if (bizmis) {
         window.dispatchEvent(new CustomEvent('avatar-animation', { detail: { name: 'waving', lifecycle: { times: 1, when: null, duration_in_ms: null }, toolCallId: `clerk-intro-waving-${Date.now()}` } }));
         // the store clerk's model is parsed while the pair stands still: parsing it at the start stalled the logo's move
-        window.setTimeout(() => this.preloadStoreClerk(), CLERK_INTRO_APPEAR_MS + 150);
-        await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_PREPARE_LEAD_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
-        const prepared = Promise.resolve(this.storeClerkReady).then(() => promoWidget.prepareStoreClerk(CLERK_INTRO_BLOOM_MAX_READY_WAIT_MS));
+        // a widget that cannot hold a look parses the store clerk's model while the pair stands still (parsing it at
+        // the start stalled the logo's move)
+        prepared.then((held) => { if (!held) window.setTimeout(() => this.preloadStoreClerk(), CLERK_INTRO_APPEAR_MS + 150); });
         await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
         // the light rises at the swap's time, or later once the store's clerk is drawn
         const held = await prepared;
@@ -6415,6 +6420,22 @@
       dock.style.opacity = '';
       this.dismiss();
       this.onReady?.();
+    }
+
+    // a widget that can hold a look builds the store's clerk unseen behind the Bizmis clerk: true once it is drawn,
+    // false when the widget cannot (then preloadStoreClerk warms the model and the swap happens under the light)
+    async prepareStoreClerk() {
+      const api = window.AvatarVoicechat;
+      if (typeof api?.revealAppearance !== 'function') return false;
+      let look = null;
+      for (let left = 80; left > 0 && !look; left -= 1) {
+        look = promoWidget.storeAppearance();
+        if (!look) await wait(100);
+      }
+      if (!look) return false;
+      if (look.avatarModelUrl && typeof api.preloadAvatars === 'function') await api.preloadAvatars([look.avatarModelUrl]).catch(() => {});
+      if (look.shirtStampUrl) { const img = new Image(); img.crossOrigin = 'anonymous'; img.src = look.shirtStampUrl; }
+      return promoWidget.prepareStoreClerk(CLERK_INTRO_BIZMIS_PREPARE_MAX_MS);
     }
 
     preloadStoreClerk() {
