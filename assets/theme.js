@@ -846,11 +846,11 @@
   const CLERK_INTRO_BIZMIS_SHIFT_AT_MS = 1500;    // the logo comes in alone, centred, then moves aside for the clerk
   const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1900;
   const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5960;
-  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7200;
+  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7600;    // after the bloom has given the store's clerk back
   const CLERK_INTRO_BIZMIS_GAP_PX = 96;
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
-  const CLERK_INTRO_BLOOM_RISE_MS = 220;
-  const CLERK_INTRO_BLOOM_HOLD_MS = 420;   // the new look loads under the bloom
+  const CLERK_INTRO_BLOOM_RISE_MS = 320;   // until the light covers the whole clerk: the look changes only then
+  const CLERK_INTRO_BLOOM_HOLD_MS = 700;   // the new look loads under the bloom
   const CLERK_INTRO_BLOOM_FADE_MS = 600;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
@@ -6378,7 +6378,7 @@
       bloom.className = 'clerk-intro-bloom';
       bloom.style.left = `${box.left + box.width / 2}px`;
       bloom.style.top = `${box.top + box.height * 0.5}px`;
-      bloom.style.setProperty('--size', `${Math.max(box.width, box.height) * 1.15}px`);
+      bloom.style.setProperty('--size', `${Math.max(box.width, box.height) * 1.6}px`);
       for (let i = 0; i < 16; i += 1) {
         const spark = document.createElement('span');
         const a = (i / 16) * Math.PI * 2 + (i % 3) * 0.21;
@@ -6394,9 +6394,11 @@
       await nextFrames(1);
       bloom.classList.add('is-on');
       this.node.classList.add('is-swapped');
-      await wait(CLERK_INTRO_BLOOM_RISE_MS * 0.6);
+      // the look changes at the peak, with the clerk wholly under the light (mid-rise it showed through and the model
+      // change read as a shake)
+      await wait(CLERK_INTRO_BLOOM_RISE_MS);
       promoWidget.becomeStoreClerk();
-      await wait(CLERK_INTRO_BLOOM_RISE_MS * 0.4 + CLERK_INTRO_BLOOM_HOLD_MS);
+      await wait(CLERK_INTRO_BLOOM_HOLD_MS);
       bloom.classList.add('is-off');
       await wait(CLERK_INTRO_BLOOM_FADE_MS + 900);
       bloom.remove();
