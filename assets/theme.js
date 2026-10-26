@@ -846,12 +846,13 @@
   const CLERK_INTRO_BIZMIS_SHIFT_AT_MS = 1500;    // the logo comes in alone, centred, then moves aside for the clerk
   const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1900;
   const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5960;
-  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7900;    // after the bloom has given the store's clerk back
+  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7900;    // at the earliest, and only after the bloom has given the store's clerk back
+  const CLERK_INTRO_BIZMIS_SHOWN_BEAT_MS = 350;   // the store's clerk stands in the open before it glides
   const CLERK_INTRO_BIZMIS_GAP_PX = 96;
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 320;   // until the light covers the whole clerk: the look changes only then
   const CLERK_INTRO_BLOOM_HOLD_MS = 900;   // the new look loads under the bloom
-  const CLERK_INTRO_BLOOM_FADE_MS = 600;
+  const CLERK_INTRO_BLOOM_FADE_MS = 650;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -6335,7 +6336,10 @@
         await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
         this.phase('swap');
         swapDone = this.becomeStoreClerk(card);
-        await wait(CLERK_INTRO_BIZMIS_GLIDE_AT_MS - CLERK_INTRO_BIZMIS_SWAP_AT_MS);
+        // the glide starts once the light has cleared and the store's clerk has been seen standing a beat (on a fixed
+        // clock it began under the fading light and only its end showed: a snap into the corner)
+        await Promise.all([wait(CLERK_INTRO_BIZMIS_GLIDE_AT_MS - CLERK_INTRO_BIZMIS_SWAP_AT_MS), this.storeClerkShown]);
+        await wait(CLERK_INTRO_BIZMIS_SHOWN_BEAT_MS);
       } else {
         await wait(CLERK_INTRO_APPEAR_MS + CLERK_INTRO_HOLD_MS);
       }
@@ -6378,6 +6382,8 @@
 
     async becomeStoreClerk(card) {
       // a bloom of light over the clerk; under it the clerk takes the store's look and the logos trade places
+      let shown;
+      this.storeClerkShown = new Promise((resolve) => { shown = resolve; });   // set before the first await: start() reads it
       const box = (card.querySelector('canvas')?.parentElement?.closest('.block') || card).getBoundingClientRect();
       const bloom = document.createElement('div');
       bloom.className = 'clerk-intro-bloom';
@@ -6406,7 +6412,9 @@
       promoWidget.becomeStoreClerk();
       await wait(CLERK_INTRO_BLOOM_HOLD_MS);
       bloom.classList.add('is-off');
-      await wait(CLERK_INTRO_BLOOM_FADE_MS + 900);
+      await wait(CLERK_INTRO_BLOOM_FADE_MS);
+      shown();
+      await wait(900);
       bloom.remove();
     }
 
