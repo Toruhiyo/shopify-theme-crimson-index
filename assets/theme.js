@@ -844,7 +844,7 @@
   // waves, becomes the store's clerk under a bloom of light as the store's logo takes the Bizmis logo's place, then
   // glides into its corner
   const CLERK_INTRO_BIZMIS_SHIFT_AT_MS = 1500;    // the logo comes in alone, centred, then moves aside for the clerk
-  const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1900;
+  const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 2550;   // once the logo has finished moving aside (both at once stuttered)
   const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5960;
   const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7900;    // at the earliest, and only after the bloom has given the store's clerk back
   const CLERK_INTRO_BIZMIS_SHOWN_BEAT_MS = 350;   // the store's clerk stands in the open before it glides
