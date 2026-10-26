@@ -6297,8 +6297,11 @@
         brands.style.width = `${logoW}px`;
         brands.style.left = `${left}px`;
         brands.style.top = `${window.innerHeight * 0.47}px`;
-        // the logo opens alone at the centre of the screen
+        // the logo opens alone at the centre of the screen (placed there without a transition: no slide in)
+        brands.style.transition = 'none';
         brands.style.setProperty('--brands-shift', `${(window.innerWidth - logoW) / 2 - left}px`);
+        void brands.offsetWidth;
+        brands.style.transition = '';
       }
       const dx = centreX - (box.left + box.width / 2);
       // with the brands the pair sits a touch above centre (the figure's weight is low: a bust, hands at the bottom)
