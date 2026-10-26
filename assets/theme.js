@@ -852,7 +852,7 @@
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 320;   // until the light covers the whole clerk: the look changes only then
   const CLERK_INTRO_BLOOM_SWAP_IN_RISE_MS = 190;   // the light is ~95% opaque over the whole clerk by then
-  const CLERK_INTRO_BLOOM_HOLD_MS = 120;   // after the peak: the new look has drawn under the light by then
+  const CLERK_INTRO_BLOOM_HOLD_MS = 200;   // after the peak: the new look (cut in, no crossfade) has drawn by then
   const CLERK_INTRO_BLOOM_FADE_MS = 550;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
@@ -1089,7 +1089,8 @@
     function becomeStoreClerk() {
       const api = window.AvatarVoicechat;
       const look = storeAppearance();
-      if (look && api && typeof api.setAppearance === 'function') api.setAppearance(look);
+      // a cut, not the widget's crossfade: under the bloom the old look must not linger, fading out after the light
+      if (look && api && typeof api.setAppearance === 'function') api.setAppearance(look, { swap: 'cut' });
     }
 
     return { arm, hide, remountForStore, applyStoreLook, preloadStoreStamps, storeAppearance, becomeStoreClerk };
