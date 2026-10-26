@@ -855,6 +855,11 @@
   const CLERK_INTRO_BLOOM_HOLD_MS = 60;    // after the peak: the new look (cut in, no crossfade) draws as the light starts to leave
   const CLERK_INTRO_BLOOM_FADE_MS = 450;
   const CLERK_INTRO_BLOOM_MAX_COVER_MS = 1200;   // a widget that never reports the new model on screen
+  // widgets that can hold a look: the store clerk is built unseen during the wave, the light rises once it is drawn
+  // and it is revealed in the rise (its cut lands two frames on, at the peak), so the light never waits on a model
+  const CLERK_INTRO_BIZMIS_PREPARE_LEAD_MS = 1400;
+  const CLERK_INTRO_BLOOM_REVEAL_IN_RISE_MS = 250;
+  const CLERK_INTRO_BLOOM_MAX_READY_WAIT_MS = 2500;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
@@ -1087,25 +1092,48 @@
       };
     }
 
+    // resolves when the widget fires `name` for the look's model (widgets that report it), or after timeoutMs
+    function lookEvent(name, look, timeoutMs) {
+      const file = (url) => (url || '').split('?')[0].split('/').pop();
+      const want = file(look?.avatarModelUrl);
+      return new Promise((resolve) => {
+        if (!want || !timeoutMs) { resolve(); return; }
+        const done = () => { window.removeEventListener(name, onEvent); resolve(); };
+        const onEvent = (event) => { if (file(event.detail?.model) === want) done(); };
+        window.addEventListener(name, onEvent);
+        window.setTimeout(done, timeoutMs);
+      });
+    }
+
     // resolves once the store's clerk model is on screen (widgets that report it), or after timeoutMs
     function becomeStoreClerk(timeoutMs = 0) {
       const api = window.AvatarVoicechat;
       const look = storeAppearance();
-      const file = (url) => (url || '').split('?')[0].split('/').pop();
-      const want = file(look?.avatarModelUrl);
-      const shown = new Promise((resolve) => {
-        if (!want || !timeoutMs) { resolve(); return; }
-        const done = () => { window.removeEventListener('bizmis:avatar-look-shown', onShown); resolve(); };
-        const onShown = (event) => { if (file(event.detail?.model) === want) done(); };
-        window.addEventListener('bizmis:avatar-look-shown', onShown);
-        window.setTimeout(done, timeoutMs);
-      });
+      const shown = lookEvent('bizmis:avatar-look-shown', look, timeoutMs);
       // a cut, not the widget's crossfade: under the bloom the old look must not linger, fading out after the light
       if (look && api && typeof api.setAppearance === 'function') api.setAppearance(look, { swap: 'cut' });
       return shown;
     }
 
-    return { arm, hide, remountForStore, applyStoreLook, preloadStoreStamps, storeAppearance, becomeStoreClerk };
+    // builds the store's clerk unseen behind the current one: true once it is drawn (or after timeoutMs), false
+    // when the widget cannot hold a look (becomeStoreClerk then swaps under the light)
+    function prepareStoreClerk(timeoutMs) {
+      const api = window.AvatarVoicechat;
+      const look = storeAppearance();
+      if (!look || typeof api?.revealAppearance !== 'function' || typeof api.setAppearance !== 'function') return Promise.resolve(false);
+      const ready = lookEvent('bizmis:avatar-look-ready', look, timeoutMs);
+      api.setAppearance(look, { swap: 'cut', hold: true });
+      return ready.then(() => true);
+    }
+
+    // shows the prepared clerk; resolves once it is on screen, or after timeoutMs
+    function revealStoreClerk(timeoutMs) {
+      const shown = lookEvent('bizmis:avatar-look-shown', storeAppearance(), timeoutMs);
+      window.AvatarVoicechat?.revealAppearance?.();
+      return shown;
+    }
+
+    return { arm, hide, remountForStore, applyStoreLook, preloadStoreStamps, storeAppearance, becomeStoreClerk, prepareStoreClerk, revealStoreClerk };
   }
 
   let openingWaveStarted = false;
@@ -6352,9 +6380,13 @@
         window.dispatchEvent(new CustomEvent('avatar-animation', { detail: { name: 'waving', lifecycle: { times: 1, when: null, duration_in_ms: null }, toolCallId: `clerk-intro-waving-${Date.now()}` } }));
         // the store clerk's model is parsed while the pair stands still: parsing it at the start stalled the logo's move
         window.setTimeout(() => this.preloadStoreClerk(), CLERK_INTRO_APPEAR_MS + 150);
+        await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_PREPARE_LEAD_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
+        const prepared = Promise.resolve(this.storeClerkReady).then(() => promoWidget.prepareStoreClerk(CLERK_INTRO_BLOOM_MAX_READY_WAIT_MS));
         await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
+        // the light rises at the swap's time, or later once the store's clerk is drawn
+        const held = await prepared;
         this.phase('swap');
-        swapDone = this.becomeStoreClerk(card);
+        swapDone = this.becomeStoreClerk(card, held);
         // the glide starts once the light has cleared and the store's clerk has been seen standing a beat (on a fixed
         // clock it began under the fading light and only its end showed: a snap into the corner)
         await Promise.all([wait(CLERK_INTRO_BIZMIS_GLIDE_AT_MS - CLERK_INTRO_BIZMIS_SWAP_AT_MS), this.storeClerkShown]);
@@ -6401,7 +6433,7 @@
       tryLook(80);
     }
 
-    async becomeStoreClerk(card) {
+    async becomeStoreClerk(card, held = false) {
       // a bloom of light over the clerk; under it the clerk takes the store's look and the logos trade places
       let shown;
       this.storeClerkShown = new Promise((resolve) => { shown = resolve; });   // set before the first await: start() reads it
@@ -6429,11 +6461,15 @@
       // the look changes late in the rise, the light already near-opaque over the whole clerk (earlier it showed
       // through and the model change read as a shake); its ~350 ms of work runs under the rest of the rise, so the
       // light can leave right after its peak: a burst, not a held flash
-      await wait(CLERK_INTRO_BLOOM_SWAP_IN_RISE_MS);
+      const inRise = held ? CLERK_INTRO_BLOOM_REVEAL_IN_RISE_MS : CLERK_INTRO_BLOOM_SWAP_IN_RISE_MS;
+      await wait(inRise);
       // the light leaves as soon as the store clerk's own model is on screen (its colours land first, on the old
       // model: a fixed delay either held the light or showed that in-between), never before just past its peak
-      const peak = wait(CLERK_INTRO_BLOOM_RISE_MS + CLERK_INTRO_BLOOM_HOLD_MS - CLERK_INTRO_BLOOM_SWAP_IN_RISE_MS);
-      await Promise.all([peak, promoWidget.becomeStoreClerk(CLERK_INTRO_BLOOM_MAX_COVER_MS)]);
+      const peak = wait(CLERK_INTRO_BLOOM_RISE_MS + CLERK_INTRO_BLOOM_HOLD_MS - inRise);
+      const shownNow = held
+        ? promoWidget.revealStoreClerk(CLERK_INTRO_BLOOM_MAX_COVER_MS)
+        : promoWidget.becomeStoreClerk(CLERK_INTRO_BLOOM_MAX_COVER_MS);
+      await Promise.all([peak, shownNow]);
       bloom.classList.add('is-off');
       await wait(CLERK_INTRO_BLOOM_FADE_MS);
       shown();
