@@ -6309,12 +6309,16 @@
       const dy = window.innerHeight * (brands ? 0.47 : 0.52) - (box.top + box.height / 2);
       const dockBox = dock.getBoundingClientRect();
       dock.style.transformOrigin = `${box.left + box.width / 2 - dockBox.left}px ${box.top + box.height / 2 - dockBox.top}px`;
-      const big = `translate(${dx}px, ${dy}px) scale(${scale})`;
+      // the separate translate and scale properties, not transform: the widget's own motion (framer-motion) writes the
+      // dock's transform at any re-render, and once it wiped the big pose mid-intro (the clerk shrank into its corner
+      // under the bloom, then seemed to snap there)
+      const bigTranslate = `${dx}px ${dy}px`;
 
       document.documentElement.classList.add('is-clerk-intro-bare');
       dock.style.transition = 'none';
       dock.style.opacity = '0';
-      dock.style.transform = `${big} scale(0.94)`;
+      dock.style.translate = bigTranslate;
+      dock.style.scale = `${scale * 0.94}`;
       await nextFrames(2);
       let swapDone = null;
       if (bizmis) {
@@ -6328,9 +6332,9 @@
       this.phase('appear');
       const appearedAt = performance.now();
       document.documentElement.classList.add('is-clerk-intro-staged');
-      dock.style.transition = `opacity ${CLERK_INTRO_APPEAR_MS}ms ease-out, transform ${CLERK_INTRO_APPEAR_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+      dock.style.transition = `opacity ${CLERK_INTRO_APPEAR_MS}ms ease-out, scale ${CLERK_INTRO_APPEAR_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
       dock.style.opacity = '1';
-      dock.style.transform = big;
+      dock.style.scale = `${scale}`;
       if (bizmis) {
         window.dispatchEvent(new CustomEvent('avatar-animation', { detail: { name: 'waving', lifecycle: { times: 1, when: null, duration_in_ms: null }, toolCallId: `clerk-intro-waving-${Date.now()}` } }));
         await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
@@ -6347,8 +6351,9 @@
       // the glide: the clerk settles into its corner while the store fades in under it; the widget's card only
       // comes back once the clerk has landed in it (no panel growing around a flying clerk)
       this.phase('glide');
-      dock.style.transition = `transform ${CLERK_INTRO_GLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`;
-      dock.style.transform = 'translate(0px, 0px) scale(1)';
+      dock.style.transition = `translate ${CLERK_INTRO_GLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1), scale ${CLERK_INTRO_GLIDE_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`;
+      dock.style.translate = '0px 0px';
+      dock.style.scale = '1';
       this.node.classList.add('is-fading');
       this.heroReveal?.begin();
       await wait(CLERK_INTRO_GLIDE_MS + 40);
@@ -6357,7 +6362,8 @@
       await wait(440);
       this.phase('done');
       dock.style.transition = '';
-      dock.style.transform = '';
+      dock.style.translate = '';
+      dock.style.scale = '';
       dock.style.transformOrigin = '';
       dock.style.opacity = '';
       this.dismiss();
