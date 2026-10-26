@@ -846,11 +846,11 @@
   const CLERK_INTRO_BIZMIS_SHIFT_AT_MS = 1500;    // the logo comes in alone, centred, then moves aside for the clerk
   const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1900;
   const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5960;
-  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7600;    // after the bloom has given the store's clerk back
+  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7900;    // after the bloom has given the store's clerk back
   const CLERK_INTRO_BIZMIS_GAP_PX = 96;
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 320;   // until the light covers the whole clerk: the look changes only then
-  const CLERK_INTRO_BLOOM_HOLD_MS = 700;   // the new look loads under the bloom
+  const CLERK_INTRO_BLOOM_HOLD_MS = 900;   // the new look loads under the bloom
   const CLERK_INTRO_BLOOM_FADE_MS = 600;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
@@ -6365,7 +6365,12 @@
       const tryLook = (left) => {
         const look = promoWidget.storeAppearance();
         if (!look) { if (left > 0) window.setTimeout(() => tryLook(left - 1), 100); return; }
-        if (look.avatarModelUrl) fetch(look.avatarModelUrl, { mode: 'cors' }).catch(() => {});
+        // parsed into the widget's own model cache (its level of detail), not just fetched: the new look then
+        // draws at once instead of popping in at another framing after the bloom
+        const api = window.AvatarVoicechat;
+        if (look.avatarModelUrl && typeof api?.preloadAvatars === 'function') {
+          this.storeClerkReady = api.preloadAvatars([look.avatarModelUrl]).catch(() => {});
+        } else if (look.avatarModelUrl) fetch(look.avatarModelUrl, { mode: 'cors' }).catch(() => {});
         if (look.shirtStampUrl) { const img = new Image(); img.crossOrigin = 'anonymous'; img.src = look.shirtStampUrl; }
       };
       tryLook(80);
@@ -6397,6 +6402,7 @@
       // the look changes at the peak, with the clerk wholly under the light (mid-rise it showed through and the model
       // change read as a shake)
       await wait(CLERK_INTRO_BLOOM_RISE_MS);
+      await Promise.race([this.storeClerkReady, wait(600)]);
       promoWidget.becomeStoreClerk();
       await wait(CLERK_INTRO_BLOOM_HOLD_MS);
       bloom.classList.add('is-off');
