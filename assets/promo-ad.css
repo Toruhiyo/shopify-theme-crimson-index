@@ -6519,7 +6519,33 @@ html.is-clerk-intro-bizmis .clerk-intro__brands {
   position: absolute;
   justify-items: end;
   align-items: center;
-  transform: translateY(-50%);
+  transform: translate(var(--brands-shift, 0px), -50%);
+  transition: transform 1000ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* a warm light opens behind the Bizmis logo as it comes in */
+html.is-clerk-intro-bizmis .clerk-intro__brands::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150%;
+  aspect-ratio: 1;
+  z-index: -1;
+  background: radial-gradient(circle, rgba(249, 163, 83, 0.26), rgba(249, 163, 83, 0) 62%);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.55);
+  transition: opacity 1200ms ease-out, transform 1600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.is-clerk-intro-bizmis .clerk-intro.is-brand-in .clerk-intro__brands::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+html.is-clerk-intro-bizmis .clerk-intro.is-swapped .clerk-intro__brands::before {
+  opacity: 0;
+  transition-duration: 400ms;
 }
 
 html.is-clerk-intro-bizmis .clerk-intro {
@@ -6556,6 +6582,9 @@ html.is-clerk-intro-bizmis .clerk-intro.is-swapped::after { opacity: 1; }
 .clerk-intro__brand--bizmis {
   height: 168px;
   width: auto;
+  transform: translateY(14px) scale(0.9);
+  filter: blur(10px);
+  transition: opacity 1100ms cubic-bezier(0.16, 1, 0.3, 1), transform 1400ms cubic-bezier(0.16, 1, 0.3, 1), filter 1100ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .clerk-intro__brand--store {
@@ -6581,6 +6610,7 @@ html.is-clerk-intro-bizmis .clerk-intro.is-swapped::after { opacity: 1; }
 .clerk-intro.is-brand-in .clerk-intro__brand--bizmis {
   opacity: 1;
   transform: none;
+  filter: none;
 }
 
 .clerk-intro.is-brand-in.is-swapped .clerk-intro__brand--bizmis {

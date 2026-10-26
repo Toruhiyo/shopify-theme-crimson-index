@@ -843,9 +843,10 @@
   // ?intro=bizmis, timed to a demo's intro line: the Bizmis logo rises in, the Bizmis clerk pops in beside it and
   // waves, becomes the store's clerk under a bloom of light as the store's logo takes the Bizmis logo's place, then
   // glides into its corner
-  const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1440;
-  const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5360;
-  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 6600;
+  const CLERK_INTRO_BIZMIS_SHIFT_AT_MS = 1500;    // the logo comes in alone, centred, then moves aside for the clerk
+  const CLERK_INTRO_BIZMIS_APPEAR_AT_MS = 1900;
+  const CLERK_INTRO_BIZMIS_SWAP_AT_MS = 5960;
+  const CLERK_INTRO_BIZMIS_GLIDE_AT_MS = 7200;
   const CLERK_INTRO_BIZMIS_GAP_PX = 96;
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 220;
@@ -6296,6 +6297,8 @@
         brands.style.width = `${logoW}px`;
         brands.style.left = `${left}px`;
         brands.style.top = `${window.innerHeight * 0.47}px`;
+        // the logo opens alone at the centre of the screen
+        brands.style.setProperty('--brands-shift', `${(window.innerWidth - logoW) / 2 - left}px`);
       }
       const dx = centreX - (box.left + box.width / 2);
       // with the brands the pair sits a touch above centre (the figure's weight is low: a bust, hands at the bottom)
@@ -6313,7 +6316,10 @@
       if (bizmis) {
         this.phase('logo');
         this.node.classList.add('is-brand-in');
-        await wait(CLERK_INTRO_BIZMIS_APPEAR_AT_MS);
+        await wait(CLERK_INTRO_BIZMIS_SHIFT_AT_MS);
+        this.phase('shift');
+        brands?.style.setProperty('--brands-shift', '0px');
+        await wait(CLERK_INTRO_BIZMIS_APPEAR_AT_MS - CLERK_INTRO_BIZMIS_SHIFT_AT_MS);
       }
       this.phase('appear');
       const appearedAt = performance.now();
