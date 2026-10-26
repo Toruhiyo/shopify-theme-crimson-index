@@ -851,8 +851,8 @@
   const CLERK_INTRO_BIZMIS_GAP_PX = 96;
   const CLERK_INTRO_FIGURE_WIDTH = 0.38;   // the clerk's figure across its (square) canvas: the rest is empty sides
   const CLERK_INTRO_BLOOM_RISE_MS = 320;   // until the light covers the whole clerk: the look changes only then
-  const CLERK_INTRO_BLOOM_HOLD_MS = 600;   // the new look draws under the bloom (its model is parsed ahead)
-  const CLERK_INTRO_BLOOM_FADE_MS = 650;
+  const CLERK_INTRO_BLOOM_HOLD_MS = 180;   // just long enough for the new look to draw (its model is parsed ahead): a burst, not a held flash
+  const CLERK_INTRO_BLOOM_FADE_MS = 550;
   const PROMO_COVER_HOLD_MS = 600;
   const PROMO_COVER_FADE_MS = 500;
   const PROMO_REDUCED_NAV_MS = 400;
