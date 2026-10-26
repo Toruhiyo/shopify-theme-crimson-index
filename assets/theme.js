@@ -6279,7 +6279,6 @@
     async start() {
       try { sessionStorage.setItem(CLERK_INTRO_SEEN_KEY, '1'); } catch (e) { /* private mode */ }
       const bizmis = document.documentElement.classList.contains('is-clerk-intro-bizmis');
-      if (bizmis) this.preloadStoreClerk();
       const card = await this.waitForClerk();
       if (!card || prefersReducedMotion()) {
         this.finish();
@@ -6339,6 +6338,8 @@
       dock.style.scale = `${scale}`;
       if (bizmis) {
         window.dispatchEvent(new CustomEvent('avatar-animation', { detail: { name: 'waving', lifecycle: { times: 1, when: null, duration_in_ms: null }, toolCallId: `clerk-intro-waving-${Date.now()}` } }));
+        // the store clerk's model is parsed while the pair stands still: parsing it at the start stalled the logo's move
+        window.setTimeout(() => this.preloadStoreClerk(), CLERK_INTRO_APPEAR_MS + 150);
         await wait(CLERK_INTRO_BIZMIS_SWAP_AT_MS - CLERK_INTRO_BIZMIS_APPEAR_AT_MS - (performance.now() - appearedAt));
         this.phase('swap');
         swapDone = this.becomeStoreClerk(card);
@@ -6417,7 +6418,6 @@
       // through and the model change read as a shake); its ~350 ms of work runs under the rest of the rise, so the
       // light can leave right after its peak: a burst, not a held flash
       await wait(CLERK_INTRO_BLOOM_SWAP_IN_RISE_MS);
-      await Promise.race([this.storeClerkReady, wait(300)]);
       const swappedAt = performance.now();
       promoWidget.becomeStoreClerk();
       await wait(Math.max(0, CLERK_INTRO_BLOOM_RISE_MS + CLERK_INTRO_BLOOM_HOLD_MS - CLERK_INTRO_BLOOM_SWAP_IN_RISE_MS - (performance.now() - swappedAt)));
