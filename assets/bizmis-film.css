@@ -38,6 +38,13 @@
     background: #fff;
   }
 
+  /* the disc in the room under the heading, at the same place on every screen */
+  .hero.has-film .hero-film-play {
+    top: 60%;
+    bottom: auto;
+    translate: -50% -50%;
+  }
+
   .hero.has-film .hero__media img {
     transform-origin: 100% 100%;
     transform: scale(0.86) translate(9%, 6%);
