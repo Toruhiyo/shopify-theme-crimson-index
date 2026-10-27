@@ -1,291 +1,595 @@
 /*
- * The Bizmis demo film in the hero (snippets/bizmis-film.liquid), with bizmis.ai's film player behaviour:
- * - idle:    the hero as it is, with a play button. Nothing of the film loads before the first press.
- * - playing: the film over the hero, edge to edge under the header, with sound; the bar hides while the pointer rests.
- * - paused:  a click on the film or the bar's button holds the frame.
- * - ended:   the closing frame stays and its "Install now" becomes a real button, in place.
- * A click outside the film, Escape or the close button returns to the hero; play then resumes where it stopped.
- * HLS through hls.js (loaded on the first play), or natively where the browser plays HLS itself (Safari).
+ * The Bizmis demo film in the hero (snippets/bizmis-film.liquid): a port of bizmis.ai's hero film player
+ * (trujilloai-bizmis-landing src/components/Hero.tsx + src/components/film/FilmPlayer.tsx, "bare" + "fill").
+ * - idle:    the hero as it is, "Watch the demo" in its copy. Nothing of the film loads before the first press.
+ * - playing: the film over the whole hero through an iris from the button, edge to edge on black; the store's header,
+ *            the hero picture and the live widget step aside. The dock hides while the pointer rests.
+ * - paused:  the frame holds, with a glass play button in the middle.
+ * - ended:   the film holds its closing frame and its "Install now" becomes a button in place.
+ * ✕, Escape or a click outside the hero closes it (the iris runs back); play again resumes where it stopped.
+ * Captions (off by default, the choice remembered): the .vtt's narrator and shopper lines in the landing's caption
+ * pill, tagged with their voice. HLS through hls.js (loaded on the first play) or natively where there is no
+ * MediaSource (iOS).
  */
 (function () {
   'use strict';
 
-  var IDLE_MS = 2500;
-  var PEAK_OVER_AVERAGE = 2.5; // auto quality judges a rendition by its peak; cap it at this many times its average
+  var CONTROLS_IDLE_MS = 2500;
+  var PEAK_OVER_AVERAGE = 2.5; // auto quality judges a rendition by its peak: cap it at this many times its average
+  var SEEK_STEP_S = 5;
+  var IRIS_MS = 950;
+  var CAPTIONS_KEY = 'bizmis.film.captions';
+  var VOICE_LABELS = { narrator: 'Narrator', shopper: 'Shopper' };
 
-  function fmt(s) {
+  var easeInOut = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+  var formatTime = function (s) {
     if (!isFinite(s) || s < 0) s = 0;
     var m = Math.floor(s / 60);
     var sec = Math.floor(s % 60);
     return m + ':' + (sec < 10 ? '0' : '') + sec;
-  }
+  };
+  var qualityLabel = function (h) { return h >= 2160 ? '4K' : h + 'p'; };
+  var reducedMotion = function () { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; };
 
-  function loadScript(url) {
+  var vttTime = function (t) { return t.trim().split(':').map(Number).reduce(function (a, n) { return a * 60 + n; }, 0); };
+  // A small WebVTT reader: timings, the <v> voice, text without tags (the player lays out its own lines).
+  var parseVtt = function (vtt) {
+    return vtt.replace(/\r/g, '').split(/\n\n+/).reduce(function (out, block) {
+      var lines = block.split('\n');
+      var at = lines.findIndex(function (l) { return l.indexOf('-->') !== -1; });
+      if (at === -1) return out;
+      var parts = lines[at].split('-->');
+      var raw = lines.slice(at + 1).join(' ');
+      var voice = (raw.match(/<v(?:\.[^\s>]+)*\s+([^>]+)>/) || [])[1];
+      var text = raw.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      if (text) out.push({ start: vttTime(parts[0]), end: vttTime(parts[1].trim().split(/\s/)[0]), text: text, voice: voice ? voice.trim() : '' });
+      return out;
+    }, []);
+  };
+  var readCaptionsPref = function () {
+    try { return window.localStorage.getItem(CAPTIONS_KEY) === 'on'; } catch (e) { return false; }
+  };
+  var loadScript = function (url) {
     return new Promise(function (resolve, reject) {
       var s = document.createElement('script');
-      s.src = url;
-      s.async = true;
-      s.onload = resolve;
-      s.onerror = reject;
+      s.src = url; s.async = true; s.onload = resolve; s.onerror = reject;
       document.head.appendChild(s);
     });
-  }
+  };
 
-  function init(root) {
-    var hero = root.closest('.hero') || root.parentElement;
-    var header = document.querySelector('.header-section');
-    var stage = root.querySelector('[data-film-stage]');
-    var video = root.querySelector('[data-film-video]');
-    var openBtn = hero.querySelector('[data-film-open]');   // the button lives in the hero's copy
-    var toggleBtn = root.querySelector('[data-film-toggle]');
-    var muteBtn = root.querySelector('[data-film-mute]');
-    var ccBtn = root.querySelector('[data-film-cc]');
-    var fsBtn = root.querySelector('[data-film-fullscreen]');
-    var closeBtn = root.querySelector('[data-film-close]');
-    var track = root.querySelector('[data-film-track]');
-    var played = root.querySelector('[data-film-played]');
-    var buffered = root.querySelector('[data-film-buffered]');
-    var timeEl = root.querySelector('[data-film-time]');
-    var spinner = root.querySelector('[data-film-spinner]');
-    var endCta = root.querySelector('[data-film-end-cta]');
-    var src = root.getAttribute('data-src');
-    var endBox = (root.getAttribute('data-end-cta') || '').split(',').map(Number);
+  function init(layer) {
+    var hero = layer.closest('.hero') || layer.parentElement;
+    var $ = function (sel) { return layer.querySelector(sel); };
+    var root = $('[data-film-root]');
+    var iris = $('[data-film-iris]');
+    var glow = $('[data-film-glow]');
+    var film = $('[data-film-video]');
+    var openBtn = hero.querySelector('[data-film-open]'); // the button lives in the hero's copy
+    var resumeBtn = $('[data-film-resume]');
+    var toggleBtn = $('[data-film-toggle]');
+    var muteBtn = $('[data-film-mute]');
+    var volumeInput = $('[data-film-volume]');
+    var ccBtn = $('[data-film-cc]');
+    var fsBtn = $('[data-film-fullscreen]');
+    var closeBtn = $('[data-film-close]');
+    var track = $('[data-film-track]');
+    var played = $('[data-film-played]');
+    var bufferedEl = $('[data-film-buffered]');
+    var knob = $('[data-film-knob]');
+    var tip = $('[data-film-tip]');
+    var timeEl = $('[data-film-time]');
+    var durationEl = $('[data-film-duration]');
+    var endCta = $('[data-film-end-cta]');
+    var ccBox = $('[data-film-cc-box]');
+    var bar = $('[data-film-bar]');
+    var quality = $('[data-film-quality]');
+    var qualityBtn = $('[data-film-quality-btn]');
+    var qualityLabelEl = $('[data-film-quality-label]');
+    var qualityMenu = $('[data-film-quality-menu]');
+    var icons = $('[data-film-icons]').content;
+    var src = layer.getAttribute('data-src');
+    var captionsSrc = layer.getAttribute('data-captions');
+    var endBox = (layer.getAttribute('data-end-cta') || '').split(',').map(Number);
     // a film that fades out ends this many seconds early, on its last clean frame (the closing CTA)
-    var endHold = Number(root.getAttribute('data-end-hold')) || 0;
+    var endHold = Number(layer.getAttribute('data-end-hold')) || 0;
+
     var phase = 'idle';
     var hls = null;
     var ready = null;
     var hideTimer = 0;
     var waitTimer = 0;
     var scrubbing = false;
+    var irisState = { r: 0, cx: 0, cy: 0, frame: 0 };
+    var levels = [];
+    var level = -1;
+    var playingHeight = null;
+    var ccOn = readCaptionsPref();
+    var cues = null;
+    var cuesFetch = null;
+    var cueIndex = -1;
+    var cueRaf = 0;
+    var picture = { left: 0, top: 0, width: 0, height: 0 };
+
+    // where the picture actually sits inside the <video> (object-fit: contain letterboxes it), in px
+    function measure() {
+      var w = film.clientWidth;
+      var h = film.clientHeight;
+      var aspect = film.videoWidth && film.videoHeight ? film.videoWidth / film.videoHeight : 16 / 9;
+      var pw = Math.min(w, h * aspect);
+      var ph = pw / aspect;
+      picture = { left: (w - pw) / 2, top: (h - ph) / 2, width: pw, height: ph };
+      placeEndCta();
+      renderCue(true);
+    }
 
     function setPhase(p) {
       phase = p;
-      root.setAttribute('data-phase', p);
-      document.documentElement.classList.toggle('bizmis-film-open', p !== 'idle');
+      layer.setAttribute('data-phase', p);
       toggleBtn.setAttribute('aria-label', p === 'playing' ? 'Pause' : p === 'ended' ? 'Watch again' : 'Play');
       endCta.hidden = p !== 'ended';
       if (p === 'ended') placeEndCta();
+      updateControls();
+      runCaptions();
     }
 
-    // the stage starts under the floating header, so the header never covers the film
-    function placeStage() {
-      var top = 0;
-      if (header) {
-        var h = header.getBoundingClientRect();
-        var r = hero.getBoundingClientRect();
-        if (h.bottom > r.top && h.top < r.bottom) top = Math.max(0, h.bottom - r.top);
-      }
-      stage.style.top = top + 'px';
+    // Controls stay up unless the film is playing and the pointer rests.
+    function updateControls() {
+      var awake = layer.classList.contains('is-awake');
+      var show = phase !== 'idle' && (phase !== 'playing' || awake || !quality.hidden && !qualityMenu.hidden);
+      layer.classList.toggle('is-controls', show);
+      renderCue(false);
+    }
+    function wake() {
+      layer.classList.add('is-awake');
+      updateControls();
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function () {
+        if (!scrubbing) { layer.classList.remove('is-awake'); updateControls(); }
+      }, CONTROLS_IDLE_MS);
     }
 
-    // the film's picture inside the stage (letterboxed), so the end button sits exactly on the film's title
+    // The film's end: the film's own "Install now" becomes a button in place (the landing's .bzf-end-cta geometry).
     function placeEndCta() {
-      if (endBox.length !== 4) return;
-      var w = video.clientWidth;
-      var h = video.clientHeight;
-      var aspect = video.videoWidth && video.videoHeight ? video.videoWidth / video.videoHeight : 16 / 9;
-      var pw = Math.min(w, h * aspect);
-      var ph = pw / aspect;
-      var left = video.offsetLeft + (w - pw) / 2;
-      var top = video.offsetTop + (h - ph) / 2;
-      var padX = pw * 0.018;
-      var padY = ph * 0.03;
-      endCta.style.left = left + endBox[0] * pw - padX + 'px';
-      endCta.style.top = top + endBox[1] * ph - padY + 'px';
-      endCta.style.width = endBox[2] * pw + 2 * padX + 'px';
-      endCta.style.height = endBox[3] * ph + 2 * padY + 'px';
+      if (endBox.length !== 4 || !picture.width) return;
+      var h = (endBox[3] + 0.08) * picture.height;
+      endCta.style.left = picture.left + (endBox[0] - 0.026) * picture.width + 'px';
+      endCta.style.top = picture.top + (endBox[1] - 0.04) * picture.height + 'px';
+      endCta.style.width = (endBox[2] + 0.052) * picture.width + 'px';
+      endCta.style.height = h + 'px';
+      endCta.style.borderRadius = 0.22 * h + 'px';
     }
 
+    // ---- HLS: hls.js sized to the player, or native
     function capToPlayer() {
       if (!hls || !hls.levels || !hls.levels.length) return;
+      // 25% headroom keeps the film's small UI text crisp.
       var scale = Math.min(window.devicePixelRatio || 1, 2) * 1.25;
-      var needW = video.clientWidth * scale;
-      var needH = video.clientHeight * scale;
-      var fit = -1;
-      for (var i = 0; i < hls.levels.length; i++) {
-        if (hls.levels[i].width >= needW && hls.levels[i].height >= needH) { fit = i; break; }
-      }
+      var needW = film.clientWidth * scale;
+      var needH = film.clientHeight * scale;
+      var fit = hls.levels.findIndex(function (l) { return l.width >= needW && l.height >= needH; });
       hls.autoLevelCapping = fit === -1 ? hls.levels.length - 1 : fit;
     }
-
     function ensureSource() {
       if (ready) return ready;
       var isHls = /\.m3u8(\?|$)/.test(src);
-      // hls.js wherever Media Source exists (it picks the rendition by the player's size); native HLS otherwise (iOS)
-      var mse = window.MediaSource || window.ManagedMediaSource;
-      if (!isHls || !mse) {
-        video.src = src;
+      if (!isHls || !(window.MediaSource || window.ManagedMediaSource)) {
+        film.src = src;
         ready = Promise.resolve();
         return ready;
       }
-      ready = (window.Hls ? Promise.resolve() : loadScript(root.getAttribute('data-hls-js'))).then(function () {
+      ready = (window.Hls ? Promise.resolve() : loadScript(layer.getAttribute('data-hls-js'))).then(function () {
         var Hls = window.Hls;
-        if (!Hls || !Hls.isSupported()) { video.src = src; return; }
+        if (!Hls || !Hls.isSupported()) { film.src = src; return; }
+        // Buffer only ~20 s ahead (40 s at most); auto quality starts from a broadband guess (3 Mbps).
         hls = new Hls({ maxBufferLength: 20, maxMaxBufferLength: 40, abrEwmaDefaultEstimate: 3000000 });
+        hls.on(Hls.Events.LEVEL_SWITCHED, function (_e, data) {
+          playingHeight = hls.levels[data.level] ? hls.levels[data.level].height : null;
+          renderQualityLabel();
+        });
         return new Promise(function (resolve) {
           hls.once(Hls.Events.MANIFEST_PARSED, function () {
             hls.levels.forEach(function (l) {
               if (l.averageBitrate && l.bitrate > l.averageBitrate * PEAK_OVER_AVERAGE) l.bitrate = Math.round(l.averageBitrate * PEAK_OVER_AVERAGE);
             });
+            levels = hls.levels.map(function (l) { return l.height; });
+            quality.hidden = levels.length < 2;
+            renderQualityMenu();
             capToPlayer();
             resolve();
           });
           hls.loadSource(src);
-          hls.attachMedia(video);
+          hls.attachMedia(film);
         });
       });
       return ready;
     }
 
-    function wake() {
-      root.classList.add('is-awake');
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(function () {
-        if (!scrubbing && phase === 'playing') root.classList.remove('is-awake');
-      }, IDLE_MS);
+    // ---- quality menu (nextLevel: playback carries on through what's buffered, no stall)
+    function renderQualityLabel() {
+      qualityLabelEl.textContent = level === -1 ? 'Auto' + (playingHeight ? ' · ' + qualityLabel(playingHeight) : '') : qualityLabel(levels[level]);
+    }
+    function renderQualityMenu() {
+      var order = [-1].concat(levels.map(function (_, i) { return i; }).sort(function (a, b) { return levels[b] - levels[a]; }));
+      qualityMenu.innerHTML = '';
+      order.forEach(function (i) {
+        var li = document.createElement('li');
+        li.setAttribute('role', 'none');
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'bzf-quality__item';
+        b.setAttribute('role', 'menuitemradio');
+        b.setAttribute('aria-checked', String(level === i));
+        b.appendChild(icons.querySelector('[data-icon="check"]').cloneNode(true));
+        var label = document.createElement('span');
+        label.className = 'bzf-quality__name';
+        label.textContent = i === -1 ? 'Auto' : qualityLabel(levels[i]);
+        if (i === -1 && level === -1 && playingHeight) {
+          var now = document.createElement('span');
+          now.className = 'bzf-quality__now';
+          now.textContent = qualityLabel(playingHeight);
+          label.appendChild(now);
+        }
+        b.appendChild(label);
+        if (i !== -1 && levels[i] >= 2160) {
+          var uhd = document.createElement('span');
+          uhd.className = 'bzf-quality__uhd';
+          uhd.textContent = 'UHD';
+          b.appendChild(uhd);
+        }
+        b.addEventListener('click', function () { chooseLevel(i); });
+        li.appendChild(b);
+        qualityMenu.appendChild(li);
+      });
+      renderQualityLabel();
+    }
+    function openQuality(open) {
+      qualityMenu.hidden = !open;
+      qualityBtn.setAttribute('aria-expanded', String(open));
+      qualityBtn.classList.toggle('is-open', open);
+      if (open) {
+        renderQualityMenu();
+        var chosen = qualityMenu.querySelector('[aria-checked="true"]');
+        if (chosen) chosen.focus({ preventScroll: true });
+      }
+      updateControls();
+    }
+    function chooseLevel(i) {
+      if (hls) hls.nextLevel = i;
+      level = i;
+      openQuality(false);
+      qualityBtn.focus({ preventScroll: true });
+      renderQualityLabel();
+    }
+    qualityBtn.addEventListener('click', function () { openQuality(qualityMenu.hidden); });
+    qualityMenu.addEventListener('keydown', function (e) {
+      var items = Array.prototype.slice.call(qualityMenu.querySelectorAll('[role="menuitemradio"]'));
+      var at = items.indexOf(document.activeElement);
+      var go = function (i) { var it = items[(i + items.length) % items.length]; if (it) it.focus({ preventScroll: true }); };
+      switch (e.key) {
+        case 'ArrowDown': go(at + 1); break;
+        case 'ArrowUp': go(at - 1); break;
+        case 'Home': go(0); break;
+        case 'End': go(items.length - 1); break;
+        case 'Escape': openQuality(false); qualityBtn.focus({ preventScroll: true }); break;
+        case 'Tab': openQuality(false); return;
+        case ' ': case 'Enter': e.stopPropagation(); return; // the item's own click picks it
+        default: return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    document.addEventListener('pointerdown', function (e) {
+      if (!qualityMenu.hidden && !qualityMenu.contains(e.target) && !qualityBtn.contains(e.target)) openQuality(false);
+    }, true);
+
+    // ---- captions: drawn by the player in the landing's caption pill, the voice tagged
+    function voiceKey(v) { return /^shopper$/i.test(v) ? 'shopper' : /^narrator$/i.test(v) ? 'narrator' : ''; }
+    function renderCue(force) {
+      var on = ccOn && cues && phase !== 'idle' && picture.width > 0;
+      var cue = on && cueIndex >= 0 ? cues[cueIndex] : null;
+      ccBox.hidden = !on;
+      if (!on) return;
+      var fontSize = Math.min(34, Math.max(12.5, picture.width * 0.0142));
+      var pillHeight = fontSize * 2;
+      var below = picture.top; // the letterbox under the picture (it's centred)
+      var controlsTop = picture.width < 640 ? 62 : 88; // the dock's top, plus a gap
+      var inLetterbox = below >= pillHeight * 2.6 + 12;
+      ccBox.style.left = picture.left + picture.width * 0.05 + 'px';
+      ccBox.style.width = picture.width * 0.9 + 'px';
+      if (inLetterbox) {
+        ccBox.style.top = picture.top + picture.height + 12 + 'px';
+        ccBox.style.bottom = '';
+      } else {
+        ccBox.style.top = '';
+        ccBox.style.bottom = Math.max(below + picture.height * 0.03, layer.classList.contains('is-controls') ? controlsTop : 0) + 'px';
+      }
+      var shown = ccBox.getAttribute('data-cue');
+      if (!force && shown === String(cueIndex)) {
+        var p0 = ccBox.firstChild;
+        if (p0) p0.style.fontSize = fontSize + 'px';
+        return;
+      }
+      ccBox.setAttribute('data-cue', String(cueIndex));
+      ccBox.innerHTML = '';
+      ccBox.setAttribute('aria-hidden', String(!cue));
+      if (!cue) return;
+      var p = document.createElement('p');
+      p.className = 'bzf-cc';
+      p.lang = 'en';
+      p.style.fontSize = fontSize + 'px';
+      var key = voiceKey(cue.voice);
+      if (cue.voice) {
+        var tag = document.createElement('span');
+        tag.className = 'bzf-cc__tag bzf-cc__tag--' + (key || 'other');
+        var icon = icons.querySelector('[data-icon="' + (key || 'narrator') + '"]').cloneNode(true);
+        icon.setAttribute('class', 'bzf-cc__mic');
+        tag.appendChild(icon);
+        tag.appendChild(document.createTextNode(VOICE_LABELS[key] || cue.voice));
+        p.appendChild(tag);
+      }
+      var text = document.createElement('span');
+      text.className = 'bzf-cc__text';
+      text.textContent = cue.text;
+      p.appendChild(text);
+      ccBox.appendChild(p);
+    }
+    // The cue on screen, read every frame (timeupdate only fires ~4 times a second).
+    function runCaptions() {
+      cancelAnimationFrame(cueRaf);
+      if (!ccOn || !cues || phase === 'idle') { cueIndex = -1; renderCue(true); return; }
+      var tick = function () {
+        var t = film.currentTime;
+        var i = cues.findIndex(function (c) { return t >= c.start && t < c.end; });
+        if (i !== cueIndex) { cueIndex = i; renderCue(true); }
+        cueRaf = requestAnimationFrame(tick);
+      };
+      tick();
+    }
+    function loadCues() {
+      if (!ccOn || !captionsSrc || cuesFetch) return;
+      cuesFetch = fetch(captionsSrc)
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('captions ' + r.status)); })
+        .then(function (vtt) { cues = parseVtt(vtt); runCaptions(); })
+        .catch(function () { cuesFetch = null; }); // try again on the next toggle
+    }
+    function setCc(on) {
+      ccOn = on;
+      try { window.localStorage.setItem(CAPTIONS_KEY, on ? 'on' : 'off'); } catch (e) { /* private mode: this visit only */ }
+      if (ccBtn) ccBtn.setAttribute('aria-pressed', String(on));
+      loadCues();
+      runCaptions();
+    }
+    if (ccBtn) {
+      ccBtn.setAttribute('aria-pressed', String(ccOn));
+      ccBtn.addEventListener('click', function () { setCc(!ccOn); });
+    }
+    // iPhone fullscreen is the system player, where these captions can't be drawn: hand it the cues as a native track.
+    var nativeTrack = null;
+    film.addEventListener('webkitbeginfullscreen', function () {
+      if (!ccOn || !cues || !cues.length) return;
+      if (!nativeTrack) {
+        nativeTrack = film.addTextTrack('captions', 'Captions', 'en');
+        cues.forEach(function (c) { nativeTrack.addCue(new VTTCue(c.start, c.end, (c.voice ? c.voice + ': ' : '') + c.text)); });
+      }
+      nativeTrack.mode = 'showing';
+    });
+    film.addEventListener('webkitendfullscreen', function () { if (nativeTrack) nativeTrack.mode = 'disabled'; });
+
+    // ---- the iris: a soft-edged circle from the play button (and a glow riding its edge)
+    function paintIris() {
+      layer.style.setProperty('--r', irisState.r + 'px');
+      layer.style.setProperty('--cx', irisState.cx + 'px');
+      layer.style.setProperty('--cy', irisState.cy + 'px');
+      var far = Math.hypot(layer.clientWidth, layer.clientHeight);
+      glow.style.opacity = String(Math.max(0, Math.min(1, 1.6 * (1 - irisState.r / far))));
+    }
+    function runIris(to, done) {
+      cancelAnimationFrame(irisState.frame);
+      var from = irisState.r;
+      var still = reducedMotion();
+      var t0 = performance.now();
+      var step = function (now) {
+        var t = still ? 1 : Math.min(1, (now - t0) / IRIS_MS);
+        irisState.r = from + (to - from) * easeInOut(t);
+        paintIris();
+        if (t < 1) irisState.frame = requestAnimationFrame(step);
+        else if (done) done();
+      };
+      irisState.frame = requestAnimationFrame(step);
     }
 
+    // ---- open / close
+    function setOpen(open) {
+      hero.classList.toggle('is-film-open', open);
+      document.documentElement.classList.toggle('bizmis-film-open', open);
+    }
     function play() {
-      placeStage();
-      stage.hidden = false;
+      ensureSource().then(function () {
+        var pr = film.play();
+        if (pr && pr.catch) pr.catch(function () { setPhase('paused'); });
+      });
       setPhase('playing');
       wake();
-      ensureSource().then(function () {
-        var p = video.play();
-        if (p && p.catch) p.catch(function () { setPhase('paused'); });
-      });
-      stage.focus({ preventScroll: true });
     }
-
-    function pause() {
-      video.pause();
-      setPhase('paused');
+    function replay() {
+      film.currentTime = 0;
+      var pr = film.play();
+      if (pr && pr.catch) pr.catch(function () { setPhase('paused'); });
+      setPhase('playing');
       wake();
     }
-
-    function replay() {
-      video.currentTime = 0;
-      play();
+    function pauseInPlace() {
+      film.pause();
+      setPhase('paused');
     }
-
-    function close() {
-      if (phase === 'idle') return;
-      if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
-      video.pause();
-      stage.hidden = true;
-      setPhase('idle');
-      openBtn.focus({ preventScroll: true });
-    }
-
-    function toggle() {
-      if (phase === 'playing') pause();
+    function togglePlay() {
+      if (phase === 'playing') pauseInPlace();
       else if (phase === 'ended') replay();
       else play();
     }
-
-    function seekFraction(clientX) {
-      var r = track.getBoundingClientRect();
-      var f = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
-      if (isFinite(video.duration)) {
-        video.currentTime = f * video.duration;
-        if (phase === 'ended' && f < 1) setPhase('paused');
-      }
+    function fullscreen() {
+      if (document.fullscreenElement) return;
+      if (root.requestFullscreen) root.requestFullscreen().catch(function () {});
+      else if (film.webkitEnterFullscreen) film.webkitEnterFullscreen(); // iOS Safari: only the <video> goes fullscreen
     }
-
-    openBtn.addEventListener('click', function () {
+    function openFilm() {
+      layer.hidden = false; // shown (still masked shut) before it is measured
+      var box = layer.getBoundingClientRect();
+      var disc = openBtn.querySelector('[data-play]') || openBtn;
+      var target = disc.getBoundingClientRect();
+      var cx = target.left + target.width / 2 - box.left;
+      var cy = target.top + target.height / 2 - box.top;
+      var far = Math.max(Math.hypot(cx, cy), Math.hypot(box.width - cx, cy), Math.hypot(cx, box.height - cy), Math.hypot(box.width - cx, box.height - cy));
+      irisState.cx = cx;
+      irisState.cy = cy;
+      paintIris();
+      setOpen(true);
       if (phase === 'ended') replay();
-      else play();
-    });
-    toggleBtn.addEventListener('click', toggle);
-    closeBtn.addEventListener('click', close);
-    video.addEventListener('click', toggle);
-    muteBtn.addEventListener('click', function () {
-      video.muted = !video.muted;
-      root.classList.toggle('is-muted', video.muted);
-      muteBtn.setAttribute('aria-label', video.muted ? 'Unmute' : 'Mute');
-    });
-    if (ccBtn) {
-      ccBtn.addEventListener('click', function () {
-        var t = video.textTracks && video.textTracks[0];
-        if (!t) return;
-        var on = t.mode !== 'showing';
-        t.mode = on ? 'showing' : 'disabled';
-        ccBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
+      else play(); // in the click itself, so the film may start with sound
+      root.focus({ preventScroll: true });
+      measure();
+      // on a phone the 16:9 film would be a strip across a portrait screen: go fullscreen
+      if (window.matchMedia('(max-width: 1023px) and (pointer: coarse)').matches) fullscreen();
+      runIris(far + 160);
     }
+    function closeFilm() {
+      if (phase === 'idle') return;
+      if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+      film.pause();
+      openQuality(false);
+      setPhase('idle');
+      setOpen(false);
+      runIris(0, function () { if (phase === 'idle') layer.hidden = true; });
+      openBtn.focus({ preventScroll: true });
+    }
+
+    openBtn.addEventListener('click', openFilm);
+    closeBtn.addEventListener('click', closeFilm);
+    resumeBtn.addEventListener('click', play);
+    toggleBtn.addEventListener('click', togglePlay);
+    film.addEventListener('click', togglePlay);
     fsBtn.addEventListener('click', function () {
       if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
-      else if (stage.requestFullscreen) stage.requestFullscreen().catch(function () {});
-      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iOS Safari: only the <video> goes fullscreen
+      else fullscreen();
+    });
+    document.addEventListener('fullscreenchange', function () {
+      layer.classList.toggle('is-fullscreen', document.fullscreenElement === root);
+      fsBtn.setAttribute('aria-label', document.fullscreenElement === root ? 'Exit full screen' : 'Full screen');
     });
 
+    // volume
+    muteBtn.addEventListener('click', function () {
+      film.muted = !film.muted;
+      if (!film.muted && film.volume === 0) film.volume = 1;
+    });
+    volumeInput.addEventListener('input', function () {
+      film.volume = Number(volumeInput.value);
+      film.muted = film.volume === 0;
+    });
+    film.addEventListener('volumechange', function () {
+      var off = film.muted || film.volume === 0;
+      layer.classList.toggle('is-muted', off);
+      muteBtn.setAttribute('aria-label', off ? 'Unmute' : 'Mute');
+      volumeInput.value = String(film.muted ? 0 : film.volume);
+    });
+
+    // timeline: hover tooltip + pointer scrubbing
+    var duration = 0;
+    function fractionAt(x) {
+      var r = track.getBoundingClientRect();
+      return Math.min(1, Math.max(0, (x - r.left) / r.width));
+    }
+    function seekTo(t) {
+      if (!duration) return;
+      film.currentTime = Math.min(Math.max(0, t), duration);
+      renderTime();
+      if (phase === 'ended' && film.currentTime < duration) setPhase('paused');
+    }
     track.addEventListener('pointerdown', function (e) {
       scrubbing = true;
       track.setPointerCapture(e.pointerId);
-      seekFraction(e.clientX);
+      seekTo(fractionAt(e.clientX) * duration);
     });
-    track.addEventListener('pointermove', function (e) { if (scrubbing) seekFraction(e.clientX); });
+    track.addEventListener('pointermove', function (e) {
+      var f = fractionAt(e.clientX);
+      tip.hidden = false;
+      tip.style.left = f * 100 + '%';
+      tip.textContent = formatTime(f * duration);
+      if (scrubbing) seekTo(f * duration);
+    });
     track.addEventListener('pointerup', function () { scrubbing = false; wake(); });
-    track.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + (e.key === 'ArrowRight' ? 5 : -5)));
-      }
-    });
+    track.addEventListener('pointerleave', function () { tip.hidden = true; });
 
-    stage.addEventListener('pointermove', wake);
-    stage.addEventListener('keydown', function (e) {
-      if (e.key === ' ' || e.key === 'k') { if (e.target === stage || e.target === video) { e.preventDefault(); toggle(); } }
-    });
-
-    video.addEventListener('timeupdate', function () {
-      var d = video.duration;
-      if (endHold && phase === 'playing' && isFinite(d) && video.currentTime >= d - endHold) {
-        video.pause();
-        video.currentTime = d - endHold;
-        setPhase('ended');
-        root.classList.add('is-awake');
-      }
-      var pct = isFinite(d) && d > 0 ? (video.currentTime / d) * 100 : 0;
+    function renderTime() {
+      var t = film.currentTime;
+      var pct = duration ? (t / duration) * 100 : 0;
       played.style.width = pct + '%';
-      track.setAttribute('aria-valuenow', String(Math.round(pct)));
-      timeEl.textContent = fmt(video.currentTime) + ' / ' + (isFinite(d) ? fmt(d) : timeEl.textContent.split(' / ')[1]);
+      knob.style.left = pct + '%';
+      timeEl.textContent = formatTime(t);
+      track.setAttribute('aria-valuenow', String(Math.round(t)));
+      track.setAttribute('aria-valuetext', formatTime(t) + ' / ' + formatTime(duration));
+    }
+
+    // film element events
+    film.addEventListener('loadedmetadata', function () {
+      if (isFinite(film.duration)) {
+        duration = film.duration;
+        durationEl.textContent = formatTime(duration);
+        track.setAttribute('aria-valuemax', String(Math.round(duration)));
+      }
+      measure();
     });
-    video.addEventListener('progress', function () {
-      var d = video.duration;
-      if (video.buffered.length && isFinite(d) && d > 0) buffered.style.width = (video.buffered.end(video.buffered.length - 1) / d) * 100 + '%';
+    film.addEventListener('timeupdate', function () {
+      if (endHold && phase === 'playing' && duration && film.currentTime >= duration - endHold) {
+        film.pause();
+        film.currentTime = duration - endHold;
+        setPhase('ended');
+        wake();
+      }
+      renderTime();
     });
-    video.addEventListener('ended', function () {
-      setPhase('ended');
-      root.classList.add('is-awake');
+    film.addEventListener('progress', function () {
+      if (film.buffered.length && duration) bufferedEl.style.width = (film.buffered.end(film.buffered.length - 1) / duration) * 100 + '%';
     });
-    video.addEventListener('waiting', function () {
+    film.addEventListener('ended', function () { setPhase('ended'); wake(); });
+    // only show the spinner for a real stall, not every brief "waiting" blip
+    film.addEventListener('waiting', function () {
       clearTimeout(waitTimer);
-      waitTimer = setTimeout(function () { spinner.hidden = false; }, 250);
+      waitTimer = setTimeout(function () { layer.classList.add('is-stalled'); }, 250);
     });
     ['playing', 'canplay', 'pause'].forEach(function (ev) {
-      video.addEventListener(ev, function () { clearTimeout(waitTimer); spinner.hidden = true; });
+      film.addEventListener(ev, function () { clearTimeout(waitTimer); layer.classList.remove('is-stalled'); });
     });
-    video.addEventListener('loadedmetadata', function () { if (phase === 'ended') placeEndCta(); });
 
-    // the end CTA follows the picture when the stage resizes; auto quality follows the player's size
-    if (window.ResizeObserver) {
-      new ResizeObserver(function () {
-        capToPlayer();
-        if (phase === 'ended') placeEndCta();
-      }).observe(video);
-    }
-    window.addEventListener('resize', function () { if (phase !== 'idle') placeStage(); });
+    if (window.ResizeObserver) new ResizeObserver(function () { measure(); capToPlayer(); }).observe(film);
 
+    // keyboard (on the player)
+    root.addEventListener('keydown', function (e) {
+      if (e.target instanceof HTMLInputElement) return;
+      switch (e.key) {
+        case ' ': case 'k': e.preventDefault(); togglePlay(); break;
+        case 'm': film.muted = !film.muted; break;
+        case 'f': if (document.fullscreenElement) document.exitFullscreen().catch(function () {}); else fullscreen(); break;
+        case 'c': if (ccBtn) setCc(!ccOn); break;
+        case 'ArrowLeft': e.preventDefault(); seekTo(film.currentTime - SEEK_STEP_S); break;
+        case 'ArrowRight': e.preventDefault(); seekTo(film.currentTime + SEEK_STEP_S); break;
+        default: break;
+      }
+      wake();
+    });
+    root.addEventListener('pointermove', function () { if (phase !== 'idle') wake(); });
+
+    // click-off: anywhere outside the hero sends an open film back; Escape too
     document.addEventListener('pointerdown', function (e) {
       if (phase === 'idle' || document.fullscreenElement) return;
-      if (!stage.contains(e.target)) close();
+      if (!hero.contains(e.target)) closeFilm();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && phase !== 'idle' && !document.fullscreenElement) close();
+      if (e.key === 'Escape' && phase !== 'idle' && !document.fullscreenElement && qualityMenu.hidden) closeFilm();
     });
 
+    layer.classList.toggle('is-muted', false);
+    if (ccBtn) loadCues();
     setPhase('idle');
   }
 
