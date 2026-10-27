@@ -1,0 +1,62 @@
+{%- comment -%}
+  The Bizmis demo film in the hero, the way bizmis.ai plays its film: the hero itself is the idle state (its slides and
+  copy stay as they are) with a play button and the film's length; play opens the film over the hero, edge to edge
+  under the header, with sound and controls. A click outside it or Escape returns to the hero (play resumes where it
+  stopped). At the end the film holds its closing frame and its "Install now" becomes a real button, in place.
+
+  Params: src (HLS master .m3u8 or an MP4), label, duration (shown, e.g. "2:55"), captions (a .vtt, optional),
+  cta_url, cta_label, end_cta ("left,top,width,height" of the closing title, as fractions of the frame).
+{%- endcomment -%}
+{%- assign end_cta = end_cta | default: '0.2727,0.3162,0.4594,0.106' | split: ',' -%}
+<div
+  class="bizmis-film"
+  data-bizmis-film
+  data-src="{{ src | escape }}"
+  data-hls-js="https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"
+  data-end-cta="{{ end_cta | join: ',' }}"
+>
+  <button type="button" class="bizmis-film__open" data-film-open aria-label="{{ label | escape }} ({{ duration }})">
+    <span class="bizmis-film__disc" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6Z"/></svg>
+    </span>
+    <span class="bizmis-film__pill" aria-hidden="true">{{ label }}<span class="bizmis-film__dot"></span>{{ duration }}</span>
+  </button>
+
+  <div class="bizmis-film__stage" data-film-stage hidden role="region" aria-label="{{ label | escape }}" tabindex="-1">
+    <video class="bizmis-film__video" data-film-video playsinline preload="none" crossorigin="anonymous">
+      {%- if captions != blank -%}
+        <track kind="subtitles" srclang="en" label="English" src="{{ captions | escape }}">
+      {%- endif -%}
+    </video>
+    <span class="bizmis-film__spinner" data-film-spinner hidden aria-hidden="true"></span>
+    <a class="bizmis-film__end-cta" data-film-end-cta href="{{ cta_url | escape }}" target="_blank" rel="noopener" hidden>{{ cta_label }}</a>
+
+    <div class="bizmis-film__bar" data-film-bar>
+      <button type="button" class="bizmis-film__btn" data-film-toggle aria-label="Pause">
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2"/></svg>
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6Z"/></svg>
+        <svg class="i-replay" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4.2 4.5v5h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="bizmis-film__time" data-film-time>0:00 / {{ duration }}</span>
+      <div class="bizmis-film__track" data-film-track role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="bizmis-film__buffered" data-film-buffered></span>
+        <span class="bizmis-film__played" data-film-played></span>
+      </div>
+      {%- if captions != blank -%}
+        <button type="button" class="bizmis-film__btn bizmis-film__cc" data-film-cc aria-pressed="false" aria-label="Subtitles">CC</button>
+      {%- endif -%}
+      <button type="button" class="bizmis-film__btn" data-film-mute aria-label="Mute">
+        <svg class="i-sound" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="i-muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/><path d="m16 9.5 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" class="bizmis-film__btn" data-film-fullscreen aria-label="Full screen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="bizmis-film__btn" data-film-close aria-label="Close the film">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 6.5 11 11m0-11-11 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+{{ 'bizmis-film.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'bizmis-film.js' | asset_url }}" defer></script>

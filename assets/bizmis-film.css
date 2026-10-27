@@ -1,0 +1,333 @@
+/* The Bizmis demo film in the hero (snippets/bizmis-film.liquid, assets/bizmis-film.js): bizmis.ai's film player,
+   in its frosted warm glass, with the Bizmis orange play disc. */
+.bizmis-film {
+  --film-orange: #f28c38;
+  --film-glass: rgba(84, 43, 14, 0.3);
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* idle: the play disc and its pill over the hero's picture side (the copy keeps the left column) */
+.bizmis-film__open {
+  position: absolute;
+  left: 66%;
+  top: 52%;
+  translate: -50% -50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bizmis-film__disc {
+  display: grid;
+  place-items: center;
+  width: clamp(4.75rem, 7.2vw, 6.5rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--film-orange);
+  box-shadow: 0 0 0 0.6rem rgba(242, 140, 56, 0.22), 0 18px 44px -14px rgba(120, 52, 6, 0.6);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease;
+}
+
+.bizmis-film__disc svg {
+  width: 42%;
+  margin-left: 6%;
+  fill: #fff;
+}
+
+.bizmis-film__open:hover .bizmis-film__disc,
+.bizmis-film__open:focus-visible .bizmis-film__disc {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 0.85rem rgba(242, 140, 56, 0.26), 0 22px 50px -14px rgba(120, 52, 6, 0.65);
+}
+
+.bizmis-film__open:focus-visible {
+  outline: none;
+}
+
+.bizmis-film__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: var(--film-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 12px 32px -12px rgba(90, 40, 8, 0.45);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.bizmis-film__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.75;
+}
+
+.bizmis-film[data-phase='playing'] .bizmis-film__open,
+.bizmis-film[data-phase='paused'] .bizmis-film__open,
+.bizmis-film[data-phase='ended'] .bizmis-film__open {
+  visibility: hidden;
+}
+
+/* open: the film over the hero, under the floating header */
+.bizmis-film__stage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: #0d0c0b;
+  pointer-events: auto;
+  outline: none;
+}
+
+.bizmis-film__stage[hidden] {
+  display: none;
+}
+
+.bizmis-film__stage:fullscreen {
+  top: 0 !important;
+}
+
+.bizmis-film__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #0d0c0b;
+  cursor: pointer;
+}
+
+.bizmis-film__video::cue {
+  font-family: inherit;
+  font-size: 1.05em;
+  background: rgba(13, 12, 11, 0.72);
+}
+
+.bizmis-film__spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -1.375rem 0 0 -1.375rem;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: bizmis-film-spin 800ms linear infinite;
+  pointer-events: none;
+}
+
+@keyframes bizmis-film-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ended: the film's own "Install now" becomes a bordered button, in place */
+.bizmis-film__end-cta {
+  position: absolute;
+  border-radius: 1.4rem;
+  border: 2px solid rgba(43, 37, 32, 0.85);
+  color: transparent;
+  font-size: 0;
+  box-shadow: 0 0 0 0 rgba(242, 140, 56, 0);
+  animation: bizmis-film-cta-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition: box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.bizmis-film__end-cta:hover,
+.bizmis-film__end-cta:focus-visible {
+  background: rgba(242, 140, 56, 0.08);
+  box-shadow: 0 0 0 6px rgba(242, 140, 56, 0.28);
+  outline: none;
+}
+
+@keyframes bizmis-film-cta-in {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: none; }
+}
+
+/* the control bar: frosted glass inside the film, hidden while the pointer rests */
+.bizmis-film__bar {
+  position: absolute;
+  left: 50%;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: min(46rem, calc(100% - 2rem));
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--film-glass);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 14px 40px -14px rgba(0, 0, 0, 0.6);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.bizmis-film.is-awake .bizmis-film__bar,
+.bizmis-film[data-phase='paused'] .bizmis-film__bar,
+.bizmis-film__bar:focus-within {
+  opacity: 1;
+}
+
+.bizmis-film__btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.bizmis-film__btn:hover,
+.bizmis-film__btn:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+  outline: none;
+}
+
+.bizmis-film__btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: currentColor;
+}
+
+.bizmis-film__cc {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.bizmis-film__cc[aria-pressed='true'] {
+  opacity: 1;
+  box-shadow: inset 0 -2px 0 var(--film-orange);
+  border-radius: 0.4rem;
+}
+
+.bizmis-film [data-film-toggle] .i-play,
+.bizmis-film [data-film-toggle] .i-replay,
+.bizmis-film[data-phase='paused'] [data-film-toggle] .i-pause,
+.bizmis-film[data-phase='ended'] [data-film-toggle] .i-pause,
+.bizmis-film [data-film-mute] .i-muted,
+.bizmis-film.is-muted [data-film-mute] .i-sound {
+  display: none;
+}
+
+.bizmis-film[data-phase='paused'] [data-film-toggle] .i-play,
+.bizmis-film[data-phase='ended'] [data-film-toggle] .i-replay,
+.bizmis-film.is-muted [data-film-mute] .i-muted {
+  display: block;
+}
+
+.bizmis-film__time {
+  flex: none;
+  min-width: 5.6rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+
+.bizmis-film__track {
+  position: relative;
+  flex: 1;
+  height: 1.6rem;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.bizmis-film__track::before,
+.bizmis-film__buffered,
+.bizmis-film__played {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 2px;
+}
+
+.bizmis-film__track::before {
+  right: 0;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.bizmis-film__buffered {
+  width: 0;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.bizmis-film__played {
+  width: 0;
+  background: var(--film-orange);
+}
+
+.bizmis-film__track:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* the live widget steps aside while the film plays (it would sit over the film's own widget) */
+html.bizmis-film-open #bizmis-avatar-embed {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 200ms ease, visibility 0s 200ms;
+}
+
+@media (max-width: 749px) {
+  /* phones: the copy sits low in the hero, the play button above it on the picture */
+  .bizmis-film__open {
+    left: 50%;
+    top: 30%;
+  }
+
+  .bizmis-film__time {
+    min-width: 0;
+    font-size: 0.72rem;
+  }
+
+  .bizmis-film__bar {
+    gap: 0.2rem;
+    padding: 0.35rem 0.45rem;
+  }
+
+  .bizmis-film [data-film-fullscreen] {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bizmis-film__disc,
+  .bizmis-film__end-cta {
+    transition: none;
+    animation: none;
+  }
+}

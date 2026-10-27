@@ -43,6 +43,17 @@
     assign promo_video = true
   endif
 
+  comment
+    The Bizmis demo film plays in the hero (snippets/bizmis-film.liquid), except in the recording links (the store's
+    intro and the promo-video modes record the store itself) and with ?nofilm.
+  endcomment
+  assign show_film = false
+  if section.settings.film_src != blank and promo_video == false
+    unless request.query_string contains 'intro=' or request.query_string contains 'nofilm'
+      assign show_film = true
+    endunless
+  endif
+
   assign hero_eyebrow = section.settings.subtitle
   assign hero_title = section.settings.title
   assign hero_cta = section.settings.cta_text
@@ -158,6 +169,18 @@
     </div>
   </div>
 
+  {%- if show_film -%}
+    {%- render 'bizmis-film',
+      src: section.settings.film_src,
+      label: section.settings.film_label,
+      duration: section.settings.film_duration,
+      captions: section.settings.film_captions,
+      cta_url: section.settings.film_cta_url,
+      cta_label: section.settings.film_cta_label,
+      end_cta: section.settings.film_end_cta
+    -%}
+  {%- endif -%}
+
   {%- if slide_count > 1 -%}
     <div class="hero__nav" aria-label="Slideshow navigation">
       <button class="hero__arrow hero__arrow--prev" data-hero-prev aria-label="Previous slide">
@@ -224,6 +247,53 @@
       "label": "Voice clerk line (second title line)",
       "default": "Just say what you need.",
       "info": "Rendered as the highlighted second line of the heading. Opens a voice chat with the store clerk."
+    },
+    {
+      "type": "header",
+      "content": "Demo film"
+    },
+    {
+      "type": "text",
+      "id": "film_src",
+      "label": "Film (HLS .m3u8 or MP4 URL)",
+      "default": "https://cdn.bizmis.ai/media/film/demo-meridian/v20/master.m3u8",
+      "info": "Plays over the hero from its play button. Leave empty to hide the film."
+    },
+    {
+      "type": "text",
+      "id": "film_label",
+      "label": "Play button label",
+      "default": "Watch the demo"
+    },
+    {
+      "type": "text",
+      "id": "film_duration",
+      "label": "Film length (shown)",
+      "default": "2:55"
+    },
+    {
+      "type": "text",
+      "id": "film_captions",
+      "label": "Subtitles (.vtt URL)",
+      "default": "https://cdn.bizmis.ai/media/film/demo-meridian/v20/en.vtt"
+    },
+    {
+      "type": "text",
+      "id": "film_cta_url",
+      "label": "End button link",
+      "default": "https://apps.shopify.com/bizmis"
+    },
+    {
+      "type": "text",
+      "id": "film_cta_label",
+      "label": "End button label (for screen readers)",
+      "default": "Install Bizmis on Shopify"
+    },
+    {
+      "type": "text",
+      "id": "film_end_cta",
+      "label": "End title box (left,top,width,height as fractions of the frame)",
+      "default": "0.2727,0.3162,0.4594,0.106"
     }
   ],
   "blocks": [
