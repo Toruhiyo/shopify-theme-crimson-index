@@ -1,9 +1,11 @@
 /*
  * The Bizmis demo film in the hero (snippets/bizmis-film.liquid): a port of bizmis.ai's hero film player
  * (trujilloai-bizmis-landing src/components/Hero.tsx + src/components/film/FilmPlayer.tsx, "bare" + "fill").
- * - idle:    the hero as it is, "Watch the demo" in its copy. Nothing of the film loads before the first press.
- * - playing: the film over the whole hero through an iris from the button, edge to edge on black; the store's header,
- *            the hero picture and the live widget step aside. The dock hides while the pointer rests.
+ * - idle:    the hero is the film's poster: the landing's glass play button over its picture, and a click anywhere on
+ *            it plays. Nothing of the film loads before the first press.
+ * - playing: the film over the whole window through an iris from the button, edge to edge on black; the store's
+ *            header, the hero picture, the live widget and the page's scrollbar step aside. The dock hides while the
+ *            pointer rests.
  * - paused:  the frame holds, with a glass play button in the middle.
  * - ended:   the film holds its closing frame and its "Install now" becomes a button in place.
  * ✕, Escape or a click outside the hero closes it (the iris runs back); play again resumes where it stopped.
@@ -59,6 +61,9 @@
 
   function init(layer) {
     var hero = layer.closest('.hero') || layer.parentElement;
+    // the player covers the whole window (over the store's header and promo strip): it lives in <body>, out of the
+    // hero's stacking context and transforms
+    document.body.appendChild(layer);
     var $ = function (sel) { return layer.querySelector(sel); };
     var root = $('[data-film-root]');
     var iris = $('[data-film-iris]');
@@ -433,6 +438,7 @@
       else if (film.webkitEnterFullscreen) film.webkitEnterFullscreen(); // iOS Safari: only the <video> goes fullscreen
     }
     function openFilm() {
+      if (phase !== 'idle') return;
       layer.hidden = false; // shown (still masked shut) before it is measured
       var box = layer.getBoundingClientRect();
       var disc = openBtn.querySelector('[data-play]') || openBtn;
@@ -463,7 +469,14 @@
       openBtn.focus({ preventScroll: true });
     }
 
-    openBtn.addEventListener('click', openFilm);
+    openBtn.addEventListener('click', function (e) { e.stopPropagation(); openFilm(); });
+    // any click on the hero plays the film, except on its links, buttons, fields and the slideshow's controls
+    hero.classList.add('has-film');
+    hero.addEventListener('click', function (e) {
+      if (phase !== 'idle') return;
+      if (e.target.closest('a, button, input, select, textarea, label, .hero__nav')) return;
+      openFilm();
+    });
     closeBtn.addEventListener('click', closeFilm);
     resumeBtn.addEventListener('click', play);
     toggleBtn.addEventListener('click', togglePlay);
@@ -582,7 +595,7 @@
     // click-off: anywhere outside the hero sends an open film back; Escape too
     document.addEventListener('pointerdown', function (e) {
       if (phase === 'idle' || document.fullscreenElement) return;
-      if (!hero.contains(e.target)) closeFilm();
+      if (!layer.contains(e.target) && !hero.contains(e.target)) closeFilm();
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && phase !== 'idle' && !document.fullscreenElement && qualityMenu.hidden) closeFilm();

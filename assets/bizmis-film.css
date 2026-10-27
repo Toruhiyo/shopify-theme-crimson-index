@@ -1,113 +1,108 @@
 /* The Bizmis demo film in the hero (snippets/bizmis-film.liquid, bizmis-film-button.liquid, assets/bizmis-film.js):
-   "Watch the demo" in the store's own look, then bizmis.ai's film player in the store's colours. */
+   bizmis.ai's hero film player, in the store's colours. */
 
-/* idle: "Watch the demo" in the hero's copy, under the heading */
-.hero-film-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.9rem;
-  margin-top: 0.6rem;
-  padding: 0.4rem 1.35rem 0.4rem 0.4rem;
-  border: 1px solid var(--color-border, #e5e5ea);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
-  box-shadow: var(--shadow-elevated, 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.03));
-  color: var(--color-fg, #111);
-  font-family: var(--font-body);
-  text-align: left;
+/* ---- idle: the hero is the film's poster. The landing's play button, a big frosted-glass disc with a ring breathing
+   out of it, sits over the hero's picture, and a click anywhere on the hero plays the film. The glass is tinted with
+   the store's ink (the landing's warm tint is made for its orange stage; on this white hero it would vanish). */
+.hero.has-film {
   cursor: pointer;
-  animation: hero-film-btn-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
-  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
-  -webkit-tap-highlight-color: transparent;
 }
 
-@keyframes hero-film-btn-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+.hero.has-film a,
+.hero.has-film button {
+  cursor: pointer;
 }
 
-.hero-film-btn:hover {
-  border-color: color-mix(in srgb, var(--color-primary, #d1001a) 35%, var(--color-border, #e5e5ea));
-  box-shadow: 0 10px 30px -12px rgba(209, 0, 26, 0.35), 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.hero-film-btn:active {
-  transform: scale(0.98);
-}
-
-.hero-film-btn:focus-visible {
-  outline: 2px solid var(--color-primary, #d1001a);
-  outline-offset: 3px;
-}
-
-.hero-film-btn__disc {
-  position: relative;
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 3rem;
-  height: 3rem;
+.hero-film-play {
+  position: absolute;
+  left: 66%;
+  top: 52%;
+  z-index: 3;
+  translate: -50% -50%;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  background: var(--color-primary, #d1001a);
-  color: var(--color-primary-fg, #fff);
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: hero-film-play-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
 }
 
-/* a soft crimson ring breathing out of the disc, so the button reads as a film without shouting */
-.hero-film-btn__disc::after {
-  content: '';
+@keyframes hero-film-play-in {
+  from { opacity: 0; scale: 0.85; }
+  to { opacity: 1; scale: 1; }
+}
+
+.hero-film-play:focus-visible {
+  outline: none;
+}
+
+.hero-film-play__disc {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  height: 7rem;
+  border: 1.5px solid rgb(255 255 255 / 0.6);
+  border-radius: 50%;
+  background-color: rgb(17 17 17 / 0.46);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 0 0 6px rgb(255 255 255 / 0.35), 0 18px 50px -14px rgb(0 0 0 / 0.55);
+  color: #fff;
+  transition: transform 500ms ease, background-color 300ms ease;
+}
+
+.hero-film-play:hover .hero-film-play__disc,
+.hero.has-film:hover .hero-film-play__disc {
+  transform: scale(1.1);
+  background-color: rgb(17 17 17 / 0.58);
+}
+
+.hero-film-play:focus-visible .hero-film-play__disc {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 0 0 4px rgb(255 255 255 / 0.6), 0 0 0 7px rgb(17 17 17 / 0.35);
+}
+
+/* the landing's .bza-play-ring, breathing out in the store's ink so it shows on a white hero */
+.hero-film-play__ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid var(--color-primary, #d1001a);
-  opacity: 0;
-  animation: hero-film-ring 2.8s ease-out 1.2s infinite;
+  animation: hero-film-breathe 2.4s ease-out infinite;
 }
 
-@keyframes hero-film-ring {
-  0% { opacity: 0.45; transform: scale(1); }
-  70%, 100% { opacity: 0; transform: scale(1.55); }
+@keyframes hero-film-breathe {
+  from { box-shadow: 0 0 0 0 rgb(17 17 17 / 0.3); }
+  to { box-shadow: 0 0 0 1.6rem rgb(17 17 17 / 0); }
 }
 
-.hero-film-btn:hover .hero-film-btn__disc {
-  transform: scale(1.06);
-}
-
-.hero-film-btn__disc svg {
-  width: 1.15rem;
-  height: 1.15rem;
-  margin-left: 0.15rem;
+.hero-film-play svg {
+  width: 3rem;
+  height: 3rem;
+  margin-left: 0.375rem;
   fill: currentColor;
+  stroke: none;
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.25));
 }
-
-.hero-film-btn__text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  line-height: 1.15;
-}
-
-.hero-film-btn__label {
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.hero-film-btn__meta {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-muted-fg, #6e6e73);
-  font-variant-numeric: tabular-nums;
-}
-
 
 @media (max-width: 749px) {
-  /* phones: the copy is centred, so is the button */
-  .hero-film-btn {
-    align-self: center;
-    margin-top: 0.4rem;
+  /* phones: the copy fills the middle of the hero; the disc sits under it, above the widget bar */
+  .hero-film-play {
+    left: 50%;
+    top: auto;
+    bottom: calc(12vh + env(safe-area-inset-bottom));
+    translate: -50% 0;
+  }
+
+  .hero-film-play__disc {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .hero-film-play svg {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 }
 
@@ -119,13 +114,26 @@
   --r: 0px;   /* the iris starts shut */
   --cx: 50%;
   --cy: 50%;
-  position: absolute;
+  position: fixed;   /* moved to <body> by the script: it covers the window, not just the hero */
   inset: 0;
-  z-index: 40;
+  z-index: 2147483000;
 }
 
 .bzf[hidden] {
   display: none;
+}
+
+/* open: the page's scrolling (and its scrollbar) locked under the film, which covers the store's header, its promo
+   strip and the hero's top margin */
+html.bizmis-film-open,
+html.bizmis-film-open body,
+html.bizmis-film-open [data-overlayscrollbars-viewport] {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+html.bizmis-film-open .os-scrollbar {
+  visibility: hidden !important;
 }
 
 .bzf-glass {
@@ -866,9 +874,9 @@ html.bizmis-film-open #bizmis-avatar-embed {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-film-btn,
-  .hero-film-btn__disc,
-  .hero-film-btn__disc::after,
+  .hero-film-play,
+  .hero-film-play__disc,
+  .hero-film-play__ring,
   .bzf-cc,
   .bzf-end-cta {
     animation: none;

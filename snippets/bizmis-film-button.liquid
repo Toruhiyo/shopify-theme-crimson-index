@@ -1,13 +1,11 @@
 {%- comment -%}
-  The hero's "Watch the demo" button, in the copy under the heading (the film itself: snippets/bizmis-film.liquid).
-  Params: label, duration (shown, e.g. "2:48").
+  The hero's play button (the landing's: a big frosted-glass disc with a ring breathing out of it), over the hero's
+  picture: the hero itself is the film's idle state, and a click anywhere on it plays the film (assets/bizmis-film.js).
+  Params: label, duration (read out, e.g. "2:48").
 {%- endcomment -%}
-<button type="button" class="hero-film-btn" data-film-open aria-label="{{ label | escape }}, {{ duration }}">
-  <span class="hero-film-btn__disc" data-play aria-hidden="true">
-    <svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6Z"/></svg>
-  </span>
-  <span class="hero-film-btn__text" aria-hidden="true">
-    <span class="hero-film-btn__label">{{ label }}</span>
-    <span class="hero-film-btn__meta">{{ duration }} · with sound</span>
+<button type="button" class="hero-film-play" data-film-open aria-label="{{ label | escape }} ({{ duration }})">
+  <span class="hero-film-play__disc" data-play aria-hidden="true">
+    <span class="hero-film-play__ring"></span>
+    <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
   </span>
 </button>
