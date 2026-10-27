@@ -36,7 +36,7 @@
     var header = document.querySelector('.header-section');
     var stage = root.querySelector('[data-film-stage]');
     var video = root.querySelector('[data-film-video]');
-    var openBtn = root.querySelector('[data-film-open]');
+    var openBtn = hero.querySelector('[data-film-open]');   // the button lives in the hero's copy
     var toggleBtn = root.querySelector('[data-film-toggle]');
     var muteBtn = root.querySelector('[data-film-mute]');
     var ccBtn = root.querySelector('[data-film-cc]');

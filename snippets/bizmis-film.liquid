@@ -1,10 +1,10 @@
 {%- comment -%}
   The Bizmis demo film in the hero, the way bizmis.ai plays its film: the hero itself is the idle state (its slides and
-  copy stay as they are) with a play button and the film's length; play opens the film over the hero, edge to edge
-  under the header, with sound and controls. A click outside it or Escape returns to the hero (play resumes where it
+  copy stay as they are), with the "Watch the demo" button in the copy (snippets/bizmis-film-button.liquid); play opens
+  the film over the hero, framed on the store's light surface under the header, with sound and controls. A click outside it or Escape returns to the hero (play resumes where it
   stopped). At the end the film holds its closing frame and its "Install now" becomes a real button, in place.
 
-  Params: src (HLS master .m3u8 or an MP4), label, duration (shown, e.g. "2:55"), captions (a .vtt, optional),
+  Params: src (HLS master .m3u8 or an MP4), label (the stage's accessible name), captions (a .vtt, optional),
   cta_url, cta_label, end_cta ("left,top,width,height" of the closing title, as fractions of the frame), end_hold (seconds
   before the end to stop on, for a film that fades out).
 {%- endcomment -%}
@@ -17,13 +17,6 @@
   data-end-cta="{{ end_cta | join: ',' }}"
   data-end-hold="{{ end_hold | default: 0 }}"
 >
-  <button type="button" class="bizmis-film__open" data-film-open aria-label="{{ label | escape }} ({{ duration }})">
-    <span class="bizmis-film__disc" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6Z"/></svg>
-    </span>
-    <span class="bizmis-film__pill" aria-hidden="true">{{ label }}<span class="bizmis-film__dot"></span>{{ duration }}</span>
-  </button>
-
   <div class="bizmis-film__stage" data-film-stage hidden role="region" aria-label="{{ label | escape }}" tabindex="-1">
     <video class="bizmis-film__video" data-film-video playsinline preload="none" crossorigin="anonymous">
       {%- if captions != blank -%}

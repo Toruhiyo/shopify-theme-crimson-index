@@ -1,125 +1,179 @@
-/* The Bizmis demo film in the hero (snippets/bizmis-film.liquid, assets/bizmis-film.js): bizmis.ai's film player,
-   in its frosted warm glass, with the Bizmis orange play disc. */
+/* The Bizmis demo film in the hero (snippets/bizmis-film.liquid, bizmis-film-button.liquid, assets/bizmis-film.js),
+   in the store's own look: the crimson primary, ink, the light card surface, Inter, the card radius and shadows. */
+
+/* idle: "Watch the demo" in the hero's copy, under the heading */
+.hero-film-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+  padding: 0.4rem 1.35rem 0.4rem 0.4rem;
+  border: 1px solid var(--color-border, #e5e5ea);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: var(--shadow-elevated, 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.03));
+  color: var(--color-fg, #111);
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  animation: hero-film-btn-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes hero-film-btn-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.hero-film-btn:hover {
+  border-color: color-mix(in srgb, var(--color-primary, #d1001a) 35%, var(--color-border, #e5e5ea));
+  box-shadow: 0 10px 30px -12px rgba(209, 0, 26, 0.35), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.hero-film-btn:active {
+  transform: scale(0.98);
+}
+
+.hero-film-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #d1001a);
+  outline-offset: 3px;
+}
+
+.hero-film-btn__disc {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--color-primary, #d1001a);
+  color: var(--color-primary-fg, #fff);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* a soft crimson ring breathing out of the disc, so the button reads as a film without shouting */
+.hero-film-btn__disc::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary, #d1001a);
+  opacity: 0;
+  animation: hero-film-ring 2.8s ease-out 1.2s infinite;
+}
+
+@keyframes hero-film-ring {
+  0% { opacity: 0.45; transform: scale(1); }
+  70%, 100% { opacity: 0; transform: scale(1.55); }
+}
+
+.hero-film-btn:hover .hero-film-btn__disc {
+  transform: scale(1.06);
+}
+
+.hero-film-btn__disc svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-left: 0.15rem;
+  fill: currentColor;
+}
+
+.hero-film-btn__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  line-height: 1.15;
+}
+
+.hero-film-btn__label {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.hero-film-btn__meta {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-muted-fg, #6e6e73);
+  font-variant-numeric: tabular-nums;
+}
+
+/* open: the film framed on the store's light surface, over the hero, under the floating header */
 .bizmis-film {
-  --film-orange: #f28c38;
-  --film-glass: rgba(84, 43, 14, 0.3);
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
 }
 
-/* idle: the play disc and its pill over the hero's picture side (the copy keeps the left column) */
-.bizmis-film__open {
-  position: absolute;
-  left: 66%;
-  top: 52%;
-  translate: -50% -50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  pointer-events: auto;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.bizmis-film__disc {
-  display: grid;
-  place-items: center;
-  width: clamp(4.75rem, 7.2vw, 6.5rem);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--film-orange);
-  box-shadow: 0 0 0 0.6rem rgba(242, 140, 56, 0.22), 0 18px 44px -14px rgba(120, 52, 6, 0.6);
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease;
-}
-
-.bizmis-film__disc svg {
-  width: 42%;
-  margin-left: 6%;
-  fill: #fff;
-}
-
-.bizmis-film__open:hover .bizmis-film__disc,
-.bizmis-film__open:focus-visible .bizmis-film__disc {
-  transform: scale(1.06);
-  box-shadow: 0 0 0 0.85rem rgba(242, 140, 56, 0.26), 0 22px 50px -14px rgba(120, 52, 6, 0.65);
-}
-
-.bizmis-film__open:focus-visible {
-  outline: none;
-}
-
-.bizmis-film__pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: var(--film-glass);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  backdrop-filter: blur(18px) saturate(1.5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 12px 32px -12px rgba(90, 40, 8, 0.45);
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.bizmis-film__dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.75;
-}
-
-.bizmis-film[data-phase='playing'] .bizmis-film__open,
-.bizmis-film[data-phase='paused'] .bizmis-film__open,
-.bizmis-film[data-phase='ended'] .bizmis-film__open {
-  visibility: hidden;
-}
-
-/* open: the film over the hero, under the floating header */
 .bizmis-film__stage {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  background: #0d0c0b;
+  inset: 0;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 2.5vw, 2rem) clamp(0.75rem, 3vw, 2.5rem) calc(3.25rem + clamp(0.9rem, 2vw, 1.5rem));   /* the bar sits under the film */
+  background: var(--color-card, #f5f5f7);
   pointer-events: auto;
   outline: none;
+  animation: bizmis-film-stage-in 280ms ease both;
+}
+
+@keyframes bizmis-film-stage-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .bizmis-film__stage[hidden] {
   display: none;
 }
 
+/* full screen: the film edge to edge on black, the bar over its foot again, hiding while the pointer rests */
 .bizmis-film__stage:fullscreen {
   top: 0 !important;
+  padding: 0;
+  background: #000;
 }
 
+.bizmis-film__stage:fullscreen .bizmis-film__bar {
+  bottom: 1.5rem;
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.bizmis-film.is-awake .bizmis-film__stage:fullscreen .bizmis-film__bar,
+.bizmis-film[data-phase='paused'] .bizmis-film__stage:fullscreen .bizmis-film__bar,
+.bizmis-film__stage:fullscreen .bizmis-film__bar:focus-within {
+  opacity: 1;
+}
+
+/* the film at its own 16:9, as large as the stage allows, with the store's card corners and shadow */
 .bizmis-film__video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #0d0c0b;
+  display: block;
+  width: min(100cqw - 1.5rem, (100cqh - 1.5rem) * 16 / 9);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: var(--radius-card, 16px);
+  background: #fff;
+  box-shadow: 0 30px 80px -30px rgba(17, 17, 17, 0.35), 0 2px 10px rgba(17, 17, 17, 0.06);
   cursor: pointer;
 }
 
+.bizmis-film__stage:fullscreen .bizmis-film__video {
+  width: min(100cqw, 100cqh * 16 / 9);
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .bizmis-film__video::cue {
-  font-family: inherit;
+  font-family: var(--font-body);
   font-size: 1.05em;
-  background: rgba(13, 12, 11, 0.72);
+  color: #fff;
+  background: rgba(17, 17, 17, 0.78);
 }
 
 .bizmis-film__spinner {
@@ -130,8 +184,8 @@
   height: 2.75rem;
   margin: -1.375rem 0 0 -1.375rem;
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.25);
-  border-top-color: #fff;
+  border: 3px solid rgba(209, 0, 26, 0.18);
+  border-top-color: var(--color-primary, #d1001a);
   animation: bizmis-film-spin 800ms linear infinite;
   pointer-events: none;
 }
@@ -144,18 +198,17 @@
 .bizmis-film__end-cta {
   position: absolute;
   border-radius: 1.4rem;
-  border: 2px solid rgba(43, 37, 32, 0.85);
+  border: 2px solid rgba(17, 17, 17, 0.85);
   color: transparent;
   font-size: 0;
-  box-shadow: 0 0 0 0 rgba(242, 140, 56, 0);
   animation: bizmis-film-cta-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   transition: box-shadow 200ms ease, background-color 200ms ease;
 }
 
 .bizmis-film__end-cta:hover,
 .bizmis-film__end-cta:focus-visible {
-  background: rgba(242, 140, 56, 0.08);
-  box-shadow: 0 0 0 6px rgba(242, 140, 56, 0.28);
+  background: rgba(17, 17, 17, 0.04);
+  box-shadow: 0 0 0 6px rgba(17, 17, 17, 0.1);
   outline: none;
 }
 
@@ -164,32 +217,26 @@
   to { opacity: 1; transform: none; }
 }
 
-/* the control bar: frosted glass inside the film, hidden while the pointer rests */
+/* the control bar: under the film, never over it: white frosted glass, ink icons, a crimson play button and progress
+   line */
 .bizmis-film__bar {
   position: absolute;
   left: 50%;
-  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  bottom: clamp(0.6rem, 1.4vw, 1rem);
   translate: -50% 0;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  width: min(46rem, calc(100% - 2rem));
-  padding: 0.45rem 0.6rem;
+  gap: 0.35rem;
+  width: min(44rem, calc(100% - 3rem));
+  padding: 0.35rem 0.5rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: var(--film-glass);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  backdrop-filter: blur(20px) saturate(1.5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 14px 40px -14px rgba(0, 0, 0, 0.6);
-  color: #fff;
-  opacity: 0;
-  transition: opacity 260ms ease;
-}
-
-.bizmis-film.is-awake .bizmis-film__bar,
-.bizmis-film[data-phase='paused'] .bizmis-film__bar,
-.bizmis-film__bar:focus-within {
-  opacity: 1;
+  border: 1px solid var(--color-border, #e5e5ea);
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: 0 12px 34px -14px rgba(17, 17, 17, 0.35);
+  color: var(--color-fg, #111);
+  font-family: var(--font-body);
 }
 
 .bizmis-film__btn {
@@ -204,11 +251,13 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 .bizmis-film__btn:hover,
 .bizmis-film__btn:focus-visible {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--color-card, #f5f5f7);
+  color: var(--color-primary, #d1001a);
   outline: none;
 }
 
@@ -218,16 +267,28 @@
   fill: currentColor;
 }
 
+.bizmis-film [data-film-toggle] {
+  background: var(--color-primary, #d1001a);
+  color: var(--color-primary-fg, #fff);
+}
+
+.bizmis-film [data-film-toggle]:hover,
+.bizmis-film [data-film-toggle]:focus-visible {
+  background: var(--color-primary, #d1001a);
+  color: var(--color-primary-fg, #fff);
+  filter: brightness(0.9);
+}
+
 .bizmis-film__cc {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  opacity: 0.7;
+  color: var(--color-muted-fg, #6e6e73);
 }
 
 .bizmis-film__cc[aria-pressed='true'] {
-  opacity: 1;
-  box-shadow: inset 0 -2px 0 var(--film-orange);
+  color: var(--color-primary, #d1001a);
+  box-shadow: inset 0 -2px 0 var(--color-primary, #d1001a);
   border-radius: 0.4rem;
 }
 
@@ -249,9 +310,11 @@
 .bizmis-film__time {
   flex: none;
   min-width: 5.6rem;
+  padding: 0 0.35rem;
   font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-muted-fg, #6e6e73);
   font-variant-numeric: tabular-nums;
-  opacity: 0.9;
 }
 
 .bizmis-film__track {
@@ -276,26 +339,26 @@
 
 .bizmis-film__track::before {
   right: 0;
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--color-border, #e5e5ea);
 }
 
 .bizmis-film__buffered {
   width: 0;
-  background: rgba(255, 255, 255, 0.35);
+  background: #d1d1d6;
 }
 
 .bizmis-film__played {
   width: 0;
-  background: var(--film-orange);
+  background: var(--color-primary, #d1001a);
 }
 
 .bizmis-film__track:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline: 2px solid var(--color-primary, #d1001a);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* the live widget steps aside while the film plays (it would sit over the film's own widget) */
+/* the live widget steps aside while the film plays (the film has its own) */
 html.bizmis-film-open #bizmis-avatar-embed {
   opacity: 0 !important;
   visibility: hidden !important;
@@ -303,19 +366,10 @@ html.bizmis-film-open #bizmis-avatar-embed {
 }
 
 @media (max-width: 749px) {
-  /* phones: the copy fills the middle of the hero, so the play button sits below it, a row above the widget bar */
-  .bizmis-film__open {
-    left: 50%;
-    top: auto;
-    bottom: calc(13vh + env(safe-area-inset-bottom));
-    translate: -50% 0;
-    flex-direction: row;
-    gap: 0.75rem;
-  }
-
-  .bizmis-film__disc {
-    width: 3.6rem;
-    box-shadow: 0 0 0 0.4rem rgba(242, 140, 56, 0.22), 0 12px 30px -12px rgba(120, 52, 6, 0.6);
+  /* phones: the copy is centred, so is the button */
+  .hero-film-btn {
+    align-self: center;
+    margin-top: 0.4rem;
   }
 
   .bizmis-film__time {
@@ -324,19 +378,19 @@ html.bizmis-film-open #bizmis-avatar-embed {
   }
 
   .bizmis-film__bar {
-    gap: 0.2rem;
-    padding: 0.35rem 0.45rem;
-  }
-
-  .bizmis-film [data-film-fullscreen] {
-    display: grid;
+    gap: 0.1rem;
+    width: calc(100% - 1.5rem);
+    padding: 0.3rem 0.35rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bizmis-film__disc,
+  .hero-film-btn,
+  .hero-film-btn__disc,
+  .hero-film-btn__disc::after,
+  .bizmis-film__stage,
   .bizmis-film__end-cta {
-    transition: none;
     animation: none;
+    transition: none;
   }
 }

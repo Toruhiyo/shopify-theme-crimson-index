@@ -166,6 +166,10 @@
           {%- endif -%}
         </h1>
       {%- endif -%}
+
+      {%- if show_film -%}
+        {%- render 'bizmis-film-button', label: section.settings.film_label, duration: section.settings.film_duration -%}
+      {%- endif -%}
     </div>
   </div>
 
@@ -173,7 +177,6 @@
     {%- render 'bizmis-film',
       src: section.settings.film_src,
       label: section.settings.film_label,
-      duration: section.settings.film_duration,
       captions: section.settings.film_captions,
       cta_url: section.settings.film_cta_url,
       cta_label: section.settings.film_cta_label,
