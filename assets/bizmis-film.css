@@ -303,10 +303,19 @@ html.bizmis-film-open #bizmis-avatar-embed {
 }
 
 @media (max-width: 749px) {
-  /* phones: the copy sits low in the hero, the play button above it on the picture */
+  /* phones: the copy fills the middle of the hero, so the play button sits below it, a row above the widget bar */
   .bizmis-film__open {
     left: 50%;
-    top: 30%;
+    top: auto;
+    bottom: calc(13vh + env(safe-area-inset-bottom));
+    translate: -50% 0;
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .bizmis-film__disc {
+    width: 3.6rem;
+    box-shadow: 0 0 0 0.4rem rgba(242, 140, 56, 0.22), 0 12px 30px -12px rgba(120, 52, 6, 0.6);
   }
 
   .bizmis-film__time {
