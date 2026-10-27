@@ -177,7 +177,8 @@
       captions: section.settings.film_captions,
       cta_url: section.settings.film_cta_url,
       cta_label: section.settings.film_cta_label,
-      end_cta: section.settings.film_end_cta
+      end_cta: section.settings.film_end_cta,
+      end_hold: section.settings.film_end_hold
     -%}
   {%- endif -%}
 
@@ -294,6 +295,13 @@
       "id": "film_end_cta",
       "label": "End title box (left,top,width,height as fractions of the frame)",
       "default": "0.2727,0.3162,0.4594,0.106"
+    },
+    {
+      "type": "text",
+      "id": "film_end_hold",
+      "label": "Stop this many seconds before the end",
+      "default": "1",
+      "info": "For a film that fades out: it holds its last clean frame (the closing call to action)."
     }
   ],
   "blocks": [

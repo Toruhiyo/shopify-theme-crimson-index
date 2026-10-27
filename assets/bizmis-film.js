@@ -50,6 +50,8 @@
     var endCta = root.querySelector('[data-film-end-cta]');
     var src = root.getAttribute('data-src');
     var endBox = (root.getAttribute('data-end-cta') || '').split(',').map(Number);
+    // a film that fades out ends this many seconds early, on its last clean frame (the closing CTA)
+    var endHold = Number(root.getAttribute('data-end-hold')) || 0;
     var phase = 'idle';
     var hls = null;
     var ready = null;
@@ -239,6 +241,12 @@
 
     video.addEventListener('timeupdate', function () {
       var d = video.duration;
+      if (endHold && phase === 'playing' && isFinite(d) && video.currentTime >= d - endHold) {
+        video.pause();
+        video.currentTime = d - endHold;
+        setPhase('ended');
+        root.classList.add('is-awake');
+      }
       var pct = isFinite(d) && d > 0 ? (video.currentTime / d) * 100 : 0;
       played.style.width = pct + '%';
       track.setAttribute('aria-valuenow', String(Math.round(pct)));

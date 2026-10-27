@@ -5,7 +5,8 @@
   stopped). At the end the film holds its closing frame and its "Install now" becomes a real button, in place.
 
   Params: src (HLS master .m3u8 or an MP4), label, duration (shown, e.g. "2:55"), captions (a .vtt, optional),
-  cta_url, cta_label, end_cta ("left,top,width,height" of the closing title, as fractions of the frame).
+  cta_url, cta_label, end_cta ("left,top,width,height" of the closing title, as fractions of the frame), end_hold (seconds
+  before the end to stop on, for a film that fades out).
 {%- endcomment -%}
 {%- assign end_cta = end_cta | default: '0.2727,0.3162,0.4594,0.106' | split: ',' -%}
 <div
@@ -14,6 +15,7 @@
   data-src="{{ src | escape }}"
   data-hls-js="https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"
   data-end-cta="{{ end_cta | join: ',' }}"
+  data-end-hold="{{ end_hold | default: 0 }}"
 >
   <button type="button" class="bizmis-film__open" data-film-open aria-label="{{ label | escape }} ({{ duration }})">
     <span class="bizmis-film__disc" aria-hidden="true">
