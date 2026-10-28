@@ -1900,12 +1900,16 @@ textarea.input {
   --promo-height: 2.75rem;
 }
 
-/* Temporary: with the Bizmis top bar off, inset the whole homepage
-   frame 28px. Do not pad the body: that only drops the nav and leaks
-   the red cover through the gap. */
+/* With the Bizmis top bar off there is no strip: the header and the hero start at the top. */
 html:not(:has(.has-promo-bar)),
 body:not(.has-promo-bar) {
-  --promo-height: 28px;
+  --promo-height: 0px;
+}
+
+/* ?noagent: the store without its Bizmis clerk */
+html.no-bizmis-agent #bizmis-avatar-embed,
+html.no-bizmis-agent .bizmis-viewport-portal-root {
+  display: none !important;
 }
 
 .announcement-bar-section:not(:has(.promo-bar, .announcement-bar)) {
@@ -2287,15 +2291,6 @@ body:not(.has-promo-bar) {
 .template-index .hero,
 .template-index .hero--large {
   min-height: 100dvh;
-}
-
-body:not(.has-promo-bar).template-index .hero-section {
-  margin-top: 28px;
-}
-
-body:not(.has-promo-bar).template-index .hero,
-body:not(.has-promo-bar).template-index .hero--large {
-  min-height: calc(100dvh - 28px);
 }
 
 /* Light scrim under the floating transparent header so the nav stays

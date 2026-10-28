@@ -69,7 +69,9 @@
     var iris = $('[data-film-iris]');
     var glow = $('[data-film-glow]');
     var film = $('[data-film-video]');
-    var openBtn = hero.querySelector('[data-film-open]'); // the button lives in the hero's copy
+    // the play disc over the hero and any other trigger in its copy (the heading's second line); the iris opens from the disc
+    var openBtns = Array.prototype.slice.call(hero.querySelectorAll('[data-film-open]'));
+    var disc = hero.querySelector('[data-play]') || openBtns[0];
     var resumeBtn = $('[data-film-resume]');
     var toggleBtn = $('[data-film-toggle]');
     var muteBtn = $('[data-film-mute]');
@@ -441,7 +443,6 @@
       if (phase !== 'idle') return;
       layer.hidden = false; // shown (still masked shut) before it is measured
       var box = layer.getBoundingClientRect();
-      var disc = openBtn.querySelector('[data-play]') || openBtn;
       var target = disc.getBoundingClientRect();
       var cx = target.left + target.width / 2 - box.left;
       var cy = target.top + target.height / 2 - box.top;
@@ -466,10 +467,10 @@
       setPhase('idle');
       setOpen(false);
       runIris(0, function () { if (phase === 'idle') layer.hidden = true; });
-      openBtn.focus({ preventScroll: true });
+      (disc.closest('button') || disc).focus({ preventScroll: true });
     }
 
-    openBtn.addEventListener('click', function (e) { e.stopPropagation(); openFilm(); });
+    openBtns.forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openFilm(); }); });
     // any click on the hero plays the film, except on its links, buttons, fields and the slideshow's controls
     hero.classList.add('has-film');
     hero.addEventListener('click', function (e) {
@@ -600,6 +601,69 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && phase !== 'idle' && !document.fullscreenElement && qualityMenu.hidden) closeFilm();
     });
+
+    // ---- the clerk's invite (bizmis.ai's hero agent, HeroAgent.tsx, on the store's own clerk): it says hello with a
+    // wave, says what it does, then "Press play" while it points at the film (its right: the visitor's left, where the
+    // film's button is), in its own captions (AvatarVoicechat.say); then what it does and the invite take turns. Only
+    // while the film is closed, the hero in view and the clerk's card showing (phones: captions, no pointing); it stops
+    // for good once the visitor turns to the clerk. ?noagent hides the clerk, and with it the invite.
+    var agentLines = (layer.getAttribute('data-agent-lines') || '').split('|').map(function (l) { return l.trim(); }).filter(Boolean);
+    (function invite() {
+      if (agentLines.length < 2 || document.documentElement.classList.contains('no-bizmis-agent')) return;
+      var START_MS = 2500;
+      var HOLD_MS = 1300;
+      var INVITE_REST_MS = 5000;
+      var RETRY_MS = 1000;
+      var desktop = window.matchMedia('(min-width: 750px)');
+      var heroSeen = true;
+      var stopped = false;
+      var step = 0;
+      var timer = 0;
+      var clerk = function () {
+        return window.AvatarVoicechat && typeof window.AvatarVoicechat.say === 'function' ? window.AvatarVoicechat : null;
+      };
+      // the clerk's card is up (not folded into its bubble): on phones its bar always is
+      var cardShowing = function () {
+        if (!desktop.matches) return true;
+        var el = document.getElementById('bizmis-avatar-embed');
+        var r = el && el.getBoundingClientRect();
+        return !!r && r.width > 160 && r.height > 160;
+      };
+      var stop = function () { stopped = true; clearTimeout(timer); };
+      // the visitor turned to the clerk (its card, its bar or its captions): it never interrupts them again
+      ['pointerdown', 'focusin', 'keydown'].forEach(function (ev) {
+        document.addEventListener(ev, function (e) {
+          var t = e.target;
+          if (t && t.closest && t.closest('#bizmis-avatar-embed, .bizmis-viewport-portal-root')) stop();
+        }, true);
+      });
+      if (window.IntersectionObserver) {
+        new IntersectionObserver(function (entries) { heroSeen = entries[0].isIntersecting; }, { threshold: 0.35 }).observe(hero);
+      }
+      var tick = function () {
+        if (stopped) return;
+        var api = clerk();
+        var root = document.documentElement;
+        var waiting = !api || phase !== 'idle' || !heroSeen || document.hidden || !cardShowing()
+          || root.classList.contains('is-clerk-intro') || root.classList.contains('bizmis-film-open');
+        if (waiting) { timer = setTimeout(tick, RETRY_MS); return; }
+        var last = step === agentLines.length - 1;
+        var gesture = step === 0 ? 'waving' : last && desktop.matches ? 'pointing_right' : undefined;
+        var line = agentLines[step];
+        if (!api.say(line, gesture ? { gesture: gesture } : undefined)) {
+          // a conversation is on: the visitor is talking to the clerk
+          stop();
+          return;
+        }
+        // the widget shows a caption ~1 s plus 0.2 s a word; the line then holds before the next
+        var words = line.split(/\s+/).length;
+        var next = last ? 1 : step + 1;
+        var wait = 1000 + 220 * words + (last ? INVITE_REST_MS : HOLD_MS);
+        step = next;
+        timer = setTimeout(tick, wait);
+      };
+      timer = setTimeout(tick, START_MS);
+    })();
 
     layer.classList.toggle('is-muted', false);
     if (ccBtn) loadCues();

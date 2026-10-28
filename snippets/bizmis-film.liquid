@@ -9,7 +9,9 @@
 
   Params: src (HLS master .m3u8 or an MP4), label (the region's name), captions (a .vtt with <v Narrator> / <v Shopper>
   voices, optional), cta_url, cta_label, end_cta ("left,top,width,height" of the closing title's ink, as fractions of
-  the frame), end_hold (seconds before the end to stop on, for a film that fades out).
+  the frame), end_hold (seconds before the end to stop on, for a film that fades out), agent_lines (the clerk's invite
+  to watch the film, lines separated by |: said in its captions, the first with a wave, the last while it points at
+  the film).
 {%- endcomment -%}
 {%- assign end_cta = end_cta | default: '0.2727,0.3162,0.4594,0.106' | split: ',' -%}
 <div
@@ -21,6 +23,7 @@
   data-hls-js="https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"
   data-end-cta="{{ end_cta | join: ',' }}"
   data-end-hold="{{ end_hold | default: 0 }}"
+  data-agent-lines="{{ agent_lines | escape }}"
   hidden
 >
   <div class="bzf-iris" data-film-iris>

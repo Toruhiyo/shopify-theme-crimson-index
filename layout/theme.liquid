@@ -43,7 +43,9 @@
         try { sessionStorage.removeItem('bizmis-session'); } catch (e) {}
         try { localStorage.removeItem('bizmis-session'); } catch (e) {}
       }
-      if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '28px');
+      if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '0px');
+      // ?noagent: the store without its Bizmis clerk (the widget stays out of sight)
+      root.classList.toggle('no-bizmis-agent', params.has('noagent'));
     })();
   </script>
   <style>html.is-promo-opening{background:var(--color-bg)}html.is-promo-cover{background:{{ promo_red }}}</style>

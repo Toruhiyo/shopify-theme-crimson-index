@@ -44,12 +44,13 @@
   endif
 
   comment
-    The Bizmis demo film plays in the hero (snippets/bizmis-film.liquid), except in the recording links (the store's
-    intro and the promo-video modes record the store itself) and with ?nofilm.
+    The Bizmis demo film plays in the hero (snippets/bizmis-film.liquid), with its own smaller copy inviting the visitor
+    to watch it, except in the recording links (the store's intro and the promo-video modes record the store itself),
+    with ?storehero (the store's own hero, for recording demos) and with ?nofilm.
   endcomment
   assign show_film = false
   if section.settings.film_src != blank and promo_video == false
-    unless request.query_string contains 'intro=' or request.query_string contains 'nofilm'
+    unless request.query_string contains 'intro=' or request.query_string contains 'nofilm' or request.query_string contains 'storehero'
       assign show_film = true
     endunless
   endif
@@ -67,11 +68,15 @@
     assign hero_eyebrow = 'YOUR STORE, UNATTENDED.'
     assign hero_title = 'Shoppers browse.'
     assign hero_cta = 'Nobody sells.'
+  elsif show_film
+    assign hero_eyebrow = section.settings.film_eyebrow
+    assign hero_title = section.settings.film_title
+    assign hero_cta = section.settings.film_title_cta
   endif
 -%}
 
 <section
-  class="hero {{ height_class }}"
+  class="hero {{ height_class }}{% if show_film %} hero--film-copy{% endif %}"
   data-hero-slideshow
   data-autoplay-interval="{{ interval }}"
   data-bizmis-mark-url="{{ 'bizmis-logo-full-white-transparent.png' | asset_url }}"
@@ -158,11 +163,18 @@
           {%- if hero_cta != blank -%}
             {%- comment -%}
               The CTA is the title's second line: same scale, brand color,
-              underlined, clickable. Starts a voice chat with the clerk.
+              underlined, clickable. Starts a voice chat with the clerk; with
+              the film on, it plays the film.
             {%- endcomment -%}
-            <button type="button" class="hero__title-cta" data-open-voice-clerk>
-              {{- hero_cta -}}
-            </button>
+            {%- if show_film -%}
+              <button type="button" class="hero__title-cta" data-film-open>
+                {{- hero_cta -}}
+              </button>
+            {%- else -%}
+              <button type="button" class="hero__title-cta" data-open-voice-clerk>
+                {{- hero_cta -}}
+              </button>
+            {%- endif -%}
           {%- endif -%}
         </h1>
       {%- endif -%}
@@ -179,7 +191,8 @@
       cta_url: section.settings.film_cta_url,
       cta_label: section.settings.film_cta_label,
       end_cta: section.settings.film_end_cta,
-      end_hold: section.settings.film_end_hold
+      end_hold: section.settings.film_end_hold,
+      agent_lines: section.settings.film_agent_lines
     -%}
   {%- endif -%}
 
@@ -266,6 +279,32 @@
       "id": "film_label",
       "label": "Play button label",
       "default": "Watch the demo"
+    },
+    {
+      "type": "text",
+      "id": "film_eyebrow",
+      "label": "Film copy: subtitle",
+      "default": "Consumer electronics, curated",
+      "info": "With the film on, the hero shows this copy (smaller) instead of the store's own. ?storehero shows the store's."
+    },
+    {
+      "type": "text",
+      "id": "film_title",
+      "label": "Film copy: heading",
+      "default": "Meet our store clerk."
+    },
+    {
+      "type": "text",
+      "id": "film_title_cta",
+      "label": "Film copy: heading's second line (plays the film)",
+      "default": "Watch it sell."
+    },
+    {
+      "type": "text",
+      "id": "film_agent_lines",
+      "label": "The clerk's invite (lines separated by |)",
+      "default": "Hi! I'm Meridian's Bizmis sales agent.|I match every shopper's needs, clear their doubts and win the sale.|Press play and watch me sell!",
+      "info": "Said in the clerk's captions: the first with a wave, the last while it points at the film; then the last two take turns."
     },
     {
       "type": "text",

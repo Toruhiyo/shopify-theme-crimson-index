@@ -9,6 +9,15 @@
   cursor: pointer;
 }
 
+/* the hero's own copy with the film on (section setting film_*): smaller, so the film's button leads */
+.hero--film-copy .hero__title {
+  font-size: clamp(2.3rem, 4vw, 3.5rem);
+}
+
+.hero--film-copy .hero__subtitle {
+  font-size: 0.95rem;
+}
+
 /* desktops: every slide steps 6% to the right (its left edge fading into the page) so each product clears the centre,
    where the disc sits; the laptop and the watch otherwise start just left of it */
 @media (min-width: 750px) {
