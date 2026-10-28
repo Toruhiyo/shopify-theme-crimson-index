@@ -1,12 +1,11 @@
 {%- comment -%}
-  The hero's play button: centred in the hero under its heading, a crimson disc with a ring breathing out of it and the
-  page's eyebrow type under it. The hero itself is the film's poster: a click anywhere on it plays the film
-  (assets/bizmis-film.js). Params: label, duration (e.g. "2:48").
+  The hero's play button: a crimson disc alone, centred in the hero in the empty room between its copy and the product
+  (the copy's red lines end left of centre, every slide's product sits right of it). The hero itself is the film's
+  poster: a click anywhere on it plays the film (assets/bizmis-film.js). Params: label (the button's name).
 {%- endcomment -%}
-<button type="button" class="hero-film-play" data-film-open aria-label="{{ label | escape }} ({{ duration }})">
+<button type="button" class="hero-film-play" data-film-open aria-label="{{ label | escape }}">
   <span class="hero-film-play__disc" data-play aria-hidden="true">
     <span class="hero-film-play__ring"></span>
     <svg viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
   </span>
-  <span class="hero-film-play__label" aria-hidden="true">{{ label }}<span class="hero-film-play__time">{{ duration }}</span></span>
 </button>

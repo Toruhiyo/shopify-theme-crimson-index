@@ -1,72 +1,23 @@
 /* The Bizmis demo film in the hero (snippets/bizmis-film.liquid, bizmis-film-button.liquid, assets/bizmis-film.js):
    bizmis.ai's hero film player, in the store's colours. */
 
-/* ---- idle: the hero is the film's poster, composed around its play button. On a desktop the heading moves to the top
-   centre, the slide (its product always on the right) steps back towards the bottom right with its top and left edges
-   fading into the page, and the play button takes the centre: a crimson disc (the page's primary, as on its buttons and
-   the clerk's send button) with a ring breathing out of it and the page's eyebrow type under it. A click anywhere on
-   the hero plays the film. Only with the film on (.has-film): the recording links keep the store's own hero. */
+/* ---- idle: the store's own hero is the film's poster. Its play button, a crimson disc alone (the page's primary, as on
+   its buttons and the clerk's send button) with a hairline halo and the landing's breathing ring, sits at the hero's
+   horizontal centre at the height of the copy's lower lines: the room there is always empty (the heading's red lines
+   end left of centre, every slide's product sits right of it). A click anywhere on the hero plays the film. */
 .hero.has-film {
   cursor: pointer;
-}
-
-@media (min-width: 750px) {
-  .hero.has-film .hero__container {
-    align-self: flex-start;
-    padding-top: calc(var(--promo-height, 0px) + var(--header-height, 4rem) + 3.5rem + 2vh);
-  }
-
-  .hero.has-film .hero__content {
-    align-items: center;
-    max-width: none;
-    margin-inline: auto;
-    text-align: center;
-    gap: 0.9rem;
-  }
-
-  .hero.has-film .hero__title {
-    font-size: clamp(2.6rem, 4.4vw, 4.3rem);
-  }
-
-  .hero.has-film .hero__title-cta {
-    max-width: none;
-    margin-inline: auto;
-    text-align: center;
-  }
-
-  .hero.has-film .hero__media {
-    background: #fff;
-  }
-
-  /* the disc in the room under the heading, at the same place on every screen */
-  .hero.has-film .hero-film-play {
-    top: 60%;
-    bottom: auto;
-    translate: -50% -50%;
-  }
-
-  .hero.has-film .hero__media img {
-    transform-origin: 100% 100%;
-    transform: scale(0.86) translate(9%, 6%);
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 22%), linear-gradient(to bottom, transparent, #000 18%);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to right, transparent, #000 22%), linear-gradient(to bottom, transparent, #000 18%);
-    mask-composite: intersect;
-  }
 }
 
 .hero-film-play {
   position: absolute;
   left: 50%;
-  bottom: 22vh;
+  top: 60%;
   z-index: 3;
-  translate: -50% 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  translate: -50% -50%;
   padding: 0;
   border: 0;
+  border-radius: 50%;
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -74,7 +25,7 @@
 }
 
 @keyframes hero-film-play-in {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: scale(0.85); }
   to { opacity: 1; transform: none; }
 }
 
@@ -87,8 +38,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 5.25rem;
+  height: 5.25rem;
   border-radius: 50%;
   background: var(--color-primary, #d1001a);
   color: var(--color-primary-fg, #fff);
@@ -100,7 +51,7 @@
 .hero-film-play__disc::before {
   content: '';
   position: absolute;
-  inset: -10px;
+  inset: -9px;
   border-radius: 50%;
   border: 1px solid rgb(209 0 26 / 0.22);
 }
@@ -128,39 +79,23 @@
 
 @keyframes hero-film-breathe {
   from { box-shadow: 0 0 0 0 rgb(209 0 26 / 0.35); }
-  to { box-shadow: 0 0 0 1.6rem rgb(209 0 26 / 0); }
+  to { box-shadow: 0 0 0 1.4rem rgb(209 0 26 / 0); }
 }
 
 .hero-film-play svg {
-  width: 2rem;
-  height: 2rem;
+  width: 1.9rem;
+  height: 1.9rem;
   margin-left: 0.3rem;
   fill: currentColor;
   stroke: none;
 }
 
-/* the page's eyebrow type: uppercase, tracked, bold; the length muted */
-.hero-film-play__label {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-fg, #111);
-}
-
-.hero-film-play__time {
-  margin-left: 0.6em;
-  font-weight: 600;
-  color: var(--color-muted-fg, #6e6e73);
-  font-variant-numeric: tabular-nums;
-}
-
 @media (max-width: 749px) {
-  /* phones: the copy is centred in the middle of the hero; the button sits under it, above the clerk's bar */
+  /* phones: the copy is centred in the middle of the hero; the disc sits under it, above the clerk's bar */
   .hero-film-play {
+    top: auto;
     bottom: calc(11vh + env(safe-area-inset-bottom));
-    gap: 0.75rem;
+    translate: -50% 0;
   }
 
   .hero-film-play__disc {
@@ -171,10 +106,6 @@
   .hero-film-play svg {
     width: 1.6rem;
     height: 1.6rem;
-  }
-
-  .hero-film-play__label {
-    font-size: 0.72rem;
   }
 }
 
