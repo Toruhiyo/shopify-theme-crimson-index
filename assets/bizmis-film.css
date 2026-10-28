@@ -3,10 +3,24 @@
 
 /* ---- idle: the store's own hero is the film's poster. Its play button, a crimson disc alone (the page's primary, as on
    its buttons and the clerk's send button) with a hairline halo and the landing's breathing ring, sits at the hero's
-   horizontal centre at the height of the copy's lower lines: the room there is always empty (the heading's red lines
-   end left of centre, every slide's product sits right of it). A click anywhere on the hero plays the film. */
+   horizontal centre at the height of the copy's lower lines: the heading's red lines end left of centre, and on desktops
+   the slides step a little to the right so every product sits right of it. A click anywhere on the hero plays it. */
 .hero.has-film {
   cursor: pointer;
+}
+
+/* desktops: every slide steps 6% to the right (its left edge fading into the page) so each product clears the centre,
+   where the disc sits; the laptop and the watch otherwise start just left of it */
+@media (min-width: 750px) {
+  .hero.has-film .hero__media {
+    background: #fff;
+  }
+
+  .hero.has-film .hero__media img {
+    transform: translateX(6%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 16%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 16%);
+  }
 }
 
 .hero-film-play {
@@ -38,8 +52,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 5.25rem;
-  height: 5.25rem;
+  width: 4.75rem;
+  height: 4.75rem;
   border-radius: 50%;
   background: var(--color-primary, #d1001a);
   color: var(--color-primary-fg, #fff);
@@ -51,7 +65,7 @@
 .hero-film-play__disc::before {
   content: '';
   position: absolute;
-  inset: -9px;
+  inset: -8px;
   border-radius: 50%;
   border: 1px solid rgb(209 0 26 / 0.22);
 }
