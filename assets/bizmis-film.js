@@ -622,12 +622,14 @@
       var clerk = function () {
         return window.AvatarVoicechat && typeof window.AvatarVoicechat.say === 'function' ? window.AvatarVoicechat : null;
       };
-      // the clerk's card is up (not folded into its bubble): on phones its bar always is
+      // the clerk's card is up (not folded into its bubble): its avatar is drawn big (the widget's root itself has no
+      // size, its card is fixed-positioned inside it); on phones its bar always is
       var cardShowing = function () {
         if (!desktop.matches) return true;
-        var el = document.getElementById('bizmis-avatar-embed');
-        var r = el && el.getBoundingClientRect();
-        return !!r && r.width > 160 && r.height > 160;
+        return Array.prototype.some.call(document.querySelectorAll('#bizmis-avatar-embed canvas'), function (c) {
+          var r = c.getBoundingClientRect();
+          return r.width > 160 && r.height > 160;
+        });
       };
       var stop = function () { stopped = true; clearTimeout(timer); };
       // the visitor turned to the clerk (its card, its bar or its captions): it never interrupts them again
