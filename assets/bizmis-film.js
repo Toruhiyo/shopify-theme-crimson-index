@@ -673,6 +673,8 @@
   }
 
   function boot() {
+    // html.store-hero (?storehero, ?nofilm, the recording links): the store's own hero, no film, no invite
+    if (document.documentElement.classList.contains('store-hero')) return;
     document.querySelectorAll('[data-bizmis-film]').forEach(init);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

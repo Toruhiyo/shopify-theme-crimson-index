@@ -9,12 +9,25 @@
   cursor: pointer;
 }
 
-/* the hero's own copy with the film on (section setting film_*): smaller, so the film's button leads */
-.hero--film-copy .hero__title {
+/* With the film on, the hero shows its own copy (section settings film_*), smaller so the film's button leads; the
+   store's own copy shows instead with html.store-hero (?storehero, ?nofilm, the recording links), and the film is
+   gone. The copy wrappers don't change the hero's layout. */
+.hero__copy {
+  display: contents;
+}
+
+html:not(.store-hero) .hero--has-film .hero__copy--store,
+html.store-hero .hero__copy--film,
+html.store-hero .hero-film-play,
+html.store-hero [data-bizmis-film] {
+  display: none !important;
+}
+
+.hero__copy--film .hero__title {
   font-size: clamp(2.3rem, 4vw, 3.5rem);
 }
 
-.hero--film-copy .hero__subtitle {
+.hero__copy--film .hero__subtitle {
   font-size: 0.95rem;
 }
 

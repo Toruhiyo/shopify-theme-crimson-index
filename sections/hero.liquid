@@ -45,14 +45,13 @@
 
   comment
     The Bizmis demo film plays in the hero (snippets/bizmis-film.liquid), with its own smaller copy inviting the visitor
-    to watch it, except in the recording links (the store's intro and the promo-video modes record the store itself),
-    with ?storehero (the store's own hero, for recording demos) and with ?nofilm.
+    to watch it. The URL decides in the browser (Liquid can't read the query string): ?storehero, ?nofilm and the
+    recording links (?intro=, promo_video, marketing=) set html.store-hero (layout/theme.liquid), which shows the
+    store's own copy and hides the film.
   endcomment
   assign show_film = false
-  if section.settings.film_src != blank and promo_video == false
-    unless request.query_string contains 'intro=' or request.query_string contains 'nofilm' or request.query_string contains 'storehero'
-      assign show_film = true
-    endunless
+  if section.settings.film_src != blank
+    assign show_film = true
   endif
 
   assign hero_eyebrow = section.settings.subtitle
@@ -68,15 +67,11 @@
     assign hero_eyebrow = 'YOUR STORE, UNATTENDED.'
     assign hero_title = 'Shoppers browse.'
     assign hero_cta = 'Nobody sells.'
-  elsif show_film
-    assign hero_eyebrow = section.settings.film_eyebrow
-    assign hero_title = section.settings.film_title
-    assign hero_cta = section.settings.film_title_cta
   endif
 -%}
 
 <section
-  class="hero {{ height_class }}{% if show_film %} hero--film-copy{% endif %}"
+  class="hero {{ height_class }}{% if show_film %} hero--has-film{% endif %}"
   data-hero-slideshow
   data-autoplay-interval="{{ interval }}"
   data-bizmis-mark-url="{{ 'bizmis-logo-full-white-transparent.png' | asset_url }}"
@@ -127,6 +122,7 @@
 
   <div class="page-width hero__container">
     <div class="hero__content">
+      <div class="hero__copy hero__copy--store">
       {%- if hero_eyebrow_mark -%}
         {%- assign bizmis_mark_url = 'bizmis-logo-full-white-transparent.png' | asset_url -%}
         <p class="hero__subtitle hero__subtitle--mark" aria-label="AGENTIC SALES, WITH BIZMIS">
@@ -163,22 +159,35 @@
           {%- if hero_cta != blank -%}
             {%- comment -%}
               The CTA is the title's second line: same scale, brand color,
-              underlined, clickable. Starts a voice chat with the clerk; with
-              the film on, it plays the film.
+              underlined, clickable. Starts a voice chat with the clerk.
             {%- endcomment -%}
-            {%- if show_film -%}
-              <button type="button" class="hero__title-cta" data-film-open>
-                {{- hero_cta -}}
-              </button>
-            {%- else -%}
-              <button type="button" class="hero__title-cta" data-open-voice-clerk>
-                {{- hero_cta -}}
-              </button>
-            {%- endif -%}
+            <button type="button" class="hero__title-cta" data-open-voice-clerk>
+              {{- hero_cta -}}
+            </button>
           {%- endif -%}
         </h1>
       {%- endif -%}
 
+      </div>
+      {%- if show_film -%}
+        {%- comment -%}
+          With the film on: its own copy (section settings film_*), smaller; the heading's second line plays the film.
+          The store's own copy above stays in the page for html.store-hero (and the hero's scripts find it first).
+        {%- endcomment -%}
+        <div class="hero__copy hero__copy--film">
+          {%- if section.settings.film_eyebrow != blank -%}
+            <p class="hero__subtitle">{{ section.settings.film_eyebrow }}</p>
+          {%- endif -%}
+          <h1 class="hero__title">
+            <span class="hero__title-line">{{ section.settings.film_title }}</span>
+            {%- if section.settings.film_title_cta != blank -%}
+              <button type="button" class="hero__title-cta" data-film-open>
+                {{- section.settings.film_title_cta -}}
+              </button>
+            {%- endif -%}
+          </h1>
+        </div>
+      {%- endif -%}
     </div>
   </div>
 

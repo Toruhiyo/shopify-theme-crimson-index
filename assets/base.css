@@ -1906,6 +1906,16 @@ body:not(.has-promo-bar) {
   --promo-height: 0px;
 }
 
+/* ?nobar (and the recording links): no Bizmis bar, and no space for it */
+html.no-bizmis-bar .announcement-bar-section:has(.promo-bar) {
+  display: none !important;
+}
+
+html.no-bizmis-bar,
+html.no-bizmis-bar body {
+  --promo-height: 0px !important;
+}
+
 /* ?noagent: the store without its Bizmis clerk */
 html.no-bizmis-agent #bizmis-avatar-embed,
 html.no-bizmis-agent .bizmis-viewport-portal-root {

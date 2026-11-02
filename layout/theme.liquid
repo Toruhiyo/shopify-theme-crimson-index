@@ -46,6 +46,14 @@
       if (!{{ has_promo_bar | json }}) root.style.setProperty('--promo-height', '0px');
       // ?noagent: the store without its Bizmis clerk (the widget stays out of sight)
       root.classList.toggle('no-bizmis-agent', params.has('noagent'));
+      // the recording links record the store itself: no Bizmis bar, the store's own hero (no film)
+      var recording = !!promoVideo || params.has('marketing') || (params.has('intro') && params.get('intro') !== '0');
+      // ?nobar: no Bizmis bar, and no space for it
+      var noBar = params.has('nobar') || recording;
+      root.classList.toggle('no-bizmis-bar', noBar);
+      if (noBar) root.style.setProperty('--promo-height', '0px');
+      // ?storehero (or ?nofilm): the store's own hero copy, no film
+      root.classList.toggle('store-hero', params.has('storehero') || params.has('nofilm') || recording);
     })();
   </script>
   <style>html.is-promo-opening{background:var(--color-bg)}html.is-promo-cover{background:{{ promo_red }}}</style>
