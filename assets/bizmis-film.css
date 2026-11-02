@@ -31,6 +31,18 @@ html.store-hero [data-bizmis-film] {
   font-size: 0.95rem;
 }
 
+/* the heading's second line underlined in the store's crimson, like the store's own (its underline is drawn by the
+   theme's script for the store's heading only) */
+.hero .hero__copy--film .hero__title-cta {
+  text-decoration: underline;
+  text-decoration-thickness: 0.055em;
+  text-underline-offset: 0.14em;
+}
+
+.hero .hero__copy--film .hero__title-cta:hover {
+  text-decoration-thickness: 0.085em;
+}
+
 /* desktops: every slide steps 6% to the right (its left edge fading into the page) so each product clears the centre,
    where the disc sits; the laptop and the watch otherwise start just left of it */
 @media (min-width: 750px) {
