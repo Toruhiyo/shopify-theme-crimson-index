@@ -34,6 +34,10 @@
       var clerkIntro = isHome && !marketingAd && !promoVideo && params.get('nocover') !== '1'
         && (params.get('intro') === '1' || params.get('intro') === 'bizmis' || (!introSeen && params.get('intro') !== '0'));
       root.classList.toggle('is-clerk-intro', clerkIntro);
+      // This store opens with its own clerk intro: tell the Bizmis widget not to run its welcome intro
+      // (data-bizmis-host-intro). Set on every home view, also after the intro was seen this session, so
+      // the widget never plays its intro on a later home visit either.
+      if (isHome) root.setAttribute('data-bizmis-host-intro', '');
       // ?intro=bizmis (store demos): the clerk first shows as the Bizmis clerk beside the Bizmis logo, then becomes
       // the store's own clerk before it settles into its corner
       root.classList.toggle('is-clerk-intro-bizmis', clerkIntro && params.get('intro') === 'bizmis');
